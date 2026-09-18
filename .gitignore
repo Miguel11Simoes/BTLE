@@ -30,3 +30,6 @@ python/*.bin
 verilog/btle_controller/
 *.jou
 *.log
+
+# Area runs: the mapped netlists are large and reproducible; netlist.sha256 records them.
+results/area/**/netlist.json

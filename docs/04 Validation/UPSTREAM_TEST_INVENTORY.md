@@ -60,17 +60,18 @@ Each command comes from the testbench's own header comment and is run from
 | `btle_tx_tb.v` | Full TX | see the header of `btle_tx_tb.v` | not run |
 | `btle_rx_core_tb.v` | RX core | see the header of `btle_rx_core_tb.v` | not run |
 | `btle_rx_tb.v` | Full RX | see the header of `btle_rx_tb.v` | not run |
-| `btle_controller_tb.v` | PHY + LL + top | see the header; **expected to fail as written** (below) | not run |
+| `btle_controller_tb.v` | PHY + LL + top | see the header of `btle_controller_tb.v` | not run |
 
 Each testbench is followed by `vvp <name>`. A pass prints `Test PASS`, or
 `0 difference found` for the RX/TX comparisons.
 
-**Expected problem with `btle_controller_tb`:** its header command compiles
-`btle_ll.v` **and** `uart_frame_rx.v`, `uart_frame_tx.v`, `rx_clk_gen.v` and
-`tx_clk_gen.v`, and `btle_ll.v` already defines those modules (issue U1 in
+*Correction (2026-09-18):* an earlier version of this inventory expected
+`btle_controller_tb` to fail because of duplicate modules. That was wrong. The
+copies inside `btle_ll.v` are under `` `ifdef AVOID_DUPLICATION ``, which is
+never defined, so they are not compiled (issue U1, corrected, in
 [../01 Architecture/UPSTREAM_ARCHITECTURE.md](../01%20Architecture/UPSTREAM_ARCHITECTURE.md)).
-Icarus normally rejects duplicate modules. Dropping the four separate files
-from the command should work, but that is to be confirmed when it runs.
+The header command should work as written. This is still to be confirmed by
+running it.
 
 **No testbench covers `btle_ll.v` on its own.** The AXI-lite registers, the RX
 PDU RAM and the counters are exercised only inside `btle_controller_tb`, and

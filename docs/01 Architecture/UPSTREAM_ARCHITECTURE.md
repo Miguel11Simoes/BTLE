@@ -54,7 +54,7 @@ btle_controller                    verilog/btle_controller.v
 │   ├── clk_cross_bus              register values from the AXI clock into the 16 MHz clock
 │   ├── rx_ram, octet_to_word      received PDU buffer, read through register 40
 │   ├── event_counter_*            packet/event counters
-│   ├── uart_frame_rx/tx, tx/rx_clk_gen   UART HCI (duplicates, see section 7)
+│   ├── uart_frame_rx/tx, tx/rx_clk_gen   UART HCI (from the separate files; see U1)
 │   └── sdpram_one_clk, sdpram_two_clk
 └── btle_phy                       verilog/btle_phy.v
     ├── btle_tx                    verilog/btle_tx.v
@@ -164,7 +164,7 @@ that goes in `CHANGES.md`.
 
 | # | Issue | Where | Effect |
 |---|---|---|---|
-| U1 | `btle_ll.v` defines `uart_frame_rx`, `uart_frame_tx`, `tx_clk_gen` and `rx_clk_gen` again; they already exist as separate files. The copies differ only in whitespace and comments. | `btle_ll.v` lines 2235–2784 vs `verilog/uart_frame_*.v`, `verilog/*_clk_gen.v` | `verilog/btle_controller.tcl` adds both copies to the Vivado project (lines 174–195), so the modules are defined twice. Simulators such as Icarus reject that. |
+| U1 | *Corrected 2026-09-18.* `btle_ll.v` holds second copies of `uart_frame_rx`, `uart_frame_tx`, `tx_clk_gen` and `rx_clk_gen`, which differ from the separate files only in whitespace and comments. They sit inside `` `ifdef AVOID_DUPLICATION ``, which nothing defines, so they are never compiled. The first version of this table said the modules were defined twice. That was wrong. | `btle_ll.v` lines 2218–2783 | Dead code only. The separate files are the definitions that actually get compiled. |
 | U2 | The top-level Icarus command in the chip write-up lists `dpram.v`, which no longer exists, and leaves out `auxiliary_daemon.v` and `clock_domain_conversion_iq.v`. | `open_btle_baseband_chip/open_btle_baseband_chip.md`, around line 347 | The documented `btle_controller_tb` command does not run as written. |
 | U3 | The command in the header of `btle_controller.v` refers to `./btle_ll/hw/fpga/btle_ll_stub.v`, which is not in the repository. | `btle_controller.v` line 5 | Same as U2. |
 | U4 | The comment on `baremetal_phy_intf_mode` does not match the boards. | `btle_controller.v` line 111 | Misleading; see section 5. |

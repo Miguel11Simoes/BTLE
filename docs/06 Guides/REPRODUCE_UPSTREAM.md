@@ -61,11 +61,11 @@ Then run TX, RX core and RX with the commands in the headers of
 
 ## 3. Top-level testbench
 
-The command in the header of `btle_controller_tb.v` compiles four modules
-twice (issue U1). Try it as written first, and record the result. If Icarus
-reports duplicate modules, drop `uart_frame_rx.v uart_frame_tx.v rx_clk_gen.v
-tx_clk_gen.v` from the list, because `btle_ll.v` already defines them.
-Record which command worked.
+Use the command in the header of `btle_controller_tb.v` as written. Keep
+`uart_frame_rx.v`, `uart_frame_tx.v`, `rx_clk_gen.v` and `tx_clk_gen.v` in the
+list: the copies inside `btle_ll.v` are excluded by
+`` `ifdef AVOID_DUPLICATION ``, so these files are the only definitions.
+Record the result.
 
 ## 4. Python model checks
 

@@ -90,4 +90,8 @@ for top in "${tops[@]}"; do
 done
 
 python3 "$repo/scripts/area/summarize_area.py" "$out" | tee "$out/summary.md"
+
+# Netlists are large and reproducible: keep their hashes, not the files, in git.
+# Logs are the evidence: keep them, compressed.
+(cd "$out" && sha256sum */netlist.json > netlist.sha256 && gzip -9 */yosys.log)
 exit $status
