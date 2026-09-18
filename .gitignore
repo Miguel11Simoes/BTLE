@@ -1,2 +1,32 @@
 host/build
 
+
+# Editor and OS
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Test vectors written by python/test_vector_for_btle_verilog.py into verilog/,
+# and outputs of the Icarus testbenches. Regenerate them; never commit them.
+verilog/btle_config.txt
+verilog/btle_rx_*.txt
+verilog/btle_tx_*.txt
+verilog/cos_table.txt
+verilog/sin_table.txt
+verilog/gauss_filter_tap.txt
+verilog/*_tb
+verilog/*.vcd
+python/*.txt
+python/*.bin
+
+# Vivado project output
+verilog/btle_controller/
+*.jou
+*.log

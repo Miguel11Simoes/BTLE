@@ -1,3 +1,10 @@
+> **Thesis fork, by Miguel Simões.** This repository derives from
+> [JiaoXianjun/BTLE](https://github.com/JiaoXianjun/BTLE) (tag `upstream-baseline`),
+> and is used to study a reconfigurable RISC-V core in the BLE baseband.
+> The documentation for that work is in [docs/](docs/README.md).
+> [CHANGES.md](CHANGES.md) lists every file changed from the original. The
+> upstream README follows below, unchanged.
+
 BTLE
 ========
 
