@@ -63,14 +63,29 @@ ram_files=(sdpram_one_clk.v sdpram_two_clk.v)
   echo "ram_blackboxes=${ram_files[*]}"
 } > "$out/provenance.txt"
 
+# Optional configuration: AREA_PARAMS="NAME=VALUE ..." is applied to every top
+# that declares the parameter (e.g. the reduced "sticker" configuration).
+AREA_PARAMS=${AREA_PARAMS:-}
+echo "area_params=${AREA_PARAMS:-<none: module defaults>}" >> "$out/provenance.txt"
+params_of() {  # parameter names declared in the header of module $1
+  awk -v m="$1" '$0 ~ "^[[:space:]]*module[[:space:]]+"m"([^a-zA-Z0-9_]|$)" {f=1}
+                 f && /parameter/ {for (i=1;i<=NF;i++) if ($i ~ /^[A-Za-z_][A-Za-z0-9_]*$/ && $(i+1) == "=") print $i}
+                 f && /^[[:space:]]*\)[[:space:]]*\(/ {exit}' "$rtl"/*.v
+}
+
 status=0
 for top in "${tops[@]}"; do
   d=$out/$top
   mkdir -p "$d"
+  chparams=""
+  declared=$(params_of "$top")
+  for kv in $AREA_PARAMS; do
+    grep -qx "${kv%%=*}" <<< "$declared" && chparams="$chparams -chparam ${kv%%=*} ${kv#*=}"
+  done
   {
     echo "read_verilog -lib ${ram_files[*]}"
     echo "read_verilog ${logic_files[*]}"
-    echo "hierarchy -check -top $top"
+    echo "hierarchy -check -top $top$chparams"
     echo "synth -flatten -top $top"
     echo "check -assert"
     echo "dfflibmap -liberty $LIBERTY"
