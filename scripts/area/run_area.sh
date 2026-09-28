@@ -16,6 +16,8 @@
 # Environment:
 #   OSS_CAD  OSS CAD Suite root  (default ~/eda/oss-cad-suite-20260907)
 #   LIBERTY  liberty file        (default ~/eda/NangateOpenCellLibrary_typical.lib)
+#   RTL_REV  measure the verilog/ of this git revision (git archive) instead of
+#            the working tree (default: working tree)
 # Output: results/area/<label>/  (refuses to overwrite an existing label)
 
 set -euo pipefail
@@ -31,6 +33,7 @@ ABC=$OSS_CAD/bin/yosys-abc
 repo=$(git rev-parse --show-toplevel)
 rtl=$repo/verilog
 out=$repo/results/area/$label
+RTL_REV=${RTL_REV:-}
 
 # Bottom-up, so a failure points at the smallest module that breaks.
 default_tops=(
@@ -44,6 +47,12 @@ if [ $# -gt 0 ]; then tops=("$@"); else tops=("${default_tops[@]}"); fi
 [ -f "$LIBERTY" ] || { echo "liberty not found at $LIBERTY" >&2; exit 1; }
 [ -e "$out" ] && { echo "$out exists; choose a new label, never overwrite" >&2; exit 1; }
 mkdir -p "$out"
+src=""
+if [ -n "$RTL_REV" ]; then
+  src=$(mktemp -d /tmp/btle_area.XXXXXX)
+  git -C "$repo" archive "$RTL_REV" verilog | tar -x -C "$src"
+  rtl=$src/verilog
+fi
 
 # RTL set: every non-testbench file, minus the RAM models (read as blackboxes)
 # and the Xilinx-only RAM wrapper (only used under `ifdef XILINX_XPM).
@@ -54,8 +63,15 @@ ram_files=(sdpram_one_clk.v sdpram_two_clk.v)
 {
   echo "label=$label"
   echo "date_utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-  echo "git_commit=$(git -C "$repo" rev-parse HEAD)"
-  echo "git_dirty=$(git -C "$repo" status --porcelain -- verilog | wc -l)"
+  if [ -n "$RTL_REV" ]; then
+    echo "rtl_rev=$RTL_REV (git archive)"
+    echo "git_commit=$(git -C "$repo" rev-parse "$RTL_REV^{commit}")"
+    echo "git_dirty=0"
+    echo "verilog_tree=$(git -C "$repo" rev-parse "$RTL_REV:verilog")"
+  else
+    echo "git_commit=$(git -C "$repo" rev-parse HEAD)"
+    echo "git_dirty=$(git -C "$repo" status --porcelain -- verilog | wc -l)"
+  fi
   echo "yosys=$("$YOSYS" -V)"
   echo "liberty=$(basename "$LIBERTY")"
   echo "liberty_sha256=$(sha256sum "$LIBERTY" | cut -d' ' -f1)"
@@ -109,4 +125,5 @@ python3 "$repo/scripts/area/summarize_area.py" "$out" | tee "$out/summary.md"
 # Netlists are large and reproducible: keep their hashes, not the files, in git.
 # Logs are the evidence: keep them, compressed.
 (cd "$out" && sha256sum */netlist.json > netlist.sha256 && gzip -9 */yosys.log)
+[ -n "$src" ] && rm -rf "$src"
 exit $status
