@@ -84,6 +84,9 @@ proc"
   (cd "$work" && yosys -q -s "$m.list.ys") > "$work/$m.list.log" 2>&1 || true; cp "$work/$m.list.log" "$work/$m.mods" "$out/" 2>/dev/null || true
   ren=""
   while IFS='|' read -r base inst gold_inst; do
+    # only where the new RTL really has that generate block (a branch without
+    # the reduction keeps the instance at its original name: nothing to rename)
+    grep -qw "${inst%%.*}" "$work/gate/$base.v" || continue
     for mod in $(grep -oE '[^[:space:]]+' "$work/$m.mods" 2>/dev/null | grep -E "(^|\\\\)$base\$"); do
       ren="$ren
 cd $mod
