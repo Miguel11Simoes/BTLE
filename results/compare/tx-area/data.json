@@ -1,0 +1,202 @@
+{
+ "label": "tx-area",
+ "area": {
+  "master": {
+   "gauss_filter": {
+    "cells": 2286,
+    "flops": 178,
+    "area": 3366.0,
+    "macros": 0,
+    "sram_bits": 0
+   },
+   "gfsk_modulation": {
+    "cells": 2466,
+    "flops": 229,
+    "area": 3740.2,
+    "macros": 2,
+    "sram_bits": 32768
+   },
+   "btle_tx": {
+    "cells": 3409,
+    "flops": 404,
+    "area": 5322.9,
+    "macros": 3,
+    "sram_bits": 36864
+   }
+  },
+  "ble-tx-fir2": {
+   "gauss_filter": {
+    "cells": 1560,
+    "flops": 170,
+    "area": 2311.5,
+    "macros": 0,
+    "sram_bits": 0
+   },
+   "gfsk_modulation": {
+    "cells": 1748,
+    "flops": 221,
+    "area": 2703.1,
+    "macros": 2,
+    "sram_bits": 32768
+   },
+   "btle_tx": {
+    "cells": 2707,
+    "flops": 396,
+    "area": 4295.9,
+    "macros": 3,
+    "sram_bits": 36864
+   }
+  },
+  "ble-tx-table": {
+   "gauss_filter": {
+    "cells": 253,
+    "flops": 22,
+    "area": 348.5,
+    "macros": 0,
+    "sram_bits": 0
+   },
+   "gfsk_modulation": {
+    "cells": 426,
+    "flops": 73,
+    "area": 716.6,
+    "macros": 2,
+    "sram_bits": 32768
+   },
+   "btle_tx": {
+    "cells": 1392,
+    "flops": 248,
+    "area": 2325.6,
+    "macros": 3,
+    "sram_bits": 36864
+   }
+  },
+  "ble-tx-table-reg": {
+   "gauss_filter": {
+    "cells": 10097,
+    "flops": 2822,
+    "area": 23221.5,
+    "macros": 0,
+    "sram_bits": 0
+   },
+   "gfsk_modulation": {
+    "cells": 10422,
+    "flops": 2873,
+    "area": 23615.5,
+    "macros": 2,
+    "sram_bits": 32768
+   },
+   "btle_tx": {
+    "cells": 11328,
+    "flops": 3048,
+    "area": 25201.6,
+    "macros": 3,
+    "sram_bits": 36864
+   },
+   "gauss_table_builder": {
+    "cells": 493,
+    "flops": 53,
+    "area": 778.0,
+    "macros": 0,
+    "sram_bits": 0
+   },
+   "gauss_table_reg": {
+    "cells": 8899,
+    "flops": 2560,
+    "area": 20870.1,
+    "macros": 0,
+    "sram_bits": 0
+   }
+  },
+  "ble-tx-table-sram": {
+   "gauss_filter": {
+    "cells": 1362,
+    "flops": 267,
+    "area": 2479.7,
+    "macros": 3,
+    "sram_bits": 2560
+   },
+   "gfsk_modulation": {
+    "cells": 1535,
+    "flops": 318,
+    "area": 2838.8,
+    "macros": 5,
+    "sram_bits": 35328
+   },
+   "btle_tx": {
+    "cells": 2477,
+    "flops": 493,
+    "area": 4434.5,
+    "macros": 6,
+    "sram_bits": 39424
+   },
+   "gauss_table_builder": {
+    "cells": 493,
+    "flops": 53,
+    "area": 778.0,
+    "macros": 0,
+    "sram_bits": 0
+   },
+   "gauss_table_sram": {
+    "cells": 56,
+    "flops": 16,
+    "area": 139.4,
+    "macros": 3,
+    "sram_bits": 2560
+   }
+  }
+ },
+ "openram": {
+  "sram_1rw_32x32": {
+   "words": 32,
+   "bits_per_word": 32,
+   "bits": 1024,
+   "width": 118.685,
+   "height": 76.22,
+   "area": 9046.2
+  },
+  "sram_1rw_16x64": {
+   "words": 64,
+   "bits_per_word": 16,
+   "bits": 1024,
+   "width": 73.035,
+   "height": 74.975,
+   "area": 5475.8
+  },
+  "sram_1rw_16x32": {
+   "words": 32,
+   "bits_per_word": 16,
+   "bits": 512,
+   "width": 73.035,
+   "height": 53.61,
+   "area": 3915.4
+  }
+ },
+ "table_macro_area": 18437.4,
+ "totals": {
+  "master": {
+   "gauss_filter": 3366.0,
+   "gfsk_modulation": 3740.2,
+   "btle_tx": 5322.9
+  },
+  "ble-tx-fir2": {
+   "gauss_filter": 2311.5,
+   "gfsk_modulation": 2703.1,
+   "btle_tx": 4295.9
+  },
+  "ble-tx-table": {
+   "gauss_filter": 348.5,
+   "gfsk_modulation": 716.6,
+   "btle_tx": 2325.6
+  },
+  "ble-tx-table-reg": {
+   "gauss_filter": 23221.5,
+   "gfsk_modulation": 23615.5,
+   "btle_tx": 25201.6
+  },
+  "ble-tx-table-sram": {
+   "gauss_filter": 20917.100000000002,
+   "gfsk_modulation": 21276.2,
+   "btle_tx": 22871.9
+  }
+ }
+}

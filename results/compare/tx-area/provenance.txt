@@ -1,0 +1,10 @@
+label=tx-area
+date_utc=2026-09-28T21:08:31Z
+harness=494657918f2f6bedccb96048dcf20542b110cb68 (branch ble-tx-table), dirty files under scripts/: 0
+configurations (name, revision, commit, verilog/ tree, parameters):
+  master	upstream-baseline	85401861e8f4b04b90cbaa0394c0f9d45ed02f18	4bacca327f4a7112a66bca5915160ebacfffb28e	<none: defaults>
+  ble-tx-fir2	origin/ble-tx-fir2	6367e94c3c7ac9f32fb67a1594ce78c87a31883d	07255a363a0570ec0138b13c987f79d4884af7b7	<none: defaults>
+  ble-tx-table	ble-tx-table	494657918f2f6bedccb96048dcf20542b110cb68	2d36551e0bf844c7b97e00679522c2838829fd35	GAUSS_TABLE=1
+  ble-tx-table-reg	origin/ble-tx-table-reg	f57bc5c0cc1f2a542456c8d9f77a552c59d1299f	c8675f2be5bc098b894ffec7ac887818da428c8a	GAUSS_TABLE=1
+  ble-tx-table-sram	origin/ble-tx-table-sram	9428f49b8fff7ddeb41ee77642d0d83d077fa987	3887f20eb2a845987fa467b4a3b731608d407705	GAUSS_TABLE=1
+openram=origin/ble-tx-table-sram:results/area/openram-gauss/summary.md (commit 9428f49b8fff7ddeb41ee77642d0d83d077fa987)

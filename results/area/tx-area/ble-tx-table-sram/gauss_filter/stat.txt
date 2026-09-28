@@ -1,0 +1,46 @@
+35. Printing statistics.
+
+=== gauss_filter ===
+
+        +----------Local Count, excluding submodules.
+        |        +-Local Area, excluding submodules.
+        |        | 
+     1382        - wires
+     1730        - wire bits
+       36        - public wires
+      377        - public wire bits
+       10        - ports
+       43        - port bits
+     1365 2.48E+03 cells
+       23   24.472   AND2_X1
+       14    18.62   AND3_X1
+      176   234.08   AOI211_X1
+       75     79.8   AOI21_X1
+        1    1.596   AOI221_X1
+       10     13.3   AOI22_X1
+      267 1.21E+03   DFF_X1
+       90    47.88   INV_X1
+      139  258.818   MUX2_X1
+       68   54.264   NAND2_X1
+       12   12.768   NAND3_X1
+        3     3.99   NAND4_X1
+      231  184.338   NOR2_X1
+       15    15.96   NOR3_X1
+        3     3.99   NOR4_X1
+        5     6.65   OAI211_X1
+       75     79.8   OAI21_X1
+        4    6.384   OAI221_X1
+       13    17.29   OAI22_X1
+        1    1.862   OAI33_X1
+       20    21.28   OR2_X1
+        6     7.98   OR3_X1
+        1    1.596   OR4_X1
+       84  134.064   XNOR2_X1
+       26   41.496   XOR2_X1
+        3        -   sdpram_one_clk
+
+   Area for cell type \sdpram_one_clk is unknown!
+
+   Chip area for module '\gauss_filter': 2479.652000
+     of which used for sequential elements: 1207.374000 (48.69%)
+

@@ -1,0 +1,12 @@
+label=tx-area/ble-tx-table-sram
+date_utc=2026-09-28T21:08:31Z
+rtl_rev=origin/ble-tx-table-sram (git archive)
+git_commit=9428f49b8fff7ddeb41ee77642d0d83d077fa987
+git_dirty=0
+verilog_tree=3887f20eb2a845987fa467b4a3b731608d407705
+yosys=Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+liberty=NangateOpenCellLibrary_typical.lib
+liberty_sha256=8d540a4d4cf6d09d27c87ad067857a9c0c2eeb023ab7a56e058cd3113db4e9b1
+rtl_files=auxiliary_daemon.v bit_repeat_upsample.v btle_controller.v btle_controller_wrapper.v btle_ll.v btle_phy.v btle_rx.v btle_rx_core.v btle_tx.v clock_domain_conversion_iq.v crc24.v crc24_core.v gauss_filter.v gfsk_demodulation.v gfsk_modulation.v rx_clk_gen.v scramble.v scramble_core.v search_unique_bit_sequence.v serial_in_ram_out.v tx_clk_gen.v uart_frame_rx.v uart_frame_tx.v vco.v
+ram_blackboxes=sdpram_one_clk.v sdpram_two_clk.v
+area_params=GAUSS_TABLE=1
