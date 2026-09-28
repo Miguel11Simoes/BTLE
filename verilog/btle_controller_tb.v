@@ -129,6 +129,26 @@ integer NUM_ERROR;
 integer tmp;
 integer i, j;
 
+// Modified 2026-09-19 by Miguel Simões: the declarations below were after their first use
+// in the initial block, which Icarus rejects (issue U9). Moved here unchanged. See CHANGES.md.
+// Auxiliary signals
+reg  [7:0]  gpio;
+wire [15:0] ll_gpio;
+wire ll_itrpt0, ll_itrpt1, ll_itrpt2, ll_itrpt3;
+wire ll_itrpt4, ll_itrpt5, ll_itrpt6, ll_itrpt7;
+
+// BRAM ports (tied off in baremetal mode)
+reg  [BRAM_ADDR_WIDTH_IN_BYTE-1:0] bram_addr_a;
+reg  bram_clk_a;
+reg  [BRAM_DATA_WIDTH-1:0]         bram_wrdata_a;
+wire [BRAM_DATA_WIDTH-1:0]         bram_rddata_a;
+reg  bram_en_a;
+reg  bram_rst_a;
+reg  bram_we_a;
+
+// RF GPIO
+reg [7:0] rf_gpio;
+
 initial begin
   $dumpfile("btle_controller_tb.vcd");
   $dumpvars;
@@ -393,23 +413,6 @@ wire s00_axi_rready;
 
 assign baremetal_phy_intf_mode = 1;
 
-// Auxiliary signals
-reg  [7:0]  gpio;
-wire [15:0] ll_gpio;
-wire ll_itrpt0, ll_itrpt1, ll_itrpt2, ll_itrpt3;
-wire ll_itrpt4, ll_itrpt5, ll_itrpt6, ll_itrpt7;
-
-// BRAM ports (tied off in baremetal mode)
-reg  [BRAM_ADDR_WIDTH_IN_BYTE-1:0] bram_addr_a;
-reg  bram_clk_a;
-reg  [BRAM_DATA_WIDTH-1:0]         bram_wrdata_a;
-wire [BRAM_DATA_WIDTH-1:0]         bram_rddata_a;
-reg  bram_en_a;
-reg  bram_rst_a;
-reg  bram_we_a;
-
-// RF GPIO
-reg [7:0] rf_gpio;
 
 // test process
 reg [31:0] clk_count;
