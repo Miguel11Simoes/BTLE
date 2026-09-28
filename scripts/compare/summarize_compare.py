@@ -31,6 +31,19 @@ def num(x):
     return f'{x:,.0f}'.replace(',', ' ')
 
 
+def same(a, b):
+    """Counts must be equal. Capacitance sums (floats) are equal up to the order
+    in which saif_activity.py adds them: it iterates over Python sets, whose order
+    changes from one process to the next, so the last bits (~1e-15) may differ."""
+    if isinstance(a, float) or isinstance(b, float):
+        return abs(a - b) <= 1e-9 * max(abs(a), abs(b), 1.0)
+    return a == b
+
+
+def same_all(xs, ys):
+    return len(xs) == len(ys) and all(same(x, y) for x, y in zip(xs, ys))
+
+
 def pct(ref, val):
     if ref == 0:
         return '0' if val == 0 else 'n/a'
@@ -193,9 +206,9 @@ def main():
         print(f"| `{n}` | `{t.get('start', '?')}` | `{t.get('end', '?')}` |")
     print()
     r_rows = [timing[n].get('ref_controller') for n in names]
-    same = all(r and r.get('min_period_ns') == r_rows[0].get('min_period_ns') and r.get('start') == r_rows[0].get('start')
+    ok_t = all(r and r.get('min_period_ns') == r_rows[0].get('min_period_ns') and r.get('start') == r_rows[0].get('start')
                for r in r_rows)
-    checks.append(('upstream controller timed identically in every run (period and path)', same))
+    checks.append(('upstream controller timed identically in every run (period and path)', ok_t))
     t0 = timing[ref]
     checks.append((f'`{ref}` dut controller timed identically to the upstream reference',
                    t0['dut_controller'].get('min_period_ns') == t0['ref_controller'].get('min_period_ns')))
@@ -247,16 +260,15 @@ def main():
                     cells.append(f'{v:.1f}' if n == ref else f'{v:.1f} ({pct(r0, v)})')
                 print(f'| {b} | ' + ' | '.join(cells) + ' |')
             print()
+    keys = ('toggles_per_cycle', 'hot_nets', 'mem', 'data', 'clock')
     for s in SCENARIOS:
         refs = [act[n][s]['ref'] for n in names if s in act[n]]
-        same = all((r['toggles_per_cycle'], r['data'], r['clock'], r['hot_nets']) ==
-                   (refs[0]['toggles_per_cycle'], refs[0]['data'], refs[0]['clock'], refs[0]['hot_nets']) for r in refs)
-        checks.append((f'upstream side identical in every run, scenario `{s}`', same))
+        ok = all(same_all([r[k] for k in keys], [refs[0][k] for k in keys]) for r in refs)
+        checks.append((f'upstream side identical in every run, scenario `{s}`', ok))
         d0 = act[ref].get(s)
         if d0:
             checks.append((f'`{ref}` equals upstream exactly, scenario `{s}`',
-                           (d0['dut']['toggles_per_cycle'], d0['dut']['data'], d0['dut']['clock']) ==
-                           (d0['ref']['toggles_per_cycle'], d0['ref']['data'], d0['ref']['clock'])))
+                           same_all([d0['dut'][k] for k in keys], [d0['ref'][k] for k in keys])))
     vref = res / 'compare' / label / 'vectors.sha256'
     for n in names:
         f = res / 'power' / label / n / 'vectors.sha256'
