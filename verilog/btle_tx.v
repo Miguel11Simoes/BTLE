@@ -1,6 +1,7 @@
 // Author: Xianjun Jiao <putaoshu@msn.com>
 // SPDX-FileCopyrightText: 2024 Xianjun Jiao
 // SPDX-License-Identifier: Apache-2.0 license
+// Modified 2026-09-19 by Miguel Simões: GAUSS_TABLE parameter passed to gfsk_modulation (default 0 = original). See CHANGES.md.
 
 // iverilog -o btle_tx btle_tx.v sdpram_one_clk.v sdpram_two_clk.v crc24.v crc24_core.v scramble.v scramble_core.v gfsk_modulation.v bit_repeat_upsample.v gauss_filter.v vco.v 
 
@@ -19,7 +20,8 @@ module btle_tx #
   parameter integer VCO_BIT_WIDTH = 16,
   parameter integer SIN_COS_ADDR_BIT_WIDTH = 11,
   parameter integer IQ_BIT_WIDTH = 8,
-  parameter integer GAUSS_FIR_OUT_AMP_SCALE_DOWN_NUM_BIT_SHIFT = 1
+  parameter integer GAUSS_FIR_OUT_AMP_SCALE_DOWN_NUM_BIT_SHIFT = 1,
+  parameter integer GAUSS_TABLE = 0 // passed to gauss_filter
 ) (
   input wire clk, // for baseband processing, 16MHz
   input wire rst,
@@ -260,6 +262,7 @@ scramble # (
 gfsk_modulation # (
   .SAMPLE_PER_SYMBOL(SAMPLE_PER_SYMBOL),
   .GAUSS_FILTER_BIT_WIDTH(GAUSS_FILTER_BIT_WIDTH),
+  .GAUSS_TABLE(GAUSS_TABLE),
   .NUM_TAP_GAUSS_FILTER(NUM_TAP_GAUSS_FILTER),
   .VCO_BIT_WIDTH(VCO_BIT_WIDTH),
   .SIN_COS_ADDR_BIT_WIDTH(SIN_COS_ADDR_BIT_WIDTH),

@@ -1,6 +1,7 @@
 // Author: Xianjun Jiao <putaoshu@msn.com>
 // SPDX-FileCopyrightText: 2024 Xianjun Jiao
 // SPDX-License-Identifier: Apache-2.0 license
+// Modified 2026-09-19 by Miguel Simões: GAUSS_TABLE parameter passed to gauss_filter (default 0 = original). See CHANGES.md.
 
 `timescale 1ns / 1ps
 module gfsk_modulation #
@@ -11,7 +12,8 @@ module gfsk_modulation #
   parameter integer VCO_BIT_WIDTH = 16,
   parameter integer SIN_COS_ADDR_BIT_WIDTH = 11,
   parameter integer IQ_BIT_WIDTH = 8,
-  parameter integer GAUSS_FIR_OUT_AMP_SCALE_DOWN_NUM_BIT_SHIFT = 1
+  parameter integer GAUSS_FIR_OUT_AMP_SCALE_DOWN_NUM_BIT_SHIFT = 1,
+  parameter integer GAUSS_TABLE = 0 // passed to gauss_filter
 ) (
   input wire clk,
   input wire rst,
@@ -74,6 +76,7 @@ bit_repeat_upsample # (
 
 gauss_filter # (
   .GAUSS_FILTER_BIT_WIDTH(GAUSS_FILTER_BIT_WIDTH),
+  .GAUSS_TABLE(GAUSS_TABLE),
   .NUM_TAP_GAUSS_FILTER(NUM_TAP_GAUSS_FILTER)
 ) gauss_filter_i (
   .clk(clk),

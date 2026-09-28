@@ -1,6 +1,7 @@
 // Author: Xianjun Jiao <putaoshu@msn.com>
 // SPDX-FileCopyrightText: 2024 Xianjun Jiao
 // SPDX-License-Identifier: Apache-2.0 license
+// Modified 2026-09-28 by Miguel Simões: GAUSS_TABLE parameter (default 0 = original). See CHANGES.md.
 
 // btle_controller = btle_ll (link layer) + btle_phy (phy: btle_tx and btle_rx)
 
@@ -42,7 +43,10 @@ module btle_controller #
   parameter integer BRAM_DEPTH = 32768,
   parameter integer BRAM_ADDR_WIDTH = $clog2(BRAM_DEPTH),
   parameter integer BRAM_DATA_WIDTH = (2*RF_I_OR_Q_BIT_WIDTH),
-  parameter integer BRAM_ADDR_WIDTH_IN_BYTE = $clog2(BRAM_DEPTH*BRAM_DATA_WIDTH/8)
+  parameter integer BRAM_ADDR_WIDTH_IN_BYTE = $clog2(BRAM_DEPTH*BRAM_DATA_WIDTH/8),
+
+  // Area reduction B2 (branch ble-tx-table); defaults to the original design.
+  parameter integer GAUSS_TABLE = 0        // 1: fixed-tap Gaussian table instead of the runtime FIR (gauss_filter)
 ) (
   input  wire rf_clk,
   input  wire rf_rst,
@@ -457,6 +461,7 @@ btle_phy #
   .CHANNEL_NUMBER_BIT_WIDTH(CHANNEL_NUMBER_BIT_WIDTH),
   .SAMPLE_PER_SYMBOL(SAMPLE_PER_SYMBOL),
   .GAUSS_FILTER_BIT_WIDTH(GAUSS_FILTER_BIT_WIDTH),
+  .GAUSS_TABLE(GAUSS_TABLE),
   .NUM_TAP_GAUSS_FILTER(NUM_TAP_GAUSS_FILTER),
   .VCO_BIT_WIDTH(VCO_BIT_WIDTH),
   .SIN_COS_ADDR_BIT_WIDTH(SIN_COS_ADDR_BIT_WIDTH),
