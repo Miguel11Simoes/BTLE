@@ -1,0 +1,24 @@
+# Author: Miguel Simões
+# SPDX-License-Identifier: Apache-2.0
+# Formal equivalence of the Gaussian table (GAUSS_TABLE = 1) with the upstream
+# FIR loaded with the same taps (see gauss_miter.sv). Unbounded: base case
+# from reset + k-induction (depth 40: 10 loading clocks + a full 17-sample
+# window, so the base case can reach every mutant). gauss_filter_ref.v is the upstream gauss_filter.v
+# renamed; run_formal_gauss.sh extracts it from the reference git revision.
+
+[options]
+mode prove
+depth 40
+
+[engines]
+smtbmc bitwuzla
+
+[script]
+plugin -i slang
+read_slang gauss_filter_ref.v gauss_filter.v gauss_miter.sv --top gauss_miter
+prep -top gauss_miter
+
+[files]
+gauss_filter_ref.v
+gauss_filter.v
+gauss_miter.sv
