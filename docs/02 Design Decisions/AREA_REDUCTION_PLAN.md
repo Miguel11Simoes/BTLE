@@ -5,8 +5,11 @@
 **Base:** tag `upstream-baseline` (`8540186`)  
 **Date:** 2026-09-18  
 **Author:** Miguel Simões  
-**Status:** baseline measured; no reduction implemented yet. Every saving below
-is marked either *measured* or *estimate*.
+**Status:** baseline measured. On branch `ble-tx-table`, **B2 alone** is
+implemented, measured and validated (2026-09-28); B1, A1 and A2 are not on this
+branch (see [../04 Validation/TX_TABLE_VALIDATION.md](../04%20Validation/TX_TABLE_VALIDATION.md)
+and [../04 Validation/BRANCH_COMPARISON.md](../04%20Validation/BRANCH_COMPARISON.md)).
+Every saving below is marked either *measured* or *estimate*.
 
 ---
 
@@ -121,7 +124,7 @@ Every candidate belongs to one class, and the class determines how it is proved.
 | A2 | A | Remove debug registers from `btle_ll`: 64-bit timestamps, 1 PPS, event counters, the 25 unconnected R/W registers, UART HCI | part of 9 453 cells | estimate; measure after the cut |
 | A3 | A | Drop `KEEP_FOR_DBG` (`mark_debug` / `DONT_TOUCH`) | ≈ 0 in Yosys (it ignores them); matters for Vivado | measured indirectly |
 | B1 | B | **One shared GFSK demodulator** for all 8 phases. Every phase computes `i[n-8]·q[n] − i[n]·q[n-8]`, one symbol apart; one unit with an 8-sample delay line produces the same product for every incoming sample. | ≈ 7 × 3 899 = **27 293 cells** (54 % of the controller) | estimate from measured parts |
-| B2 | B | Gaussian filter → look-up table. The input is a repeated bit stream, so the 17-tap output depends only on 3 consecutive bits and the sample phase: 3 bits × 8 phases = 64 entries. As a ROM it stays bit-exact for the default taps. As a small RAM of 64 × 16 = 1 kbit written by software, it stays bit-exact for **any** taps and remains runtime-reconfigurable. | most of 2 286 cells | estimate |
+| B2 | B | Gaussian filter → look-up table. The input is a repeated bit stream, so the 17-tap output depends only on 3 consecutive bits and the sample phase: 3 bits × 8 phases = 64 entries. As a ROM it stays bit-exact for the default taps. As a small RAM of 64 × 16 = 1 kbit written by software, it stays bit-exact for **any** taps and remains runtime-reconfigurable. *As implemented* (`GAUSS_TABLE=1`, same code as `ble-opt`): distributed-arithmetic tables over the 17-sample window (6+6+5 samples) built from fixed taps, exact for every input sequence. | estimate: most of 2 286 cells; **measured: 2 286 → 253 cells, controller 50 295 → 48 227** | **done on this branch**, validated in [TX_TABLE_VALIDATION.md](../04%20Validation/TX_TABLE_VALIDATION.md) |
 | B3 | B | COS/SIN tables: quarter-wave storage, 4× fewer bits | 24 576 bits | bit-exact only if the table is symmetric, so it becomes C if arbitrary tables must stay supported |
 | C1 | C | **Single-phase receiver**: timing recovery on the preamble, then one decode | the remaining ≈ 7 × 540 cells of core logic, plus 7 PDU buffers (28 672 bits) | estimate; changes sensitivity; proof = BER vs SNR and ppm with `python/test_btle_ber.py`, against upstream's claim of 0.1 % BER at 11.5 dB / 20 ppm |
 | C2 | C | PDU buffers sized for legacy advertising: 64 × 8 instead of 512 × 8 | 3 584 bits per buffer | only if data PDUs over 64 bytes are out of scope (§ 2) |
@@ -134,6 +137,7 @@ Every candidate belongs to one class, and the class determines how it is proved.
 | Scenario | Controller cells | SRAM bits |
 |---|---:|---:|
 | Upstream today (measured) | 50 295 | 1 136 070 |
+| **B2 alone (measured, this branch, `GAUSS_TABLE=1`)** | **48 227** | 1 136 070 |
 | A1 + B1 (no function removed) | ≈ 22 700 | ≈ 87 500 |
 | + A2 + B2 | lower still; A2 depends on the new LL interface | ≈ 87 500 |
 | TX-only sticker: C3 + C4 + B2 + minimal LL | a few thousand | ≈ 4 000 (TX PDU buffer) |
@@ -184,3 +188,4 @@ and stores only the sha256 of each mapped netlist in `netlist.sha256`.
 | Date | Change |
 |---|---|
 | 2026-09-18 | First version: baseline measured, candidates classified. |
+| 2026-09-28 | Branch `ble-tx-table`: B2 implemented alone (the `ble-opt` code) and measured, controller 50 295 → 48 227 cells. The rest of this plan is left as it was on 2026-09-18; its later revisions are on `ble-opt`. |

@@ -1,0 +1,7 @@
+label=tx-table
+date_utc=2026-09-28T14:12:29Z
+ref_rev=upstream-baseline (85401861e8f4b04b90cbaa0394c0f9d45ed02f18)
+dut=working tree at 6e2c5b1b6b18986bddc662d4c5404b8cc5bf14fa, dirty verilog files: 0
+dut configuration: GAUSS_TABLE=1 (nothing removed: every output and register compared)
+iverilog=Icarus Verilog version 14.0 (devel) (s20260301-411-gca6b8d376-dirty)
+seeds_per_example=5 packets_per_seed=6

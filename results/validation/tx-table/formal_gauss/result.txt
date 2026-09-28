@@ -1,0 +1,2 @@
+prove: PASS 0 12
+RESULT: PASS

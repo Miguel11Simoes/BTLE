@@ -1,0 +1,6 @@
+gauss_filter: EQUIVALENT (Found 450 $equiv cells)
+gfsk_modulation: EQUIVALENT (Found 33294 $equiv cells)
+btle_tx: EQUIVALENT (Found 37622 $equiv cells)
+btle_phy: EQUIVALENT (Found 73598 $equiv cells)
+btle_controller: EQUIVALENT (Found 96609 $equiv cells)
+RESULT: PASS
