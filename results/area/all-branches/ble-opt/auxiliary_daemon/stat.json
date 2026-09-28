@@ -1,0 +1,73 @@
+{
+   "creator": "Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)",
+   "invocation": "stat -json -liberty /home/msmiguel/eda/NangateOpenCellLibrary_typical.lib ",
+   "modules": {
+      "\\auxiliary_daemon": {
+         "num_wires":         237,
+         "num_wire_bits":     418,
+         "num_pub_wires":     22,
+         "num_pub_wire_bits": 203,
+         "num_ports":         19,
+         "num_port_bits":     170,
+         "num_memories":      0,
+         "num_memory_bits":   0,
+         "num_processes":     0,
+         "num_cells":         233,
+         "num_submodules":       0,
+         "area":              365.750000,
+         "sequential_area":    149.226000,
+         "num_cells_by_type": {
+            "AND2_X1": 10,
+            "AND3_X1": 12,
+            "AOI211_X1": 2,
+            "AOI21_X1": 41,
+            "DFF_X1": 33,
+            "INV_X1": 16,
+            "NAND2_X1": 11,
+            "NAND3_X1": 4,
+            "NOR2_X1": 23,
+            "NOR3_X1": 14,
+            "NOR4_X1": 2,
+            "OAI21_X1": 24,
+            "OR2_X1": 8,
+            "OR3_X1": 2,
+            "XNOR2_X1": 20,
+            "XOR2_X1": 11
+         }
+      }
+   },
+      "design": {
+         "num_wires":         237,
+         "num_wire_bits":     418,
+         "num_pub_wires":     22,
+         "num_pub_wire_bits": 203,
+         "num_ports":         19,
+         "num_port_bits":     170,
+         "num_memories":      0,
+         "num_memory_bits":   0,
+         "num_processes":     0,
+         "num_cells":         233,
+         "num_submodules":       0,
+         "area":              365.750000,
+         "sequential_area":    149.226000,
+         "num_cells_by_type": {
+            "AND2_X1": 10,
+            "AND3_X1": 12,
+            "AOI211_X1": 2,
+            "AOI21_X1": 41,
+            "DFF_X1": 33,
+            "INV_X1": 16,
+            "NAND2_X1": 11,
+            "NAND3_X1": 4,
+            "NOR2_X1": 23,
+            "NOR3_X1": 14,
+            "NOR4_X1": 2,
+            "OAI21_X1": 24,
+            "OR2_X1": 8,
+            "OR3_X1": 2,
+            "XNOR2_X1": 20,
+            "XOR2_X1": 11
+         }
+      }
+}
+

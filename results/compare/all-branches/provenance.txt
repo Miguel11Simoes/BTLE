@@ -1,0 +1,13 @@
+label=all-branches
+date_utc=2026-09-28T14:42:34Z
+harness=f540e99ded01cc1c9f4b6b5dd5df0fd72c8c8d2e (branch ble-opt), dirty files under scripts/: 0
+configurations (name, measured revision, commit, verilog/ tree, parameters):
+  master	upstream-baseline	85401861e8f4b04b90cbaa0394c0f9d45ed02f18	4bacca327f4a7112a66bca5915160ebacfffb28e	<none: defaults>
+  ble-tx-table	origin/ble-tx-table	eaaf6cf67ea514ea66751b39c116446351b6505f	2d36551e0bf844c7b97e00679522c2838829fd35	GAUSS_TABLE=1
+  ble-rx-dm	origin/ble-rx-dm	92d6e5429185534b168a6cfce1337540d8c14a88	aa807f8228cdcf2db6dca8648980b08c6e195f54	<none: defaults>
+  ble-opt	ble-opt	f540e99ded01cc1c9f4b6b5dd5df0fd72c8c8d2e	b78aa3706fe50f542d00756fb94b014afe1adb4d	ENABLE_IQ_CAPTURE=0 LL_MINIMAL=1 GAUSS_TABLE=1
+activity vectors: example 0, 20 dB, 20 ppm, one set for every configuration; vectors.tar.gz, sha256 of vectors.sha256 d53f2d49ed8db456
+branches with the upstream verilog/ tree (4bacca327f4a7112a66bca5915160ebacfffb28e):
+  master	origin/master	4bacca327f4a7112a66bca5915160ebacfffb28e	same_as_upstream=yes
+  risc-v-ble	origin/risc-v-ble	4bacca327f4a7112a66bca5915160ebacfffb28e	same_as_upstream=yes
+summary.md and data.json regenerated after the run by scripts/compare/summarize_compare.py at 696b036: the run's own summariser (f540e99) compared the capacitance sums of the upstream side bit for bit and failed on floating-point summation order only (differences ~1e-15 relative); no measurement was repeated or changed.

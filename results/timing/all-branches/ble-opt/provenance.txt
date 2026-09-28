@@ -1,0 +1,9 @@
+label=all-branches/ble-opt
+date_utc=2026-09-28T14:42:35Z
+ref=upstream-baseline (85401861e8f4b04b90cbaa0394c0f9d45ed02f18), default parameters
+dut=ble-opt (f540e99ded01cc1c9f4b6b5dd5df0fd72c8c8d2e, verilog tree b78aa3706fe50f542d00756fb94b014afe1adb4d), ENABLE_IQ_CAPTURE=0 LL_MINIMAL=1 GAUSS_TABLE=1
+sta_set=controller
+target_clock_ns=62.5
+yosys=Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+abc========= ABC command line "version"
+liberty=NangateOpenCellLibrary_typical.lib sha256=8d540a4d4cf6d09d27c87ad067857a9c0c2eeb023ab7a56e058cd3113db4e9b1

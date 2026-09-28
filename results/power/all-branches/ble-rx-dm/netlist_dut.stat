@@ -1,0 +1,348 @@
+
+32. Printing statistics.
+
+=== $paramod$af4d3bf28a95f355d9568260868c7172c1c910e1\btle_tx ===
+
+        +----------Local Count, excluding submodules.
+        |        +-Local Area, excluding submodules.
+        |        | 
+     1134        - wires
+     1511        - wire bits
+     1134        - public wires
+     1511        - public wire bits
+       31        - ports
+      193        - port bits
+     1091 1.95E+03 cells
+        1        -   $print
+      125      133   AND2_X1
+       17    22.61   AND3_X1
+        3    4.788   AND4_X1
+       10     13.3   AOI211_X1
+      150    159.6   AOI21_X1
+        4    6.384   AOI221_X1
+        1    2.128   AOI222_X1
+       17    22.61   AOI22_X1
+      226 1.02E+03   DFF_X1
+       54   28.728   INV_X1
+       21   39.102   MUX2_X1
+       51   40.698   NAND2_X1
+       22   23.408   NAND3_X1
+        3     3.99   NAND4_X1
+      103   82.194   NOR2_X1
+       30    31.92   NOR3_X1
+       20     26.6   NOR4_X1
+        4     5.32   OAI211_X1
+      137  145.768   OAI21_X1
+       10    15.96   OAI221_X1
+       15    19.95   OAI22_X1
+        1    1.862   OAI33_X1
+        6    6.384   OR2_X1
+        4     5.32   OR3_X1
+        3    4.788   OR4_X1
+       26   41.496   XNOR2_X1
+       24   38.304   XOR2_X1
+        2        -   sdpram_one_clk
+        1        -   sdpram_two_clk
+        1        - submodules
+        1        -   $paramod$cf0693f3a00c75d0471d97168bc5440fe3887b70\gauss_filter
+
+   Area for cell type $print is unknown!
+   Area for cell type \sdpram_one_clk is unknown!
+   Area for cell type \sdpram_two_clk is unknown!
+
+   Chip area for module '$paramod$af4d3bf28a95f355d9568260868c7172c1c910e1\btle_tx': 1948.184000
+     of which used for sequential elements: 1021.972000 (52.46%)
+
+=== $paramod$b1e7bdc7312128b48937155ccca1e286a06c78b7\btle_rx ===
+
+        +----------Local Count, excluding submodules.
+        |        +-Local Area, excluding submodules.
+        |        | 
+    10259        - wires
+    11735        - wire bits
+    10259        - public wires
+    11735        - public wire bits
+       17        - ports
+      130        - port bits
+    10090 1.59E+04 cells
+      437  464.968   AND2_X1
+      134   178.22   AND3_X1
+       78  124.488   AND4_X1
+      184   244.72   AOI211_X1
+      712  757.568   AOI21_X1
+      103  164.388   AOI221_X1
+       93  197.904   AOI222_X1
+      579   770.07   AOI22_X1
+     1416  6.4E+03   DFF_X1
+     1031  548.492   INV_X1
+      165   307.23   MUX2_X1
+     1152  919.296   NAND2_X1
+      295   313.88   NAND3_X1
+       56    74.48   NAND4_X1
+     1007  803.586   NOR2_X1
+      176  187.264   NOR3_X1
+      118   156.94   NOR4_X1
+      214   284.62   OAI211_X1
+      546  580.944   OAI21_X1
+       59   94.164   OAI221_X1
+        7   14.896   OAI222_X1
+       38    50.54   OAI22_X1
+      145   154.28   OR2_X1
+      115   152.95   OR3_X1
+       12   19.152   OR4_X1
+      661 1.05E+03   XNOR2_X1
+      549  876.204   XOR2_X1
+        8        -   sdpram_two_clk
+
+   Area for cell type \sdpram_two_clk is unknown!
+
+   Chip area for module '$paramod$b1e7bdc7312128b48937155ccca1e286a06c78b7\btle_rx': 15899.352000
+     of which used for sequential elements: 6403.152000 (40.27%)
+
+=== $paramod$cf0693f3a00c75d0471d97168bc5440fe3887b70\gauss_filter ===
+
+        +----------Local Count, excluding submodules.
+        |        +-Local Area, excluding submodules.
+        |        | 
+     2306        - wires
+     2489        - wire bits
+     2306        - public wires
+     2489        - public wire bits
+       10        - ports
+       43        - port bits
+     2286 3.37E+03 cells
+       68   72.352   AND2_X1
+        9    11.97   AND3_X1
+        3    4.788   AND4_X1
+      146   194.18   AOI211_X1
+      134  142.576   AOI21_X1
+        1    1.596   AOI221_X1
+        2     2.66   AOI22_X1
+      178  804.916   DFF_X1
+      144   76.608   INV_X1
+      230   428.26   MUX2_X1
+      270   215.46   NAND2_X1
+        7    7.448   NAND3_X1
+      299  238.602   NOR2_X1
+       46   48.944   NOR3_X1
+        5     6.65   NOR4_X1
+      116  123.424   OAI21_X1
+        1    1.596   OAI221_X1
+        1     1.33   OAI22_X1
+        1    1.862   OAI33_X1
+       22   23.408   OR2_X1
+       19    25.27   OR3_X1
+        5     7.98   OR4_X1
+      300    478.8   XNOR2_X1
+      279  445.284   XOR2_X1
+
+   Chip area for module '$paramod$cf0693f3a00c75d0471d97168bc5440fe3887b70\gauss_filter': 3365.964000
+     of which used for sequential elements: 804.916000 (23.91%)
+
+=== $paramod$15c6ab6e7a67e7aec15ee91f1709da072b270955\clock_domain_conversion_iq ===
+
+        +----------Local Count, excluding submodules.
+        |        +-Local Area, excluding submodules.
+        |        | 
+      203        - wires
+      387        - wire bits
+      203        - public wires
+      387        - public wire bits
+       18        - ports
+      202        - port bits
+      183  357.504 cells
+        2    2.128   AOI21_X1
+       61  275.842   DFF_X1
+       61   32.452   INV_X1
+       59   47.082   NOR2_X1
+
+   Chip area for module '$paramod$15c6ab6e7a67e7aec15ee91f1709da072b270955\clock_domain_conversion_iq': 357.504000
+     of which used for sequential elements: 275.842000 (77.16%)
+
+=== btle_controller ===
+
+        +----------Local Count, excluding submodules.
+        |        +-Local Area, excluding submodules.
+        |        | 
+      136        - wires
+     1172        - wire bits
+      136        - public wires
+     1172        - public wire bits
+       86        - ports
+      635        - port bits
+      219  407.778 cells
+      219  407.778   MUX2_X1
+        5        - submodules
+        1        -   $paramod$15c6ab6e7a67e7aec15ee91f1709da072b270955\clock_domain_conversion_iq
+        1        -   $paramod$3b5286966c61cbb9913caf4a92001e1bb6ef7782\btle_ll
+        1        -   $paramod$3f2f547c192f340667d0c8471cadc977d8544356\auxiliary_daemon
+        1        -   $paramod$af4d3bf28a95f355d9568260868c7172c1c910e1\btle_tx
+        1        -   $paramod$b1e7bdc7312128b48937155ccca1e286a06c78b7\btle_rx
+
+   Area for cell type $print is unknown!
+   Area for cell type \sdpram_one_clk is unknown!
+   Area for cell type \sdpram_two_clk is unknown!
+
+   Chip area for module '\btle_controller': 407.778000
+     of which used for sequential elements: 0.000000 (0.00%)
+
+=== $paramod$3f2f547c192f340667d0c8471cadc977d8544356\auxiliary_daemon ===
+
+        +----------Local Count, excluding submodules.
+        |        +-Local Area, excluding submodules.
+        |        | 
+      302        - wires
+      497        - wire bits
+      302        - public wires
+      497        - public wire bits
+       19        - ports
+      170        - port bits
+      300  486.248 cells
+       23   24.472   AND2_X1
+       13    17.29   AND3_X1
+        1    1.596   AND4_X1
+        3     3.99   AOI211_X1
+       41   43.624   AOI21_X1
+       48  217.056   DFF_X1
+       18    9.576   INV_X1
+       13   10.374   NAND2_X1
+        5     5.32   NAND3_X1
+       33   26.334   NOR2_X1
+       14   14.896   NOR3_X1
+        5     6.65   NOR4_X1
+        1     1.33   OAI211_X1
+       37   39.368   OAI21_X1
+       10    10.64   OR2_X1
+        2     2.66   OR3_X1
+       21   33.516   XNOR2_X1
+       11   17.556   XOR2_X1
+        1        -   sdpram_two_clk
+
+   Area for cell type \sdpram_two_clk is unknown!
+
+   Chip area for module '$paramod$3f2f547c192f340667d0c8471cadc977d8544356\auxiliary_daemon': 486.248000
+     of which used for sequential elements: 217.056000 (44.64%)
+
+=== $paramod$3b5286966c61cbb9913caf4a92001e1bb6ef7782\btle_ll ===
+
+        +----------Local Count, excluding submodules.
+        |        +-Local Area, excluding submodules.
+        |        | 
+     9681        - wires
+    13283        - wire bits
+     9681        - public wires
+    13283        - public wire bits
+       70        - ports
+      467        - port bits
+     9536 1.68E+04 cells
+      235   250.04   AND2_X1
+       32    42.56   AND3_X1
+       67  106.932   AND4_X1
+      221   293.93   AOI211_X1
+     1503  1.6E+03   AOI21_X1
+       32   51.072   AOI221_X1
+      198  421.344   AOI222_X1
+      556   739.48   AOI22_X1
+       60    319.2   DFFR_X1
+        2    10.64   DFFS_X1
+     1974 8.93E+03   DFF_X1
+     1592  846.944   INV_X1
+       12   22.344   MUX2_X1
+      247  197.106   NAND2_X1
+      118  125.552   NAND3_X1
+      159   211.47   NAND4_X1
+      607  484.386   NOR2_X1
+      112  119.168   NOR3_X1
+       50     66.5   NOR4_X1
+       13    17.29   OAI211_X1
+     1619 1.72E+03   OAI21_X1
+        6    9.576   OAI221_X1
+       39    51.87   OAI22_X1
+        2    3.724   OAI33_X1
+       11   11.704   OR2_X1
+        3     3.99   OR3_X1
+       14   22.344   OR4_X1
+       30    47.88   XNOR2_X1
+       19   30.324   XOR2_X1
+        1        -   sdpram_one_clk
+        2        -   sdpram_two_clk
+
+   Area for cell type \sdpram_one_clk is unknown!
+   Area for cell type \sdpram_two_clk is unknown!
+
+   Chip area for module '$paramod$3b5286966c61cbb9913caf4a92001e1bb6ef7782\btle_ll': 16755.606000
+     of which used for sequential elements: 9256.268000 (55.24%)
+
+=== design hierarchy ===
+
+        +----------Count including submodules.
+        |        +-Area including submodules.
+        |        | 
+    23705 3.92E+04 btle_controller
+      183  357.504 $paramod$15c6ab6e7a67e7aec15ee91f1709da072b270955\clock_domain_conversion_iq
+     9536 1.68E+04 $paramod$3b5286966c61cbb9913caf4a92001e1bb6ef7782\btle_ll
+      300  486.248 $paramod$3f2f547c192f340667d0c8471cadc977d8544356\auxiliary_daemon
+     1091 1.95E+03 $paramod$af4d3bf28a95f355d9568260868c7172c1c910e1\btle_tx
+     2286 3.37E+03   $paramod$cf0693f3a00c75d0471d97168bc5440fe3887b70\gauss_filter
+    10090 1.59E+04 $paramod$b1e7bdc7312128b48937155ccca1e286a06c78b7\btle_rx
+
+        +----------Count including submodules.
+        |        +-Area including submodules.
+        |        | 
+    24021        - wires
+    31074        - wire bits
+    24021        - public wires
+    31074        - public wire bits
+      251        - ports
+     1840        - port bits
+        -        - memories
+        -        - memory bits
+        -        - processes
+    23705 3.92E+04 cells
+        1        -   $print
+      888  944.832   AND2_X1
+      205   272.65   AND3_X1
+      152  242.592   AND4_X1
+      564   750.12   AOI211_X1
+     2542  2.7E+03   AOI21_X1
+      140   223.44   AOI221_X1
+      292  621.376   AOI222_X1
+     1154  1534.82   AOI22_X1
+       60    319.2   DFFR_X1
+        2    10.64   DFFS_X1
+     3903 1.76E+04   DFF_X1
+     2900   1542.8   INV_X1
+      647  1.2E+03   MUX2_X1
+     1733 1.38E+03   NAND2_X1
+      447  475.608   NAND3_X1
+      218   289.94   NAND4_X1
+     2108 1.68E+03   NOR2_X1
+      378  402.192   NOR3_X1
+      198   263.34   NOR4_X1
+      232   308.56   OAI211_X1
+     2455  2612.12   OAI21_X1
+       76  121.296   OAI221_X1
+        7   14.896   OAI222_X1
+       93   123.69   OAI22_X1
+        4    7.448   OAI33_X1
+      194  206.416   OR2_X1
+      143   190.19   OR3_X1
+       34   54.264   OR4_X1
+     1038 1.66E+03   XNOR2_X1
+      882 1.41E+03   XOR2_X1
+        3        -   sdpram_one_clk
+       12        -   sdpram_two_clk
+        5 3.88E+04 submodules
+        1  357.504   $paramod$15c6ab6e7a67e7aec15ee91f1709da072b270955\clock_domain_conversion_iq
+        1 1.68E+04   $paramod$3b5286966c61cbb9913caf4a92001e1bb6ef7782\btle_ll
+        1  486.248   $paramod$3f2f547c192f340667d0c8471cadc977d8544356\auxiliary_daemon
+        1 5.31E+03   $paramod$af4d3bf28a95f355d9568260868c7172c1c910e1\btle_tx
+        1 1.59E+04   $paramod$b1e7bdc7312128b48937155ccca1e286a06c78b7\btle_rx
+
+   Area for cell type $print is unknown!
+   Area for cell type \sdpram_one_clk is unknown!
+   Area for cell type \sdpram_two_clk is unknown!
+
+   Chip area for top module '\btle_controller': 39220.636000
+     of which used for sequential elements: 17979.206000 (45.84%)
+

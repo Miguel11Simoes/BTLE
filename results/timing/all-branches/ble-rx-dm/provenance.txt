@@ -1,0 +1,9 @@
+label=all-branches/ble-rx-dm
+date_utc=2026-09-28T14:42:35Z
+ref=upstream-baseline (85401861e8f4b04b90cbaa0394c0f9d45ed02f18), default parameters
+dut=origin/ble-rx-dm (92d6e5429185534b168a6cfce1337540d8c14a88, verilog tree aa807f8228cdcf2db6dca8648980b08c6e195f54), default parameters
+sta_set=controller
+target_clock_ns=62.5
+yosys=Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+abc========= ABC command line "version"
+liberty=NangateOpenCellLibrary_typical.lib sha256=8d540a4d4cf6d09d27c87ad067857a9c0c2eeb023ab7a56e058cd3113db4e9b1
