@@ -1,0 +1,9 @@
+label=tx-opt
+date_utc=2026-09-29T18:14:05Z
+ref_rev=upstream-baseline (85401861e8f4b04b90cbaa0394c0f9d45ed02f18)
+dut=working tree at 516a5090b3210cacdac9179a53601e657777b26f, dirty verilog files: 0
+dut_defaults=gauss_filter.v:GAUSS_TABLE=1
+iverilog=Icarus Verilog version 14.0 (devel) (s20260301-411-gca6b8d376-dirty)
+python=Python 3.11.14 numpy=2.4.6
+matrix: examples=0 1 2 snr=20 12 8 ppm=0 20 50 delay=0 5
+testbenches=gfsk_demodulation_tb btle_rx_core_tb btle_rx_tb btle_tx_tb btle_controller_tb
