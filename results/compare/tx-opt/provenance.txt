@@ -1,0 +1,10 @@
+label=tx-opt
+date_utc=2026-09-29T18:14:05Z
+harness=a4ccea7736681cafa19157ec854f425806c7da6f (branch ble-opt), dirty files under scripts/: 0
+configurations (name, measured revision, commit, verilog/ tree, parameters):
+  master	upstream-baseline	85401861e8f4b04b90cbaa0394c0f9d45ed02f18	4bacca327f4a7112a66bca5915160ebacfffb28e	<none: defaults>
+  ble-tx-opt	origin/ble-tx-opt	516a5090b3210cacdac9179a53601e657777b26f	c76351d49305b5b4454a4e7d50a9b5dc8fb9d6d2	GAUSS_TABLE=1
+activity vectors: example 0, 20 dB, 20 ppm, one set for every configuration; vectors.tar.gz, sha256 of vectors.sha256 d53f2d49ed8db456
+branches with the upstream verilog/ tree (4bacca327f4a7112a66bca5915160ebacfffb28e):
+  master	origin/master	4bacca327f4a7112a66bca5915160ebacfffb28e	same_as_upstream=yes
+  risc-v-ble	origin/risc-v-ble	4bacca327f4a7112a66bca5915160ebacfffb28e	same_as_upstream=yes
