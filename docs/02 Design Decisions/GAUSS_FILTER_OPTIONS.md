@@ -1,9 +1,9 @@
 # Gaussian filter: where the table lives, and the folded FIR — TX area of every option
 
 **Project:** BTLE — reconfigurable RISC-V baseband  
-**Branch:** the same file on `master`, `risc-v-ble`, `ble-opt`, `ble-tx-table`, `ble-rx-dm`, `ble-tx-table-reg`, `ble-tx-table-sram` and `ble-tx-fir2`  
+**Branch:** the same file on `master`, `risc-v-ble`, `ble-opt`, `ble-tx-table`, `ble-rx-dm`, `ble-tx-table-reg`, `ble-tx-table-sram`, `ble-tx-fir2` and `ble-tx-sin4`  
 **Base:** tag `upstream-baseline` (`8540186`)  
-**Date:** 2026-09-28  
+**Date:** 2026-09-28; updated 2026-09-29 (on `ble-tx-sin4`; pointer to the TX total)  
 **Author:** Miguel Simões  
 **Status:** executed: run `tx-area` of `scripts/compare/run_tx_compare.sh` (harness `4946579`).
 **TX area only**: the receiver is not counted. Pre-layout std-cell area (Nangate45) plus real
@@ -69,7 +69,9 @@ area of the SRAM macros is added to the std-cell area. The RAMs every option
 shares (TX COS/SIN tables, 32 768 bits, and the TX packet buffer, 4 096 bits)
 are left out. Results in
 [`results/compare/tx-area/summary.md`](../../results/compare/tx-area/summary.md)
-(on the four TX branches).
+(on the four TX branches). With those RAMs counted as SRAM macros, the
+transmitter is about 97 % memory and every option here moves its total by
+−1.8 to +11.9 %: `docs/04 Validation/BRANCH_COMPARISON.md` § 4.
 
 ### 2.1 The Gaussian filter (`gauss_filter`)
 
