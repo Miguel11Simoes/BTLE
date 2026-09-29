@@ -1,0 +1,3 @@
+design          unbuffered_ns  comb_path_ns  seq_overhead_ns  min_period_ns  slack_at_target_ns  fmax_MHz
+ref_controller  6.073          1.631         0.359            1.991          60.509              502.3
+dut_controller  6.408          1.517         0.359            1.877          60.623              532.8

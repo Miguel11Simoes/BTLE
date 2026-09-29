@@ -1,0 +1,13 @@
+label=tx-variants
+date_utc=2026-09-29T02:28:25Z
+harness=fe14935b6108d14901e78589b4bf431dafe76211 (branch ble-opt), dirty files under scripts/: 0
+configurations (name, measured revision, commit, verilog/ tree, parameters):
+  master	upstream-baseline	85401861e8f4b04b90cbaa0394c0f9d45ed02f18	4bacca327f4a7112a66bca5915160ebacfffb28e	<none: defaults>
+  ble-tx-table-reg	origin/ble-tx-table-reg	93a25cd7fb014d2525a06465bc635ec71d953823	c8675f2be5bc098b894ffec7ac887818da428c8a	GAUSS_TABLE=1
+  ble-tx-table-sram	origin/ble-tx-table-sram	1fe3534e36392f51d15ad4930d054c197b11f50f	3887f20eb2a845987fa467b4a3b731608d407705	GAUSS_TABLE=1
+  ble-tx-fir2	origin/ble-tx-fir2	f88d66fa89eebf364646563b70eccd38a0656a40	07255a363a0570ec0138b13c987f79d4884af7b7	<none: defaults>
+  ble-tx-sin4	origin/ble-tx-sin4	3b9f7e889badf2ec4b271f07ca7e3d01e7ed87fe	fd4e70cf8b1e97400e6f095535066af3994c0db4	<none: defaults>
+activity vectors: example 0, 20 dB, 20 ppm, one set for every configuration; vectors.tar.gz, sha256 of vectors.sha256 d53f2d49ed8db456
+branches with the upstream verilog/ tree (4bacca327f4a7112a66bca5915160ebacfffb28e):
+  master	origin/master	4bacca327f4a7112a66bca5915160ebacfffb28e	same_as_upstream=yes
+  risc-v-ble	origin/risc-v-ble	4bacca327f4a7112a66bca5915160ebacfffb28e	same_as_upstream=yes
