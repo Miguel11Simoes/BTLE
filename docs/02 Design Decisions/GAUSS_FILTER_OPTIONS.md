@@ -1,9 +1,9 @@
 # Gaussian filter: where the table lives, and the folded FIR — TX area of every option
 
 **Project:** BTLE — reconfigurable RISC-V baseband  
-**Branch:** the same file on `master`, `risc-v-ble`, `ble-opt`, `ble-tx-table`, `ble-rx-dm`, `ble-tx-table-reg`, `ble-tx-table-sram`, `ble-tx-fir2`, `ble-tx-sin4` and `ble-tx-sin8`  
+**Branch:** the same file on `master`, `risc-v-ble`, `ble-opt`, `ble-tx-table`, `ble-rx-dm`, `ble-tx-table-reg`, `ble-tx-table-sram`, `ble-tx-fir2`, `ble-tx-sin4`, `ble-tx-sin8` and `ble-tx-opt`  
 **Base:** tag `upstream-baseline` (`8540186`)  
-**Date:** 2026-09-28; updated 2026-09-29 (on `ble-tx-sin4` and `ble-tx-sin8`; pointer to the TX total)  
+**Date:** 2026-09-28; updated 2026-09-29 (on `ble-tx-sin4`, `ble-tx-sin8` and `ble-tx-opt`; pointer to the TX total)  
 **Author:** Miguel Simões  
 **Status:** executed: run `tx-area` of `scripts/compare/run_tx_compare.sh` (harness `4946579`).
 **TX area only**: the receiver is not counted. Pre-layout std-cell area (Nangate45) plus real

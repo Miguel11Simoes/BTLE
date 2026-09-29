@@ -24,6 +24,7 @@ lists where each piece is.
 | See where the BLE area goes and how to shrink it | [02 Design Decisions/AREA_REDUCTION_PLAN.md](02%20Design%20Decisions/AREA_REDUCTION_PLAN.md) |
 | Know what is tested and what is not | [04 Validation/UPSTREAM_TEST_INVENTORY.md](04%20Validation/UPSTREAM_TEST_INVENTORY.md) |
 | See the Gaussian table (B2) alone, its proofs and its saving | [04 Validation/TX_TABLE_VALIDATION.md](04%20Validation/TX_TABLE_VALIDATION.md) |
+| See B2 and the {cos, sin} memory together, the smallest transmitter measured: its checks, area and activity | [04 Validation/TX_OPT_VALIDATION.md](04%20Validation/TX_OPT_VALIDATION.md) |
 | Compare every branch: area (the transmitter with its SRAM macros), timing, switching activity | [04 Validation/BRANCH_COMPARISON.md](04%20Validation/BRANCH_COMPARISON.md) |
 | Choose where the Gaussian table lives (OTP, ROM, SRAM, REG) or a folded FIR, by TX area | [02 Design Decisions/GAUSS_FILTER_OPTIONS.md](02%20Design%20Decisions/GAUSS_FILTER_OPTIONS.md) |
 | Reproduce the upstream results | [06 Guides/REPRODUCE_UPSTREAM.md](06%20Guides/REPRODUCE_UPSTREAM.md) |
@@ -40,7 +41,7 @@ content, which is why some numbers are missing.
 | `01 Architecture/` | How the hardware is built: hierarchy, clocks, interfaces, registers | Upstream described |
 | `02 Design Decisions/` | Scope, open questions, decisions and the reasons for them; area reduction plan | Four decisions open; area baseline measured |
 | `03 RISC-V Integration/` | Implementation of the core and its interface to the PHY | Not started |
-| `04 Validation/` | Test inventory, evidence, results | B2 alone proved and measured (branch `ble-tx-table`); branches compared |
+| `04 Validation/` | Test inventory, evidence, results | B2 and the {cos, sin} memory together, checked and measured (branch `ble-tx-opt`); branches compared |
 | `05 Thesis/` | Reports written for the dissertation | Not started |
 | `06 Guides/` | How to reproduce, build and contribute | Written, not yet executed |
 | `07 Reference Manual/` | Pointers to the upstream documentation | Written |
