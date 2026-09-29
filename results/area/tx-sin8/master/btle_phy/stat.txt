@@ -1,0 +1,53 @@
+34. Printing statistics.
+
+=== btle_phy ===
+
+        +----------Local Count, excluding submodules.
+        |        +-Local Area, excluding submodules.
+        |        | 
+    40620        - wires
+    43736        - wire bits
+      318        - public wires
+     3368        - public wire bits
+       45        - ports
+      320        - port bits
+    40350  5.4E+04 cells
+        1        -   $print
+     2310  2457.84   AND2_X1
+      736   978.88   AND3_X1
+      585   933.66   AND4_X1
+      365   485.45   AOI211_X1
+     3295  3505.88   AOI21_X1
+       90   143.64   AOI221_X1
+       43   91.504   AOI222_X1
+     1259  1674.47   AOI22_X1
+     2472 1.12E+04   DFF_X1
+     2709 1.44E+03   INV_X1
+      762 1.42E+03   MUX2_X1
+     5598 4.47E+03   NAND2_X1
+      827  879.928   NAND3_X1
+      215   285.95   NAND4_X1
+     4694 3.75E+03   NOR2_X1
+      527  560.728   NOR3_X1
+      182   242.06   NOR4_X1
+      202   268.66   OAI211_X1
+     2689 2.86E+03   OAI21_X1
+       62   98.952   OAI221_X1
+        9   19.152   OAI222_X1
+      189   251.37   OAI22_X1
+        2    3.724   OAI33_X1
+      940  1000.16   OR2_X1
+      893  1187.69   OR3_X1
+       29   46.284   OR4_X1
+     4704 7.51E+03   XNOR2_X1
+     3950   6304.2   XOR2_X1
+        2        -   sdpram_one_clk
+        9        -   sdpram_two_clk
+
+   Area for cell type $print is unknown!
+   Area for cell type \sdpram_one_clk is unknown!
+   Area for cell type \sdpram_two_clk is unknown!
+
+   Chip area for module '\btle_phy': 54040.294000
+     of which used for sequential elements: 11178.384000 (20.69%)
+

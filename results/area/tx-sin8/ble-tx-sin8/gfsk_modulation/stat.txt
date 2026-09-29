@@ -1,0 +1,49 @@
+34. Printing statistics.
+
+=== gfsk_modulation ===
+
+        +----------Local Count, excluding submodules.
+        |        +-Local Area, excluding submodules.
+        |        | 
+     2800        - wires
+     3195        - wire bits
+       58        - public wires
+      453        - public wire bits
+       21        - ports
+      102        - port bits
+     2797  4454.17 cells
+      112  119.168   AND2_X1
+        8    10.64   AND3_X1
+        2    3.192   AND4_X1
+      152   202.16   AOI211_X1
+      161  171.304   AOI21_X1
+        7   11.172   AOI221_X1
+        2    4.256   AOI222_X1
+        4     5.32   AOI22_X1
+      307 1.39E+03   DFF_X1
+      170    90.44   INV_X1
+      320   595.84   MUX2_X1
+      290   231.42   NAND2_X1
+       12   12.768   NAND3_X1
+        5     6.65   NAND4_X1
+      322  256.956   NOR2_X1
+       50     53.2   NOR3_X1
+       15    19.95   NOR4_X1
+        1     1.33   OAI211_X1
+      134  142.576   OAI21_X1
+        4    6.384   OAI221_X1
+        2    4.256   OAI222_X1
+       10     13.3   OAI22_X1
+        1    1.862   OAI33_X1
+       31   32.984   OR2_X1
+       20     26.6   OR3_X1
+        8   12.768   OR4_X1
+      343  547.428   XNOR2_X1
+      302  481.992   XOR2_X1
+        2        -   sdpram_one_clk
+
+   Area for cell type \sdpram_one_clk is unknown!
+
+   Chip area for module '\gfsk_modulation': 4454.170000
+     of which used for sequential elements: 1388.254000 (31.17%)
+
