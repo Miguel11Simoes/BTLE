@@ -3,13 +3,14 @@
 **Project:** BTLE — reconfigurable RISC-V baseband  
 **Branch:** every branch carries this same file (`master`, `risc-v-ble`, `ble-tx-table`, `ble-tx-table-reg`, `ble-tx-table-sram`, `ble-tx-fir2`, `ble-tx-sin4`, `ble-tx-sin8`, `ble-tx-sin8-1rw`, `ble-tx-sin2`, `ble-tx-opt`, `ble-rx-dm`, `ble-opt`)  
 **Base:** tag `upstream-baseline` (`8540186`)  
-**Date:** 2026-09-28; updated 2026-09-29 (six transmitter branches, SRAM macro areas) and 2026-10-03 (two VCO-memory branches, not yet built)  
+**Date:** 2026-09-28; updated 2026-09-29 (six transmitter branches, SRAM macro areas), 2026-10-03 (the VCO-memory sweep) and 2026-10-04 (`ble-tx-sin8-1rw` and `ble-tx-sin2`, the one-port VCO memories, run `tx-1rw`)  
 **Author:** Miguel Simões  
 **Status:** executed: run `all-branches`, harness `scripts/compare/` at `f540e99` (summary
 regenerated at `696b036`, § 11); with the same harness and the same vectors, run `tx-variants`
 (`fe14935`) for four transmitter branches (its two failed checks are explained in § 6.1), run
-`tx-sin8` (`577bb31`) for `ble-tx-sin8` and run `tx-opt` (`a4ccea7`) for `ble-tx-opt`;
-transmitter SRAM macros from runs `openram-tx` and `openram-sin8` (OpenRAM 1.2.48, FreePDK45).
+`tx-sin8` (`577bb31`) for `ble-tx-sin8`, run `tx-opt` (`a4ccea7`) for `ble-tx-opt` and run
+`tx-1rw` (`69e5204`) for `ble-tx-sin8-1rw` and `ble-tx-sin2`; transmitter SRAM macros from runs
+`openram-tx`, `openram-sin8` and `openram-1rw-sweep` (OpenRAM 1.2.48, FreePDK45).
 Pre-layout area and static timing; gate-level switching activity, which is a proxy and
 **not power**.
 
@@ -28,17 +29,20 @@ of them rewrite the signal processing, and two remove debug infrastructure:
 | A2 | minimal Link Layer (no UART HCI, 1 PPS, debug registers) | `btle_ll` |
 
 Two branches isolate the signal-processing changes: `ble-tx-table` holds only
-B2 and `ble-rx-dm` only B1. Six more change only the transmitter. Three of them
-build the Gaussian filter another way: `ble-tx-table-reg` and
+B2 and `ble-rx-dm` only B1. Eight more change only the transmitter. Three of
+them build the Gaussian filter another way: `ble-tx-table-reg` and
 `ble-tx-table-sram` keep B2's tables but rewritable (in flip-flops, in SRAM),
 and `ble-tx-fir2` folds the FIR by the symmetry of its taps; their choice is
-argued in `docs/02 Design Decisions/GAUSS_FILTER_OPTIONS.md`. Two shrink the
+argued in `docs/02 Design Decisions/GAUSS_FILTER_OPTIONS.md`. Four shrink the
 VCO's memory: `ble-tx-sin4` stores only the first quarter of the cosine and
 sine tables and rebuilds the rest by symmetry, and `ble-tx-sin8` then keeps
 those two quarter tables, which are always read at the same address, in one
-memory of {cos, sin} words. The last, `ble-tx-opt`, puts the best of each
-together, B2 and the memory of `ble-tx-sin8`, and nothing else: its receiver
-and its debug memory are upstream's.
+memory of {cos, sin} words. `ble-tx-sin8-1rw` gives that memory one port
+instead of two, and `ble-tx-sin2` keeps only the quarter sine table, also with
+one port, read twice per sample; their memories were chosen in
+`docs/02 Design Decisions/VCO_MEMORY_SWEEP.md`. One more, `ble-tx-opt`, puts
+together B2 and the memory of `ble-tx-sin8`, and nothing else: its receiver and
+its debug memory are upstream's.
 
 This document measures every branch with the same ruler and answers four
 questions: what each change buys on its own, whether the changes add up, what
@@ -47,11 +51,11 @@ memories are counted. The area flow counts RAM in bits only, so it cannot
 weigh logic against memory; § 4 adds the area of real SRAM macros.
 
 This file is identical on every branch. The raw results it cites are in
-`results/compare/{all-branches,tx-variants,tx-sin8,tx-opt}/`, in the
-per-configuration folders `results/{area,timing,power}/{all-branches,tx-variants,tx-sin8,tx-opt}/`
-and in `results/area/{openram-tx,openram-sin8}/`, which exist on `ble-opt`,
-`ble-tx-table`, `ble-rx-dm` and `ble-tx-opt`; the relative links below resolve
-there.
+`results/compare/{all-branches,tx-variants,tx-sin8,tx-opt,tx-1rw}/`, in the
+per-configuration folders `results/{area,timing,power}/{all-branches,tx-variants,tx-sin8,tx-opt,tx-1rw}/`
+and in `results/area/{openram-tx,openram-sin8,openram-1rw-sweep}/`, which exist
+on `ble-opt`, `ble-tx-table`, `ble-rx-dm` and `ble-tx-opt`; the relative links
+below resolve there.
 
 ## 1. The branches
 
@@ -65,7 +69,9 @@ there.
 | `ble-tx-fir2` | folded (symmetric) Gaussian FIR, taps still programmable | `gauss_filter.v` and U9; tree `07255a3` | defaults (the folded FIR is not a parameter) |
 | `ble-tx-sin4` | quarter-wave VCO tables: 2 × 512 × 8 bits instead of 2 × 2 048 × 8 | `vco.v` only; tree `fd4e70c` | defaults (not a parameter) |
 | `ble-tx-sin8` | the two quarter-wave tables in one 512 × 16 memory, {cos, sin} per word | `vco.v` only; tree `8ba2c0e` | defaults (not a parameter) |
-| `ble-tx-opt` | the best transmitter: B2 and the {cos, sin} memory of `ble-tx-sin8`; receiver and debug memory of upstream | the files of `ble-tx-table`, and the `vco.v` of `ble-tx-sin8`; tree `c76351d` | `GAUSS_TABLE=1` |
+| `ble-tx-sin8-1rw` | the memory of `ble-tx-sin8` with one port: 512 × 16, {cos, sin} per word | `vco.v` and the testbench fix U9; tree `132cca8` | defaults (not a parameter) |
+| `ble-tx-sin2` | the quarter sine table alone, 512 × 8 with one port, read twice per sample; cos 0 in a register | `vco.v` and the testbench fix U9; tree `833ee9d` | defaults (not a parameter) |
+| `ble-tx-opt` | the best of the first transmitter branches together: B2 and the {cos, sin} memory of `ble-tx-sin8`; receiver and debug memory of upstream | the files of `ble-tx-table`, and the `vco.v` of `ble-tx-sin8`; tree `c76351d` | `GAUSS_TABLE=1` |
 | `ble-rx-dm` | B1 alone | `btle_rx.v`, `btle_rx_core.v`, new `gfsk_demodulation_shared.v`, file lists, U9; tree `aa807f8` | defaults (B1 is not a parameter) |
 | `ble-opt` | B1 + B2 + A1 + A2, plus the model-update firmware | 11 RTL files (1 new), the Vivado file list, 2 testbenches; tree `b78aa37` | `ENABLE_IQ_CAPTURE=0 LL_MINIMAL=1 GAUSS_TABLE=1` |
 
@@ -75,6 +81,8 @@ How they relate:
 master  (= upstream-baseline, 8540186)
  ├─ ble-tx-sin4                  from fae132e: quarter-wave VCO tables (5df56e9)
  │   └─ ble-tx-sin8              from 8567f8d: one {cos, sin} memory (94a7bc7), its test
+ │       ├─ ble-tx-sin8-1rw      from 00ad076: the memory with one port (36c1103), U9
+ │       └─ ble-tx-sin2          from 00ad076: the quarter sine table alone, one port (6d86155), U9
  └─ risc-v-ble                   70cab42, 3e3086e: documentation only
      └─ 74bb17c, 69c8b51         area flow; upstream baseline measured
          ├─ ble-tx-table         + B2 alone (dfcc15c), U9 (4c8d66a), its validation
@@ -91,65 +99,64 @@ Every branch then has commits that add this document; the four measurement
 branches (`ble-opt`, `ble-tx-table`, `ble-rx-dm`, `ble-tx-opt`) also carry the
 comparison harness (the same files on the four) and its results.
 
-Two more branches, `ble-tx-sin8-1rw` and `ble-tx-sin2`, were cut from
-`ble-tx-sin8` (`00ad076`) for single-port memories of the VCO tables. Their
-memories were measured first, before any RTL, in
-`docs/02 Design Decisions/VCO_MEMORY_SWEEP.md`; a third branch cut with them,
-`ble-tx-sin128` (128 × 32), was deleted when that sweep measured its memory
-(16 637.9 µm², not the ~7 000 µm² that motivated it). The two do not change the
-RTL of `ble-tx-sin8` yet, so they have no column here; each will be added when
-it is built and measured.
+`ble-tx-sin8-1rw` and `ble-tx-sin2` were cut from `ble-tx-sin8` (`00ad076`) for
+single-port memories of the VCO tables. Their memories were measured first,
+before any RTL, in `docs/02 Design Decisions/VCO_MEMORY_SWEEP.md`; a third
+branch cut with them, `ble-tx-sin128` (128 × 32), was deleted when that sweep
+measured its memory (16 637.9 µm², not the ~7 000 µm² that motivated it). Each
+carries its own report at its root (`TX_SIN8_1RW_COMPARISON.md`,
+`TX_SIN2_COMPARISON.md`) and its validation runs in `results/validation/`.
 
 The two isolated branches measure **exactly the code that `ble-opt`
 combines**. `ble-rx-dm` is the `ble-opt` history itself, stopped at `88f2250`.
 In `ble-tx-table`, `gauss_filter.v`, `gfsk_modulation.v` and `btle_tx.v` are
 byte-identical to `ble-opt`, and `btle_phy.v` and `btle_controller.v` carry only
 the B2 lines of `39f5851`. The transmitter branches are alternatives to B2
-(`reg`, `sram`, `fir2`), independent of it (`sin4` and `sin8`, which touch
-only `vco.v`) or both together (`ble-tx-opt`: every file of `ble-tx-table`, and
-the `vco.v` of `ble-tx-sin8`, byte for byte). None of them is part of
-`ble-opt`.
+(`reg`, `sram`, `fir2`), independent of it (`sin4`, `sin8`, `sin8-1rw` and
+`sin2`, which touch only `vco.v`, the last two also the testbench fix U9) or
+both together (`ble-tx-opt`: every file of `ble-tx-table`, and the `vco.v` of
+`ble-tx-sin8`, byte for byte). None of them is part of `ble-opt`.
 
 A branch is measured in **its configuration: every optional reduction its
 `btle_controller` declares, switched on** (`scripts/branch_config.sh`). The
 parameters default to the original design on every branch, so the Vivado flow
 of the boards sees upstream unless it asks otherwise; B1, the folded FIR, the
-quarter-wave tables and the {cos, sin} memory are the exceptions, because they
-are structural.
+quarter-wave tables, the {cos, sin} memory and the one-port memories are the
+exceptions, because they are structural.
 
 ## 2. The comparison
 
 Differences are against `master`. `risc-v-ble` has the same `verilog/` tree
 as `master`, so its figures are the same by construction: the flows are
 deterministic for identical inputs, `master` reproduces the committed
-`baseline-upstream` area run exactly, and it came out identical in all four runs
+`baseline-upstream` area run exactly, and it came out identical in all five runs
 (§§ 3, 6.1).
 
-| | `master` / `risc-v-ble` | `ble-tx-table` | `ble-tx-table-reg` | `ble-tx-table-sram` | `ble-tx-fir2` | `ble-tx-sin4` | `ble-tx-sin8` | `ble-tx-opt` | `ble-rx-dm` | `ble-opt` |
-|---|---|---|---|---|---|---|---|---|---|---|
-| **Content** | upstream BTLE (+ thesis docs on `risc-v-ble`) | **B2** | B2's tables in flip-flops | B2's tables in SRAM | folded FIR | quarter-wave VCO tables | one {cos, sin} memory for the quarter-wave tables | **B2 + the {cos, sin} memory** | **B1** | **B1 + B2 + A1 + A2** |
-| Configuration measured | defaults | `GAUSS_TABLE=1` | `GAUSS_TABLE=1` | `GAUSS_TABLE=1` | defaults | defaults | defaults | `GAUSS_TABLE=1` | defaults | `ENABLE_IQ_CAPTURE=0`, `LL_MINIMAL=1`, `GAUSS_TABLE=1` |
-| GFSK demodulators in `btle_rx` | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | **1, shared** | **1, shared** |
-| Gaussian filter | FIR, runtime taps | **fixed-tap table** | **table in 2 560 flip-flops**, runtime taps | **table in SRAM**, runtime taps | **folded FIR**, runtime taps | FIR, runtime taps | FIR, runtime taps | **fixed-tap table** | FIR, runtime taps | **fixed-tap table** |
-| VCO COS / SIN tables | 2 × 2 048 × 8 | 2 × 2 048 × 8 | 2 × 2 048 × 8 | 2 × 2 048 × 8 | 2 × 2 048 × 8 | **2 × 512 × 8** | **1 × 512 × 16** ({cos, sin}) | **1 × 512 × 16** ({cos, sin}) | 2 × 2 048 × 8 | 2 × 2 048 × 8 |
-| IQ-capture debug RAM (1 Mbit) | yes | yes | yes | yes | yes | yes | yes | yes | yes | **removed** |
-| Link Layer | full | full | full | full | full | full | full | full | full | **minimal** |
-| **Std cells, `btle_controller`** | 50 295 | 48 227 (−4.1 %) | 58 091 (+15.5 %) | 49 324 (−1.9 %) | 49 620 (−1.3 %) | 50 397 (+0.2 %) | 50 716 (+0.8 %) | 48 559 (−3.5 %) | 23 346 (−53.6 %) | **16 102 (−68.0 %)** |
-| Flip-flops | 4 578 | 4 422 (−3.4 %) | 7 222 (+57.8 %) | 4 667 (+1.9 %) | 4 570 (−0.2 %) | 4 581 (+0.1 %) | 4 656 (+1.7 %) | 4 500 (−1.7 %) | 3 926 (−14.2 %) | 2 673 (−41.6 %) |
-| Cell area (µm²) | 71 706 | 68 667 (−4.2 %) | 91 556 (+27.7 %) | 70 896 (−1.1 %) | 70 652 (−1.5 %) | 71 863 (+0.2 %) | 72 484 (+1.1 %) | 69 412 (−3.2 %) | 38 782 (−45.9 %) | 26 681 (−62.8 %) |
-| **SRAM bits** | 1 136 070 | 1 136 070 | 1 136 070 | 1 138 630 (+0.2 %) | 1 136 070 | 1 111 494 (−2.2 %) | 1 111 494 (−2.2 %) | 1 111 494 (−2.2 %) | 1 136 070 | **87 046 (−92.3 %)** |
-| **Transmitter with its SRAM macros (µm², § 4)** | 167 731 | 164 734 (−1.8 %) | 187 610 (+11.9 %) | 185 280 (+10.5 %) | 166 704 (−0.6 %) | **76 552 (−54.4 %)** | **67 437 (−59.8 %)** | **64 441 (−61.6 %)** | 167 737 (0) | 164 734 (−1.8 %) |
-| Min period at 16 MHz (62.5 ns) | 1.991 ns | 1.905 ns | 1.995 ns | 2.011 ns | 1.877 ns | 2.007 ns | 1.910 ns | 1.917 ns | 1.834 ns | 1.944 ns |
-| Slack / Fmax | +60.509 ns / 502 MHz | +60.595 ns / 525 MHz | +60.505 ns / 501 MHz | +60.489 ns / 497 MHz | +60.623 ns / 533 MHz | +60.493 ns / 498 MHz | +60.590 ns / 524 MHz | +60.583 ns / 522 MHz | +60.666 ns / 545 MHz | +60.556 ns / 514 MHz |
-| Worst path | demodulator multiply, one of 8 copies | Link Layer 64-bit timestamp | demodulator multiply, one of 8 copies | the same | the same | the same | Link Layer 64-bit timestamp | demodulator multiply, one of 8 copies | shared demodulator multiply | Link Layer 64-bit timestamp |
-| **Data + clock switched capacitance, `mixed`** | 1.25 × 10⁹ fF | −3.2 % | +40.8 % | +0.6 % | −0.5 % | +0.1 % | +1.3 % | −1.8 % | −9.5 % | **−30.3 %** |
-| … over the 5 scenarios | — | −2.3 to −5.0 % | +39.9 to +53.0 % (4 scenarios, § 6.1) | +0.6 to +1.8 % (4 scenarios) | −0.1 to −1.1 % | 0 to +0.4 % | +1.2 to +1.8 % | −1.1 to −3.1 % | −5.9 to −12.9 % | −25.5 to −34.7 % |
-| Clock pins (load × toggles) | 8.76 × 10⁸ fF | −3.4 % | +57.3 % | +1.9 % | −0.2 % | +0.1 % | +1.7 % | −1.7 % | −14.1 % | −41.4 % |
-| Non-clock toggles / cycle, `mixed` | 984.3 | 956.4 (−2.8 %) | 988.0 (+0.4 %) | 958.7 (−2.6 %) | 971.0 (−1.4 %) | 987.0 (+0.3 %) | 989.4 (+0.5 %) | 962.7 (−2.2 %) | 1 004.5 (+2.1 %) | 939.7 (−4.5 %) |
-| Nets with activity > 10 %, `mixed` | 839 | 827 | 836 | 824 | 841 | 851 | 845 | 837 | 4 002 (×4.8) | 3 908 (×4.7) |
-| RAM-port toggles, `mixed` | 3 044 741 | unchanged | unchanged | +10.8 % | unchanged | −0.4 % | −0.4 % | −0.4 % | unchanged | −40.0 % |
-| Functions removed | — | runtime Gaussian taps | none; 928 clocks after a tap write before the next transmission | the same | none | COS/SIN tables without quarter-wave symmetry | as `ble-tx-sin4`; table writes limited to w + 1 in any w clocks (§ 8) | runtime Gaussian taps; COS/SIN tables as `ble-tx-sin8` (§ 8) | **none** | runtime taps, IQ capture, UART HCI, 1 PPS, latency counter |
-| Gate-level outputs vs upstream, 5 scenarios | — | identical, every output | identical in 4; `tx` transmits before the rebuild (§ 6.1) | the same | identical, every output | identical, every output | identical, every output | identical, every output | identical, every output | identical, except the 3 removed outputs |
+| | `master` / `risc-v-ble` | `ble-tx-table` | `ble-tx-table-reg` | `ble-tx-table-sram` | `ble-tx-fir2` | `ble-tx-sin4` | `ble-tx-sin8` | `ble-tx-sin8-1rw` | `ble-tx-sin2` | `ble-tx-opt` | `ble-rx-dm` | `ble-opt` |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| **Content** | upstream BTLE (+ thesis docs on `risc-v-ble`) | **B2** | B2's tables in flip-flops | B2's tables in SRAM | folded FIR | quarter-wave VCO tables | one {cos, sin} memory for the quarter-wave tables | the {cos, sin} memory with **one port** | the quarter **sine** table alone, **one port** | **B2 + the {cos, sin} memory** | **B1** | **B1 + B2 + A1 + A2** |
+| Configuration measured | defaults | `GAUSS_TABLE=1` | `GAUSS_TABLE=1` | `GAUSS_TABLE=1` | defaults | defaults | defaults | defaults | defaults | `GAUSS_TABLE=1` | defaults | `ENABLE_IQ_CAPTURE=0`, `LL_MINIMAL=1`, `GAUSS_TABLE=1` |
+| GFSK demodulators in `btle_rx` | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | **1, shared** | **1, shared** |
+| Gaussian filter | FIR, runtime taps | **fixed-tap table** | **table in 2 560 flip-flops**, runtime taps | **table in SRAM**, runtime taps | **folded FIR**, runtime taps | FIR, runtime taps | FIR, runtime taps | FIR, runtime taps | FIR, runtime taps | **fixed-tap table** | FIR, runtime taps | **fixed-tap table** |
+| VCO COS / SIN tables | 2 × 2 048 × 8 | 2 × 2 048 × 8 | 2 × 2 048 × 8 | 2 × 2 048 × 8 | 2 × 2 048 × 8 | **2 × 512 × 8** | **1 × 512 × 16** ({cos, sin}) | **1 × 512 × 16** ({cos, sin}), one port | **1 × 512 × 8** (sine), one port; cos 0 in a register | **1 × 512 × 16** ({cos, sin}) | 2 × 2 048 × 8 | 2 × 2 048 × 8 |
+| IQ-capture debug RAM (1 Mbit) | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes | **removed** |
+| Link Layer | full | full | full | full | full | full | full | full | full | full | full | **minimal** |
+| **Std cells, `btle_controller`** | 50 295 | 48 227 (−4.1 %) | 58 091 (+15.5 %) | 49 324 (−1.9 %) | 49 620 (−1.3 %) | 50 397 (+0.2 %) | 50 716 (+0.8 %) | 50 708 (+0.8 %) | 50 621 (+0.6 %) | 48 559 (−3.5 %) | 23 346 (−53.6 %) | **16 102 (−68.0 %)** |
+| Flip-flops | 4 578 | 4 422 (−3.4 %) | 7 222 (+57.8 %) | 4 667 (+1.9 %) | 4 570 (−0.2 %) | 4 581 (+0.1 %) | 4 656 (+1.7 %) | 4 642 (+1.4 %) | 4 639 (+1.3 %) | 4 500 (−1.7 %) | 3 926 (−14.2 %) | 2 673 (−41.6 %) |
+| Cell area (µm²) | 71 706 | 68 667 (−4.2 %) | 91 556 (+27.7 %) | 70 896 (−1.1 %) | 70 652 (−1.5 %) | 71 863 (+0.2 %) | 72 484 (+1.1 %) | 72 414 (+1.0 %) | 72 278 (+0.8 %) | 69 412 (−3.2 %) | 38 782 (−45.9 %) | 26 681 (−62.8 %) |
+| **SRAM bits** | 1 136 070 | 1 136 070 | 1 136 070 | 1 138 630 (+0.2 %) | 1 136 070 | 1 111 494 (−2.2 %) | 1 111 494 (−2.2 %) | 1 111 494 (−2.2 %) | 1 107 398 (−2.5 %) | 1 111 494 (−2.2 %) | 1 136 070 | **87 046 (−92.3 %)** |
+| **Transmitter with its SRAM macros (µm², § 4)** | 167 731 | 164 734 (−1.8 %) | 187 610 (+11.9 %) | 185 280 (+10.5 %) | 166 704 (−0.6 %) | **76 552 (−54.4 %)** | **67 437 (−59.8 %)** | **46 773 (−72.1 %)** | **40 293 (−76.0 %)** | **64 441 (−61.6 %)** | 167 737 (0) | 164 734 (−1.8 %) |
+| Min period at 16 MHz (62.5 ns) | 1.991 ns | 1.905 ns | 1.995 ns | 2.011 ns | 1.877 ns | 2.007 ns | 1.910 ns | 1.974 ns | 1.938 ns | 1.917 ns | 1.834 ns | 1.944 ns |
+| Slack / Fmax | +60.509 ns / 502 MHz | +60.595 ns / 525 MHz | +60.505 ns / 501 MHz | +60.489 ns / 497 MHz | +60.623 ns / 533 MHz | +60.493 ns / 498 MHz | +60.590 ns / 524 MHz | +60.526 ns / 507 MHz | +60.562 ns / 516 MHz | +60.583 ns / 522 MHz | +60.666 ns / 545 MHz | +60.556 ns / 514 MHz |
+| Worst path | demodulator multiply, one of 8 copies | Link Layer 64-bit timestamp | demodulator multiply, one of 8 copies | the same | the same | the same | Link Layer 64-bit timestamp | demodulator multiply, one of 8 copies | demodulator multiply, one of 8 copies | demodulator multiply, one of 8 copies | shared demodulator multiply | Link Layer 64-bit timestamp |
+| **Data + clock switched capacitance, `mixed`** | 1.25 × 10⁹ fF | −3.2 % | +40.8 % | +0.6 % | −0.5 % | +0.1 % | +1.3 % | +1.3 % | +1.8 % | −1.8 % | −9.5 % | **−30.3 %** |
+| … over the 5 scenarios | — | −2.3 to −5.0 % | +39.9 to +53.0 % (4 scenarios, § 6.1) | +0.6 to +1.8 % (4 scenarios) | −0.1 to −1.1 % | 0 to +0.4 % | +1.2 to +1.8 % | +1.0 to +1.9 % | +0.9 to +3.4 % | −1.1 to −3.1 % | −5.9 to −12.9 % | −25.5 to −34.7 % |
+| Clock pins (load × toggles) | 8.76 × 10⁸ fF | −3.4 % | +57.3 % | +1.9 % | −0.2 % | +0.1 % | +1.7 % | +1.4 % | +1.3 % | −1.7 % | −14.1 % | −41.4 % |
+| Non-clock toggles / cycle, `mixed` | 984.3 | 956.4 (−2.8 %) | 988.0 (+0.4 %) | 958.7 (−2.6 %) | 971.0 (−1.4 %) | 987.0 (+0.3 %) | 989.4 (+0.5 %) | 994.3 (+1.0 %) | 1012.1 (+2.8 %) | 962.7 (−2.2 %) | 1 004.5 (+2.1 %) | 939.7 (−4.5 %) |
+| Nets with activity > 10 %, `mixed` | 839 | 827 | 836 | 824 | 841 | 851 | 845 | 882 | 951 | 837 | 4 002 (×4.8) | 3 908 (×4.7) |
+| RAM-port toggles, `mixed` | 3 044 741 | unchanged | unchanged | +10.8 % | unchanged | −0.4 % | −0.4 % | −0.4 % | +7.0 % | −0.4 % | unchanged | −40.0 % |
+| Functions removed | — | runtime Gaussian taps | none; 928 clocks after a tap write before the next transmission | the same | none | COS/SIN tables without quarter-wave symmetry | as `ble-tx-sin4`; table writes limited to w + 1 in any w clocks (§ 8) | as `ble-tx-sin4`; a table write waits for a clock without a read (§ 8) | as `ble-tx-sin4`, and the COS table apart from cos 0; sine writes wait while transmitting; one sample every two clocks at most (§ 8) | runtime Gaussian taps; COS/SIN tables as `ble-tx-sin8` (§ 8) | **none** | runtime taps, IQ capture, UART HCI, 1 PPS, latency counter |
+| Gate-level outputs vs upstream, 5 scenarios | — | identical, every output | identical in 4; `tx` transmits before the rebuild (§ 6.1) | the same | identical, every output | identical, every output | identical, every output | identical, every output | identical, every output | identical, every output | identical, every output | identical, except the 3 removed outputs |
 
 ## 3. Area
 
@@ -158,10 +165,11 @@ Same flow as every earlier run: Yosys 0.68, `synth -flatten`, `dfflibmap`,
 were synthesised for each branch; results in
 [`results/area/all-branches/`](../../results/area/all-branches/),
 [`results/area/tx-variants/`](../../results/area/tx-variants/),
-[`results/area/tx-sin8/`](../../results/area/tx-sin8/) and
-[`results/area/tx-opt/`](../../results/area/tx-opt/). Every
+[`results/area/tx-sin8/`](../../results/area/tx-sin8/),
+[`results/area/tx-opt/`](../../results/area/tx-opt/) and
+[`results/area/tx-1rw/`](../../results/area/tx-1rw/). Every
 configuration reproduces its earlier area run top for top: `master` =
-`baseline-upstream` (in all four runs), `ble-tx-table` = `tx-table`, `ble-rx-dm` =
+`baseline-upstream` (in all five runs), `ble-tx-table` = `tx-table`, `ble-rx-dm` =
 `shared-demod`, `ble-opt` = `sticker`; the Gaussian filter and the
 transmitter of `ble-tx-table-reg`, `ble-tx-table-sram` and `ble-tx-fir2` =
 run `tx-area` of `GAUSS_FILTER_OPTIONS.md`, and the transmitter of
@@ -171,22 +179,23 @@ as on `ble-tx-sin8` (the same files).
 
 ### 3.1 Per block (std cells, each top synthesised alone)
 
-| Top | `master` / `risc-v-ble` | `ble-tx-table` (B2) | `ble-tx-table-reg` | `ble-tx-table-sram` | `ble-tx-fir2` | `ble-tx-sin4` | `ble-tx-sin8` | `ble-tx-opt` | `ble-rx-dm` (B1) | `ble-opt` (B1 B2 A1 A2) |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| `gauss_filter` | 2 286 | **253** (−88.9 %) | 10 097 (+341.7 %) | 1 362 (−40.4 %) | **1 560** (−31.8 %) | 2 286 | 2 286 | **253** (−88.9 %) | 2 286 | **253** (−88.9 %) |
-| `vco` | 86 | 86 | 86 | 86 | 86 | 179 (+108.1 %) | 438 (+409.3 %) | 438 (+409.3 %) | 86 | 86 |
-| `btle_tx` | 3 409 | **1 392** (−59.2 %) | 11 328 (+232.3 %) | 2 477 (−27.3 %) | **2 707** (−20.6 %) | 3 465 (+1.6 %) | 3 718 (+9.1 %) | **1 696** (−50.2 %) | 3 411 | **1 392** (−59.2 %) |
-| `btle_rx` | 36 864 | 36 884 | 36 954 | 36 954 | 36 980 | 36 884 | 36 928 | 36 931 | **10 068** (−72.7 %) | **10 068** (−72.7 %) |
-| `btle_phy` | 40 339 | 38 083 (−5.6 %) | 48 192 (+19.5 %) | 39 294 (−2.6 %) | 39 655 (−1.7 %) | 40 384 (+0.1 %) | 40 573 (+0.6 %) | 38 600 (−4.3 %) | 13 536 (−66.4 %) | 11 394 (−71.8 %) |
-| `auxiliary_daemon` | 299 | 299 | 299 | 299 | 299 | 299 | 299 | 299 | 299 | **233** (−22.1 %) |
-| `btle_ll` | 9 453 | 9 453 | 9 453 | 9 453 | 9 453 | 9 453 | 9 453 | 9 453 | 9 453 | **4 336** (−54.1 %) |
-| **`btle_controller`** | **50 295** | **48 227** (−4.1 %) | **58 091** (+15.5 %) | **49 324** (−1.9 %) | **49 620** (−1.3 %) | **50 397** (+0.2 %) | **50 716** (+0.8 %) | **48 559** (−3.5 %) | **23 346** (−53.6 %) | **16 102** (−68.0 %) |
+| Top | `master` / `risc-v-ble` | `ble-tx-table` (B2) | `ble-tx-table-reg` | `ble-tx-table-sram` | `ble-tx-fir2` | `ble-tx-sin4` | `ble-tx-sin8` | `ble-tx-sin8-1rw` | `ble-tx-sin2` | `ble-tx-opt` | `ble-rx-dm` (B1) | `ble-opt` (B1 B2 A1 A2) |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| `gauss_filter` | 2 286 | **253** (−88.9 %) | 10 097 (+341.7 %) | 1 362 (−40.4 %) | **1 560** (−31.8 %) | 2 286 | 2 286 | 2 286 | 2 286 | **253** (−88.9 %) | 2 286 | **253** (−88.9 %) |
+| `vco` | 86 | 86 | 86 | 86 | 86 | 179 (+108.1 %) | 438 (+409.3 %) | 426 (+395.3 %) | 408 (+374.4 %) | 438 (+409.3 %) | 86 | 86 |
+| `btle_tx` | 3 409 | **1 392** (−59.2 %) | 11 328 (+232.3 %) | 2 477 (−27.3 %) | **2 707** (−20.6 %) | 3 465 (+1.6 %) | 3 718 (+9.1 %) | 3 729 (+9.4 %) | 3 687 (+8.2 %) | **1 696** (−50.2 %) | 3 411 | **1 392** (−59.2 %) |
+| `btle_rx` | 36 864 | 36 884 | 36 954 | 36 954 | 36 980 | 36 884 | 36 928 | 36 952 | 36 928 | 36 931 | **10 068** (−72.7 %) | **10 068** (−72.7 %) |
+| `btle_phy` | 40 339 | 38 083 (−5.6 %) | 48 192 (+19.5 %) | 39 294 (−2.6 %) | 39 655 (−1.7 %) | 40 384 (+0.1 %) | 40 573 (+0.6 %) | 40 550 (+0.5 %) | 40 593 (+0.6 %) | 38 600 (−4.3 %) | 13 536 (−66.4 %) | 11 394 (−71.8 %) |
+| `auxiliary_daemon` | 299 | 299 | 299 | 299 | 299 | 299 | 299 | 299 | 299 | 299 | 299 | **233** (−22.1 %) |
+| `btle_ll` | 9 453 | 9 453 | 9 453 | 9 453 | 9 453 | 9 453 | 9 453 | 9 453 | 9 453 | 9 453 | 9 453 | **4 336** (−54.1 %) |
+| **`btle_controller`** | **50 295** | **48 227** (−4.1 %) | **58 091** (+15.5 %) | **49 324** (−1.9 %) | **49 620** (−1.3 %) | **50 397** (+0.2 %) | **50 716** (+0.8 %) | **50 708** (+0.8 %) | **50 621** (+0.6 %) | **48 559** (−3.5 %) | **23 346** (−53.6 %) | **16 102** (−68.0 %) |
 
 The cell counts leave out the RAMs. `ble-tx-table-sram` moves 2 560 bits of
-its table into SRAM banks (controller: 1 138 630 SRAM bits), and
-`ble-tx-sin4`, `ble-tx-sin8` and `ble-tx-opt` remove 24 576 bits (1 111 494),
-which `ble-tx-sin8` and `ble-tx-opt` keep in one memory instead of two; § 4
-converts the transmitter's RAMs into area.
+its table into SRAM banks (controller: 1 138 630 SRAM bits);
+`ble-tx-sin4`, `ble-tx-sin8`, `ble-tx-sin8-1rw` and `ble-tx-opt` remove 24 576
+bits (1 111 494), which all but `ble-tx-sin4` keep in one memory instead of
+two, and `ble-tx-sin2` removes 28 672 (1 107 398), keeping only the quarter
+sine table; § 4 converts the transmitter's RAMs into area.
 
 Each change moves only its own block. The small moves elsewhere (`btle_rx`
 36 864 → 36 884 … 36 980 on the transmitter branches, `btle_tx` 3 409 → 3 411
@@ -217,7 +226,12 @@ them can be chosen instead of B2, not added to it. `ble-tx-sin4` changes only
 +93 cells (+124.2 µm²), +56 cells (+104.8 µm²) on the whole transmitter.
 `ble-tx-sin8`, also only `vco.v`, adds another 259 cells and 75 flip-flops to
 the VCO for the shared write port of its table memory (+597.7 µm² on the
-transmitter).
+transmitter). The one-port branches spend less on it: `ble-tx-sin8-1rw` holds a
+waiting write in the table registers instead of a queue and adds a 16-bit
+register for a write to the entry being read (VCO: 426 cells, 79 flip-flops,
+against 438 and 93 on `ble-tx-sin8`), and `ble-tx-sin2` writes one table and
+holds the two entries of a sample (VCO: 408 cells, 76 flip-flops). On the
+transmitter they are 75.2 and 144.7 µm² below `ble-tx-sin8`.
 
 `ble-tx-opt` checks that the two transmitter changes add up, built into one
 design. On `btle_tx`:
@@ -254,25 +268,34 @@ The area flow counts RAMs in bits only, so the cell area of § 3 leaves out
 most of the transmitter. `btle_tx` has three RAMs, and each is written by one
 side while the other reads it:
 
-| RAM | RTL | Every other branch | `ble-tx-sin4` | `ble-tx-sin8`, `ble-tx-opt` | Written | Read |
-|---|---|---|---|---|---|---|
-| COS table | `vco.v`, `sdpram_one_clk` | 2 048 × 8 | 512 × 8 | one 512 × 16, {cos, sin} per word, with a write mask of one bit per table | from the table registers, on every clock (`write_enable` tied to 1); on `ble-tx-sin8` and `ble-tx-opt`, when a register changes, through one shared port | at the VCO phase, on every clock |
-| SIN table | `vco.v`, `sdpram_one_clk` | 2 048 × 8 | 512 × 8 | (the same word) | the same | the same |
-| PDU buffer | `btle_tx.v`, `sdpram_two_clk` | 512 × 8 | 512 × 8 | 512 × 8 | by the processor side, on `clkb`, every clock | by the packet path, on `clk` |
+| RAM | RTL | Every other branch | `ble-tx-sin4` | `ble-tx-sin8`, `ble-tx-opt` | `ble-tx-sin8-1rw` | `ble-tx-sin2` | Written | Read |
+|---|---|---|---|---|---|---|---|---|
+| COS table | `vco.v`, `sdpram_one_clk` | 2 048 × 8 | 512 × 8 | one 512 × 16, {cos, sin} per word, with a write mask of one bit per table | the same 512 × 16, with **one port** | none: cos x = sin(90° − x), cos 0 in an 8-bit register | from the table registers, on every clock (`write_enable` tied to 1); from `ble-tx-sin8` on, when a register changes, through one shared port; on the one-port branches, in a clock without a read | at the VCO phase, on every clock; on the one-port branches, in every clock without a write (`ble-tx-sin2`: entry b of the next phase in the clock of a sample, entry a otherwise) |
+| SIN table | `vco.v`, `sdpram_one_clk` | 2 048 × 8 | 512 × 8 | (the same word) | (the same word) | one 512 × 8, **one port** | the same | the same |
+| PDU buffer | `btle_tx.v`, `sdpram_two_clk` | 512 × 8 | 512 × 8 | 512 × 8 | 512 × 8 | 512 × 8 | by the processor side, on `clkb`, every clock | by the packet path, on `clk` |
 
 `ble-tx-table-sram` adds the three Gaussian-table banks, 2 560 bits,
 18 437.4 µm² (`GAUSS_FILTER_OPTIONS.md` § 3). The receiver is not converted.
 In the RTL of `ble-tx-sin8`, and of `ble-tx-opt`, which has the same `vco.v`,
 the 512 × 16 memory is written as its two halves, two `sdpram_one_clk` that
 share the write and read addresses (the mask bits are their write enables); it
-is one macro.
+is one macro. `ble-tx-sin8-1rw` keeps that model, and `ble-tx-sin2` one
+`sdpram_one_clk`, but they never write and read it in the same clock: a
+one-port macro takes the write address in a clock with a write, in which it
+keeps its output, and the read address in the others. The model's read port
+also reads in a clock with a write; the VCO keeps it on an entry that no write
+has changed, or does not show it (both reports explain why), and their tests
+check, on every clock, that the VCO outputs are the same with a one-port macro
+model.
 
 ### 4.1 The macros
 
 OpenRAM 1.2.48 in FreePDK45, the process behind the Nangate45 cells, default
 layout, in two port sets (`scripts/area/run_openram.sh`, runs
 [`openram-tx`](../../results/area/openram-tx/summary.md) and
-[`openram-sin8`](../../results/area/openram-sin8/summary.md)):
+[`openram-sin8`](../../results/area/openram-sin8/summary.md); run
+[`openram-1rw-sweep`](../../results/area/openram-1rw-sweep/summary.md) gives the
+two 1RW macros of the one-port branches the same areas):
 
 | Macro | Ports | Words × bits | Size (µm) | Area (µm²) | µm² per bit |
 |---|---|---|---|---:|---:|
@@ -283,12 +306,15 @@ layout, in two port sets (`scripts/area/run_openram.sh`, runs
 | `sram_1rw_8x512` | 1 read/write | 512 × 8 | 85.285 × 125.507 | 10 703.9 | 2.61 |
 | `sram_1rw_16x512_m8` | 1 read/write with an 8-bit write mask | 512 × 16 | 135.157 × 126.627 | 17 114.7 | 2.09 |
 
-- **1RW1R is the macro the RTL needs**, and the one used below: every RAM of
-  the transmitter is a simple dual-port model whose write port and read port
-  work in the same cycle, and the PDU buffer has a clock on each side.
-- **1RW is a lower bound.** One port would do only if the RTL wrote the tables
-  and the buffer while the transmitter is idle and gated the writes, which no
-  branch does.
+- **1RW1R is the macro the RTL needs**, and the one used below, except for the
+  VCO memory of `ble-tx-sin8-1rw` and `ble-tx-sin2`: every other RAM of the
+  transmitter is a simple dual-port model whose write port and read port work
+  in the same cycle, and the PDU buffer has a clock on each side.
+- **The two one-port branches need 1RW for the VCO memory**, because their RTL
+  never writes it in a clock in which it reads. Their PDU buffer stays 1RW1R.
+- **1RW for every RAM is a lower bound.** One port for the other memories
+  would need their RTL to schedule the port the same way, which no branch
+  does.
 - **A quarter of the bits is a third of the area.** The periphery (decoders,
   sense amplifiers, write drivers, control, supply rings) does not shrink with
   the array: 512 × 8 costs 34 % of 2 048 × 8, in both port sets.
@@ -299,12 +325,16 @@ layout, in two port sets (`scripts/area/run_openram.sh`, runs
 
 ### 4.2 Total area of the transmitter
 
-`btle_tx` std-cell area (§ 3.1) plus its macros. The estimated row is not
-built: it adds the measured change of `ble-tx-sin8` (+702.5 µm² of logic, one
-512 × 16 table memory) to `ble-tx-fir2`. The same estimate made for
-`ble-tx-table` gave 64 440.0 µm²; built, as `ble-tx-opt`, it measures 64 440.8.
+`btle_tx` std-cell area (§ 3.1) plus its macros. **Total** counts the macros
+the RTL needs: 1RW1R for every RAM, except the VCO memory of the two one-port
+branches, which is 1RW (17 114.7 and 10 703.9 µm²). **Total, all 1RW** is the
+lower bound with a one-port macro for every RAM. The estimated rows are not
+built: they add the measured change of `ble-tx-sin8`, `ble-tx-sin8-1rw` or
+`ble-tx-sin2` (its logic and its memory) to `ble-tx-fir2` or `ble-tx-table`.
+The same estimate made for `ble-tx-table` with the memory of `ble-tx-sin8` gave
+64 440.0 µm²; built, as `ble-tx-opt`, it measures 64 440.8.
 
-| Branch | `btle_tx` cells (µm²) | Gaussian-table macros | COS + SIN macros | PDU buffer | **Total, 1RW1R (µm²)** | vs `master` | Total, 1RW (µm²) | vs `master` |
+| Branch | `btle_tx` cells (µm²) | Gaussian-table macros | COS + SIN macros | PDU buffer | **Total (µm²)** | vs `master` | Total, all 1RW (µm²) | vs `master` |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
 | `master` / `risc-v-ble` | 5 322.9 | — | 138 700.5 | 23 708.0 | **167 731.4** | — | 79 667.6 | — |
 | `ble-tx-table` | 2 325.6 | — | 138 700.5 | 23 708.0 | **164 734.1** | −1.8 % | 76 670.3 | −3.8 % |
@@ -313,10 +343,14 @@ built: it adds the measured change of `ble-tx-sin8` (+702.5 µm² of logic, one
 | `ble-tx-fir2` | 4 295.9 | — | 138 700.5 | 23 708.0 | **166 704.4** | −0.6 % | 78 640.6 | −1.3 % |
 | **`ble-tx-sin4`** | 5 427.7 | — | **47 415.9** | 23 708.0 | **76 551.6** | **−54.4 %** | 37 539.4 | **−52.9 %** |
 | **`ble-tx-sin8`** | 6 025.4 | — | **37 703.9** | 23 708.0 | **67 437.3** | **−59.8 %** | 33 844.0 | **−57.5 %** |
+| **`ble-tx-sin8-1rw`** | 5 950.2 | — | **17 114.7** (1RW) | 23 708.0 | **46 772.8** | **−72.1 %** | 33 768.8 | **−57.6 %** |
+| **`ble-tx-sin2`** | 5 880.7 | — | **10 703.9** (1RW) | 23 708.0 | **40 292.6** | **−76.0 %** | 27 288.5 | **−65.7 %** |
 | **`ble-tx-opt`** | **3 028.9** | — | **37 703.9** | 23 708.0 | **64 440.8** | **−61.6 %** | 30 847.5 | **−61.3 %** |
 | `ble-rx-dm` | 5 328.2 | — | 138 700.5 | 23 708.0 | **167 736.7** | 0 | 79 672.9 | 0 |
 | `ble-opt` | 2 325.6 | — | 138 700.5 | 23 708.0 | **164 734.1** | −1.8 % | 76 670.3 | −3.8 % |
 | *estimate: `ble-tx-sin8` + `ble-tx-fir2`* | *4 998.4* | — | *37 703.9* | *23 708.0* | *66 410.3* | *−60.4 %* | *32 817.0* | *−58.8 %* |
+| *estimate: `ble-tx-sin2` + `ble-tx-table` (B2)* | *2 883.4* | — | *10 703.9* | *23 708.0* | *37 295.3* | *−77.8 %* | *24 291.2* | *−69.5 %* |
+| *estimate: `ble-tx-sin2` + `ble-tx-fir2`* | *4 853.7* | — | *10 703.9* | *23 708.0* | *39 265.6* | *−76.6 %* | *26 261.5* | *−67.0 %* |
 
 ### 4.3 What the total says
 
@@ -336,20 +370,35 @@ built: it adds the measured change of `ble-tx-sin8` (+702.5 µm² of logic, one
    (the shared write port), and the transmitter goes to 67 437 µm², −59.8 %
    against `master` (−57.5 % with 1RW). Its price is a limit on how fast the
    two tables can be written together (§ 8).
-4. **The Gaussian-filter options hardly move the real total.** B2 saves
+4. **One port cuts the table memory by more than half again.** The
+   transmitter takes one sample every two clocks, so one port has time for the
+   reads and the writes (`VCO_MEMORY_SWEEP.md` § 1). `ble-tx-sin8-1rw` keeps
+   the 512 × 16 {cos, sin} memory with one port: 37 703.9 → 17 114.7 µm², with
+   75.2 µm² less logic than `ble-tx-sin8`, and the transmitter goes to
+   46 773 µm², −72.1 % against `master` and −30.6 % against `ble-tx-sin8`.
+   `ble-tx-sin2` keeps only the quarter sine table, 512 × 8 with one port
+   (10 703.9 µm²), read twice per sample, with 144.7 µm² less logic than
+   `ble-tx-sin8`: 40 293 µm², −76.0 % against `master`, the smallest
+   transmitter built. Their price is again function, not area: table writes
+   wait for clocks without a read, and on `ble-tx-sin2` the cosine table is
+   derived from the sine table (§ 8). With these memories the PDU buffer,
+   untouched on every branch, becomes the largest part of the transmitter:
+   51 % of it on `ble-tx-sin8-1rw`, 59 % on `ble-tx-sin2`.
+5. **The Gaussian-filter options hardly move the real total.** B2 saves
    1.8 % of the transmitter (3.8 % with 1RW), the folded FIR 0.6 %, and the
    rewritable tables add 10 to 12 % (22 to 25 % with 1RW).
    `GAUSS_FILTER_OPTIONS.md` ranks them right within the filter; this puts the
    filter in scale.
-5. **The two kinds of change add, and `ble-tx-opt` is the smallest
-   transmitter.** `ble-tx-sin4` and `ble-tx-sin8` touch only `vco.v`, the
+6. **The two kinds of change add.** The VCO branches touch only `vco.v`, the
    Gaussian branches only the filter. `ble-tx-opt` builds B2 with the memory
    of `ble-tx-sin8`: 64 440.8 µm², −61.6 % against `master` (−61.3 % with
    1RW), 0.8 µm² from the estimate made from the two branches apart. Its
    logic, 3 028.9 µm², is less than the upstream Gaussian filter alone
    (3 366.0), and the memories are 95 % of it. With the folded FIR instead of
    B2, which keeps the taps programmable, the estimate is 66 410 µm²
-   (−60.4 %).
+   (−60.4 %). With the memory of `ble-tx-sin2`, B2 is estimated at
+   37 295 µm² (−77.8 %) and the folded FIR at 39 266 µm² (−76.6 %); neither
+   combination is built.
 
 ## 5. Static timing
 
@@ -359,20 +408,21 @@ legalised (maximum 16) and gates sized, ABC `stime`, and the worst liberty
 clock-to-Q and setup added. Results in
 [`results/timing/all-branches/`](../../results/timing/all-branches/),
 [`results/timing/tx-variants/`](../../results/timing/tx-variants/),
-[`results/timing/tx-sin8/`](../../results/timing/tx-sin8/) and
-[`results/timing/tx-opt/`](../../results/timing/tx-opt/).
+[`results/timing/tx-sin8/`](../../results/timing/tx-sin8/),
+[`results/timing/tx-opt/`](../../results/timing/tx-opt/) and
+[`results/timing/tx-1rw/`](../../results/timing/tx-1rw/).
 Target: the 16 MHz baseband clock, 62.5 ns.
 
-| | `master` / `risc-v-ble` | `ble-tx-table` | `ble-tx-table-reg` | `ble-tx-table-sram` | `ble-tx-fir2` | `ble-tx-sin4` | `ble-tx-sin8` | `ble-tx-opt` | `ble-rx-dm` | `ble-opt` |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| Unbuffered path | 6.073 ns | 6.546 ns | 6.479 ns | 7.115 ns | 6.408 ns | 7.081 ns | 6.251 ns | 6.689 ns | 3.913 ns | 4.044 ns |
-| Logic path (buffered, sized) | 1.631 ns | 1.546 ns | 1.636 ns | 1.652 ns | 1.517 ns | 1.647 ns | 1.550 ns | 1.558 ns | 1.475 ns | 1.597 ns |
-| Register overhead | 0.359 ns | 0.359 ns | 0.359 ns | 0.359 ns | 0.359 ns | 0.359 ns | 0.359 ns | 0.359 ns | 0.359 ns | 0.347 ns |
-| **Min period** | **1.991 ns** | **1.905 ns** (−4.3 %) | **1.995 ns** (+0.2 %) | **2.011 ns** (+1.0 %) | **1.877 ns** (−5.7 %) | **2.007 ns** (+0.8 %) | **1.910 ns** (−4.1 %) | **1.917 ns** (−3.7 %) | **1.834 ns** (−7.9 %) | **1.944 ns** (−2.4 %) |
-| Slack at 62.5 ns | +60.509 ns | +60.595 ns | +60.505 ns | +60.489 ns | +60.623 ns | +60.493 ns | +60.590 ns | +60.583 ns | +60.666 ns | +60.556 ns |
-| Fmax | 502.3 MHz | 524.9 MHz | 501.2 MHz | 497.2 MHz | 532.8 MHz | 498.3 MHz | 523.6 MHz | 521.6 MHz | 545.3 MHz | 514.3 MHz |
-| Flip-flops / gates timed | 4 578 / 45 716 | 4 422 / 43 804 | 7 222 / 50 868 | 4 667 / 44 656 | 4 570 / 45 049 | 4 581 / 45 815 | 4 656 / 46 059 | 4 500 / 44 058 | 3 926 / 19 419 | 2 673 / 13 428 |
-| Worst path | demodulator multiply, copy 2 | Link Layer `timestamp` | demodulator multiply, copy 2 | demodulator multiply, copy 6 | demodulator multiply, copy 3 | demodulator multiply, copy 6 | Link Layer `timestamp` | demodulator multiply, copy 0 | shared demodulator multiply | Link Layer `timestamp` |
+| | `master` / `risc-v-ble` | `ble-tx-table` | `ble-tx-table-reg` | `ble-tx-table-sram` | `ble-tx-fir2` | `ble-tx-sin4` | `ble-tx-sin8` | `ble-tx-sin8-1rw` | `ble-tx-sin2` | `ble-tx-opt` | `ble-rx-dm` | `ble-opt` |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| Unbuffered path | 6.073 ns | 6.546 ns | 6.479 ns | 7.115 ns | 6.408 ns | 7.081 ns | 6.251 ns | 6.120 ns | 6.195 ns | 6.689 ns | 3.913 ns | 4.044 ns |
+| Logic path (buffered, sized) | 1.631 ns | 1.546 ns | 1.636 ns | 1.652 ns | 1.517 ns | 1.647 ns | 1.550 ns | 1.614 ns | 1.578 ns | 1.558 ns | 1.475 ns | 1.597 ns |
+| Register overhead | 0.359 ns | 0.359 ns | 0.359 ns | 0.359 ns | 0.359 ns | 0.359 ns | 0.359 ns | 0.359 ns | 0.359 ns | 0.359 ns | 0.359 ns | 0.347 ns |
+| **Min period** | **1.991 ns** | **1.905 ns** (−4.3 %) | **1.995 ns** (+0.2 %) | **2.011 ns** (+1.0 %) | **1.877 ns** (−5.7 %) | **2.007 ns** (+0.8 %) | **1.910 ns** (−4.1 %) | **1.974 ns** (−0.9 %) | **1.938 ns** (−2.7 %) | **1.917 ns** (−3.7 %) | **1.834 ns** (−7.9 %) | **1.944 ns** (−2.4 %) |
+| Slack at 62.5 ns | +60.509 ns | +60.595 ns | +60.505 ns | +60.489 ns | +60.623 ns | +60.493 ns | +60.590 ns | +60.526 ns | +60.562 ns | +60.583 ns | +60.666 ns | +60.556 ns |
+| Fmax | 502.3 MHz | 524.9 MHz | 501.2 MHz | 497.2 MHz | 532.8 MHz | 498.3 MHz | 523.6 MHz | 506.6 MHz | 516.0 MHz | 521.6 MHz | 545.3 MHz | 514.3 MHz |
+| Flip-flops / gates timed | 4 578 / 45 716 | 4 422 / 43 804 | 7 222 / 50 868 | 4 667 / 44 656 | 4 570 / 45 049 | 4 581 / 45 815 | 4 656 / 46 059 | 4 642 / 46 065 | 4 639 / 45 981 | 4 500 / 44 058 | 3 926 / 19 419 | 2 673 / 13 428 |
+| Worst path | demodulator multiply, copy 2 | Link Layer `timestamp` | demodulator multiply, copy 2 | demodulator multiply, copy 6 | demodulator multiply, copy 3 | demodulator multiply, copy 6 | Link Layer `timestamp` | demodulator multiply, copy 6 | demodulator multiply, copy 0 | demodulator multiply, copy 0 | shared demodulator multiply | Link Layer `timestamp` |
 
 The worst paths in full:
 
@@ -394,9 +444,12 @@ What can be said, and what cannot:
    in time, not in logic depth. None of the transmitter branches puts the
    worst path in the transmitter: it stays the multiply of one of the 8
    upstream demodulators or, on `ble-tx-sin8`, the Link Layer's `timestamp`
-   counter, as on `ble-tx-table`.
+   counter, as on `ble-tx-table`. The read ahead of `ble-tx-sin2` puts the
+   phase adder and a negation in front of the memory address, and the
+   one-port memories have their data 0.29 to 0.32 ns after the falling clock
+   edge (`VCO_MEMORY_SWEEP.md` § 3): far inside the clock.
 3. **Differences below about 0.15 ns are flow noise, not design effects.** The
-   worst path of five transmitter branches is the same upstream RTL, the
+   worst path of seven transmitter branches is the same upstream RTL, the
    demodulator multiply, and it times anywhere from 1.877 ns (`ble-tx-fir2`)
    to 2.011 ns (`ble-tx-table-sram`), against 1.991 ns on `master`. Likewise
    the `timestamp` counter of `btle_ll` is the same RTL on `master`,
@@ -415,8 +468,9 @@ What can be said, and what cannot:
 `ble-opt`, once per branch. Results in
 [`results/power/all-branches/`](../../results/power/all-branches/),
 [`results/power/tx-variants/`](../../results/power/tx-variants/),
-[`results/power/tx-sin8/`](../../results/power/tx-sin8/) and
-[`results/power/tx-opt/`](../../results/power/tx-opt/).
+[`results/power/tx-sin8/`](../../results/power/tx-sin8/),
+[`results/power/tx-opt/`](../../results/power/tx-opt/) and
+[`results/power/tx-1rw/`](../../results/power/tx-1rw/).
 
 - Both **gate-level** netlists, upstream and the branch, run side by side in one
   Verilator simulation per scenario, and every output is compared on every
@@ -439,8 +493,8 @@ What can be said, and what cannot:
   Python model, 20 dB, 20 ppm). The generator's channel noise is not seeded;
   a first attempt of run `all-branches` generated vectors per branch, so each
   branch saw a different packet noise, and it was stopped and repeated with
-  one set. Runs `tx-variants`, `tx-sin8` and `tx-opt` reused that set (the same
-  `vectors.sha256`).
+  one set. Runs `tx-variants`, `tx-sin8`, `tx-opt` and `tx-1rw` reused that set
+  (the same `vectors.sha256`).
 - Measures, as on `ble-opt`: toggles per net where it is driven; nets with a
   toggle rate > 0.1; and the **switched-capacitance proxy** Σ toggles × liberty
   input-pin capacitance, split into data pins and flip-flop `CK` pins. No
@@ -453,8 +507,9 @@ same capacitance sums to 10⁻¹⁴. `master` against upstream shows no
 difference at all, in any run (the consistency checks at the end of
 [`all-branches/summary.md`](../../results/compare/all-branches/summary.md),
 [`tx-variants/summary.md`](../../results/compare/tx-variants/summary.md),
-[`tx-sin8/summary.md`](../../results/compare/tx-sin8/summary.md) and
-[`tx-opt/summary.md`](../../results/compare/tx-opt/summary.md)). The
+[`tx-sin8/summary.md`](../../results/compare/tx-sin8/summary.md),
+[`tx-opt/summary.md`](../../results/compare/tx-opt/summary.md) and
+[`tx-1rw/summary.md`](../../results/compare/tx-1rw/summary.md)). The
 scenarios that do not use the packet vectors (`tx`, `idle`, `idle0`) also
 reproduce the earlier `ble-opt` run `sticker-vs-upstream` exactly, every count
 of every block, upstream and reduced alike; `rx` and `mixed` cannot, because
@@ -462,28 +517,28 @@ that run's vectors were not kept.
 
 ### 6.2 Data + clock switched capacitance, every scenario
 
-| Scenario | `master` / `risc-v-ble` | `ble-tx-table` (B2) | `ble-tx-table-reg` | `ble-tx-table-sram` | `ble-tx-fir2` | `ble-tx-sin4` | `ble-tx-sin8` | `ble-tx-opt` | `ble-rx-dm` (B1) | `ble-opt` (B1 B2 A1 A2) |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| `rx` | 1.23 × 10⁹ fF | −2.4 % | +40.8 % | +1.4 % | −0.1 % | 0 | +1.2 % | −1.2 % | −12.9 % | **−33.2 %** |
-| `tx` | 1.00 × 10⁹ fF | −5.0 % | — | — | −1.1 % | +0.4 % | +1.8 % | −3.1 % | −8.0 % | **−34.7 %** |
-| `mixed` | 1.25 × 10⁹ fF | −3.2 % | +40.8 % | +0.6 % | −0.5 % | +0.1 % | +1.3 % | −1.8 % | −9.5 % | **−30.3 %** |
-| `idle` | 1.26 × 10⁹ fF | −2.3 % | +39.9 % | +1.4 % | −0.1 % | 0 | +1.2 % | −1.1 % | −5.9 % | **−25.5 %** |
-| `idle0` | 0.95 × 10⁹ fF | −3.1 % | +53.0 % | +1.8 % | −0.1 % | 0 | +1.5 % | −1.5 % | −8.5 % | **−34.4 %** |
+| Scenario | `master` / `risc-v-ble` | `ble-tx-table` (B2) | `ble-tx-table-reg` | `ble-tx-table-sram` | `ble-tx-fir2` | `ble-tx-sin4` | `ble-tx-sin8` | `ble-tx-sin8-1rw` | `ble-tx-sin2` | `ble-tx-opt` | `ble-rx-dm` (B1) | `ble-opt` (B1 B2 A1 A2) |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| `rx` | 1.23 × 10⁹ fF | −2.4 % | +40.8 % | +1.4 % | −0.1 % | 0 | +1.2 % | +1.0 % | +0.9 % | −1.2 % | −12.9 % | **−33.2 %** |
+| `tx` | 1.00 × 10⁹ fF | −5.0 % | — | — | −1.1 % | +0.4 % | +1.8 % | +1.9 % | +3.4 % | −3.1 % | −8.0 % | **−34.7 %** |
+| `mixed` | 1.25 × 10⁹ fF | −3.2 % | +40.8 % | +0.6 % | −0.5 % | +0.1 % | +1.3 % | +1.3 % | +1.8 % | −1.8 % | −9.5 % | **−30.3 %** |
+| `idle` | 1.26 × 10⁹ fF | −2.3 % | +39.9 % | +1.4 % | −0.1 % | 0 | +1.2 % | +1.0 % | +0.9 % | −1.1 % | −5.9 % | **−25.5 %** |
+| `idle0` | 0.95 × 10⁹ fF | −3.1 % | +53.0 % | +1.8 % | −0.1 % | 0 | +1.5 % | +1.3 % | +1.2 % | −1.5 % | −8.5 % | **−34.4 %** |
 
 ### 6.3 The measures of `SWITCHING_ACTIVITY.md`, scenario `mixed`, every branch
 
-| Measure | `master` / `risc-v-ble` | `ble-tx-table` | `ble-tx-table-reg` | `ble-tx-table-sram` | `ble-tx-fir2` | `ble-tx-sin4` | `ble-tx-sin8` | `ble-tx-opt` | `ble-rx-dm` | `ble-opt` |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| Toggles / cycle, non-clock nets | 984.3 | 956.4 (−2.8 %) | 988.0 (+0.4 %) | 958.7 (−2.6 %) | 971.0 (−1.4 %) | 987.0 (+0.3 %) | 989.4 (+0.5 %) | 962.7 (−2.2 %) | 1 004.5 (+2.1 %) | 939.7 (−4.5 %) |
-| Nets with activity > 10 % | 839 | 827 | 836 | 824 | 841 | 851 | 845 | 837 | 4 002 (×4.8) | 3 908 (×4.7) |
-| `btle_rx` toggles / cycle | 791.1 | 790.6 | 788.2 | 788.9 | 791.4 | 788.8 | 791.0 | 791.5 | 811.5 (+2.6 %) | 808.8 (+2.2 %) |
-| `btle_ll` toggles / cycle | 41.5 | 40.6 | 41.6 | 41.9 | 42.7 | 41.1 | 42.2 | 41.5 | 41.7 | 11.0 (**−73.4 %**) |
-| Gaussian filter toggles / cycle | 39.1 | 12.6 (**−67.8 %**) | 45.6 (+16.4 %) | 15.4 (**−60.8 %**) | 24.2 (**−38.1 %**) | 39.1 | 39.1 | 12.3 (**−68.6 %**) | 39.1 | 12.3 (**−68.6 %**) |
-| Rest of `btle_tx` (VCO, packet path) toggles / cycle | 37.4 | 37.4 | 37.4 | 37.4 | 37.4 | 42.8 (+14.4 %) | 42.0 (+12.1 %) | 42.3 (+12.9 %) | 36.9 | 37.7 |
-| Clock network (CK-pin load × toggles) | 8.76 × 10⁸ | −3.4 % | **+57.3 %** | +1.9 % | −0.2 % | +0.1 % | +1.7 % | −1.7 % | −14.1 % | **−41.4 %** |
-| Memory: toggles on RAM ports | 3 044 741 | unchanged | unchanged | +10.8 % | unchanged | −0.4 % | −0.4 % | −0.4 % | unchanged | **−40.0 %** |
-| Data load × toggles | 3.73 × 10⁸ | −2.8 % | +1.8 % | −2.5 % | −1.2 % | +0.2 % | +0.4 % | −2.1 % | +1.5 % | −4.3 % |
-| **Data + clock proxy** | 1.25 × 10⁹ | **−3.2 %** | **+40.8 %** | **+0.6 %** | **−0.5 %** | **+0.1 %** | **+1.3 %** | **−1.8 %** | **−9.5 %** | **−30.3 %** |
+| Measure | `master` / `risc-v-ble` | `ble-tx-table` | `ble-tx-table-reg` | `ble-tx-table-sram` | `ble-tx-fir2` | `ble-tx-sin4` | `ble-tx-sin8` | `ble-tx-sin8-1rw` | `ble-tx-sin2` | `ble-tx-opt` | `ble-rx-dm` | `ble-opt` |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| Toggles / cycle, non-clock nets | 984.3 | 956.4 (−2.8 %) | 988.0 (+0.4 %) | 958.7 (−2.6 %) | 971.0 (−1.4 %) | 987.0 (+0.3 %) | 989.4 (+0.5 %) | 994.3 (+1.0 %) | 1012.1 (+2.8 %) | 962.7 (−2.2 %) | 1 004.5 (+2.1 %) | 939.7 (−4.5 %) |
+| Nets with activity > 10 % | 839 | 827 | 836 | 824 | 841 | 851 | 845 | 882 | 951 | 837 | 4 002 (×4.8) | 3 908 (×4.7) |
+| `btle_rx` toggles / cycle | 791.1 | 790.6 | 788.2 | 788.9 | 791.4 | 788.8 | 791.0 | 791.5 | 792.1 | 791.5 | 811.5 (+2.6 %) | 808.8 (+2.2 %) |
+| `btle_ll` toggles / cycle | 41.5 | 40.6 | 41.6 | 41.9 | 42.7 | 41.1 | 42.2 | 41.7 | 41.5 | 41.5 | 41.7 | 11.0 (**−73.4 %**) |
+| Gaussian filter toggles / cycle | 39.1 | 12.6 (**−67.8 %**) | 45.6 (+16.4 %) | 15.4 (**−60.8 %**) | 24.2 (**−38.1 %**) | 39.1 | 39.1 | 39.1 | 39.1 | 12.3 (**−68.6 %**) | 39.1 | 12.3 (**−68.6 %**) |
+| Rest of `btle_tx` (VCO, packet path) toggles / cycle | 37.4 | 37.4 | 37.4 | 37.4 | 37.4 | 42.8 (+14.4 %) | 42.0 (+12.1 %) | 46.8 (+24.9 %) | 64.3 (+71.9 %) | 42.3 (+12.9 %) | 36.9 | 37.7 |
+| Clock network (CK-pin load × toggles) | 8.76 × 10⁸ | −3.4 % | **+57.3 %** | +1.9 % | −0.2 % | +0.1 % | +1.7 % | +1.4 % | +1.3 % | −1.7 % | −14.1 % | **−41.4 %** |
+| Memory: toggles on RAM ports | 3 044 741 | unchanged | unchanged | +10.8 % | unchanged | −0.4 % | −0.4 % | −0.4 % | +7.0 % | −0.4 % | unchanged | **−40.0 %** |
+| Data load × toggles | 3.73 × 10⁸ | −2.8 % | +1.8 % | −2.5 % | −1.2 % | +0.2 % | +0.4 % | +1.0 % | +2.9 % | −2.1 % | +1.5 % | −4.3 % |
+| **Data + clock proxy** | 1.25 × 10⁹ | **−3.2 %** | **+40.8 %** | **+0.6 %** | **−0.5 %** | **+0.1 %** | **+1.3 %** | **+1.3 %** | **+1.8 %** | **−1.8 %** | **−9.5 %** | **−30.3 %** |
 
 The full tables (every scenario, every block, the most active nets) are in
 [`all-branches/summary.md`](../../results/compare/all-branches/summary.md),
@@ -510,8 +565,9 @@ filter's proxy moves (−79.8 % in `mixed`), on `ble-rx-dm` only `btle_rx`'s
 behave the same way: only their own block moves the proxy by more than 0.1
 point, the Gaussian filter on `ble-tx-table-reg` (+40 to +53 points),
 `ble-tx-table-sram` (+0.6 to +1.8) and `ble-tx-fir2` (−0.1 to −1.1), and the
-rest of `btle_tx`, which holds the VCO, on `ble-tx-sin4` (at most +0.4) and
-`ble-tx-sin8` (+1.2 to +1.9). On `ble-tx-opt` both move, and they add up:
+rest of `btle_tx`, which holds the VCO, on `ble-tx-sin4` (at most +0.4),
+`ble-tx-sin8` (+1.2 to +1.9), `ble-tx-sin8-1rw` (+1.0 to +1.9) and `ble-tx-sin2`
+(+0.9 to +3.4). On `ble-tx-opt` both move, and they add up:
 
 | Scenario | B2 (`ble-tx-table`) | {cos, sin} memory (`ble-tx-sin8`) | Sum | `ble-tx-opt` | Residual |
 |---|---:|---:|---:|---:|---:|
@@ -555,6 +611,22 @@ rest of `btle_tx`, which holds the VCO, on `ble-tx-sin4` (at most +0.4) and
   (68.0 → 77.1 toggles per cycle in `tx`), and so do the RAM ports. In
   OpenRAM's model the one 512 × 16 dual-port macro leaks 9.0 µW, against
   2 × 4.9 µW for the two 512 × 8 of `ble-tx-sin4`.
+- **One port for the {cos, sin} memory (`ble-tx-sin8-1rw`).** The queues of
+  the write port give way to a 16-bit held entry, 14 flip-flops fewer than
+  `ble-tx-sin8`, so the clock-pin load rises 1.4 % instead of 1.7 %. While
+  transmitting the rest of the transmitter switches somewhat more (68.0 →
+  86.7 toggles per cycle in `tx`, against 77.1), and the proxy rises 1.0 to
+  1.9 %, as on `ble-tx-sin8`. In OpenRAM's model the one-port macro leaks
+  8.6 µW and takes 1.30 pJ per access (`VCO_MEMORY_SWEEP.md` § 2.2).
+- **The sine table alone (`ble-tx-sin2`).** Two reads per sample make the
+  memory's read address alternate between entries b and a on every clock while
+  transmitting: the RAM-port toggles rise 15.7 % in `tx` (7.0 % in `mixed`) and
+  the rest of the transmitter switches 80 % more (68.0 → 122.2 toggles per
+  cycle), so the proxy rises 3.4 % in `tx`. Without traffic only the VCO's
+  flip-flops count, and the proxy rises 0.9 to 1.2 % (clock pins +1.3 %). The
+  proxy does not see the memory, which is read on every clock while
+  transmitting: in OpenRAM's model the 512 × 8 one-port macro leaks 4.5 µW and
+  takes 0.72 pJ per access.
 - **The best transmitter together (`ble-tx-opt`).** The Gaussian table saves
   more activity than the write port of the {cos, sin} memory costs: the proxy
   falls 1.1 to 3.1 %, most while transmitting (−15.1 % of all non-clock
@@ -594,14 +666,14 @@ of the synthesised netlist is compared with upstream on every clock.
 | Gate-level lockstep, run `all-branches` | 5/5 scenarios, 0 mismatches | 5/5 scenarios, 0 mismatches | 5/5 scenarios, 0 mismatches |
 | Report | `docs/04 Validation/TX_TABLE_VALIDATION.md` | `docs/04 Validation/SHARED_DEMOD_VALIDATION.md` | `SHARED_DEMOD_VALIDATION.md`, `STICKER_REDUCTIONS_VALIDATION.md` |
 
-| | `ble-tx-table-reg` | `ble-tx-table-sram` | `ble-tx-fir2` | `ble-tx-sin4` | `ble-tx-sin8` | `ble-tx-opt` |
-|---|---|---|---|---|---|---|
-| Formal | defaults ≡ upstream: `gauss_filter`, `gfsk_modulation`, `btle_tx` | the same | pair identity at 16 bits; whole filter ≡ upstream for any taps and any input, unbounded, at 4 bits; 3/3 mutants | — | — | B2 ≡ upstream FIR, **unbounded** (the `gauss_filter.v` of `ble-tx-table`); VCO: — (as `ble-tx-sin8`) |
-| Random lockstep, module level | 4 seeds × 200 random tap sets × 5 000 clocks; 2/2 mutants | the same; 4/4 mutants | 4 seeds × 2 000 000 clocks, 1 001 125 random tap writes | `vco` against the `master` VCO, both full tables loaded: all 2 048 phase addresses, phase jumps, gaps, a reset; 3 072 clocks, no mismatch (`tests/test_vco_sin4.py`) | `vco` against the `ble-tx-sin4` VCO: 4 seeds × 1 000 000 clocks of random writes to both tables (same and different addresses in one clock, streams, resets), reads aimed at the entries just written, 2 919 121 comparisons, no mismatch; 7/7 mutants. And the sweep of `test_vco_sin4.py` against `master` (`tests/test_vco_sin8.py`) | the VCO: `tests/test_vco_sin8.py` on this branch, the result of `ble-tx-sin8` (the same `vco.v`) |
-| Controller through the registers | 15/15 runs, 90 random tap sets reprogrammed in flight, 930 629 clocks, every output and register; 4/4 mutants | 15/15 runs, 927 488 clocks; 6/6 mutants | — | — | — | 15/15 runs, 923 385 clocks, `GAUSS_TABLE=1`, every output and register; 4/4 mutants |
-| Upstream testbenches, 270 runs | 270/270 identical with the table on | 270/270 identical with the table on | 270/270 identical | — | — | 270/270 identical with the table on |
-| Gate-level lockstep, runs `tx-variants`, `tx-sin8` and `tx-opt` | 4/5 scenarios, 0 mismatches; `tx` transmits before the 928-clock rebuild (§ 6.1) | the same | 5/5 scenarios, 0 mismatches | 5/5 scenarios, 0 mismatches, with the full 2 048-entry tables written as the firmware writes them (25 packets sent) | 5/5 scenarios, 0 mismatches, with the full tables written as the firmware writes them (25 packets sent) | 5/5 scenarios, 0 mismatches (run `tx-opt`), tables written as the firmware writes them |
-| Report | `GAUSS_FILTER_OPTIONS.md` § 7 | `GAUSS_FILTER_OPTIONS.md` § 7 | `GAUSS_FILTER_OPTIONS.md` § 7 | `TX_SIN4_COMPARISON.md` (on `ble-tx-sin4`) | `TX_SIN8_COMPARISON.md` (on `ble-tx-sin8`) | `docs/04 Validation/TX_OPT_VALIDATION.md` (on `ble-tx-opt`) |
+| | `ble-tx-table-reg` | `ble-tx-table-sram` | `ble-tx-fir2` | `ble-tx-sin4` | `ble-tx-sin8` | `ble-tx-sin8-1rw` | `ble-tx-sin2` | `ble-tx-opt` |
+|---|---|---|---|---|---|---|---|---|
+| Formal | defaults ≡ upstream: `gauss_filter`, `gfsk_modulation`, `btle_tx` | the same | pair identity at 16 bits; whole filter ≡ upstream for any taps and any input, unbounded, at 4 bits; 3/3 mutants | — | — | — | — | B2 ≡ upstream FIR, **unbounded** (the `gauss_filter.v` of `ble-tx-table`); VCO: — (as `ble-tx-sin8`) |
+| Random lockstep, module level | 4 seeds × 200 random tap sets × 5 000 clocks; 2/2 mutants | the same; 4/4 mutants | 4 seeds × 2 000 000 clocks, 1 001 125 random tap writes | `vco` against the `master` VCO, both full tables loaded: all 2 048 phase addresses, phase jumps, gaps, a reset; 3 072 clocks, no mismatch (`tests/test_vco_sin4.py`) | `vco` against the `ble-tx-sin4` VCO: 4 seeds × 1 000 000 clocks of random writes to both tables (same and different addresses in one clock, streams, resets), reads aimed at the entries just written, 2 919 121 comparisons, no mismatch; 7/7 mutants. And the sweep of `test_vco_sin4.py` against `master` (`tests/test_vco_sin8.py`) | `vco` against the `ble-tx-sin4` VCO: 4 seeds × 1 000 000 clocks of random writes to both tables against samples on random clocks, every other clock or none; 2 370 274 comparisons, no mismatch; the same VCO on a one-port macro model identical on every clock; 11/11 mutants. And the sweep against `master` (`tests/test_vco_sin8_1rw.py`) | `vco` against the `ble-tx-sin4` VCO, each sine write mirrored into its cosine table: 4 seeds × 1 000 000 clocks, 1 324 264 samples on random clocks, every other clock or none; 2 629 325 comparisons, no mismatch; the one-port macro model identical on every clock; 11/11 mutants. And a sweep against `master` with the full tables (`tests/test_vco_sin2.py`) | the VCO: `tests/test_vco_sin8.py` on this branch, the result of `ble-tx-sin8` (the same `vco.v`) |
+| Controller through the registers | 15/15 runs, 90 random tap sets reprogrammed in flight, 930 629 clocks, every output and register; 4/4 mutants | 15/15 runs, 927 488 clocks; 6/6 mutants | — | — | — | — | — | 15/15 runs, 923 385 clocks, `GAUSS_TABLE=1`, every output and register; 4/4 mutants |
+| Upstream testbenches, 270 runs | 270/270 identical with the table on | 270/270 identical with the table on | 270/270 identical | — | — | 270/270 identical, and 270/270 with the memory on the one-port macro model | 270/270 identical, and 270/270 with the memory on the one-port macro model | 270/270 identical with the table on |
+| Gate-level lockstep, runs `tx-variants`, `tx-sin8`, `tx-opt` and `tx-1rw` | 4/5 scenarios, 0 mismatches; `tx` transmits before the 928-clock rebuild (§ 6.1) | the same | 5/5 scenarios, 0 mismatches | 5/5 scenarios, 0 mismatches, with the full 2 048-entry tables written as the firmware writes them (25 packets sent) | 5/5 scenarios, 0 mismatches, with the full tables written as the firmware writes them (25 packets sent) | 5/5 scenarios, 0 mismatches (run `tx-1rw`), tables written as the firmware writes them | 5/5 scenarios, 0 mismatches (run `tx-1rw`), tables written as the firmware writes them | 5/5 scenarios, 0 mismatches (run `tx-opt`), tables written as the firmware writes them |
+| Report | `GAUSS_FILTER_OPTIONS.md` § 7 | `GAUSS_FILTER_OPTIONS.md` § 7 | `GAUSS_FILTER_OPTIONS.md` § 7 | `TX_SIN4_COMPARISON.md` (on `ble-tx-sin4`) | `TX_SIN8_COMPARISON.md` (on `ble-tx-sin8`) | `TX_SIN8_1RW_COMPARISON.md` (on `ble-tx-sin8-1rw`) | `TX_SIN2_COMPARISON.md` (on `ble-tx-sin2`) | `docs/04 Validation/TX_OPT_VALIDATION.md` (on `ble-tx-opt`) |
 
 ## 8. What each branch gives up
 
@@ -613,6 +685,8 @@ of the synthesised netlist is compared with upstream on every clock.
 | `ble-tx-table-reg`, `ble-tx-table-sram` | none, but after a tap write the tables need 928 clocks (58 µs) to be rebuilt before the next transmission |
 | `ble-tx-sin4` | the independent programming of the whole COS/SIN tables: only addresses 0–511 of each are stored and the rest follows by quarter-wave symmetry, so a table without that symmetry can no longer be loaded (the project's tables have it, § 6.1) |
 | `ble-tx-sin8` | the same as `ble-tx-sin4`, and the two tables share one write port: their writes must not back up by more than one, at most w + 1 table writes in any w consecutive clocks (two writes to the same address in one clock count as one), where upstream accepts two per clock. Within that, the outputs differ only if the VCO reads an entry in the clock after its write had to wait, which means rewriting both tables while transmitting. The firmware writes one table at a time, a register write every few clocks |
+| `ble-tx-sin8-1rw` | the same as `ble-tx-sin4`, and the tables share one port with the VCO's reads: a table write waits for a clock without a read (one clock in two while transmitting, every clock when idle; two writes to the same address in one clock count as one), and a table's pair must not change again before it is written (at most four clocks, when both tables change at once while transmitting). Within that, the outputs are upstream's on every clock. The firmware writes one table entry per register write, and not while transmitting |
+| `ble-tx-sin2` | the same as `ble-tx-sin4`, and the cosine table: only cos[0] is stored, every other entry is cos[k] = sin[512 − k], so a cosine table not of that form can no longer be loaded (the project's tables are). Sine writes wait for a clock without a read, none while transmitting, and the sine pair must not change again before it is written. The VCO takes at most one sample every two clocks and none in the clock after a reset, which is what the transmitter gives |
 | `ble-tx-table` | the runtime change of the Gaussian taps (register 1): the taps become a synthesis parameter |
 | `ble-tx-opt` | what `ble-tx-table` and `ble-tx-sin8` give up, and nothing else: the runtime Gaussian taps; COS/SIN tables without quarter-wave symmetry; table writes faster than w + 1 in any w clocks. The receiver, the Link Layer and the IQ-capture debug memory are upstream's |
 | `ble-opt` | the runtime Gaussian taps; the IQ capture (`btle_ll -q`); the UART HCI; the 1 PPS input; the latency statistic of `btle_ll.c`; removed registers read 0 |
@@ -630,13 +704,18 @@ of the synthesised netlist is compared with upstream on every clock.
    1.8 % and 0.6 %. `ble-tx-sin4` only looked larger (+2.0 % of cell area)
    because the flow does not count the memory it removes. `ble-tx-sin8`, with
    one memory for both quarter tables, takes it to 67 437 µm² (−59.8 %), and
-   `ble-tx-opt`, which adds B2, is the smallest transmitter measured:
-   64 441 µm², −61.6 % against `master`, with the receiver and the debug
-   memory unchanged. Their cost is function, not area: the tables must have
+   `ble-tx-opt`, which adds B2, to 64 441 µm² (−61.6 %). One port, which is
+   enough because the transmitter takes one sample every two clocks, halves
+   that memory again: `ble-tx-sin8-1rw` measures 46 773 µm² (−72.1 %), and
+   `ble-tx-sin2`, which keeps only the quarter sine table and reads it twice
+   per sample, 40 293 µm² (−76.0 %), the smallest transmitter built, with the
+   receiver and the debug memory unchanged. The packet buffer is then most of
+   what is left. Their cost is function, not area: the tables must have
    quarter-wave symmetry, which the project's tables have (identical outputs,
-   § 6.1), the two tables cannot be written faster than one entry per clock
-   between them, with one of slack, and on `ble-tx-opt` the Gaussian taps are
-   fixed (§ 8).
+   § 6.1); the table writes are limited, to one entry per clock between the
+   two tables on `ble-tx-sin8`, to the clocks the VCO does not read on the
+   one-port branches; on `ble-tx-sin2` the cosine table follows from the sine
+   table; and on `ble-tx-opt` the Gaussian taps are fixed (§ 8).
 3. **All the memory saving of `ble-opt` is debug infrastructure.** Neither B1
    nor B2 touches the SRAM; A1 and A2 remove 92.3 % of its bits, almost all of
    them the 1 Mbit IQ-capture RAM.
@@ -652,13 +731,14 @@ of the synthesised netlist is compared with upstream on every clock.
    it built: B2 with the memory of `ble-tx-sin8` measures 64 440.8 µm²
    against 64 440.0 estimated, the flip-flops add up exactly and the activity
    to within 0.1 point. With the folded FIR, which keeps the taps
-   programmable, the same combination is estimated at −60.4 %.
+   programmable, the same combination is estimated at −60.4 %; with the
+   memory of `ble-tx-sin2`, B2 at −77.8 % and the folded FIR at −76.6 %.
 6. **Activity ranks the changes differently from area.** The debug
    infrastructure (A1 + A2) gives most of the 25–35 % proxy reduction, because
    it is logic clocked on every cycle; B1 lowers the clock load but raises data
    switching when the receiver has no traffic; B2 matters only while
    transmitting.
-7. **Timing does not separate the branches.** All eleven close 16 MHz with a
+7. **Timing does not separate the branches.** All thirteen close 16 MHz with a
    factor of about 31, none of the transmitter branches puts the worst path in
    the transmitter, and the differences between them are within the flow's
    noise.
@@ -686,12 +766,15 @@ of the synthesised netlist is compared with upstream on every clock.
   measured on their own blocks, and §§ 3.2 and 6.4 show it is consistent with
   the totals.
 - **Only one combination of the transmitter changes is built**: `ble-tx-opt`
-  (B2 with the {cos, sin} memory). The one with the folded FIR is estimated
-  from the parts in § 4.
+  (B2 with the {cos, sin} memory). The ones with the folded FIR, and those
+  with the memory of `ble-tx-sin2`, are estimated from the parts in § 4.
 - **The {cos, sin} memory of `ble-tx-sin8` and `ble-tx-opt` is checked by
   simulation**, at module level against `ble-tx-sin4` and at gate level
   against upstream, not by a formal proof: the write port's contract (§ 8) is
-  exercised, not proved.
+  exercised, not proved. So are the one-port memories of `ble-tx-sin8-1rw` and
+  `ble-tx-sin2`; their one-port behaviour is checked against a behavioural
+  model of a one-port macro (one address, the output kept in a clock with a
+  write), not against a vendor's macro model.
 
 ## 11. Reproducing
 
@@ -705,6 +788,7 @@ scripts/compare/run_compare.sh <label>                          # about 1 h, mas
 scripts/compare/run_compare.sh <label> master ble-tx-table-reg ble-tx-table-sram ble-tx-fir2 ble-tx-sin4
 scripts/compare/run_compare.sh <label> master ble-tx-sin8
 scripts/compare/run_compare.sh <label> master ble-tx-opt
+scripts/compare/run_compare.sh <label> master ble-tx-sin8-1rw ble-tx-sin2
 # the activity of these runs exactly: reuse their vectors
 mkdir /tmp/vec && tar -xzf results/compare/all-branches/vectors.tar.gz -C /tmp/vec
 VEC_DIR=/tmp/vec scripts/compare/run_compare.sh <label> [name ...]
@@ -719,7 +803,8 @@ revision, commit, `verilog/` tree and parameters in `provenance.txt`
 ([`all-branches`](../../results/compare/all-branches/provenance.txt),
 [`tx-variants`](../../results/compare/tx-variants/provenance.txt),
 [`tx-sin8`](../../results/compare/tx-sin8/provenance.txt),
-[`tx-opt`](../../results/compare/tx-opt/provenance.txt)), writes
+[`tx-opt`](../../results/compare/tx-opt/provenance.txt),
+[`tx-1rw`](../../results/compare/tx-1rw/provenance.txt)), writes
 `summary.md` and `data.json`, and fails if a consistency check fails. Area and
 timing take about a minute; activity about 15 minutes per configuration.
 

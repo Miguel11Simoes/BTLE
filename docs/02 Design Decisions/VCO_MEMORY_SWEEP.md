@@ -3,11 +3,14 @@
 **Project:** BTLE — reconfigurable RISC-V baseband  
 **Branch:** every branch carries this same file (`master`, `risc-v-ble`, `ble-tx-table`, `ble-tx-table-reg`, `ble-tx-table-sram`, `ble-tx-fir2`, `ble-tx-sin4`, `ble-tx-sin8`, `ble-tx-sin8-1rw`, `ble-tx-sin2`, `ble-tx-opt`, `ble-rx-dm`, `ble-opt`)  
 **Base:** tag `upstream-baseline` (`8540186`)  
-**Date:** 2026-10-03  
+**Date:** 2026-10-03; updated 2026-10-04 (the two branches built and measured, § 5)  
 **Author:** Miguel Simões  
 **Status:** executed: run `openram-1rw-sweep` of `scripts/area/run_openram.sh` on branch
 `ble-tx-sin8-1rw` (commit `176a79b`): 9 single-port macros requested, 8 generated. Measured
 before any RTL of the new branches; `ble-tx-sin128` was deleted after it (§ 4).
+`ble-tx-sin8-1rw` and `ble-tx-sin2` were then built and measured (run `tx-1rw`,
+`docs/04 Validation/BRANCH_COMPARISON.md`; their reports `TX_SIN8_1RW_COMPARISON.md` and
+`TX_SIN2_COMPARISON.md`, at the root of each).
 
 ---
 
@@ -138,8 +141,8 @@ than the 62.5 ns of the 16 MHz clock; setup and hold are 0.009 and 0.001 ns.
 | Alternative | Memory | Area (µm²) | vs the memory of `ble-tx-sin8` | Reads per sample | Free clock for writes while transmitting | Decision |
 |---|---|---:|---:|---:|---|---|
 | `ble-tx-sin8` (today) | 512 × 16, two ports | 37 703.9 | — | 1 | — (second port) | reference |
-| `ble-tx-sin8-1rw` | 512 × 16, one port | 17 114.7 | −54.6 % | 1 | yes | **implement** |
-| `ble-tx-sin2` | 512 × 8, one port | 10 703.9 | −71.6 % | 2 | no | **implement** |
+| `ble-tx-sin8-1rw` | 512 × 16, one port | 17 114.7 | −54.6 % | 1 | yes | **implement** (built, § 5) |
+| `ble-tx-sin2` | 512 × 8, one port | 10 703.9 | −71.6 % | 2 | no | **implement** (built, § 5) |
 | eighth wave, one entry per word | 256 × 16, one port | 10 424.9 | −72.4 % | 1 | yes | **the best 4 096-bit memory** |
 | `ble-tx-sin128` | 128 × 32, one port | 16 637.9 | −55.9 % | 1 | yes | **not supported: branch deleted** |
 | 64 × 64 | 64 × 64, one port, no mask (with the mask: not generated) | 27 626.0 | −26.7 % | 1 | yes | **no branch** |
@@ -149,14 +152,21 @@ than the 62.5 ns of the 16 MHz clock; setup and hold are 0.009 and 0.001 ns.
    restriction on the tables. The mask is free at this size. The only new
    limit: while transmitting, a table write waits for the clock without a read
    (one write per two clocks); outside transmission it is the limit of
-   `ble-tx-sin8`.
+   `ble-tx-sin8`. As built, a waiting write is held in the table registers
+   instead of a queue, so a table's pair must not change again before it is
+   written, and a write to the entry being read is shown through a 16-bit
+   register, which costs no clock of the port (`TX_SIN8_1RW_COMPARISON.md`).
 2. **`ble-tx-sin2`: implement.** 512 × 8 with one port, 37.5 % below the
    memory of `ble-tx-sin8-1rw`. Its costs: two reads per sample, so no clock is
    free while transmitting and table writes wait for the end of the packet;
    the cosine is the sine read at 90° − θ, so the COS table can no longer be
    programmed on its own (the project's tables satisfy cos θ = sin(90° − θ)
    exactly: checked on all 513 positions of the quarter, 0 violations); and
-   cos 0° = sin 90° falls outside the 512 words, in an 8-bit register.
+   cos 0° = sin 90° falls outside the 512 words, in an 8-bit register. As
+   built, entry b of the next phase is read ahead in the clock of the sample, so
+   the outputs change in the same clock as upstream's, and the VCO takes at
+   most one sample every two clocks and none in the clock after a reset, as
+   the transmitter gives (`TX_SIN2_COMPARISON.md`).
 3. **`ble-tx-sin128`: not supported by the numbers.** 128 × 32 measures
    16 637.9 µm² with the mask its writes need, far from the ~7 000 µm² that
    motivated it: 55 % above the 512 × 8 of `ble-tx-sin2`, with the same bits,
@@ -200,6 +210,16 @@ until it is built; on `ble-tx-sin8` the shared write port cost 597.7 µm².
 `master` is 167 731.4 µm². With any of these memories, the packet buffer
 becomes the largest part of the transmitter: 51 % of it with
 `ble-tx-sin8-1rw`, 59 % with `ble-tx-sin2` or 256 × 16.
+
+**Built and measured** (run `tx-1rw`, `docs/04 Validation/BRANCH_COMPARISON.md`
+§ 4.2): `ble-tx-sin8-1rw` measures **46 772.8 µm²** (Δ = −75.2 µm²: the waiting
+writes held in the table registers and a 16-bit held entry cost less than the
+queues of `ble-tx-sin8`), −72.1 % against `master` and −30.6 % against
+`ble-tx-sin8`; `ble-tx-sin2` measures **40 292.6 µm²** (Δ = −144.7 µm²),
+−76.0 % and −40.3 %. With these Δ, the column from `ble-tx-opt` becomes
+43 776.4 and 37 296.1 µm²; neither combination with B2 is built
+(`BRANCH_COMPARISON.md` § 4.2 estimates the second from `ble-tx-table`,
+37 295.3 µm²; the 0.8 µm² is the residual of `ble-tx-opt`).
 
 ## 6. What this does not claim
 
