@@ -50,6 +50,7 @@ progress and says so.
 | 2026-10-03 | area | New run `results/area/openram-1rw-sweep/`: single-port OpenRAM macros 512x16, 512x8, 256x16, 128x32 and 64x64 (FreePDK45), with and without an 8-bit write mask, made on `ble-tx-sin8-1rw`; 8 of 9 generated (64x64 with the mask fails in the router). No RTL changed. | `results/area/openram-1rw-sweep/summary.md` |
 | 2026-10-03 | docs | Added `docs/02 Design Decisions/VCO_MEMORY_SWEEP.md`: the OpenRAM sweep of single-port memories for the VCO tables (run `openram-1rw-sweep`, made on `ble-tx-sin8-1rw`) and what it decides for the new branches `ble-tx-sin8-1rw`, `ble-tx-sin2` and `ble-tx-sin128`, cut from `ble-tx-sin8`; `BRANCH_COMPARISON.md` and `GAUSS_FILTER_OPTIONS.md` list them. The same files on every branch. No inherited source changed on this branch. | the document |
 | 2026-10-03 | docs | Deleted the branch `ble-tx-sin128` (never pushed): the sweep measured its 128 x 32 memory at 16 637.9 µm², not the ~7 000 µm² that motivated it. `VCO_MEMORY_SWEEP.md` records the decision; `BRANCH_COMPARISON.md` and `GAUSS_FILTER_OPTIONS.md` no longer list it. The same files on every branch. No inherited source changed on this branch. | the documents |
+| 2026-10-04 | compare | New run `results/compare/tx-1rw/` (`ble-tx-sin8-1rw` and `ble-tx-sin2` against upstream, with the harness and the vectors of `all-branches`): area, static timing, gate-level lockstep (5/5 scenarios identical on both) and switching activity. No RTL changed. | `results/compare/tx-1rw/summary.md` |
 
 ## Files inherited and not modified
 

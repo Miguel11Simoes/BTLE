@@ -1,0 +1,9 @@
+label=tx-1rw/ble-tx-sin2
+date_utc=2026-10-03T17:03:53Z
+ref=upstream-baseline (85401861e8f4b04b90cbaa0394c0f9d45ed02f18), default parameters
+dut=origin/ble-tx-sin2 (35bca90214599158b3c230bfe418dac225fdb532, verilog tree 833ee9da2807adeb2e618b30a2566e86c962ea26), default parameters
+sta_set=controller
+target_clock_ns=62.5
+yosys=Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+abc========= ABC command line "version"
+liberty=NangateOpenCellLibrary_typical.lib sha256=8d540a4d4cf6d09d27c87ad067857a9c0c2eeb023ab7a56e058cd3113db4e9b1

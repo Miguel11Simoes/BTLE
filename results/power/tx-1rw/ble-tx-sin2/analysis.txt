@@ -1,0 +1,10 @@
+rx ref: cells 50506 nets 56372 toggles 92725343 (927.3/cycle) clock_toggles 700000 hot 517 data_fF_tog 3.524e+08 clk_fF_tog 8.757e+08 mem_port_toggles 2718167 missing 12
+rx dut: cells 50807 nets 56726 toggles 92810530 (928.1/cycle) clock_toggles 700000 hot 518 data_fF_tog 3.523e+08 clk_fF_tog 8.873e+08 mem_port_toggles 2718167 missing 12
+tx ref: cells 50506 nets 56372 toggles 29921646 (299.2/cycle) clock_toggles 700000 hot 754 data_fF_tog 1.238e+08 clk_fF_tog 8.757e+08 mem_port_toggles 2745143 missing 12
+tx dut: cells 50807 nets 56726 toggles 35356249 (353.6/cycle) clock_toggles 700000 hot 915 data_fF_tog 1.461e+08 clk_fF_tog 8.873e+08 mem_port_toggles 3174938 missing 12
+mixed ref: cells 50506 nets 56372 toggles 99130055 (991.3/cycle) clock_toggles 700000 hot 839 data_fF_tog 3.729e+08 clk_fF_tog 8.757e+08 mem_port_toggles 3044741 missing 12
+mixed dut: cells 50807 nets 56726 toggles 101914603 (1019.1/cycle) clock_toggles 700000 hot 951 data_fF_tog 3.839e+08 clk_fF_tog 8.873e+08 mem_port_toggles 3258655 missing 12
+idle ref: cells 50506 nets 56372 toggles 99637002 (996.4/cycle) clock_toggles 700000 hot 631 data_fF_tog 3.817e+08 clk_fF_tog 8.757e+08 mem_port_toggles 3096050 missing 12
+idle dut: cells 50807 nets 56726 toggles 99765761 (997.7/cycle) clock_toggles 700000 hot 635 data_fF_tog 3.821e+08 clk_fF_tog 8.873e+08 mem_port_toggles 3096050 missing 12
+idle0 ref: cells 50506 nets 56372 toggles 14181410 (141.8/cycle) clock_toggles 700000 hot 339 data_fF_tog 7.223e+07 clk_fF_tog 8.757e+08 mem_port_toggles 2299975 missing 12
+idle0 dut: cells 50807 nets 56726 toggles 14196144 (142.0/cycle) clock_toggles 700000 hot 343 data_fF_tog 7.237e+07 clk_fF_tog 8.873e+08 mem_port_toggles 2299975 missing 12

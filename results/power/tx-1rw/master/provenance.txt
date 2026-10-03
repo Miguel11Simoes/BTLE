@@ -1,0 +1,10 @@
+label=tx-1rw/master
+date_utc=2026-10-03T17:09:39Z
+ref=upstream-baseline (85401861e8f4b04b90cbaa0394c0f9d45ed02f18), default parameters
+dut=upstream-baseline (85401861e8f4b04b90cbaa0394c0f9d45ed02f18, verilog tree 4bacca327f4a7112a66bca5915160ebacfffb28e), default parameters
+compare=full (full: every output and register; reduced: the three removed outputs skipped, removed registers read 0)
+window_cycles=100000 (bb_clk 16 MHz) seed=1 scenarios=rx tx mixed idle idle0
+vectors=VEC_DIR d53f2d49ed8db456 (sha256 of vectors.sha256)
+yosys=Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+verilator=Verilator 5.053 devel rev v5.052-30-g63bcfff80 (mod)
+liberty=NangateOpenCellLibrary_typical.lib sha256=8d540a4d4cf6d09d27c87ad067857a9c0c2eeb023ab7a56e058cd3113db4e9b1

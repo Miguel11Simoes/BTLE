@@ -1,0 +1,11 @@
+label=tx-1rw
+date_utc=2026-10-03T17:03:52Z
+harness=69e5204a988734ad0ee21b3695c5f03bc205871f (branch ble-opt), dirty files under scripts/: 0
+configurations (name, measured revision, commit, verilog/ tree, parameters):
+  master	upstream-baseline	85401861e8f4b04b90cbaa0394c0f9d45ed02f18	4bacca327f4a7112a66bca5915160ebacfffb28e	<none: defaults>
+  ble-tx-sin8-1rw	origin/ble-tx-sin8-1rw	fca3f5342bc04010e2043fedfb425edc03df7eb6	132cca8bebf0f77612b2caeb3b737800520034d1	<none: defaults>
+  ble-tx-sin2	origin/ble-tx-sin2	35bca90214599158b3c230bfe418dac225fdb532	833ee9da2807adeb2e618b30a2566e86c962ea26	<none: defaults>
+activity vectors: example 0, 20 dB, 20 ppm, one set for every configuration; vectors.tar.gz, sha256 of vectors.sha256 d53f2d49ed8db456
+branches with the upstream verilog/ tree (4bacca327f4a7112a66bca5915160ebacfffb28e):
+  master	origin/master	4bacca327f4a7112a66bca5915160ebacfffb28e	same_as_upstream=yes
+  risc-v-ble	origin/risc-v-ble	4bacca327f4a7112a66bca5915160ebacfffb28e	same_as_upstream=yes
