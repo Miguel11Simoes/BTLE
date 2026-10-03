@@ -1,0 +1,17 @@
+# Array organisation chosen by OpenRAM 1.2.48 for the macros of run openram-1rw-sweep.
+# Read from each macro's SPICE netlist (<macro>.sp) while the run was going: the
+# bl_0_* ports of subcircuit <macro>_bitcell_array are the columns and its wl_0_* ports
+# the rows; words_per_row = columns / word bits; sense amplifiers and write drivers are
+# the instances of <macro>_sense_amp_array and <macro>_write_driver_array.
+# scripts/area/run_openram.sh keeps only the LEF, the .lib and the log of each macro, so
+# the netlists are not in this folder. Not read: sram_1rw_64x64 (its temporary files
+# were deleted at the end of the run before it was read); sram_1rw_64x64_m8 was not
+# generated.
+macro               rows  columns  words_per_row  sense_amps  write_drivers
+sram_1rw_8x512      64    64       8              8           8
+sram_1rw_16x256     64    64       4              16          16
+sram_1rw_16x256_m8  64    64       4              16          16
+sram_1rw_16x512     64    128      8              16          16
+sram_1rw_16x512_m8  64    128      8              16          16
+sram_1rw_32x128     64    64       2              32          32
+sram_1rw_32x128_m8  64    64       2              32          32

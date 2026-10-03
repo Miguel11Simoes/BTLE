@@ -1,0 +1,7 @@
+label=openram-1rw-sweep
+date_utc=2026-10-03T15:01:19Z
+git_commit=176a79bfc271712f94a13f95670f2730a181089f
+openram=1.2.48 (/home/msmiguel/venvs/openram/lib/python3.11/site-packages/openram)
+python=Python 3.11.14 numpy=1.24.4
+tech=freepdk45, nominal corner only, check_lvsdrc=False, analytical_delay=True, layout options default
+macros=sram_1rw_16x512_m8 sram_1rw_8x512 sram_1rw_16x256_m8 sram_1rw_32x128_m8 sram_1rw_64x64_m8 sram_1rw_16x512 sram_1rw_16x256 sram_1rw_32x128 sram_1rw_64x64
