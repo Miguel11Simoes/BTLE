@@ -1,0 +1,239 @@
+# Single-port memory for the VCO tables: the OpenRAM sweep, and the branches it decides
+
+**Project:** BTLE — reconfigurable RISC-V baseband  
+**Branch:** every branch carries this same file (`master`, `risc-v-ble`, `ble-tx-table`, `ble-tx-table-reg`, `ble-tx-table-sram`, `ble-tx-fir2`, `ble-tx-sin4`, `ble-tx-sin8`, `ble-tx-sin8-1rw`, `ble-tx-sin2`, `ble-tx-sin128`, `ble-tx-opt`, `ble-rx-dm`, `ble-opt`)  
+**Base:** tag `upstream-baseline` (`8540186`)  
+**Date:** 2026-10-03  
+**Author:** Miguel Simões  
+**Status:** executed: run `openram-1rw-sweep` of `scripts/area/run_openram.sh` on branch
+`ble-tx-sin8-1rw` (commit `176a79b`): 9 single-port macros requested, 8 generated. Measured
+before any RTL: the three new branches do not change the RTL of `ble-tx-sin8` yet.
+
+---
+
+## Purpose
+
+On `ble-tx-sin8` the VCO keeps the first quarter of the cosine and sine tables
+in one 512 × 16 memory with two ports, one read/write and one read (1RW1R):
+37 703.9 µm², 56 % of its transmitter and 59 % of the transmitter of
+`ble-tx-opt` (`docs/04 Validation/BRANCH_COMPARISON.md` § 4). Two levers are
+left on that memory: the number of ports, and its geometry (how many words of
+how many bits). Three branches were cut from `ble-tx-sin8` (`00ad076`), one per
+alternative, so that each can be built and measured on its own:
+
+| Branch | Memory | Reads per sample | What it stores |
+|---|---|---:|---|
+| `ble-tx-sin8-1rw` | 512 × 16, one port | 1 | the two quarter tables, {cos, sin} per word, as `ble-tx-sin8` |
+| `ble-tx-sin2` | 512 × 8, one port | 2 | the quarter sine table only; the cosine is read from it, cos θ = sin(90° − θ) |
+| `ble-tx-sin128` | 128 × 32, one port | 1 | an eighth of the wave, {cos, sin} of 0°–45°, two entries per word |
+
+This document measures the candidate memories before any of them is written in
+RTL, checks that one port at 16 MHz is fast enough, and records what the
+numbers decide.
+
+## 1. Why one port is enough
+
+Upstream writes each table on every clock through its own port, which is why
+the memories of `ble-tx-sin4` and `ble-tx-sin8` have two ports. Three facts of
+the RTL make one port sufficient:
+
+1. **The transmitter produces one sample every two clocks.** The upsampler
+   toggles its valid on every 16 MHz clock (`bit_repeat_upsample.v:72`), the
+   Gaussian filter only registers it (`gauss_filter.v:112`), and it is the
+   VCO's input valid (`gfsk_modulation.v:108`). The VCO's address changes at
+   most once every two clocks: 8 Msample/s at 16 MHz.
+2. **`ble-tx-sin8` already writes a table only when its register changes**
+   (`vco.v:119-122` on that branch), not on every clock. Writes happen when the
+   processor programs the tables.
+3. **The transmitter outputs are forced to zero when it is idle**
+   (`btle_tx.v:104-105`), so the VCO's output only matters while transmitting.
+
+So a single port has two clocks per sample: one read and one free clock for a
+write (`ble-tx-sin8-1rw`, and an eighth-wave memory), or two reads
+(`ble-tx-sin2`, which then has no free clock while transmitting). No second,
+faster clock is needed.
+
+## 2. The sweep
+
+`scripts/area/run_openram.sh`, the script of runs `openram-tx` and
+`openram-sin8`: OpenRAM 1.2.48, FreePDK45, default layout, nominal corner
+(TT, 1.0 V, 25 °C), analytical timing model, no DRC/LVS. Single-port (1RW)
+macros only. A word that holds more than one 8-bit table entry gets an 8-bit
+write mask (OpenRAM `write_size = 8`), because the registers write one entry at
+a time; the same geometries without the mask measure what the mask costs. The
+array organisation (rows, columns, column multiplexing) is OpenRAM's own
+choice, read from the SPICE netlist of each macro while the run was going
+(`arrays.txt` in the results; the netlists themselves are not kept).
+
+### 2.1 Area
+
+| Memory | Write mask | Bits | Cell array: rows × columns, column mux | Sense amplifiers and write drivers | Size (µm) | **Area (µm²)** | µm² per bit |
+|---|---|---:|---|---:|---|---:|---:|
+| 512 × 16 | 8-bit | 8 192 | 64 × 128, 8:1 | 16 | 135.157 × 126.627 | **17 114.7** | 2.09 |
+| 512 × 16 | — | 8 192 | 64 × 128, 8:1 | 16 | 135.157 × 126.627 | 17 114.7 | 2.09 |
+| 512 × 8 | — | 4 096 | 64 × 64, 8:1 | 8 | 85.285 × 125.507 | **10 703.9** | 2.61 |
+| 256 × 16 | 8-bit | 4 096 | 64 × 64, 4:1 | 16 | 86.385 × 120.680 | **10 424.9** | 2.55 |
+| 256 × 16 | — | 4 096 | 64 × 64, 4:1 | 16 | 86.385 × 118.915 | 10 272.5 | 2.51 |
+| 128 × 32 | 8-bit | 4 096 | 64 × 64, 2:1 | 32 | 133.810 × 124.340 | **16 637.9** | 4.06 |
+| 128 × 32 | — | 4 096 | 64 × 64, 2:1 | 32 | 122.370 × 120.895 | 14 793.9 | 3.61 |
+| 64 × 64 | 8-bit | 4 096 | — | — | not generated: OpenRAM's pin router stops ("Couldn't route") | — | — |
+| 64 × 64 | — | 4 096 | not read | 64 (one per bit of the word, as in the others) | 218.180 × 126.620 | 27 626.0 | 6.74 |
+
+With two ports, from runs `openram-sin8` and `openram-tx`: 512 × 16 1RW1R
+37 703.9 µm², 512 × 8 1RW1R 23 708.0 µm².
+
+What the table shows:
+
+- **One port instead of two halves the memory.** 512 × 16: 37 703.9 →
+  17 114.7 µm² (−54.6 %); 512 × 8: 23 708.0 → 10 703.9 µm² (−54.9 %).
+- **With the same bits, the width of the word decides.** Every 4 096-bit
+  memory has the same 64 × 64 cell array; the word width only changes the
+  column multiplexing and the circuitry behind each output bit (sense
+  amplifier, write driver, data flip-flops, pins). 256 × 16 is 4.0 % smaller
+  than 512 × 8 with twice that circuitry; 128 × 32, with four times, is 38 %
+  larger without the mask and 55 % larger with it; 64 × 64, with eight times,
+  is 2.6 times larger, and took 21 minutes to route against 1.5 to 5.3 for the
+  others.
+- **The write mask** costs nothing on 512 × 16 (the same footprint),
+  152.4 µm² (1.5 %) on 256 × 16 and 1 844.0 µm² (12.5 %) on 128 × 32.
+- **The ~7 000 µm² quoted for a public 128 × 32 OpenRAM example is not
+  reproduced** with this OpenRAM version and these options: 14 793.9 µm²
+  without the mask and 16 637.9 µm² with the mask the tables need, 2.1 to
+  2.4 times that figure.
+
+### 2.2 Timing and power, from each `.lib`
+
+| Memory | Data valid after the **falling** clock edge | Minimum clock period | Setup / hold | Leakage | Clock energy per access |
+|---|---:|---:|---:|---:|---:|
+| 512 × 16 (mask) | 0.321 ns | 1.188 ns | 0.009 / 0.001 ns | 8.6 µW | 1.30 pJ |
+| 512 × 8 | 0.286 ns | 1.058 ns | 0.009 / 0.001 ns | 4.5 µW | 0.72 pJ |
+| 256 × 16 (mask) | 0.285 ns | 1.054 ns | 0.009 / 0.001 ns | 4.5 µW | 0.73 pJ |
+| 128 × 32 (mask) | 0.287 ns | 1.062 ns | 0.009 / 0.001 ns | 4.5 µW | 0.77 pJ |
+| 64 × 64 (no mask) | 0.271 ns | 1.001 ns | 0.009 / 0.001 ns | 4.5 µW | 0.82 pJ |
+
+The variants without the mask have the same delays and minimum period. The
+energy is the `internal_power` of the clock pin written by OpenRAM's analytical
+model (the same value for read and write), in the energy unit of the `.lib`
+(pF × V² = pJ).
+
+## 3. Timing at 16 MHz
+
+The memory samples address and data on the rising edge and its data is valid
+0.271 to 0.321 ns after the falling edge: at most 31.6 ns after the rising
+edge, with at least 30.9 ns left before the next rising edge, where the VCO
+uses it. The minimum clock period is 1.001 to 1.188 ns, 53 to 62 times shorter
+than the 62.5 ns of the 16 MHz clock; setup and hold are 0.009 and 0.001 ns.
+
+- One read per sample (`ble-tx-sin8-1rw`, an eighth-wave memory) and two reads
+  per sample (`ble-tx-sin2`, one in each clock of the sample) both fit with
+  this margin.
+- No memory needs a faster clock. A 32 MHz clock would also fit, but the
+  transmitter's two clocks per sample make it unnecessary (§ 1).
+- These are the analytical model at the nominal corner. A slow-corner SPICE
+  characterisation would give longer delays, but not 50 times longer.
+
+## 4. What the numbers decide
+
+| Alternative | Memory | Area (µm²) | vs the memory of `ble-tx-sin8` | Reads per sample | Free clock for writes while transmitting | Decision |
+|---|---|---:|---:|---:|---|---|
+| `ble-tx-sin8` (today) | 512 × 16, two ports | 37 703.9 | — | 1 | — (second port) | reference |
+| `ble-tx-sin8-1rw` | 512 × 16, one port | 17 114.7 | −54.6 % | 1 | yes | **implement** |
+| `ble-tx-sin2` | 512 × 8, one port | 10 703.9 | −71.6 % | 2 | no | **implement** |
+| eighth wave, one entry per word | 256 × 16, one port | 10 424.9 | −72.4 % | 1 | yes | **the best 4 096-bit memory** |
+| `ble-tx-sin128` | 128 × 32, one port | 16 637.9 | −55.9 % | 1 | yes | **not supported** |
+| 64 × 64 | 64 × 64, one port, no mask (with the mask: not generated) | 27 626.0 | −26.7 % | 1 | yes | **no branch** |
+
+1. **`ble-tx-sin8-1rw`: implement.** The same 512 × 16 memory and the same
+   tables as `ble-tx-sin8`, with one port: −20 589.2 µm² of memory and no new
+   restriction on the tables. The mask is free at this size. The only new
+   limit: while transmitting, a table write waits for the clock without a read
+   (one write per two clocks); outside transmission it is the limit of
+   `ble-tx-sin8`.
+2. **`ble-tx-sin2`: implement.** 512 × 8 with one port, 37.5 % below the
+   memory of `ble-tx-sin8-1rw`. Its costs: two reads per sample, so no clock is
+   free while transmitting and table writes wait for the end of the packet;
+   the cosine is the sine read at 90° − θ, so the COS table can no longer be
+   programmed on its own (the project's tables satisfy cos θ = sin(90° − θ)
+   exactly: checked on all 513 positions of the quarter, 0 violations); and
+   cos 0° = sin 90° falls outside the 512 words, in an 8-bit register.
+3. **`ble-tx-sin128`: not supported by the numbers.** 128 × 32 measures
+   16 637.9 µm² with the mask its writes need, far from the ~7 000 µm² that
+   motivated it: 55 % above the 512 × 8 of `ble-tx-sin2`, with the same bits,
+   and close to the 512 × 16 of `ble-tx-sin8-1rw`, which holds twice as many.
+   Its 32-bit word quadruples the output circuitry of the same 64 × 64 array.
+   It should not be implemented as 128 × 32.
+4. **The 4 096-bit {cos, sin} memory the numbers support is 256 × 16**, an
+   eighth of the wave with one entry per word: 10 424.9 µm² with the mask, the
+   smallest memory of the sweep, 2.6 % below 512 × 8, and with one read per
+   sample it keeps a free clock for writes, which `ble-tx-sin2` does not. Its
+   costs: the eighth-wave symmetry couples the COS and SIN tables, as in
+   `ble-tx-sin2` (exact for the project's tables: 0 violations over 513
+   positions); a second reflection and swap at 45°; and the 45° entry, [90, 90]
+   in the project's tables, falls outside the 256 words, in a 16-bit register.
+   It is the natural replacement for the 128 × 32 of `ble-tx-sin128`; whether
+   that branch is re-targeted (and renamed) is the author's decision, and
+   until then it carries no RTL change.
+5. **64 × 64: no branch.** With the mask its writes need (four entries of each
+   table per word), OpenRAM 1.2.48 cannot route its pins in FreePDK45: the
+   escape router stops with "Couldn't route". Without the mask it routes, after
+   21 minutes, at 27 626.0 µm²: the largest memory of the sweep, 2.7 times the
+   256 × 16 with the same bits and 1.6 times the 512 × 16 that holds twice as
+   many. The trend of the sweep says why: the cell array stays the same, and
+   the 64-bit word brings 64 sense amplifiers and write drivers.
+6. **No faster clock** (§ 3).
+
+## 5. What the transmitter would measure
+
+Estimates: the transmitter logic of the branch each alternative starts from
+(measured), plus its memory, plus the 512 × 8 packet buffer with two ports
+(23 708.0 µm²). The logic each alternative adds or removes (Δ) is not known
+until it is built; on `ble-tx-sin8` the shared write port cost 597.7 µm².
+
+| Alternative | Memory (µm²) | TX, from `ble-tx-sin8` (FIR) | vs `master` | vs `ble-tx-sin8` | TX, from `ble-tx-opt` (B2) | vs `master` |
+|---|---:|---:|---:|---:|---:|---:|
+| `ble-tx-sin8` / `ble-tx-opt` (measured) | 37 703.9 | 67 437.3 | −59.8 % | — | 64 440.8 | −61.6 % |
+| `ble-tx-sin8-1rw` | 17 114.7 | 46 848.1 + Δ | −72.1 % | −30.5 % | 43 851.6 + Δ | −73.9 % |
+| `ble-tx-sin2` | 10 703.9 | 40 437.3 + Δ | −75.9 % | −40.0 % | 37 440.8 + Δ | −77.7 % |
+| 256 × 16, eighth wave | 10 424.9 | 40 158.3 + Δ | −76.1 % | −40.5 % | 37 161.8 + Δ | −77.8 % |
+| `ble-tx-sin128` (128 × 32) | 16 637.9 | 46 371.3 + Δ | −72.4 % | −31.2 % | 43 374.8 + Δ | −74.1 % |
+
+`master` is 167 731.4 µm². With any of these memories, the packet buffer
+becomes the largest part of the transmitter: 51 % of it with
+`ble-tx-sin8-1rw`, 59 % with `ble-tx-sin2` or 256 × 16.
+
+## 6. What this does not claim
+
+- **The macros are OpenRAM layouts in FreePDK45**, an academic PDK, generated
+  without DRC/LVS and never placed with the logic; a commercial SRAM compiler
+  would give other absolute areas. The comparison between geometries uses one
+  tool, one version and one set of options.
+- **Default layout options.** OpenRAM chose the column multiplexing of every
+  memory; other choices, which might let the 64 × 64 with its mask route, were
+  not tried.
+- **Timing and power are OpenRAM's analytical model**, at the nominal corner
+  only, not a SPICE characterisation. Per sample, `ble-tx-sin2` reads twice, so
+  its memory energy is about twice that of one read (2 × 0.72 against 0.73 pJ
+  for 256 × 16).
+- **No RTL yet.** The logic each alternative adds is estimated, not measured;
+  each branch will measure it when it is built, with the validation of
+  `ble-tx-sin8` (module lockstep, mutants, gate-level lockstep against
+  upstream).
+
+## 7. Reproducing
+
+From WSL, at the root of `ble-tx-sin8-1rw` (or of a measurement branch, which
+has the same script):
+
+```bash
+scripts/area/run_openram.sh <label> \
+  sram_1rw_16x512_m8 sram_1rw_8x512 sram_1rw_16x256_m8 sram_1rw_32x128_m8 sram_1rw_64x64_m8 \
+  sram_1rw_16x512 sram_1rw_16x256 sram_1rw_32x128 sram_1rw_64x64
+```
+
+The macro name is `sram_<ports>_<word bits>x<words>[_m<mask bits>]`. The run
+takes 45 minutes: 1.5 to 5.3 minutes per macro, and 21 for the 64 × 64 without
+the mask. The results, with each macro's LEF, `.lib` and log, are in
+[`results/area/openram-1rw-sweep/`](../../results/area/openram-1rw-sweep/summary.md)
+on the three new branches and on the four measurement branches (`ble-opt`,
+`ble-tx-table`, `ble-rx-dm`, `ble-tx-opt`). The script returns an error because
+one macro (64 × 64 with the mask) failed; the other eight are complete.

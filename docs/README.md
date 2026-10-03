@@ -27,6 +27,7 @@ lists where each piece is.
 | See B2 and the {cos, sin} memory together, the smallest transmitter measured: its checks, area and activity | [04 Validation/TX_OPT_VALIDATION.md](04%20Validation/TX_OPT_VALIDATION.md) |
 | Compare every branch: area (the transmitter with its SRAM macros), timing, switching activity | [04 Validation/BRANCH_COMPARISON.md](04%20Validation/BRANCH_COMPARISON.md) |
 | Choose where the Gaussian table lives (OTP, ROM, SRAM, REG) or a folded FIR, by TX area | [02 Design Decisions/GAUSS_FILTER_OPTIONS.md](02%20Design%20Decisions/GAUSS_FILTER_OPTIONS.md) |
+| Choose the single-port memory of the VCO tables (OpenRAM sweep: 512×16, 512×8, 256×16, 128×32, 64×64) | [02 Design Decisions/VCO_MEMORY_SWEEP.md](02%20Design%20Decisions/VCO_MEMORY_SWEEP.md) |
 | Reproduce the upstream results | [06 Guides/REPRODUCE_UPSTREAM.md](06%20Guides/REPRODUCE_UPSTREAM.md) |
 | Add a document or record a change | [06 Guides/CONTRIBUTING.md](06%20Guides/CONTRIBUTING.md) |
 

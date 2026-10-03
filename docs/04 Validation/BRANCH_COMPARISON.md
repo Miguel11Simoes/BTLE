@@ -1,9 +1,9 @@
 # Comparison of the branches: upstream, the transmitter variants, B1 and `ble-opt`
 
 **Project:** BTLE — reconfigurable RISC-V baseband  
-**Branch:** every branch carries this same file (`master`, `risc-v-ble`, `ble-tx-table`, `ble-tx-table-reg`, `ble-tx-table-sram`, `ble-tx-fir2`, `ble-tx-sin4`, `ble-tx-sin8`, `ble-tx-opt`, `ble-rx-dm`, `ble-opt`)  
+**Branch:** every branch carries this same file (`master`, `risc-v-ble`, `ble-tx-table`, `ble-tx-table-reg`, `ble-tx-table-sram`, `ble-tx-fir2`, `ble-tx-sin4`, `ble-tx-sin8`, `ble-tx-sin8-1rw`, `ble-tx-sin2`, `ble-tx-sin128`, `ble-tx-opt`, `ble-rx-dm`, `ble-opt`)  
 **Base:** tag `upstream-baseline` (`8540186`)  
-**Date:** 2026-09-28; updated 2026-09-29 (six transmitter branches, SRAM macro areas)  
+**Date:** 2026-09-28; updated 2026-09-29 (six transmitter branches, SRAM macro areas) and 2026-10-03 (three VCO-memory branches, not yet built)  
 **Author:** Miguel Simões  
 **Status:** executed: run `all-branches`, harness `scripts/compare/` at `f540e99` (summary
 regenerated at `696b036`, § 11); with the same harness and the same vectors, run `tx-variants`
@@ -90,6 +90,13 @@ master  (= upstream-baseline, 8540186)
 Every branch then has commits that add this document; the four measurement
 branches (`ble-opt`, `ble-tx-table`, `ble-rx-dm`, `ble-tx-opt`) also carry the
 comparison harness (the same files on the four) and its results.
+
+Three more branches, `ble-tx-sin8-1rw`, `ble-tx-sin2` and `ble-tx-sin128`,
+were cut from `ble-tx-sin8` (`00ad076`) for single-port memories of the VCO
+tables. Their memories were measured first, before any RTL, in
+`docs/02 Design Decisions/VCO_MEMORY_SWEEP.md`, which also records which of
+them the numbers support. They do not change the RTL of `ble-tx-sin8` yet, so
+they have no column here; each will be added when it is built and measured.
 
 The two isolated branches measure **exactly the code that `ble-opt`
 combines**. `ble-rx-dm` is the `ble-opt` history itself, stopped at `88f2250`.
