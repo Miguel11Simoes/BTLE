@@ -1,13 +1,13 @@
 # Single-port memory for the VCO tables: the OpenRAM sweep, and the branches it decides
 
 **Project:** BTLE — reconfigurable RISC-V baseband  
-**Branch:** every branch carries this same file (`master`, `risc-v-ble`, `ble-tx-table`, `ble-tx-table-reg`, `ble-tx-table-sram`, `ble-tx-fir2`, `ble-tx-sin4`, `ble-tx-sin8`, `ble-tx-sin8-1rw`, `ble-tx-sin2`, `ble-tx-sin128`, `ble-tx-opt`, `ble-rx-dm`, `ble-opt`)  
+**Branch:** every branch carries this same file (`master`, `risc-v-ble`, `ble-tx-table`, `ble-tx-table-reg`, `ble-tx-table-sram`, `ble-tx-fir2`, `ble-tx-sin4`, `ble-tx-sin8`, `ble-tx-sin8-1rw`, `ble-tx-sin2`, `ble-tx-opt`, `ble-rx-dm`, `ble-opt`)  
 **Base:** tag `upstream-baseline` (`8540186`)  
 **Date:** 2026-10-03  
 **Author:** Miguel Simões  
 **Status:** executed: run `openram-1rw-sweep` of `scripts/area/run_openram.sh` on branch
 `ble-tx-sin8-1rw` (commit `176a79b`): 9 single-port macros requested, 8 generated. Measured
-before any RTL: the three new branches do not change the RTL of `ble-tx-sin8` yet.
+before any RTL of the new branches; `ble-tx-sin128` was deleted after it (§ 4).
 
 ---
 
@@ -19,13 +19,14 @@ in one 512 × 16 memory with two ports, one read/write and one read (1RW1R):
 `ble-tx-opt` (`docs/04 Validation/BRANCH_COMPARISON.md` § 4). Two levers are
 left on that memory: the number of ports, and its geometry (how many words of
 how many bits). Three branches were cut from `ble-tx-sin8` (`00ad076`), one per
-alternative, so that each can be built and measured on its own:
+alternative, so that each can be built and measured on its own; the third was
+deleted after this sweep (§ 4):
 
 | Branch | Memory | Reads per sample | What it stores |
 |---|---|---:|---|
 | `ble-tx-sin8-1rw` | 512 × 16, one port | 1 | the two quarter tables, {cos, sin} per word, as `ble-tx-sin8` |
 | `ble-tx-sin2` | 512 × 8, one port | 2 | the quarter sine table only; the cosine is read from it, cos θ = sin(90° − θ) |
-| `ble-tx-sin128` | 128 × 32, one port | 1 | an eighth of the wave, {cos, sin} of 0°–45°, two entries per word |
+| `ble-tx-sin128` (deleted after this sweep) | 128 × 32, one port | 1 | an eighth of the wave, {cos, sin} of 0°–45°, two entries per word |
 
 This document measures the candidate memories before any of them is written in
 RTL, checks that one port at 16 MHz is fast enough, and records what the
@@ -140,7 +141,7 @@ than the 62.5 ns of the 16 MHz clock; setup and hold are 0.009 and 0.001 ns.
 | `ble-tx-sin8-1rw` | 512 × 16, one port | 17 114.7 | −54.6 % | 1 | yes | **implement** |
 | `ble-tx-sin2` | 512 × 8, one port | 10 703.9 | −71.6 % | 2 | no | **implement** |
 | eighth wave, one entry per word | 256 × 16, one port | 10 424.9 | −72.4 % | 1 | yes | **the best 4 096-bit memory** |
-| `ble-tx-sin128` | 128 × 32, one port | 16 637.9 | −55.9 % | 1 | yes | **not supported** |
+| `ble-tx-sin128` | 128 × 32, one port | 16 637.9 | −55.9 % | 1 | yes | **not supported: branch deleted** |
 | 64 × 64 | 64 × 64, one port, no mask (with the mask: not generated) | 27 626.0 | −26.7 % | 1 | yes | **no branch** |
 
 1. **`ble-tx-sin8-1rw`: implement.** The same 512 × 16 memory and the same
@@ -161,7 +162,7 @@ than the 62.5 ns of the 16 MHz clock; setup and hold are 0.009 and 0.001 ns.
    motivated it: 55 % above the 512 × 8 of `ble-tx-sin2`, with the same bits,
    and close to the 512 × 16 of `ble-tx-sin8-1rw`, which holds twice as many.
    Its 32-bit word quadruples the output circuitry of the same 64 × 64 array.
-   It should not be implemented as 128 × 32.
+   The branch was deleted on 2026-10-03, before any RTL, and never pushed.
 4. **The 4 096-bit {cos, sin} memory the numbers support is 256 × 16**, an
    eighth of the wave with one entry per word: 10 424.9 µm² with the mask, the
    smallest memory of the sweep, 2.6 % below 512 × 8, and with one read per
@@ -170,9 +171,8 @@ than the 62.5 ns of the 16 MHz clock; setup and hold are 0.009 and 0.001 ns.
    `ble-tx-sin2` (exact for the project's tables: 0 violations over 513
    positions); a second reflection and swap at 45°; and the 45° entry, [90, 90]
    in the project's tables, falls outside the 256 words, in a 16-bit register.
-   It is the natural replacement for the 128 × 32 of `ble-tx-sin128`; whether
-   that branch is re-targeted (and renamed) is the author's decision, and
-   until then it carries no RTL change.
+   It is the natural replacement for the 128 × 32 of the deleted
+   `ble-tx-sin128`; no branch implements it for now.
 5. **64 × 64: no branch.** With the mask its writes need (four entries of each
    table per word), OpenRAM 1.2.48 cannot route its pins in FreePDK45: the
    escape router stops with "Couldn't route". Without the mask it routes, after
@@ -195,7 +195,7 @@ until it is built; on `ble-tx-sin8` the shared write port cost 597.7 µm².
 | `ble-tx-sin8-1rw` | 17 114.7 | 46 848.1 + Δ | −72.1 % | −30.5 % | 43 851.6 + Δ | −73.9 % |
 | `ble-tx-sin2` | 10 703.9 | 40 437.3 + Δ | −75.9 % | −40.0 % | 37 440.8 + Δ | −77.7 % |
 | 256 × 16, eighth wave | 10 424.9 | 40 158.3 + Δ | −76.1 % | −40.5 % | 37 161.8 + Δ | −77.8 % |
-| `ble-tx-sin128` (128 × 32) | 16 637.9 | 46 371.3 + Δ | −72.4 % | −31.2 % | 43 374.8 + Δ | −74.1 % |
+| `ble-tx-sin128` (128 × 32, deleted) | 16 637.9 | 46 371.3 + Δ | −72.4 % | −31.2 % | 43 374.8 + Δ | −74.1 % |
 
 `master` is 167 731.4 µm². With any of these memories, the packet buffer
 becomes the largest part of the transmitter: 51 % of it with
@@ -234,6 +234,6 @@ The macro name is `sram_<ports>_<word bits>x<words>[_m<mask bits>]`. The run
 takes 45 minutes: 1.5 to 5.3 minutes per macro, and 21 for the 64 × 64 without
 the mask. The results, with each macro's LEF, `.lib` and log, are in
 [`results/area/openram-1rw-sweep/`](../../results/area/openram-1rw-sweep/summary.md)
-on the three new branches and on the four measurement branches (`ble-opt`,
+on `ble-tx-sin8-1rw`, `ble-tx-sin2` and the four measurement branches (`ble-opt`,
 `ble-tx-table`, `ble-rx-dm`, `ble-tx-opt`). The script returns an error because
 one macro (64 × 64 with the mask) failed; the other eight are complete.
