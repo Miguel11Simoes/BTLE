@@ -2,10 +2,12 @@
 // SPDX-FileCopyrightText: 2024 Xianjun Jiao
 // SPDX-License-Identifier: Apache-2.0 license
 // Modified 2026-09-19 by Miguel Simões: GAUSS_TABLE (default 0 = original FIR with taps written at
-// runtime). With 1 the output is computed by distributed arithmetic: the 17-sample window is split
-// into 3 groups (6+6+5 samples), each indexing a constant table of signed tap sums computed at
-// elaboration from GAUSS_TABLE_TAPS; tap_index/tap_value are then ignored. Exact for every input
-// sequence (same shift register, same valid timing, same modulo-2^W sum). See CHANGES.md.
+// runtime). With 1 the taps are the constants GAUSS_TABLE_TAPS and tap_index/tap_value are
+// ignored. Exact for every input sequence (same shift register, same valid timing, same
+// modulo-2^W sum). See CHANGES.md.
+// Modified 2026-10-04 by Miguel Simões: with GAUSS_TABLE = 1 the sum is computed as
+// 2 * sum(bit ? tap : 0) - sum(taps), the two positions of each tap added first, instead of
+// distributed-arithmetic tables. See CHANGES.md.
 
 // Core_v5.3 section 3.1on page 2640
 // BT = 0.5
@@ -15,7 +17,7 @@ module gauss_filter #
 (
   parameter integer GAUSS_FILTER_BIT_WIDTH = 16,
   parameter integer NUM_TAP_GAUSS_FILTER = 17,
-  parameter integer GAUSS_TABLE = 0, // 1: fixed-tap table (distributed arithmetic) instead of the runtime FIR
+  parameter integer GAUSS_TABLE = 0, // 1: constant taps (GAUSS_TABLE_TAPS) instead of the runtime FIR
   // taps 0..8 (9..16 mirror 7..0), W bits each, tap 0 in the LSBs. Default: BLE BT = 0.5, 8 samples/symbol,
   // the values python/btlelib.py generates (0 0 0 1 4 9 15 22 24 22 15 9 4 1 0 0 0). Assumes W = 16.
   parameter [9*16-1:0] GAUSS_TABLE_TAPS = {16'd24, 16'd22, 16'd15, 16'd9, 16'd4, 16'd1, 16'd0, 16'd0, 16'd0}
@@ -86,7 +88,7 @@ assign tap16_mult = (bit_upsample_store[15]?gauss_filter_tap0:(-gauss_filter_tap
 wire signed [(GAUSS_FILTER_BIT_WIDTH-1) : 0] fir_sum = (tap0_mult+tap1_mult+tap2_mult+tap3_mult+tap4_mult+tap5_mult+tap6_mult+tap7_mult+tap8_mult+tap9_mult+tap10_mult+tap11_mult+tap12_mult+tap13_mult+tap14_mult+tap15_mult+tap16_mult);
 wire signed [(GAUSS_FILTER_BIT_WIDTH-1) : 0] table_sum;
 
-// ---- GAUSS_TABLE: distributed arithmetic over the same 17-sample window ----
+// ---- GAUSS_TABLE: the same sum with constant taps ----
 // window position 0 = bit_upsample, position k (1..16) = bit_upsample_store[k-1];
 // position k uses tap k for k <= 8 and tap 16-k for k >= 9, as the FIR above.
 function signed [(GAUSS_FILTER_BIT_WIDTH-1) : 0] table_tap;
@@ -98,37 +100,35 @@ function signed [(GAUSS_FILTER_BIT_WIDTH-1) : 0] table_tap;
   end
 endfunction
 
-// sum over the group of (bit ? tap : -tap), modulo 2^W like the FIR
-function signed [(GAUSS_FILTER_BIT_WIDTH-1) : 0] table_entry;
-  input integer first_pos;
-  input integer num_pos;
-  input integer bits;
+// sum of the taps of the 17 positions, modulo 2^W
+function signed [(GAUSS_FILTER_BIT_WIDTH-1) : 0] tap_total;
+  input integer unused;
   integer k;
   reg signed [(GAUSS_FILTER_BIT_WIDTH-1) : 0] acc;
   begin
     acc = 0;
-    for (k=0; k<num_pos; k=k+1)
-      acc = acc + ( ((bits >> k) & 1) ? table_tap(first_pos+k) : -table_tap(first_pos+k) );
-    table_entry = acc;
+    for (k=0; k<17; k=k+1)
+      acc = acc + table_tap(k);
+    tap_total = acc;
   end
 endfunction
 
+// (bit ? tap : -tap) = 2 * (bit ? tap : 0) - tap, so the FIR sum is
+// 2 * sum(bit ? tap : 0) - sum(taps), modulo 2^W like the FIR. Positions k and
+// 16-k have the same tap: their two bits are added first, and the tap is taken
+// 0, 1 or 2 times.
 genvar e;
 generate
 if (GAUSS_TABLE) begin : gen_table
-  wire signed [(GAUSS_FILTER_BIT_WIDTH-1) : 0] table_a [0:63]; // positions 0..5
-  wire signed [(GAUSS_FILTER_BIT_WIDTH-1) : 0] table_b [0:63]; // positions 6..11
-  wire signed [(GAUSS_FILTER_BIT_WIDTH-1) : 0] table_c [0:31]; // positions 12..16
-  for (e=0; e<64; e=e+1) begin : fill_ab
-    assign table_a[e] = table_entry(0, 6, e);
-    assign table_b[e] = table_entry(6, 6, e);
+  wire [16:0] w = {bit_upsample_store[15:0], bit_upsample}; // w[k] = window position k
+  wire signed [(GAUSS_FILTER_BIT_WIDTH-1) : 0] term [0:8];
+  for (e=0; e<8; e=e+1) begin : pairs
+    assign term[e] = table_tap(e) * ({1'b0, w[e]} + {1'b0, w[16-e]});
   end
-  for (e=0; e<32; e=e+1) begin : fill_c
-    assign table_c[e] = table_entry(12, 5, e);
-  end
-  assign table_sum = table_a[{bit_upsample_store[4:0], bit_upsample}] +
-                     table_b[bit_upsample_store[10:5]] +
-                     table_c[bit_upsample_store[15:11]];
+  assign term[8] = w[8] ? table_tap(8) : 0;
+  wire signed [(GAUSS_FILTER_BIT_WIDTH-1) : 0] half_sum = term[0] + term[1] + term[2] + term[3] +
+                                                          term[4] + term[5] + term[6] + term[7] + term[8];
+  assign table_sum = (half_sum <<< 1) - tap_total(0);
 end else begin : gen_no_table
   assign table_sum = 0;
 end

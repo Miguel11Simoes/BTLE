@@ -1,6 +1,9 @@
 // Author: Xianjun Jiao <putaoshu@msn.com>
 // SPDX-FileCopyrightText: 2024 Xianjun Jiao
 // SPDX-License-Identifier: Apache-2.0 license
+// Modified 2026-10-04 by Miguel Simões: only the first quarter of the SINE table is stored, in one
+// memory with one port (the VCO of ble-tx-sin2), rewritten in every clock the port is free.
+// See CHANGES.md.
 
 // Core_v5.3 section 3.1on page 2640
 // The modulation index shall be between 0.45 and 0.55
@@ -37,42 +40,30 @@ reg voltage_signal_valid_delay1;
 reg voltage_signal_valid_last_delay1;
 
 // A full 2^SIN_COS_ADDR_BIT_WIDTH waveform is reconstructed from the first
-// quarter of each sine/cosine table (addresses 0..90 degrees, excluding 90).
-// At the quadrant boundary, sin(90) = cos(0) and cos(90) = -sin(0).
-// The existing write ports accept full-wave addresses, but only writes to
-// the first quarter are stored. Other values follow waveform symmetry.
+// quarter of the SINE table alone (addresses 0..90 degrees, excluding 90). At
+// the offset x into a quadrant the VCO needs sin x and cos x = sin(90 - x):
+// entry a, at the offset, and entry b, at minus the offset. cos 0 = sin 90 is
+// not in the quarter: it is kept in a register, written by the cosine table's
+// address 0, the only cosine entry stored. The other cosine writes are
+// ignored, so the tables must satisfy cos[k] = sin[2^QUARTER_ADDR_BIT_WIDTH - k]
+// for k = 1 .. 2^QUARTER_ADDR_BIT_WIDTH - 1 (the project's tables do). In the
+// quadrant given by the two top bits of the phase:
+//   0: cos =  b, sin =  a        1: cos = -a, sin =  b
+//   2: cos = -b, sin = -a        3: cos =  a, sin = -b
+// Only sine writes to the first quarter are stored.
 localparam integer QUARTER_ADDR_BIT_WIDTH = SIN_COS_ADDR_BIT_WIDTH - 2;
 
+wire signed [(VCO_BIT_WIDTH-1) : 0] next_integral_voltage_signal =
+    integral_voltage_signal + voltage_signal;
 wire [SIN_COS_ADDR_BIT_WIDTH-1:0] phase_address =
     integral_voltage_signal[(SIN_COS_ADDR_BIT_WIDTH-1) : 0];
 wire [QUARTER_ADDR_BIT_WIDTH-1:0] quarter_offset =
     phase_address[QUARTER_ADDR_BIT_WIDTH-1:0];
-wire [QUARTER_ADDR_BIT_WIDTH-1:0] quarter_read_address =
-    phase_address[QUARTER_ADDR_BIT_WIDTH] ? -quarter_offset : quarter_offset;
-
-wire signed [IQ_BIT_WIDTH-1:0] cos_quarter_data;
-wire signed [IQ_BIT_WIDTH-1:0] sin_quarter_data;
-reg swap_endpoint_delay;
-reg cos_negative_delay;
-reg sin_negative_delay;
-
-wire signed [IQ_BIT_WIDTH-1:0] cos_sample =
-    swap_endpoint_delay ? sin_quarter_data : cos_quarter_data;
-wire signed [IQ_BIT_WIDTH-1:0] sin_sample =
-    swap_endpoint_delay ? cos_quarter_data : sin_quarter_data;
-
-assign cos_out = cos_negative_delay ? -cos_sample : cos_sample;
-assign sin_out = sin_negative_delay ? -sin_sample : sin_sample;
-
-// Match the RAM's registered read: sign and endpoint selection describe the
-// same phase address that the RAM sampled on the preceding clock edge.
-always @(posedge clk) begin
-  swap_endpoint_delay <= phase_address[QUARTER_ADDR_BIT_WIDTH] &&
-                         (quarter_offset == 0);
-  cos_negative_delay <= phase_address[SIN_COS_ADDR_BIT_WIDTH-1] ^
-                        phase_address[QUARTER_ADDR_BIT_WIDTH];
-  sin_negative_delay <= phase_address[SIN_COS_ADDR_BIT_WIDTH-1];
-end
+wire [QUARTER_ADDR_BIT_WIDTH-1:0] next_quarter_offset =
+    next_integral_voltage_signal[QUARTER_ADDR_BIT_WIDTH-1:0];
+wire [QUARTER_ADDR_BIT_WIDTH-1:0] a_address = quarter_offset;
+wire [QUARTER_ADDR_BIT_WIDTH-1:0] b_address = -quarter_offset;
+wire [QUARTER_ADDR_BIT_WIDTH-1:0] next_b_address = -next_quarter_offset;
 
 always @ (posedge clk) begin
   if (rst) begin
@@ -91,110 +82,139 @@ always @ (posedge clk) begin
     sin_cos_out_valid_last <= voltage_signal_valid_last_delay1;
 
     if (voltage_signal_valid) begin
-      integral_voltage_signal <= integral_voltage_signal + voltage_signal;
+      integral_voltage_signal <= next_integral_voltage_signal;
     end
   end
 end
 
-// Both quarter tables live in ONE memory of 2^QUARTER_ADDR_BIT_WIDTH words of
-// {cos, sin}, because they are always read at the same address: one read port,
-// and one write port with a write mask of one bit per table. The write
-// interface is unchanged (an address and data per table, held until the next
-// register write). Upstream rewrites each table on every clock; here a table is
-// written when its address/data pair changes, and on the first clock after
-// reset, which leaves the same contents. The two tables share the write port:
-// if both have a write pending in the same clock, they are written together
-// when their addresses are equal; otherwise the older request goes first (the
-// cosine on a tie) and the other waits one clock, in a one-entry queue per
-// table.
-wire cos_write_in_quarter =
-    cos_table_write_address[SIN_COS_ADDR_BIT_WIDTH-1:QUARTER_ADDR_BIT_WIDTH] == 0;
+// The memory has ONE port, and a sample needs two entries. The TX gives the
+// VCO at most one sample every two clocks, never in the clock right after a
+// sample or a reset, so each sample has two clocks of the port:
+//   - in the clock of the sample, entry b of the NEXT phase (integral +
+//     voltage_signal), read ahead; it lands in b_entry one clock later;
+//   - in the clock after, entry a of the new phase, which the VCO outputs.
+// In every other clock the port reads entry a again, or takes a table write,
+// except in the clock after a reset (entry a of phase 0). While transmitting no
+// clock is left for writes; a write waits until one is.
+//
+// The sine write interface is unchanged: an address and data, held until the
+// next register write. Upstream rewrites the table on every clock; here the
+// pair is rewritten in every clock the port is free, which leaves the same
+// contents. A pair that arrives while the port is busy is written in the first
+// free clock, with the data its input still holds: the pair must not change
+// again before that clock.
 wire sin_write_in_quarter =
     sin_table_write_address[SIN_COS_ADDR_BIT_WIDTH-1:QUARTER_ADDR_BIT_WIDTH] == 0;
 
-reg [SIN_COS_ADDR_BIT_WIDTH+IQ_BIT_WIDTH-1:0] cos_write_pair_delay;
-reg [SIN_COS_ADDR_BIT_WIDTH+IQ_BIT_WIDTH-1:0] sin_write_pair_delay;
+reg [IQ_BIT_WIDTH-1:0] sin_write_data_delay;
 reg rst_delay;
 
-wire cos_write_new = cos_write_in_quarter && (rst_delay ||
-    {cos_table_write_address, cos_table_write_data} != cos_write_pair_delay);
-wire sin_write_new = sin_write_in_quarter && (rst_delay ||
-    {sin_table_write_address, sin_table_write_data} != sin_write_pair_delay);
+wire sin_write_ready = sin_write_in_quarter;
 
-reg cos_write_queued;
-reg sin_write_queued;
-reg [QUARTER_ADDR_BIT_WIDTH-1:0] cos_queued_address;
-reg [QUARTER_ADDR_BIT_WIDTH-1:0] sin_queued_address;
-reg [IQ_BIT_WIDTH-1:0] cos_queued_data;
-reg [IQ_BIT_WIDTH-1:0] sin_queued_data;
-
-// the request of each table: its queued write first, else this clock's pair
-wire cos_write_request = cos_write_queued || cos_write_new;
-wire sin_write_request = sin_write_queued || sin_write_new;
-wire [QUARTER_ADDR_BIT_WIDTH-1:0] cos_request_address = cos_write_queued ?
-    cos_queued_address : cos_table_write_address[QUARTER_ADDR_BIT_WIDTH-1:0];
-wire [QUARTER_ADDR_BIT_WIDTH-1:0] sin_request_address = sin_write_queued ?
-    sin_queued_address : sin_table_write_address[QUARTER_ADDR_BIT_WIDTH-1:0];
-wire [IQ_BIT_WIDTH-1:0] cos_request_data = cos_write_queued ?
-    cos_queued_data : cos_table_write_data;
-wire [IQ_BIT_WIDTH-1:0] sin_request_data = sin_write_queued ?
-    sin_queued_data : sin_table_write_data;
-
-wire same_write_address = (cos_request_address == sin_request_address);
-wire cos_write = cos_write_request && (!sin_write_request || same_write_address ||
-                                       cos_write_queued || !sin_write_queued);
-wire sin_write = sin_write_request && (!cos_write_request || same_write_address ||
-                                       !cos_write);
+wire b_read = voltage_signal_valid && !rst;
+wire table_write = !b_read && !voltage_signal_valid_delay1 && !rst_delay && sin_write_ready;
+wire a_read = !b_read && !table_write;
+wire [QUARTER_ADDR_BIT_WIDTH-1:0] table_write_address =
+    sin_table_write_address[QUARTER_ADDR_BIT_WIDTH-1:0];
 
 always @(posedge clk) begin
-  cos_write_pair_delay <= {cos_table_write_address, cos_table_write_data};
-  sin_write_pair_delay <= {sin_table_write_address, sin_table_write_data};
+  sin_write_data_delay <= sin_table_write_data;
   rst_delay <= rst;
+end
 
-  if (rst) begin
-    cos_write_queued <= 0;
-    sin_write_queued <= 0;
-  end else begin
-    // a new pair waits if it is not written now, or if the queued one is
-    if (cos_write_new && (!cos_write || cos_write_queued)) begin
-      cos_write_queued <= 1;
-      cos_queued_address <= cos_table_write_address[QUARTER_ADDR_BIT_WIDTH-1:0];
-      cos_queued_data <= cos_table_write_data;
-    end else if (cos_write) begin
-      cos_write_queued <= 0;
-    end
-    if (sin_write_new && (!sin_write || sin_write_queued)) begin
-      sin_write_queued <= 1;
-      sin_queued_address <= sin_table_write_address[QUARTER_ADDR_BIT_WIDTH-1:0];
-      sin_queued_data <= sin_table_write_data;
-    end else if (sin_write) begin
-      sin_write_queued <= 0;
-    end
+// cos 0 = sin 90, the cosine table's entry 0: taken one clock after its pair
+// is presented, when upstream reads it back
+reg cos_write_zero_delay;
+reg [IQ_BIT_WIDTH-1:0] cos_write_data_delay;
+reg [IQ_BIT_WIDTH-1:0] cos_zero;
+
+always @(posedge clk) begin
+  cos_write_zero_delay <= (cos_table_write_address == 0);
+  cos_write_data_delay <= cos_table_write_data;
+  if (cos_write_zero_delay) begin
+    cos_zero <= cos_write_data_delay;
   end
 end
 
-cos_sin_table_ram # (
+// The entries of the phase shown. a is the memory output after a read of a,
+// and a_hold after a read of b (the output moves on to the next phase) or
+// after a write to entry a (the output keeps the old value: a one-port memory
+// does not read while it writes). b is b_entry: the entry read ahead, or the
+// value of a write to entry b; at offset 0 it is cos 0. A write to entry a or
+// b shows from the next clock, as upstream: its value is the pair registered
+// in the clock of the write.
+wire [IQ_BIT_WIDTH-1:0] table_read_data;
+wire [IQ_BIT_WIDTH-1:0] write_data_delay = sin_write_data_delay;
+reg write_hit_a_delay;
+reg write_hit_b_delay;
+reg a_from_hold;
+reg [IQ_BIT_WIDTH-1:0] a_hold;
+reg [IQ_BIT_WIDTH-1:0] b_entry;
+reg odd_quadrant_delay;
+wire cos_negative_delay; // the two quadrant bits XORed, both registered
+reg sin_negative_delay;
+reg offset_zero_delay;
+
+wire signed [IQ_BIT_WIDTH-1:0] a_value = a_from_hold ? a_hold : table_read_data;
+wire signed [IQ_BIT_WIDTH-1:0] b_value = offset_zero_delay ? cos_zero : b_entry;
+wire signed [IQ_BIT_WIDTH-1:0] cos_sample = odd_quadrant_delay ? a_value : b_value;
+wire signed [IQ_BIT_WIDTH-1:0] sin_sample = odd_quadrant_delay ? b_value : a_value;
+
+assign cos_negative_delay = sin_negative_delay ^ odd_quadrant_delay;
+assign cos_out = cos_negative_delay ? -cos_sample : cos_sample;
+assign sin_out = sin_negative_delay ? -sin_sample : sin_sample;
+
+// Quadrant, signs and offset 0 describe the phase whose entry a the memory
+// read last: the phase moves only with a sample, and the clock after one
+// reads entry a.
+always @(posedge clk) begin
+  odd_quadrant_delay <= phase_address[QUARTER_ADDR_BIT_WIDTH];
+  sin_negative_delay <= phase_address[SIN_COS_ADDR_BIT_WIDTH-1];
+  offset_zero_delay <= (quarter_offset == 0);
+
+  write_hit_a_delay <= table_write && (table_write_address == a_address);
+  write_hit_b_delay <= table_write && (table_write_address == b_address);
+
+  if (write_hit_a_delay) begin
+    a_hold <= write_data_delay;
+  end else if (b_read) begin
+    a_hold <= a_value;
+  end
+  a_from_hold <= !a_read && (b_read || write_hit_a_delay || a_from_hold);
+
+  if (voltage_signal_valid_delay1) begin
+    b_entry <= table_read_data;
+  end else if (write_hit_b_delay) begin
+    b_entry <= write_data_delay;
+  end
+end
+
+sin_table_ram # (
   .DATA_WIDTH(IQ_BIT_WIDTH),
   .ADDRESS_WIDTH(QUARTER_ADDR_BIT_WIDTH)
-) cos_sin_table_ram_i (
+) sin_table_ram_i (
   .clk(clk),
   .rst(rst),
 
-  .write_address(cos_write ? cos_request_address : sin_request_address),
-  .write_data({cos_request_data, sin_request_data}),
-  .write_mask({cos_write, sin_write}),
+  .write_address(table_write_address),
+  .write_data(sin_table_write_data),
+  .write_enable(table_write),
 
-  .read_address(quarter_read_address),
-  .read_data({cos_quarter_data, sin_quarter_data})
+  .read_address(b_read ? next_b_address : a_address),
+  .read_data(table_read_data)
 );
 
 endmodule
 
-// One memory of 2^ADDRESS_WIDTH words of 2*DATA_WIDTH bits, with one write port
-// that has a write mask of one bit per half, and one read port. It is written
-// as its two halves, two sdpram_one_clk (the repository's RAM model) that share
-// the write address and the read address; the mask bits are their write enables.
-module cos_sin_table_ram #
+// One memory of 2^ADDRESS_WIDTH words of DATA_WIDTH bits, with ONE port. A
+// one-port macro takes write_address in a clock with a write (write_enable),
+// in which it keeps its output, and read_address in the others, in which it
+// reads. It is modelled by sdpram_one_clk (the repository's RAM model), which
+// also reads in a clock with a write: there read_address is entry a of the
+// phase shown, and the VCO shows the memory output only while it holds that
+// entry, unchanged (after a write to it, a_hold), so the VCO outputs are those
+// it has with the macro.
+module sin_table_ram #
 (
   parameter integer DATA_WIDTH = 8,
   parameter integer ADDRESS_WIDTH = 9
@@ -203,42 +223,26 @@ module cos_sin_table_ram #
   input wire rst,
 
   input wire [ADDRESS_WIDTH-1:0] write_address,
-  input wire [2*DATA_WIDTH-1:0] write_data,
-  input wire [1:0] write_mask,
+  input wire [DATA_WIDTH-1:0] write_data,
+  input wire write_enable,
 
   input wire [ADDRESS_WIDTH-1:0] read_address,
-  output wire [2*DATA_WIDTH-1:0] read_data
+  output wire [DATA_WIDTH-1:0] read_data
 );
 
 sdpram_one_clk # (
   .DATA_WIDTH(DATA_WIDTH),
   .ADDRESS_WIDTH(ADDRESS_WIDTH)
-) high_half_sdpram_one_clk_i (
+) sdpram_one_clk_i (
   .clk(clk),
   .rst(rst),
 
   .write_address(write_address),
-  .write_data(write_data[2*DATA_WIDTH-1:DATA_WIDTH]),
-  .write_enable(write_mask[1]),
+  .write_data(write_data),
+  .write_enable(write_enable),
 
   .read_address(read_address),
-  .read_data(read_data[2*DATA_WIDTH-1:DATA_WIDTH])
-);
-
-sdpram_one_clk # (
-  .DATA_WIDTH(DATA_WIDTH),
-  .ADDRESS_WIDTH(ADDRESS_WIDTH)
-) low_half_sdpram_one_clk_i (
-  .clk(clk),
-  .rst(rst),
-
-  .write_address(write_address),
-  .write_data(write_data[DATA_WIDTH-1:0]),
-  .write_enable(write_mask[0]),
-
-  .read_address(read_address),
-  .read_data(read_data[DATA_WIDTH-1:0])
+  .read_data(read_data)
 );
 
 endmodule
-

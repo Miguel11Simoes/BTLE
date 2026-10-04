@@ -1,8 +1,16 @@
 // Author: Xianjun Jiao <putaoshu@msn.com>
 // SPDX-FileCopyrightText: 2024 Xianjun Jiao
 // SPDX-License-Identifier: Apache-2.0 license
+// Modified 2026-10-04 by Miguel Simões: a 6-bit input count that stops at 41 and no state register
+// (same outputs on every clock while a packet has fewer than 8 192 bits). See CHANGES.md.
 
 // Core_v5.3 figure3.5 on page 2735
+
+// Upstream's 13-bit data_in_count is only compared with 40 and 41, and does not
+// wrap in a packet of btle_tx (at most 40 + 2 056 + 24 bits, cleared after the
+// last one): here it has 6 bits and stops at 41. Upstream's state is IDLE exactly when the
+// count is 0 (IDLE is entered with the count cleared and left with it
+// incremented), so the state register is not needed.
 
 `timescale 1ns / 1ps
 module scramble #
@@ -23,11 +31,6 @@ module scramble #
   output wire data_out_valid_last // indicate last bit out together with data_out_valid
 );
 
-localparam [0:0] IDLE           = 0,
-                 WORK_ON_INPUT  = 1;
-
-reg [0:0] scramble_state;
-
 wire data_in_valid_internal;
 wire data_out_internal;
 wire data_out_valid_internal;
@@ -38,7 +41,7 @@ reg data_in_delay;
 reg data_in_valid_delay;
 reg data_in_valid_last_delay;
 
-reg [(NUM_BIT_PAYLOAD_LENGTH+3+1):0] data_in_count;  // 1 more addr bit is needed: the octet_valid actually will output 2 bytes header, payload length, 3 bytes CRC
+reg [5:0] data_in_count; // input bits, stops at 41; 0 is upstream's IDLE
 
 assign scramble_start_for_input = (data_in_count>=40);
 assign data_in_valid_internal = (scramble_start_for_input? data_in_valid : 0);
@@ -70,29 +73,16 @@ always @ (posedge clk) begin
     data_in_valid_last_delay <= 0;
 
     data_in_count <= 0;
-
-    scramble_state <= IDLE;
   end else begin
     data_in_delay <= data_in;
     data_in_valid_delay <= data_in_valid;
     data_in_valid_last_delay <= data_in_valid_last;
 
-    case(scramble_state)
-      IDLE: begin
-        data_in_count <= (data_in_valid ? (data_in_count+1) : data_in_count);
-
-        scramble_state <= (data_in_valid ? WORK_ON_INPUT : scramble_state);
-      end
-
-      WORK_ON_INPUT: begin
-        if (data_in_valid_last_delay) begin
-          data_in_count <= 0;
-          scramble_state <= IDLE;
-        end else begin
-          data_in_count <= (data_in_valid ? (data_in_count+1) : data_in_count);
-        end
-      end
-    endcase
+    if (data_in_count != 0 && data_in_valid_last_delay) begin
+      data_in_count <= 0;
+    end else if (data_in_valid && data_in_count != 41) begin
+      data_in_count <= data_in_count + 1;
+    end
   end
 end
 
