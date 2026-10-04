@@ -340,9 +340,10 @@ endmodule
 //     latest: within the 12 clk clocks btle_tx leaves before it takes the byte
 //     when clkb runs at 8 MHz or faster.
 // The bytes sent are upstream's whenever the packet is written before tx_start,
-// as the firmware and the upstream testbenches do. A byte rewritten while it
-// is being read (between the request and the clock in which btle_tx takes it)
-// may differ: upstream reads it at the last of those clocks.
+// as the upstream testbenches do (the repository's firmware does not
+// transmit). A byte rewritten while it is being read (between the request and
+// the clock in which btle_tx takes it) may differ: upstream reads it at the
+// last of those clocks.
 module pdu_buffer #
 (
   parameter integer ADDRESS_WIDTH = 9
