@@ -3,9 +3,9 @@
 > Validation correction (2026-10-04): earlier success claims for all 270 checks are withdrawn. The strict rerun is **FAIL: 118 PASS, 20 BOTH_FAIL, 18 NO_STIMULUS, 114 ERROR; 0 DIFFERENT**. See [the integrity audit](../04%20Validation/VALIDATION_INTEGRITY.md) for evidence and limitations.
 
 **Project:** BTLE — reconfigurable RISC-V baseband  
-**Branch:** the same file on `master`, `risc-v-ble`, `ble-opt`, `ble-tx-table`, `ble-rx-dm`, `ble-tx-table-reg`, `ble-tx-table-sram`, `ble-tx-fir2`, `ble-tx-sin4`, `ble-tx-sin8`, `ble-tx-sin8-1rw`, `ble-tx-sin2`, `ble-tx-1--8` and `ble-tx-opt`  
+**Branch:** the same file on `master`, `risc-v-ble`, `ble-opt`, `ble-tx-table`, `ble-rx-dm`, `ble-tx-table-reg`, `ble-tx-table-sram`, `ble-tx-fir2`, `ble-tx-sin4`, `ble-tx-sin8`, `ble-tx-sin8-1rw`, `ble-tx-sin2`, `ble-tx-1--8`, `ble-tx-opt` and `ble-tx-pdu`  
 **Base:** tag `upstream-baseline` (`8540186`)  
-**Date:** 2026-09-28; updated 2026-09-29 (on `ble-tx-sin4`, `ble-tx-sin8` and `ble-tx-opt`; pointer to the TX total), 2026-10-03 (the two VCO-memory branches) and 2026-10-04 (the filter's weight with the memory of `ble-tx-sin2`; `ble-tx-1--8`)  
+**Date:** 2026-09-28; updated 2026-09-29 (on `ble-tx-sin4`, `ble-tx-sin8` and `ble-tx-opt`; pointer to the TX total), 2026-10-03 (the two VCO-memory branches) and 2026-10-04 (the filter's weight with the memory of `ble-tx-sin2`; `ble-tx-1--8`; the constant taps paired, built on `ble-tx-pdu`)  
 **Author:** Miguel Simões  
 **Status:** executed: run `tx-area` of `scripts/compare/run_tx_compare.sh` (harness `4946579`).
 **TX area only**: the receiver is not counted. Pre-layout std-cell area (Nangate45) plus real
@@ -34,6 +34,7 @@ against the upstream FIR, and measured with the same flow, in one run.
 | Upstream FIR (reference) | `master` | 9 tap registers (144 bits); the filter adds 17 terms | **yes**, any time, through register 1 | upstream |
 | **Folded FIR** | `ble-tx-fir2` | the same 9 tap registers; 8 pair terms + the centre | **yes**, same interface | new RTL, exact rewrite |
 | **ROM**: tables as constants | `ble-tx-table` | 160 constants that synthesis folds into gates | **no**: a new chip | B2 of `ble-opt` |
+| **Constant taps, paired** | `ble-tx-pdu` | the 9 taps as constants; 8 pair terms + the centre | **no**: a new chip | B2 rewritten, exact |
 | **REG**: tables in flip-flops | `ble-tx-table-reg` | 2 560 flip-flops | **yes**: rebuilt from the taps | new RTL |
 | **SRAM**: tables in SRAM | `ble-tx-table-sram` | 3 single-port SRAM macros, 2 560 bits | **yes**: rebuilt from the taps | new RTL + OpenRAM macros |
 | MASK-ROM macro | — | a ROM macro instead of gates | no | **not buildable**: OpenRAM's ROM compiler stops with an internal assertion in FreePDK45 for every size tried |
@@ -47,6 +48,13 @@ result is identical modulo 2¹⁶ for every tap value and every input, so this i
 an exact rewrite, like B1, and it replaces the FIR unconditionally. A side
 effect: 2h modulo 2¹⁶ does not depend on bit 15 of h, so synthesis drops the
 top bit of the 8 paired taps (178 → 170 flip-flops), correctly.
+
+**Constant taps, paired.** On `ble-tx-pdu` the constant-tap filter of B2 is
+computed without tables: (bₖ ? h : −h) = 2·(bₖ ? h : 0) − h, so the sum is
+2·Σ(bₖ ? hₖ : 0) − Σhₖ modulo 2¹⁶, and the two positions of each tap are added
+first, which takes the tap 0, 1 or 2 times. It is the folding of the folded
+FIR applied to the constant taps; the result is the same for every tap set and
+every input, and the taps stay a synthesis parameter as on `ble-tx-table`.
 
 **REG and SRAM tables.** To keep the software interface of the FIR (9 taps
 through register 1, exactly as `firmware/btle_ll.c` programs them today), the
@@ -73,21 +81,26 @@ are left out. Results in
 [`results/compare/tx-area/summary.md`](../../results/compare/tx-area/summary.md)
 (on the four TX branches). With those RAMs counted as SRAM macros, the
 transmitter is about 97 % memory and every option here moves its total by
-−1.8 to +11.9 %: `docs/04 Validation/BRANCH_COMPARISON.md` § 4. With the
-smallest transmitter built, `ble-tx-sin2` (40 293 µm², the one-port sine table;
-`ble-tx-1--8` is within 0.2 % of it), the filter weighs more: B2 is estimated
-to take 7.4 % off it and the folded FIR 2.5 % (the same § 4.2; neither
-combination is built).
+−1.8 to +11.9 %: `docs/04 Validation/BRANCH_COMPARISON.md` § 4. With
+`ble-tx-sin2` (40 293 µm², the one-port sine table; `ble-tx-1--8` is within
+0.2 % of it), the filter weighs more: B2 is estimated to take 7.4 % off it and
+the folded FIR 2.5 % (the same § 4.2). `ble-tx-pdu` builds B2, in its paired
+form, with that memory and a one-port packet buffer: 20 098.5 µm² in all, of
+which the filter is 1.3 %.
 
 ### 2.1 The Gaussian filter (`gauss_filter`)
 
 | Option | Branch | Std cells | Flip-flops | Cell area (µm²) | Table macros (µm²) | **Total (µm²)** | vs upstream FIR |
 |---|---|---:|---:|---:|---:|---:|---:|
+| **Constant taps, paired** | `ble-tx-pdu` | 166 | 22 | 256.7 | — | **256.7** | **−92.4 %** |
 | **ROM**: tables as constants | `ble-tx-table` | 253 | 22 | 348.5 | — | **348.5** | **−89.6 %** |
 | **Folded FIR** | `ble-tx-fir2` | 1 560 | 170 | 2 311.5 | — | **2 311.5** | **−31.3 %** |
 | Upstream FIR | `master` | 2 286 | 178 | 3 366.0 | — | **3 366.0** | — |
 | **SRAM** tables | `ble-tx-table-sram` | 1 362 | 267 | 2 479.7 | 18 437.4 | **20 917.1** | **+521 % (×6.2)** |
 | **REG** tables | `ble-tx-table-reg` | 10 097 | 2 822 | 23 221.5 | — | **23 221.5** | **+590 % (×6.9)** |
+
+`ble-tx-pdu` is run `tx-pdu` of `scripts/compare/run_compare.sh` (the same flow,
+`GAUSS_TABLE=1`).
 
 ### 2.2 The whole transmitter (`btle_tx`)
 
@@ -101,7 +114,9 @@ combination is built).
 
 Every number is the same as in the per-branch area runs
 (`results/area/tx-table-reg`, `tx-table-sram`, `tx-fir2`, `tx-table`,
-`baseline-upstream`), cell for cell.
+`baseline-upstream`), cell for cell. `ble-tx-pdu` is not in this table: its
+`btle_tx` also changes the packet buffer and the counters
+(`docs/04 Validation/TX_PDU_VALIDATION.md`).
 
 ## 3. Inside the rewritable tables
 
@@ -130,7 +145,8 @@ registers, is 8 to 9 times the whole folded FIR.
    It is by far the smallest option: 9.7 times smaller than the upstream FIR,
    and it cuts the whole transmitter by 56 %. The constants let synthesis fold
    the 160 entries into about 230 gates. The price is that changing the filter
-   needs a new chip.
+   needs a new chip. The same constant taps without tables, paired as in the
+   folded FIR, take 256.7 µm² on `ble-tx-pdu`: 26 % less again.
 2. **Taps programmable after fabrication → the folded FIR: 2 311.5 µm².** It is
    the smallest option that can still change: 31 % below the upstream FIR, with
    the same software interface, new taps active on the next clock, no memory
@@ -153,7 +169,7 @@ between the two winners: 2 311.5 − 348.5 = **1 963 µm²** for the filter
 
 | If the taps… | Choose | Filter area | Branch |
 |---|---|---:|---|
-| never change after fabrication | tables as constants (ROM in logic) | 348.5 µm² | `ble-tx-table` |
+| never change after fabrication | the taps as constants, paired (or as tables) | 256.7 µm² (348.5) | `ble-tx-pdu` (`ble-tx-table`) |
 | must change by software | folded FIR | 2 311.5 µm² | `ble-tx-fir2` |
 | are chosen once per chip | folded FIR + 144-bit OTP for the taps | 2 311.5 µm² + the OTP macro (not measurable here) | — |
 | (anything) | not REG, not SRAM tables | ≥ 20 917 µm² | — |
@@ -190,6 +206,7 @@ macro whose area cannot be obtained, so none was created.
 
 | Option | Filter area | Extra IP or process | Production | Changing the filter |
 |---|---:|---|---|---|
+| Constant taps, paired | 256.7 µm² | none | none | new masks |
 | ROM in gates | 348.5 µm² | none | none | new masks |
 | Folded FIR | 2 311.5 µm² | none | none | software, next clock |
 | Upstream FIR | 3 366.0 µm² | none | none | software, next clock |
@@ -210,7 +227,9 @@ trusted, because a wrong design can be small.
 | Upstream testbenches, 270 runs | 118 PASS; **FAIL overall** (integrity audit) | 118 PASS; **FAIL overall** (integrity audit) | 118 PASS; **FAIL overall** (integrity audit) |
 
 The ROM option is validated in `docs/04 Validation/TX_TABLE_VALIDATION.md` on
-`ble-tx-table` (unbounded formal proof against the FIR with the BLE taps).
+`ble-tx-table` (unbounded formal proof against the FIR with the BLE taps), and
+its paired form in `docs/04 Validation/TX_PDU_VALIDATION.md` on `ble-tx-pdu`
+(the same proof, with mutants of the new form, 3/3).
 
 At 16 bits, the solvers do not close the whole folded-FIR equivalence: they
 would have to match two different 16-bit adder trees over 9 symbolic taps. At

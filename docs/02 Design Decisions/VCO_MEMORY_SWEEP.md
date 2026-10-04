@@ -1,9 +1,9 @@
 # Single-port memory for the VCO tables: the OpenRAM sweep, and the branches it decides
 
 **Project:** BTLE — reconfigurable RISC-V baseband  
-**Branch:** every branch carries this same file (`master`, `risc-v-ble`, `ble-tx-table`, `ble-tx-table-reg`, `ble-tx-table-sram`, `ble-tx-fir2`, `ble-tx-sin4`, `ble-tx-sin8`, `ble-tx-sin8-1rw`, `ble-tx-sin2`, `ble-tx-1--8`, `ble-tx-opt`, `ble-rx-dm`, `ble-opt`)  
+**Branch:** every branch carries this same file (`master`, `risc-v-ble`, `ble-tx-table`, `ble-tx-table-reg`, `ble-tx-table-sram`, `ble-tx-fir2`, `ble-tx-sin4`, `ble-tx-sin8`, `ble-tx-sin8-1rw`, `ble-tx-sin2`, `ble-tx-1--8`, `ble-tx-opt`, `ble-tx-pdu`, `ble-rx-dm`, `ble-opt`)  
 **Base:** tag `upstream-baseline` (`8540186`)  
-**Date:** 2026-10-03; updated 2026-10-04 (the two branches built and measured, and the 256 × 16 as `ble-tx-1--8`, § 5)  
+**Date:** 2026-10-03; updated 2026-10-04 (the two branches built and measured, and the 256 × 16 as `ble-tx-1--8`, § 5; the 512 × 8 again on `ble-tx-pdu`, with B2 and a one-port packet buffer, § 5)  
 **Author:** Miguel Simões  
 **Status:** executed: run `openram-1rw-sweep` of `scripts/area/run_openram.sh` on branch
 `ble-tx-sin8-1rw` (commit `176a79b`): 9 single-port macros requested, 8 generated. Measured
@@ -11,7 +11,9 @@ before any RTL of the new branches; `ble-tx-sin128` was deleted after it (§ 4).
 `ble-tx-sin8-1rw` and `ble-tx-sin2` were then built and measured (run `tx-1rw`,
 `docs/04 Validation/BRANCH_COMPARISON.md`; their reports `TX_SIN8_1RW_COMPARISON.md` and
 `TX_SIN2_COMPARISON.md`, at the root of each), and so was the 256 × 16 memory, as branch
-`ble-tx-1--8` (run `tx-1--8`; report `TX_1--8_COMPARISON.md`).
+`ble-tx-1--8` (run `tx-1--8`; report `TX_1--8_COMPARISON.md`). `ble-tx-pdu` reuses the
+512 × 8 memory of `ble-tx-sin2` with B2 and a one-port packet buffer (run `tx-pdu`;
+report `docs/04 Validation/TX_PDU_VALIDATION.md`).
 
 ---
 
@@ -232,6 +234,13 @@ more than that of `ble-tx-sin2`, which takes back the 279.0 µm² its memory
 saves: the best memory of the sweep gives a transmitter 66.0 µm² (0.2 %) above
 `ble-tx-sin2`, the same size within the resolution of the flow, but with one
 read per sample (writes while transmitting, a sample on any clock).
+
+**The packet buffer next.** With a one-port VCO memory, the two-port 512 × 8
+packet buffer is the largest part of the transmitter. `ble-tx-pdu` keeps the
+memory of `ble-tx-sin2` and gives the buffer one port too, 256 words and a
+register for byte 256 (6 979.1 µm², run `openram-pdu`), with B2 and exact
+rewrites of the logic: the transmitter measures **20 098.5 µm²**, −88.0 %
+against `master` (run `tx-pdu`, `BRANCH_COMPARISON.md` § 4.2).
 
 ## 6. What this does not claim
 
