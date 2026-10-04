@@ -1,9 +1,9 @@
 # Gaussian filter: where the table lives, and the folded FIR — TX area of every option
 
 **Project:** BTLE — reconfigurable RISC-V baseband  
-**Branch:** the same file on `master`, `risc-v-ble`, `ble-opt`, `ble-tx-table`, `ble-rx-dm`, `ble-tx-table-reg`, `ble-tx-table-sram`, `ble-tx-fir2`, `ble-tx-sin4`, `ble-tx-sin8`, `ble-tx-sin8-1rw`, `ble-tx-sin2` and `ble-tx-opt`  
+**Branch:** the same file on `master`, `risc-v-ble`, `ble-opt`, `ble-tx-table`, `ble-rx-dm`, `ble-tx-table-reg`, `ble-tx-table-sram`, `ble-tx-fir2`, `ble-tx-sin4`, `ble-tx-sin8`, `ble-tx-sin8-1rw`, `ble-tx-sin2`, `ble-tx-1--8` and `ble-tx-opt`  
 **Base:** tag `upstream-baseline` (`8540186`)  
-**Date:** 2026-09-28; updated 2026-09-29 (on `ble-tx-sin4`, `ble-tx-sin8` and `ble-tx-opt`; pointer to the TX total), 2026-10-03 (the two VCO-memory branches) and 2026-10-04 (the filter's weight with the memory of `ble-tx-sin2`)  
+**Date:** 2026-09-28; updated 2026-09-29 (on `ble-tx-sin4`, `ble-tx-sin8` and `ble-tx-opt`; pointer to the TX total), 2026-10-03 (the two VCO-memory branches) and 2026-10-04 (the filter's weight with the memory of `ble-tx-sin2`; `ble-tx-1--8`)  
 **Author:** Miguel Simões  
 **Status:** executed: run `tx-area` of `scripts/compare/run_tx_compare.sh` (harness `4946579`).
 **TX area only**: the receiver is not counted. Pre-layout std-cell area (Nangate45) plus real
@@ -72,10 +72,10 @@ are left out. Results in
 (on the four TX branches). With those RAMs counted as SRAM macros, the
 transmitter is about 97 % memory and every option here moves its total by
 −1.8 to +11.9 %: `docs/04 Validation/BRANCH_COMPARISON.md` § 4. With the
-smallest VCO memory built, the one-port sine table of `ble-tx-sin2`, the
-transmitter is 40 293 µm² and the filter weighs more: B2 is estimated to take
-7.4 % off it and the folded FIR 2.5 % (the same § 4.2; neither combination is
-built).
+smallest transmitter built, `ble-tx-sin2` (40 293 µm², the one-port sine table;
+`ble-tx-1--8` is within 0.2 % of it), the filter weighs more: B2 is estimated
+to take 7.4 % off it and the folded FIR 2.5 % (the same § 4.2; neither
+combination is built).
 
 ### 2.1 The Gaussian filter (`gauss_filter`)
 

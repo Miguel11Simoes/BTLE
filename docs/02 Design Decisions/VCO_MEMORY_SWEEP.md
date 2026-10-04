@@ -1,16 +1,17 @@
 # Single-port memory for the VCO tables: the OpenRAM sweep, and the branches it decides
 
 **Project:** BTLE — reconfigurable RISC-V baseband  
-**Branch:** every branch carries this same file (`master`, `risc-v-ble`, `ble-tx-table`, `ble-tx-table-reg`, `ble-tx-table-sram`, `ble-tx-fir2`, `ble-tx-sin4`, `ble-tx-sin8`, `ble-tx-sin8-1rw`, `ble-tx-sin2`, `ble-tx-opt`, `ble-rx-dm`, `ble-opt`)  
+**Branch:** every branch carries this same file (`master`, `risc-v-ble`, `ble-tx-table`, `ble-tx-table-reg`, `ble-tx-table-sram`, `ble-tx-fir2`, `ble-tx-sin4`, `ble-tx-sin8`, `ble-tx-sin8-1rw`, `ble-tx-sin2`, `ble-tx-1--8`, `ble-tx-opt`, `ble-rx-dm`, `ble-opt`)  
 **Base:** tag `upstream-baseline` (`8540186`)  
-**Date:** 2026-10-03; updated 2026-10-04 (the two branches built and measured, § 5)  
+**Date:** 2026-10-03; updated 2026-10-04 (the two branches built and measured, and the 256 × 16 as `ble-tx-1--8`, § 5)  
 **Author:** Miguel Simões  
 **Status:** executed: run `openram-1rw-sweep` of `scripts/area/run_openram.sh` on branch
 `ble-tx-sin8-1rw` (commit `176a79b`): 9 single-port macros requested, 8 generated. Measured
 before any RTL of the new branches; `ble-tx-sin128` was deleted after it (§ 4).
 `ble-tx-sin8-1rw` and `ble-tx-sin2` were then built and measured (run `tx-1rw`,
 `docs/04 Validation/BRANCH_COMPARISON.md`; their reports `TX_SIN8_1RW_COMPARISON.md` and
-`TX_SIN2_COMPARISON.md`, at the root of each).
+`TX_SIN2_COMPARISON.md`, at the root of each), and so was the 256 × 16 memory, as branch
+`ble-tx-1--8` (run `tx-1--8`; report `TX_1--8_COMPARISON.md`).
 
 ---
 
@@ -143,7 +144,7 @@ than the 62.5 ns of the 16 MHz clock; setup and hold are 0.009 and 0.001 ns.
 | `ble-tx-sin8` (today) | 512 × 16, two ports | 37 703.9 | — | 1 | — (second port) | reference |
 | `ble-tx-sin8-1rw` | 512 × 16, one port | 17 114.7 | −54.6 % | 1 | yes | **implement** (built, § 5) |
 | `ble-tx-sin2` | 512 × 8, one port | 10 703.9 | −71.6 % | 2 | no | **implement** (built, § 5) |
-| eighth wave, one entry per word | 256 × 16, one port | 10 424.9 | −72.4 % | 1 | yes | **the best 4 096-bit memory** |
+| eighth wave, one entry per word | 256 × 16, one port | 10 424.9 | −72.4 % | 1 | yes | **the best 4 096-bit memory** (built as `ble-tx-1--8`, § 5) |
 | `ble-tx-sin128` | 128 × 32, one port | 16 637.9 | −55.9 % | 1 | yes | **not supported: branch deleted** |
 | 64 × 64 | 64 × 64, one port, no mask (with the mask: not generated) | 27 626.0 | −26.7 % | 1 | yes | **no branch** |
 
@@ -180,9 +181,11 @@ than the 62.5 ns of the 16 MHz clock; setup and hold are 0.009 and 0.001 ns.
    costs: the eighth-wave symmetry couples the COS and SIN tables, as in
    `ble-tx-sin2` (exact for the project's tables: 0 violations over 513
    positions); a second reflection and swap at 45°; and the 45° entry, [90, 90]
-   in the project's tables, falls outside the 256 words, in a 16-bit register.
-   It is the natural replacement for the 128 × 32 of the deleted
-   `ble-tx-sin128`; no branch implements it for now.
+   in the project's tables, falls outside the 256 words, in a register (8 bits
+   suffice: the symmetry that couples the tables makes cos 45° = sin 45°). It
+   is the natural replacement for the 128 × 32 of the deleted `ble-tx-sin128`,
+   and is built as branch `ble-tx-1--8` (`TX_1--8_COMPARISON.md`): both tables
+   are written, each entry into the half where it is stored.
 5. **64 × 64: no branch.** With the mask its writes need (four entries of each
    table per word), OpenRAM 1.2.48 cannot route its pins in FreePDK45: the
    escape router stops with "Couldn't route". Without the mask it routes, after
@@ -220,6 +223,15 @@ queues of `ble-tx-sin8`), −72.1 % against `master` and −30.6 % against
 43 776.4 and 37 296.1 µm²; neither combination with B2 is built
 (`BRANCH_COMPARISON.md` § 4.2 estimates the second from `ble-tx-table`,
 37 295.3 µm²; the 0.8 µm² is the residual of `ble-tx-opt`).
+
+The 256 × 16 eighth wave, built as `ble-tx-1--8` (run `tx-1--8`), measures
+**40 358.6 µm²** (Δ = +200.3 µm²), −75.9 % against `master` and −40.2 % against
+`ble-tx-sin8`. Its logic, the second reflection of the address, the swap past
+45°, the 45° register and the routing of each write to its half, costs 345.0 µm²
+more than that of `ble-tx-sin2`, which takes back the 279.0 µm² its memory
+saves: the best memory of the sweep gives a transmitter 66.0 µm² (0.2 %) above
+`ble-tx-sin2`, the same size within the resolution of the flow, but with one
+read per sample (writes while transmitting, a sample on any clock).
 
 ## 6. What this does not claim
 
