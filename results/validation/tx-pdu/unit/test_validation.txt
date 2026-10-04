@@ -1,0 +1,27 @@
+test_activity_wait_checks_every_process (test_validation_entrypoints.EntryPointTests.test_activity_wait_checks_every_process) ... ok
+test_empty_campaign_is_rejected (test_validation_entrypoints.EntryPointTests.test_empty_campaign_is_rejected) ... ok
+test_exit_after_pass_is_rejected (test_validation_entrypoints.EntryPointTests.test_exit_after_pass_is_rejected) ... ok
+test_full_regression_simulator_error (test_validation_entrypoints.EntryPointTests.test_full_regression_simulator_error) ... skipped 'set REGRESSION_VECTORS to a complete saved matrix'
+test_mutation_tool_crash_is_not_detection (test_validation_entrypoints.EntryPointTests.test_mutation_tool_crash_is_not_detection) ... ok
+test_proof_status_cannot_hide_engine_error (test_validation_entrypoints.EntryPointTests.test_proof_status_cannot_hide_engine_error) ... ok
+test_bad_exit_even_with_complete_verdict (test_validation_verdicts.VerdictTests.test_bad_exit_even_with_complete_verdict) ... ok
+test_complete_tx (test_validation_verdicts.VerdictTests.test_complete_tx) ... ok
+test_documented_output_formats_and_truncation (test_validation_verdicts.VerdictTests.test_documented_output_formats_and_truncation) ... ok
+test_empty_campaign_rejected (test_validation_verdicts.VerdictTests.test_empty_campaign_rejected) ... ok
+test_exit_zero_alone_is_not_success (test_validation_verdicts.VerdictTests.test_exit_zero_alone_is_not_success) ... ok
+test_failure_after_pass (test_validation_verdicts.VerdictTests.test_failure_after_pass) ... ok
+test_matrix_never_passes_with_missing_or_failed_rows (test_validation_verdicts.VerdictTests.test_matrix_never_passes_with_missing_or_failed_rows) ... ok
+test_mutation_requires_concrete_assertion (test_validation_verdicts.VerdictTests.test_mutation_requires_concrete_assertion) ... ok
+test_normal_guard (test_validation_verdicts.VerdictTests.test_normal_guard) ... ok
+test_outputs_must_exist_and_be_known (test_validation_verdicts.VerdictTests.test_outputs_must_exist_and_be_known) ... ok
+test_pair_fail_closed (test_validation_verdicts.VerdictTests.test_pair_fail_closed) ... ok
+test_partial_controller (test_validation_verdicts.VerdictTests.test_partial_controller) ... ok
+test_partial_tx (test_validation_verdicts.VerdictTests.test_partial_tx) ... ok
+test_real_process_crash_and_timeout (test_validation_verdicts.VerdictTests.test_real_process_crash_and_timeout) ... ok
+test_sby_exit_and_status_agree (test_validation_verdicts.VerdictTests.test_sby_exit_and_status_agree) ... ok
+
+----------------------------------------------------------------------
+Ran 21 tests in 7.642s
+
+OK (skipped=1)
+exit=0

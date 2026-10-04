@@ -1,0 +1,5 @@
+label=tx-pdu
+date_utc=2026-10-04T20:21:02Z
+ref_rev=upstream-baseline (85401861e8f4b04b90cbaa0394c0f9d45ed02f18)
+dut=working tree at b77331635943c9fe404689be33f575a4c875658d, dirty verilog files: 0
+yosys=Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)

@@ -1,0 +1,4 @@
+mutations: 5/5 detected
+lockstep runs: 15 pass=15 fail=0
+compared: cycles 923565 compared 923385 rx_irqs 90 rx_crc_ok 57 tx_packets 90 axi_reads 2404
+RESULT: PASS

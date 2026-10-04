@@ -1,0 +1,36 @@
+verilog/vco.v:
+  PASS sweep: 5120 clocks identical to the master VCO, 7169 clocks identical with the one-port macro
+  PASS random seed 1: 1001031 clocks, I/Q compared on 658240 (342791 skipped), 333985 samples, 80638 sine writes, 134356 writes of cos[0], 158104 ignored cosine writes, 673645 clocks with a read, 342788 with a write waiting, 193536 changes held back by the contract, 40130 reads aimed at a new entry, 2840 resets, 51 read-backs of all 512 entries; one-port macro identical on every clock
+  PASS random seed 2: 1001031 clocks, I/Q compared on 652472 (348559 skipped), 329629 samples, 84596 sine writes, 129553 writes of cos[0], 153095 ignored cosine writes, 664934 clocks with a read, 348556 with a write waiting, 195619 changes held back by the contract, 42542 reads aimed at a new entry, 2876 resets, 51 read-backs of all 512 entries; one-port macro identical on every clock
+  PASS random seed 3: 1001030 clocks, I/Q compared on 651455 (349575 skipped), 331264 samples, 85330 sine writes, 128222 writes of cos[0], 149944 ignored cosine writes, 668054 clocks with a read, 349572 with a write waiting, 201178 changes held back by the contract, 42976 reads aimed at a new entry, 2768 resets, 51 read-backs of all 512 entries; one-port macro identical on every clock
+  PASS random seed 4: 1001030 clocks, I/Q compared on 667158 (333872 skipped), 329386 samples, 83742 sine writes, 128819 writes of cos[0], 152221 ignored cosine writes, 664367 clocks with a read, 333869 with a write waiting, 189638 changes held back by the contract, 41424 reads aimed at a new entry, 2815 resets, 51 read-backs of all 512 entries; one-port macro identical on every clock
+mutant 1 (entry b read ahead at the current phase, not the next):
+  FAIL sweep at check 1: DUT I/Q=0/0 valid/last=1/0; master I/Q=127/0 valid/last=1/0
+mutant 2 (a table write in a clock in which the VCO reads):
+  PASS sweep: 5120 clocks identical to the master VCO, 7169 clocks identical with the one-port macro
+  FAIL random seed 1 clock 7: I/Q DUT x/0 sin4 x/x (phase 1)
+mutant 3 (a table write in the clock after a reset):
+  PASS sweep: 5120 clocks identical to the master VCO, 7169 clocks identical with the one-port macro
+  FAIL macro at clock 1458: RAM model I/Q=-62/0 valid/last=0/0; one-port macro I/Q=-62/x valid/last=0/0
+mutant 4 (no hold of entry a after a write to it):
+  FAIL macro at clock 5: RAM model I/Q=127/0 valid/last=0/0; one-port macro I/Q=127/x valid/last=0/0
+mutant 5 (a write to entry b is not shown):
+  PASS sweep: 5120 clocks identical to the master VCO, 7169 clocks identical with the one-port macro
+  FAIL random seed 1 clock 1056: I/Q DUT 91/x sin4 60/x (phase 282)
+mutant 6 (cos 0 taken in the clock its pair is presented (one clock early)):
+  PASS sweep: 5120 clocks identical to the master VCO, 7169 clocks identical with the one-port macro
+  FAIL random seed 1 clock 2732: I/Q DUT 77/97 sin4 24/97 (phase 0)
+mutant 7 (cosine and sine swapped in the odd quadrants):
+  FAIL sweep at check 1023: DUT I/Q=-127/0 valid/last=1/0; master I/Q=0/127 valid/last=1/0
+mutant 8 (cos 0 not used at offset 0):
+  FAIL sweep at check 0: DUT I/Q=0/0 valid/last=0/0; master I/Q=127/0 valid/last=0/0
+mutant 9 (sine writes outside the first quarter are stored too (wrapped)):
+  FAIL sweep at check 0: DUT I/Q=127/-127 valid/last=0/0; master I/Q=127/0 valid/last=0/0
+mutant 10 (a write shown with the data of the next clock, not the pair it wrote):
+  PASS sweep: 5120 clocks identical to the master VCO, 7169 clocks identical with the one-port macro
+  FAIL random seed 1 clock 1060: I/Q DUT -43/x sin4 60/x (phase 282)
+mutant 11 (the cosine sign ignores the odd quadrants):
+  FAIL sweep at check 1027: DUT I/Q=1/127 valid/last=1/0; master I/Q=-1/127 valid/last=1/0
+mutants caught: 11/11
+PASS
+exit=0
