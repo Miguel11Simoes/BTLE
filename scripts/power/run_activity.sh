@@ -48,6 +48,8 @@ VEC_DIR=${VEC_DIR:-}
 scenarios=(rx tx mixed idle idle0)
 
 repo=$(git rev-parse --show-toplevel)
+source "$repo/scripts/validation/result_guard.sh"
+positive_counts "$window" "$seed"
 here=$repo/scripts/power
 out=$repo/results/power/$label
 [ -e "$out" ] && { echo "$out exists; choose a new label" >&2; exit 1; }
@@ -116,14 +118,30 @@ fi
 
 # 4. runs: the setup reference and every scenario, in parallel
 cd "$work/vec/verilog"
+declare -A sim_pids sim_codes
 "$work/obj/sim" +scenario=setup +saif="$work/setup.saif" +seed=$seed > "$out/run_setup.log" 2>&1 &
+sim_pids[setup]=$!
 for s in "${scenarios[@]}"; do
   "$work/obj/sim" +scenario=$s +window=$window +saif="$work/$s.saif" +seed=$seed > "$out/run_$s.log" 2>&1 &
+  sim_pids[$s]=$!
 done
-wait
 status=0
+printf '{' > "$out/exit_codes.json"
+separator=""
+for s in setup "${scenarios[@]}"; do
+  sim_codes[$s]=0
+  wait "${sim_pids[$s]}" || sim_codes[$s]=$?
+  printf '%s"%s":%d' "$separator" "$s" "${sim_codes[$s]}" >> "$out/exit_codes.json"
+  separator=,
+  sim_pass "${sim_codes[$s]}" "$out/run_$s.log" 'ACTIVITY RUN PASS' || status=1
+done
+printf '}\n' >> "$out/exit_codes.json"
+if ! sim_pass "${sim_codes[setup]}" "$out/run_setup.log" 'ACTIVITY RUN PASS'; then
+  echo 'RESULT: FAIL (setup simulation failed)' > "$out/summary.md"
+  exit 1
+fi
 for s in "${scenarios[@]}"; do
-  if grep -q 'ACTIVITY RUN PASS' "$out/run_$s.log"; then
+  if sim_pass "${sim_codes[$s]}" "$out/run_$s.log" 'ACTIVITY RUN PASS'; then
     echo "$s: $(grep -m1 'activity: scenario .* cycles (' "$out/run_$s.log" | sed 's/activity: //')" | tee -a "$out/runs.txt"
     $PY "$here/saif_activity.py" "$work/$s.saif" "$work/setup.saif" "$work/ref_gl.v" "$work/dut_gl.v" \
       "$LIBERTY" "$window" "$s" "$out/$s.json" | tee -a "$out/analysis.txt"

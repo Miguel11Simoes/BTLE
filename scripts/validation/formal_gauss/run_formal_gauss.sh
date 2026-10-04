@@ -17,6 +17,7 @@ OSS_CAD=${OSS_CAD:-$HOME/eda/oss-cad-suite-20260907}
 export PATH=$OSS_CAD/bin:$PATH
 
 repo=$(git rev-parse --show-toplevel)
+source "$repo/scripts/validation/result_guard.sh"
 here=$repo/scripts/validation/formal_gauss
 out=$repo/results/validation/$label/formal_gauss
 [ -e "$out" ] && { echo "$out exists; choose a new label" >&2; exit 1; }
@@ -40,8 +41,10 @@ mutant() {  # $1 = name, $2 = sed expression on gauss_filter.v
   mkdir -p "$m"; cp "$work"/*.v "$work"/*.sv "$work"/*.sby "$m/"
   sed -E -i "$2" "$m/gauss_filter.v"
   cmp -s "$work/gauss_filter.v" "$m/gauss_filter.v" && { echo "mutant $1 did not change the file" >&2; exit 1; }
-  (cd "$m" && timeout 1800 sby -f gauss_equiv.sby) > "$out/mutant_$1.log" 2>&1 || true
+  sby_rc=0
+  (cd "$m" && timeout 1800 sby -f gauss_equiv.sby) > "$out/mutant_$1.log" 2>&1 || sby_rc=$?
   r=$(cat "$m/gauss_equiv/status" 2>/dev/null || echo ERROR)
+  if ! sby_pass "$sby_rc" "$m/gauss_equiv/status" && ! sby_fail "$sby_rc" "$m/gauss_equiv/status"; then r=ERROR; fi
   echo "mutant $1: ${r%% *}" | tee -a "$out/mutants.txt"
   [ "${r%% *}" == FAIL ] || status=1
 }
@@ -52,8 +55,11 @@ mutant group_off_by_one 's/table_b\[bit_upsample_store\[10:5\]\]/table_b[bit_ups
 # a zero bit adds the tap instead of subtracting it
 mutant wrong_sign 's/\? table_tap\(first_pos\+k\) : -table_tap\(first_pos\+k\)/? table_tap(first_pos+k) : table_tap(first_pos+k)/'
 
-(cd "$work" && timeout 3600 sby -f gauss_equiv.sby) > "$out/prove.log" 2>&1 || true
+sby_rc=0
+
+(cd "$work" && timeout 3600 sby -f gauss_equiv.sby) > "$out/prove.log" 2>&1 || sby_rc=$?
 res=$(cat "$work/gauss_equiv/status" 2>/dev/null || echo ERROR)
+if ! sby_pass "$sby_rc" "$work/gauss_equiv/status" && ! sby_fail "$sby_rc" "$work/gauss_equiv/status"; then res=ERROR; fi
 echo "prove: $res" | tee -a "$out/result.txt"
 [ "${res%% *}" == PASS ] || status=1
 cp "$work/gauss_equiv/logfile.txt" "$out/prove_sby_logfile.txt" 2>/dev/null || true

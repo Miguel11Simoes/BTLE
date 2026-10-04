@@ -129,6 +129,7 @@ for n in "${names[@]}"; do
   for s in rx tx mixed idle idle0; do
     zcat -f "$repo/results/power/$label/$n/run_$s.log"* 2> /dev/null | grep -q 'ACTIVITY RUN PASS' && ok=$((ok+1))
   done
+  [ "$ok" -eq 5 ] || status=1
   echo "activity $n done: $ok of 5 scenarios without a mismatch"
 done
 

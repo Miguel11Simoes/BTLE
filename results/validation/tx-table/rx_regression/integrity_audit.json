@@ -1,0 +1,11 @@
+{
+  "original_summary_sha256": "97ff6e531fe3d9b9b03015a4deb7cb5d79ed8164841b504bd5920b9dc989a891",
+  "records": 270,
+  "counts": {
+    "MATCH_UNVERIFIED_EXIT": 233,
+    "BOTH_FAIL": 17,
+    "NO_STIMULUS": 20
+  },
+  "prior_false_pass_no_stimulus": 20,
+  "note": "Historical reclassification only. Process exit codes were not recorded; no legacy row is promoted to a verified PASS."
+}

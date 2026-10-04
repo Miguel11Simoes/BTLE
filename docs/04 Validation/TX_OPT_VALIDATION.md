@@ -1,5 +1,7 @@
 # The best transmitter together: B2 and the {cos, sin} memory (`ble-tx-opt`)
 
+> Validation correction (2026-10-04): earlier success claims for all 270 checks are withdrawn. The strict rerun is **FAIL: 118 PASS, 20 BOTH_FAIL, 18 NO_STIMULUS, 114 ERROR; 0 DIFFERENT**. See [the integrity audit](VALIDATION_INTEGRITY.md) for evidence and limitations.
+
 **Project:** BTLE — reconfigurable RISC-V baseband  
 **Branch:** `ble-tx-opt`, from `ble-tx-table` (`e6bf731`)  
 **Base:** tag `upstream-baseline` (`8540186`)  
@@ -48,7 +50,7 @@ lockstep against `ble-tx-sin4`, 7/7 mutants). Together, on this branch:
 
 | Check | What it compares | Result |
 |---|---|---|
-| Upstream testbenches (`scripts/validation/run_rx_regression.sh`, table on through `DUT_DEFAULTS="gauss_filter.v:GAUSS_TABLE=1"`) | the 5 upstream testbenches (demodulator, RX core, RX, TX, controller) over 54 conditions: 3 packets × 3 SNR × 3 clock errors × 2 delays, every output file byte for byte against upstream | **270/270 runs identical**; 24 fail on both designs at 8 dB, a limit of the model, as on every branch |
+| Upstream testbenches (`scripts/validation/run_rx_regression.sh`, table on through `DUT_DEFAULTS="gauss_filter.v:GAUSS_TABLE=1"`) | the 5 upstream testbenches (demodulator, RX core, RX, TX, controller) over 54 conditions: 3 packets × 3 SNR × 3 clock errors × 2 delays, every output file byte for byte against upstream | **FAIL: 118 PASS, 20 BOTH_FAIL, 18 NO_STIMULUS, 114 ERROR; 0 DIFFERENT**; see integrity audit |
 | Controller through the registers (`scripts/validation/ctl_lockstep/run_ctl_lockstep.sh`) | the whole controller against upstream, clock by clock, the COS and SIN tables written through the AXI registers one after the other as the firmware does, packets of the Python model sent and received | **15/15 runs, 923 385 cycles, every output and every register read identical**; 90 packets sent and 90 received; 4/4 mutants caught (a wrong table tap, a group index off by one, a wrong sign, the IQ-capture half flag) |
 | The VCO (`tests/test_vco_sin8.py`) | the sweep against the `master` VCO; 4 × 1 000 000 clocks against the `ble-tx-sin4` VCO with random table writes | **3 072 clocks and 2 919 121 comparisons, no mismatch** |
 | Gate-level lockstep (run `tx-opt`, `BRANCH_COMPARISON.md` § 6.1) | both synthesised netlists, this branch and upstream, on every output and every clock, in 5 scenarios | **5/5 scenarios, no mismatch**; 25 packets transmitted, 27 sent to the receiver |

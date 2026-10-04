@@ -28,6 +28,7 @@ OSS_CAD=${OSS_CAD:-$HOME/eda/oss-cad-suite-20260907}
 export PATH=$OSS_CAD/bin:$PATH
 
 repo=$(git rev-parse --show-toplevel)
+source "$repo/scripts/validation/result_guard.sh"
 out=$repo/results/validation/$label/equiv_defaults
 [ -e "$out" ] && { echo "$out exists; choose a new label" >&2; exit 1; }
 mkdir -p "$out"
@@ -81,7 +82,7 @@ hierarchy -check
 proc"
   # pass 1: list the elaborated modules (parameterised variants included)
   printf '%s\ntee -q -o %s ls\n' "$prelude" "$work/$m.mods" > "$work/$m.list.ys"
-  (cd "$work" && yosys -q -s "$m.list.ys") > "$work/$m.list.log" 2>&1 || true; cp "$work/$m.list.log" "$work/$m.mods" "$out/" 2>/dev/null || true
+  (cd "$work" && yosys -q -s "$m.list.ys") > "$work/$m.list.log" 2>&1 || { echo "elaboration failed: $m" >&2; exit 1; }; cp "$work/$m.list.log" "$work/$m.mods" "$out/" 2>/dev/null || true
   ren=""
   while IFS='|' read -r base inst gold_inst; do
     # only where the new RTL really has that generate block (a branch without
@@ -108,7 +109,7 @@ equiv_simple -seq 5
 equiv_induct -seq 5
 equiv_status -assert
 EOF
-  if (cd "$work" && timeout 3600 yosys -q -l "$out/$m.log" -s "$m.ys") > /dev/null 2>&1; then
+  if (cd "$work" && timeout 3600 yosys -q -l "$out/$m.log" -s "$m.ys") > /dev/null 2>&1 && grep -q "Equivalence successfully proven" "$out/$m.log" && grep -qE 'Found [1-9][0-9]* \$equiv cells' "$out/$m.log"; then
     echo "$m: EQUIVALENT ($(grep -oE 'Found [0-9]+ \$equiv cells' "$out/$m.log" | tail -1))" | tee -a "$out/result.txt"
   else
     echo "$m: NOT PROVEN ($(grep -m1 -E 'ERROR|unproven' "$out/$m.log"))" | tee -a "$out/result.txt"; status=1

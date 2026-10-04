@@ -1,0 +1,201 @@
+[
+  {
+    "original_summary_sha256": "fce0625c4d29b7b6c865f2dcb693eb96536abd95e5045674e4da532f6ffec3fd",
+    "records": 270,
+    "counts": {
+      "MATCH_UNVERIFIED_EXIT": 225,
+      "BOTH_FAIL": 21,
+      "NO_STIMULUS": 24
+    },
+    "prior_false_pass_no_stimulus": 24,
+    "note": "Historical reclassification only. Process exit codes were not recorded; no legacy row is promoted to a verified PASS.",
+    "run": "sticker-defaults",
+    "branches": [
+      "ble-opt"
+    ]
+  },
+  {
+    "original_summary_sha256": "7c7eff5d686669384798adff806a56ec05cb43b68e265398a51df1a195c680af",
+    "records": 270,
+    "counts": {
+      "MATCH_UNVERIFIED_EXIT": 232,
+      "BOTH_FAIL": 16,
+      "NO_STIMULUS": 22
+    },
+    "prior_false_pass_no_stimulus": 22,
+    "note": "Historical reclassification only. Process exit codes were not recorded; no legacy row is promoted to a verified PASS.",
+    "run": "shared-demod",
+    "branches": [
+      "ble-opt",
+      "ble-rx-dm"
+    ]
+  },
+  {
+    "original_summary_sha256": "61ab6679722315e658613f1f71f9141cc2dcec947a7f55233523226c079f47ef",
+    "records": 270,
+    "counts": {
+      "MATCH_UNVERIFIED_EXIT": 216,
+      "BOTH_FAIL": 28,
+      "NO_STIMULUS": 26
+    },
+    "prior_false_pass_no_stimulus": 26,
+    "note": "Historical reclassification only. Process exit codes were not recorded; no legacy row is promoted to a verified PASS.",
+    "run": "tx-1--8-one-port",
+    "branches": [
+      "ble-tx-1--8"
+    ]
+  },
+  {
+    "original_summary_sha256": "3f17410b94132b3526e9256845b3a9df30ee8d44402f20ffdd9041f8ee404f13",
+    "records": 270,
+    "counts": {
+      "MATCH_UNVERIFIED_EXIT": 227,
+      "BOTH_FAIL": 21,
+      "NO_STIMULUS": 22
+    },
+    "prior_false_pass_no_stimulus": 22,
+    "note": "Historical reclassification only. Process exit codes were not recorded; no legacy row is promoted to a verified PASS.",
+    "run": "tx-1--8",
+    "branches": [
+      "ble-tx-1--8"
+    ]
+  },
+  {
+    "original_summary_sha256": "95c1b1a4af5a75f90ae5b223af93b0874def9e6a5ad33e753757acb1292757a5",
+    "records": 270,
+    "counts": {
+      "MATCH_UNVERIFIED_EXIT": 229,
+      "BOTH_FAIL": 15,
+      "NO_STIMULUS": 26
+    },
+    "prior_false_pass_no_stimulus": 26,
+    "note": "Historical reclassification only. Process exit codes were not recorded; no legacy row is promoted to a verified PASS.",
+    "run": "tx-fir2",
+    "branches": [
+      "ble-tx-fir2"
+    ]
+  },
+  {
+    "original_summary_sha256": "97ff6e531fe3d9b9b03015a4deb7cb5d79ed8164841b504bd5920b9dc989a891",
+    "records": 270,
+    "counts": {
+      "MATCH_UNVERIFIED_EXIT": 233,
+      "BOTH_FAIL": 17,
+      "NO_STIMULUS": 20
+    },
+    "prior_false_pass_no_stimulus": 20,
+    "note": "Historical reclassification only. Process exit codes were not recorded; no legacy row is promoted to a verified PASS.",
+    "run": "tx-table",
+    "branches": [
+      "ble-tx-opt",
+      "ble-tx-table",
+      "ble-tx-table-reg",
+      "ble-tx-table-sram"
+    ]
+  },
+  {
+    "original_summary_sha256": "3e34f6bb6a900d12bd365f3f641c15d3c5a40a74be38e4ad018f33b222c16502",
+    "records": 270,
+    "counts": {
+      "MATCH_UNVERIFIED_EXIT": 230,
+      "BOTH_FAIL": 24,
+      "NO_STIMULUS": 16
+    },
+    "prior_false_pass_no_stimulus": 16,
+    "note": "Historical reclassification only. Process exit codes were not recorded; no legacy row is promoted to a verified PASS.",
+    "run": "tx-opt",
+    "branches": [
+      "ble-tx-opt"
+    ]
+  },
+  {
+    "original_summary_sha256": "818aee0ee4d2d499b1b550e85a01c5c943d148076f4dad4620a7592f8eb7fc51",
+    "records": 270,
+    "counts": {
+      "MATCH_UNVERIFIED_EXIT": 231,
+      "NO_STIMULUS": 26,
+      "BOTH_FAIL": 13
+    },
+    "prior_false_pass_no_stimulus": 26,
+    "note": "Historical reclassification only. Process exit codes were not recorded; no legacy row is promoted to a verified PASS.",
+    "run": "tx-sin2-one-port",
+    "branches": [
+      "ble-tx-sin2"
+    ]
+  },
+  {
+    "original_summary_sha256": "d55dc02fdd5d84ad3ae67b33a4be9217db01973f65892ea3e91a12d0cb34859c",
+    "records": 270,
+    "counts": {
+      "MATCH_UNVERIFIED_EXIT": 234,
+      "BOTH_FAIL": 20,
+      "NO_STIMULUS": 16
+    },
+    "prior_false_pass_no_stimulus": 16,
+    "note": "Historical reclassification only. Process exit codes were not recorded; no legacy row is promoted to a verified PASS.",
+    "run": "tx-sin2",
+    "branches": [
+      "ble-tx-sin2"
+    ]
+  },
+  {
+    "original_summary_sha256": "8d22258e37bd46723926956afa796021c76a89cfb824764cd47056c07415472f",
+    "records": 270,
+    "counts": {
+      "MATCH_UNVERIFIED_EXIT": 230,
+      "BOTH_FAIL": 20,
+      "NO_STIMULUS": 20
+    },
+    "prior_false_pass_no_stimulus": 20,
+    "note": "Historical reclassification only. Process exit codes were not recorded; no legacy row is promoted to a verified PASS.",
+    "run": "tx-sin8-1rw",
+    "branches": [
+      "ble-tx-sin8-1rw"
+    ]
+  },
+  {
+    "original_summary_sha256": "a41d91507be085ff3347fb8eeb4ebd96a5da1f1e1ee597219d89f8e82b26b4a2",
+    "records": 270,
+    "counts": {
+      "MATCH_UNVERIFIED_EXIT": 225,
+      "BOTH_FAIL": 21,
+      "NO_STIMULUS": 24
+    },
+    "prior_false_pass_no_stimulus": 24,
+    "note": "Historical reclassification only. Process exit codes were not recorded; no legacy row is promoted to a verified PASS.",
+    "run": "tx-sin8-1rw-one-port",
+    "branches": [
+      "ble-tx-sin8-1rw"
+    ]
+  },
+  {
+    "original_summary_sha256": "449d5aa0cf0c2caa17c98d67dae28b0aaceafe0f88d43c8f396bc483ae5fea88",
+    "records": 270,
+    "counts": {
+      "MATCH_UNVERIFIED_EXIT": 229,
+      "BOTH_FAIL": 17,
+      "NO_STIMULUS": 24
+    },
+    "prior_false_pass_no_stimulus": 24,
+    "note": "Historical reclassification only. Process exit codes were not recorded; no legacy row is promoted to a verified PASS.",
+    "run": "tx-table-reg",
+    "branches": [
+      "ble-tx-table-reg"
+    ]
+  },
+  {
+    "original_summary_sha256": "bd7b15f82fda431432ebb396104e9c50b9ec5b706a1a8bb9e479aeae7bd52852",
+    "records": 270,
+    "counts": {
+      "MATCH_UNVERIFIED_EXIT": 229,
+      "BOTH_FAIL": 19,
+      "NO_STIMULUS": 22
+    },
+    "prior_false_pass_no_stimulus": 22,
+    "note": "Historical reclassification only. Process exit codes were not recorded; no legacy row is promoted to a verified PASS.",
+    "run": "tx-table-sram",
+    "branches": [
+      "ble-tx-table-sram"
+    ]
+  }
+]

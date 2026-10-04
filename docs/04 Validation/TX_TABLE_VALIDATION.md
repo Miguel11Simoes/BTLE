@@ -1,5 +1,7 @@
 # Validation of the Gaussian table alone (B2, branch `ble-tx-table`)
 
+> Validation correction (2026-10-04): earlier success claims for all 270 checks are withdrawn. The strict rerun is **FAIL: 118 PASS, 20 BOTH_FAIL, 18 NO_STIMULUS, 114 ERROR; 0 DIFFERENT**. See [the integrity audit](VALIDATION_INTEGRITY.md) for evidence and limitations.
+
 **Project:** BTLE — reconfigurable RISC-V baseband  
 **Branch:** `ble-tx-table`  
 **Base:** tag `upstream-baseline` (`8540186`)  
@@ -136,24 +138,9 @@ run on the table. For 3 packets × SNR {20, 12, 8} dB × clock error
 {0, 20, 50} ppm × sample delay {0, 5}, both designs must give the same verdict
 **and** the same output files, byte for byte.
 
-**Result: 270 of 270 runs identical** between upstream and the table.
+**FAIL: 118 PASS, 20 BOTH_FAIL, 18 NO_STIMULUS, 114 ERROR; 0 DIFFERENT**.
 
-| Testbench | Identical, both pass | Identical, both differ from the model |
-|---|---:|---:|
-| `gfsk_demodulation_tb` | 54 | 0 |
-| `btle_rx_core_tb` | 53 | 1 |
-| `btle_rx_tb` | 47 | 7 |
-| **`btle_tx_tb`** | **54** | **0** |
-| `btle_controller_tb` (TX + RX + LL) | 45 | 9 |
-
-`btle_tx_tb` passes in all 54 conditions with 0 errors in I and Q, and
-`btle_controller_tb` reports 0 TX errors in every run. The 17 runs that differ
-from the model are all on the receive side, which B2 does not touch, and the
-two designs are byte-identical in each of them. It is upstream behaviour
-(issue U10 in `UPSTREAM_TEST_INVENTORY.md` on `ble-opt`): the CRC flag matches the model and one
-octet of the read-back PDU differs (two octets in one run, at 8 dB). The noise
-of the Python generator is not seeded, so the count varies between runs
-(16 in the `shared-demod` regression on `ble-opt`).
+The earlier table counted incomplete checks as successful. Corrected per-bench counts are in the [integrity audit](VALIDATION_INTEGRITY.md).
 
 ### 2.5 Gate level
 

@@ -31,6 +31,8 @@ export PATH=$OSS_CAD/bin:$PATH
 export MPLBACKEND=Agg
 
 repo=$(git rev-parse --show-toplevel)
+source "$repo/scripts/validation/result_guard.sh"
+positive_counts "$seeds" "$packets"
 here=$repo/scripts/validation/ctl_lockstep
 out=$repo/results/validation/$label/ctl_lockstep
 [ -e "$out" ] && { echo "$out exists; choose a new label" >&2; exit 1; }
@@ -78,11 +80,14 @@ mutate() {  # $1 = name, $2 = file, $3 = sed expression, or "perl:<expression>" 
   case $3 in perl:*) perl -0pi -e "${3#perl:}" "$m/$2";; *) sed -E -i "$3" "$m/$2";; esac
   cmp -s "$repo/verilog/$2" "$m/$2" && { echo "mutation $1 did not change $2" >&2; exit 1; }
   build "$m/sim" "$m" || { echo "mutation $1: does not compile" | tee -a "$out/mutation.txt"; mut_ok=0; return; }
-  if (cd "$work/vec2/verilog" && vvp -n "$m/sim" +seed=1 +packets=6) > "$out/mutation_$1.log" 2>&1 \
-       && grep -q 'CTL LOCKSTEP PASS' "$out/mutation_$1.log"; then
+  sim_rc=0
+  (cd "$work/vec2/verilog" && vvp -n "$m/sim" +seed=1 +packets=6) > "$out/mutation_$1.log" 2>&1 || sim_rc=$?
+  if sim_pass "$sim_rc" "$out/mutation_$1.log" 'CTL LOCKSTEP PASS'; then
     echo "mutation $1: NOT DETECTED" | tee -a "$out/mutation.txt"; mut_ok=0
-  else
+  elif mutant_caught "$sim_rc" "$out/mutation_$1.log"; then
     echo "mutation $1: detected ($(grep -m1 MISMATCH "$out/mutation_$1.log"))" | tee -a "$out/mutation.txt"
+  else
+    echo "mutation $1: ERROR (no concrete mismatch, exit $sim_rc)" | tee -a "$out/mutation.txt"; mut_ok=0
   fi
 }
 # one table tap wrong (24 -> 23)
@@ -101,8 +106,9 @@ printf 'example\tseed\tresult\tstatistics\n' > "$out/summary.tsv"
 for ex in 0 1 2; do
   for s in $(seq 1 "$seeds"); do
     log=$out/ex${ex}_seed$s.log
-    (cd "$work/vec$ex/verilog" && vvp -n "$work/sim" +seed=$s +packets=$packets) > "$log" 2>&1 || true
-    if grep -q 'CTL LOCKSTEP PASS' "$log"; then res=PASS; n_pass=$((n_pass+1)); else res=FAIL; n_fail=$((n_fail+1)); fi
+    sim_rc=0
+    (cd "$work/vec$ex/verilog" && vvp -n "$work/sim" +seed=$s +packets=$packets) > "$log" 2>&1 || sim_rc=$?
+    if sim_pass "$sim_rc" "$log" 'CTL LOCKSTEP PASS'; then res=PASS; n_pass=$((n_pass+1)); else res=FAIL; n_fail=$((n_fail+1)); fi
     printf '%s\t%s\t%s\t%s\n' "$ex" "$s" "$res" "$(grep -m1 'ctl lockstep: cycles' "$log" | sed 's/ctl lockstep: //')" >> "$out/summary.tsv"
   done
 done

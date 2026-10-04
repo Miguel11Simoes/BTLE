@@ -94,7 +94,7 @@ output_name = "$1"
 EOF
   if (cd "$d" && timeout 3600 "$PY" "$P/sram_compiler.py" cfg.py) > "$out/$1.log" 2>&1 \
        && [ -f "$d/out/$1.lef" ]; then
-    cp "$d/out/$1.lef" "$d/out/$1_TT_1p0V_25C.lib" "$out/" 2>/dev/null || true
+    cp "$d/out/$1.lef" "$d/out/$1_TT_1p0V_25C.lib" "$out/" || return 1
     read -r w h < <(sed -n 's/^ *SIZE \([0-9.]*\) BY \([0-9.]*\) ;.*/\1 \2/p' "$d/out/$1.lef" | head -1)
     printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\n' "$1" "$ports" "$ws" "$nw" "$w" "$h" "$mask" >> "$work/sizes.tsv"
     echo "$1: ${w} x ${h} um"

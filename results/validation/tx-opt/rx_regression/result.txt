@@ -1,2 +1,3 @@
-runs=270 identical=270 different=0 (of the identical: both_fail=24)
-RESULT: PASS (every run identical between ref and dut)
+Historical records reclassified; no new simulation.
+BOTH_FAIL=24 MATCH_UNVERIFIED_EXIT=230 NO_STIMULUS=16
+RESULT: LEGACY_UNVERIFIED (use the strict-20261004-checked regression)

@@ -1,0 +1,121 @@
+[
+  {
+    "branch": "ble-rx-dm",
+    "mode": "rtl",
+    "label": "strict-20261004-checked",
+    "exit": 1,
+    "result": "runs=270 PASS=118 BOTH_FAIL=20 NO_STIMULUS=18 DIFFERENT=0 ERROR=114\nRESULT: FAIL\n"
+  },
+  {
+    "branch": "ble-opt",
+    "mode": "rtl",
+    "label": "strict-20261004-checked",
+    "exit": 1,
+    "result": "runs=270 PASS=118 BOTH_FAIL=20 NO_STIMULUS=18 DIFFERENT=0 ERROR=114\nRESULT: FAIL\n"
+  },
+  {
+    "branch": "ble-tx-fir2",
+    "mode": "rtl",
+    "label": "strict-20261004-checked",
+    "exit": 1,
+    "result": "runs=270 PASS=118 BOTH_FAIL=20 NO_STIMULUS=18 DIFFERENT=0 ERROR=114\nRESULT: FAIL\n"
+  },
+  {
+    "branch": "ble-tx-opt",
+    "mode": "rtl",
+    "label": "strict-20261004-checked",
+    "exit": 1,
+    "result": "runs=270 PASS=118 BOTH_FAIL=20 NO_STIMULUS=18 DIFFERENT=0 ERROR=114\nRESULT: FAIL\n"
+  },
+  {
+    "branch": "ble-tx-1--8",
+    "mode": "rtl",
+    "label": "strict-20261004-checked",
+    "exit": 1,
+    "result": "runs=270 PASS=118 BOTH_FAIL=20 NO_STIMULUS=18 DIFFERENT=0 ERROR=114\nRESULT: FAIL\n"
+  },
+  {
+    "branch": "ble-tx-1--8",
+    "mode": "one-port",
+    "label": "strict-20261004-checked-one-port",
+    "exit": 1,
+    "result": "runs=270 PASS=118 BOTH_FAIL=20 NO_STIMULUS=18 DIFFERENT=0 ERROR=114\nRESULT: FAIL\n"
+  },
+  {
+    "branch": "ble-tx-sin4",
+    "mode": "rtl",
+    "label": "strict-20261004-checked",
+    "exit": 1,
+    "result": "runs=270 PASS=118 BOTH_FAIL=20 NO_STIMULUS=18 DIFFERENT=0 ERROR=114\nRESULT: FAIL\n"
+  },
+  {
+    "branch": "ble-tx-sin8",
+    "mode": "rtl",
+    "label": "strict-20261004-checked",
+    "exit": 1,
+    "result": "runs=270 PASS=118 BOTH_FAIL=20 NO_STIMULUS=18 DIFFERENT=0 ERROR=114\nRESULT: FAIL\n"
+  },
+  {
+    "branch": "ble-tx-sin2",
+    "mode": "rtl",
+    "label": "strict-20261004-checked",
+    "exit": 1,
+    "result": "runs=270 PASS=118 BOTH_FAIL=20 NO_STIMULUS=18 DIFFERENT=0 ERROR=114\nRESULT: FAIL\n"
+  },
+  {
+    "branch": "ble-tx-sin2",
+    "mode": "one-port",
+    "label": "strict-20261004-checked-one-port",
+    "exit": 1,
+    "result": "runs=270 PASS=118 BOTH_FAIL=20 NO_STIMULUS=18 DIFFERENT=0 ERROR=114\nRESULT: FAIL\n"
+  },
+  {
+    "branch": "ble-tx-table",
+    "mode": "rtl",
+    "label": "strict-20261004-checked",
+    "exit": 1,
+    "result": "runs=270 PASS=118 BOTH_FAIL=20 NO_STIMULUS=18 DIFFERENT=0 ERROR=114\nRESULT: FAIL\n"
+  },
+  {
+    "branch": "ble-tx-table-reg",
+    "mode": "rtl",
+    "label": "strict-20261004-checked",
+    "exit": 1,
+    "result": "runs=270 PASS=118 BOTH_FAIL=20 NO_STIMULUS=18 DIFFERENT=0 ERROR=114\nRESULT: FAIL\n"
+  },
+  {
+    "branch": "ble-tx-sin8-1rw",
+    "mode": "rtl",
+    "label": "strict-20261004-checked",
+    "exit": 1,
+    "result": "runs=270 PASS=118 BOTH_FAIL=20 NO_STIMULUS=18 DIFFERENT=0 ERROR=114\nRESULT: FAIL\n"
+  },
+  {
+    "branch": "ble-tx-sin8-1rw",
+    "mode": "one-port",
+    "label": "strict-20261004-checked-one-port",
+    "exit": 1,
+    "result": "runs=270 PASS=118 BOTH_FAIL=20 NO_STIMULUS=18 DIFFERENT=0 ERROR=114\nRESULT: FAIL\n"
+  },
+  {
+    "branch": "ble-tx-table-sram",
+    "mode": "rtl",
+    "label": "strict-20261004-checked",
+    "exit": 1,
+    "result": "runs=270 PASS=118 BOTH_FAIL=20 NO_STIMULUS=18 DIFFERENT=0 ERROR=114\nRESULT: FAIL\n"
+  },
+  {
+    "branch": "master",
+    "mode": "rtl",
+    "label": "strict-20261004-checked",
+    "exit": 1,
+    "result": "runs=270 PASS=118 BOTH_FAIL=20 NO_STIMULUS=18 DIFFERENT=0 ERROR=114\nRESULT: FAIL\n"
+  },
+  {
+    "branch": "risc-v-ble",
+    "mode": "rtl",
+    "label": "strict-20261004-checked",
+    "exit": 1,
+    "result": "runs=270 PASS=118 BOTH_FAIL=20 NO_STIMULUS=18 DIFFERENT=0 ERROR=114\nRESULT: FAIL\n"
+  }
+]

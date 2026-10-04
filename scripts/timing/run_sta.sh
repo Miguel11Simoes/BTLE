@@ -101,6 +101,7 @@ tee -o $out/$name.stat stat -liberty $LIBERTY
                 buffer -N 16 -p; upsize; dnsize; print_stats; stime -p" \
       > "$work/$name.stime.txt" 2>&1
   sed -i 's/\x1b\[[0-9;]*m//g' "$work/$name.stime.txt"
+  [ "$(grep -cE 'Delay =[[:space:]]*[0-9.]+ ps' "$work/$name.stime.txt")" -ge 2 ] && grep -q "^Start-point = " "$work/$name.stime.txt" || { echo "incomplete ABC timing result: $name" >&2; exit 1; }
   grep -E '^(WireLoad|Path|Start-point)|i/o =' "$work/$name.stime.txt" > "$out/$name.stime.txt"
   # translate the reported path and its end points back to the design's names
   $PY - "$out/$name.stime.txt" "$work/$name.map" > "$out/$name.path.txt" <<'EOF'

@@ -1,0 +1,58 @@
+[
+  {
+    "branch": "ble-tx-1--8",
+    "exit": 0
+  },
+  {
+    "branch": "ble-tx-fir2",
+    "exit": 0
+  },
+  {
+    "branch": "ble-rx-dm",
+    "exit": 0
+  },
+  {
+    "branch": "ble-tx-sin2",
+    "exit": 0
+  },
+  {
+    "branch": "ble-tx-sin4",
+    "exit": 0
+  },
+  {
+    "branch": "ble-tx-opt",
+    "exit": 0
+  },
+  {
+    "branch": "ble-tx-sin8",
+    "exit": 0
+  },
+  {
+    "branch": "ble-tx-sin8-1rw",
+    "exit": 0
+  },
+  {
+    "branch": "ble-opt",
+    "exit": 0
+  },
+  {
+    "branch": "ble-tx-table-reg",
+    "exit": 0
+  },
+  {
+    "branch": "ble-tx-table",
+    "exit": 0
+  },
+  {
+    "branch": "risc-v-ble",
+    "exit": 0
+  },
+  {
+    "branch": "ble-tx-table-sram",
+    "exit": 0
+  },
+  {
+    "branch": "master",
+    "exit": 0
+  }
+]

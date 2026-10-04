@@ -78,6 +78,9 @@ def read_timing(run):
 
 def read_activity(run):
     out = {}
+    codes = json.loads((run / 'exit_codes.json').read_text())
+    if set(codes) != set(SCENARIOS + ['setup']) or any(codes.values()):
+        raise RuntimeError('FAIL: incomplete or failed activity processes: ' + str(run))
     events = {}
     runs = run / 'runs.txt'
     if runs.exists():
@@ -263,7 +266,7 @@ def main():
     keys = ('toggles_per_cycle', 'hot_nets', 'mem', 'data', 'clock')
     for s in SCENARIOS:
         refs = [act[n][s]['ref'] for n in names if s in act[n]]
-        ok = all(same_all([r[k] for k in keys], [refs[0][k] for k in keys]) for r in refs)
+        ok = len(refs) == len(names) and all(same_all([r[k] for k in keys], [refs[0][k] for k in keys]) for r in refs)
         checks.append((f'upstream side identical in every run, scenario `{s}`', ok))
         d0 = act[ref].get(s)
         if d0:
@@ -275,7 +278,7 @@ def main():
         checks.append((f'`{n}`: activity run on the shared vector set (`vectors.sha256`)',
                        vref.exists() and f.exists() and f.read_text() == vref.read_text()))
     for n in names:
-        ok = all(s in act[n] and 'mismatches 0' in act[n][s]['events'] for s in SCENARIOS)
+        ok = all(s in act[n] and re.search(r'\bmismatches 0(?:\s|$)', act[n][s]['events']) is not None for s in SCENARIOS)
         checks.append((f'`{n}`: gate-level outputs identical to upstream on every clock, 5 scenarios', ok))
 
     print('## Consistency checks\n')

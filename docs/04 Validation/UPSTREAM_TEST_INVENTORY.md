@@ -40,8 +40,8 @@ from `python/`. It has three built-in packets:
 | 2 | `LL_DATA`, empty payload, AA `11850A1B`, CRC init `123456` | 10 |
 
 The optional arguments add channel impairments: SNR in dB (default 20), clock
-error in ppm (default 0), and a sample delay (default 0). None of the generated
-`.txt` files is committed. `.gitignore` excludes them.
+error in ppm (default 0), and a sample delay (default 0). Loose generated `.txt` files are ignored. The strict audit stores its exact
+vector set in `results/validation/integrity-20261004/vectors.tar.gz`.
 
 ## 2. RTL testbenches
 
@@ -55,15 +55,16 @@ Each command comes from the testbench's own header comment and is run from
 | `bit_repeat_upsample_tb.v` | 8× upsampler | `iverilog -o bit_repeat_upsample_tb bit_repeat_upsample_tb.v bit_repeat_upsample.v` | not run |
 | `gauss_filter_tb.v` | Gaussian FIR | `iverilog -o gauss_filter_tb gauss_filter_tb.v gauss_filter.v` | not run |
 | `vco_tb.v` | COS/SIN VCO | `iverilog -o vco_tb vco_tb.v vco.v sdpram_one_clk.v` | not run |
-| `gfsk_demodulation_tb.v` | GFSK demodulator | `iverilog -o gfsk_demodulation_tb gfsk_demodulation_tb.v gfsk_demodulation.v` | not run |
+| `gfsk_demodulation_tb.v` | GFSK demodulator | `iverilog -o gfsk_demodulation_tb gfsk_demodulation_tb.v gfsk_demodulation.v` | 39 PASS; 9 NO_STIMULUS; 6 ERROR (strict 2026-10-04 rerun) |
 | `search_unique_bit_sequence_tb.v` | AA search | `iverilog -o search_unique_bit_sequence_tb search_unique_bit_sequence_tb.v search_unique_bit_sequence.v` | not run |
-| `btle_tx_tb.v` | Full TX | see the header of `btle_tx_tb.v` | not run |
-| `btle_rx_core_tb.v` | RX core | see the header of `btle_rx_core_tb.v` | not run |
-| `btle_rx_tb.v` | Full RX | see the header of `btle_rx_tb.v` | not run |
-| `btle_controller_tb.v` | PHY + LL + top | see the header of `btle_controller_tb.v` | not run |
+| `btle_tx_tb.v` | Full TX | see the header of `btle_tx_tb.v` | 0 PASS; 54 ERROR (incomplete output count) (strict 2026-10-04 rerun) |
+| `btle_rx_core_tb.v` | RX core | see the header of `btle_rx_core_tb.v` | 45 PASS; 9 NO_STIMULUS (strict 2026-10-04 rerun) |
+| `btle_rx_tb.v` | Full RX | see the header of `btle_rx_tb.v` | 34 PASS; 10 BOTH_FAIL; 10 ERROR (strict 2026-10-04 rerun) |
+| `btle_controller_tb.v` | PHY + LL + top | see the header of `btle_controller_tb.v` | 0 PASS; 10 BOTH_FAIL; 44 ERROR (strict 2026-10-04 rerun) |
 
-Each testbench is followed by `vvp <name>`. A pass prints `Test PASS`, or
-`0 difference found` for the RX/TX comparisons.
+Each testbench is followed by `vvp <name>`. Individual `Test PASS` and `0 difference found` messages are insufficient: the strict
+runner also checks exits, stimuli, all verdicts, known outputs and comparison lengths.
+See [VALIDATION_INTEGRITY.md](VALIDATION_INTEGRITY.md); the overall result is FAIL.
 
 *Correction (2026-09-18):* an earlier version of this inventory expected
 `btle_controller_tb` to fail because of duplicate modules. That was wrong. The

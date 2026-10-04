@@ -1,0 +1,193 @@
+[
+  {
+    "branch": "ble-tx-sin8-1rw",
+    "test": "vco",
+    "command": [
+      "python3",
+      "tests/test_vco_sin8_1rw.py",
+      "--mutants"
+    ],
+    "exit": 0,
+    "initial_exit": 1,
+    "retry_note": "First attempt rejected the temporary one-port replacement left in the scratch worktree during the parallel regression; repeated after that regression restored RTL.",
+    "log": "ble-tx-sin8-1rw-vco-rerun.log.gz"
+  },
+  {
+    "branch": "ble-tx-sin4",
+    "test": "vco",
+    "command": [
+      "python3",
+      "tests/test_vco_sin4.py"
+    ],
+    "exit": 0,
+    "log": "ble-tx-sin4-vco.log.gz"
+  },
+  {
+    "branch": "ble-opt",
+    "test": "ctl",
+    "command": [
+      "bash",
+      "scripts/validation/ctl_lockstep/run_ctl_lockstep.sh",
+      "strict-guards-final",
+      "1",
+      "6"
+    ],
+    "exit": 0,
+    "log": "ble-opt-ctl.log.gz"
+  },
+  {
+    "branch": "ble-tx-table",
+    "test": "ctl",
+    "command": [
+      "bash",
+      "scripts/validation/ctl_lockstep/run_ctl_lockstep.sh",
+      "strict-guards-final",
+      "1",
+      "6"
+    ],
+    "exit": 0,
+    "log": "ble-tx-table-ctl.log.gz"
+  },
+  {
+    "branch": "ble-tx-sin2",
+    "test": "vco",
+    "command": [
+      "python3",
+      "tests/test_vco_sin2.py",
+      "--mutants"
+    ],
+    "exit": 0,
+    "log": "ble-tx-sin2-vco.log.gz"
+  },
+  {
+    "branch": "ble-tx-table-reg",
+    "test": "ctl",
+    "command": [
+      "bash",
+      "scripts/validation/ctl_lockstep/run_ctl_lockstep.sh",
+      "strict-guards-final",
+      "1",
+      "6"
+    ],
+    "exit": 0,
+    "log": "ble-tx-table-reg-ctl.log.gz"
+  },
+  {
+    "branch": "ble-tx-sin8",
+    "test": "vco",
+    "command": [
+      "python3",
+      "tests/test_vco_sin8.py",
+      "--mutants"
+    ],
+    "exit": 0,
+    "log": "ble-tx-sin8-vco.log.gz"
+  },
+  {
+    "branch": "ble-tx-table-reg",
+    "test": "random",
+    "command": [
+      "bash",
+      "scripts/validation/table_random/run_table_random.sh",
+      "strict-guards-final",
+      "1"
+    ],
+    "exit": 0,
+    "log": "ble-tx-table-reg-random.log.gz"
+  },
+  {
+    "branch": "ble-tx-table-sram",
+    "test": "random",
+    "command": [
+      "bash",
+      "scripts/validation/table_random/run_table_random.sh",
+      "strict-guards-final",
+      "1"
+    ],
+    "exit": 0,
+    "log": "ble-tx-table-sram-random.log.gz"
+  },
+  {
+    "branch": "ble-rx-dm",
+    "test": "rx",
+    "command": [
+      "bash",
+      "scripts/validation/rx_lockstep/run_rx_lockstep.sh",
+      "strict-guards-final",
+      "1",
+      "20"
+    ],
+    "exit": 0,
+    "log": "ble-rx-dm-rx.log.gz"
+  },
+  {
+    "branch": "ble-tx-table-sram",
+    "test": "ctl",
+    "command": [
+      "bash",
+      "scripts/validation/ctl_lockstep/run_ctl_lockstep.sh",
+      "strict-guards-final",
+      "1",
+      "6"
+    ],
+    "exit": 0,
+    "log": "ble-tx-table-sram-ctl.log.gz"
+  },
+  {
+    "branch": "ble-tx-table",
+    "test": "gauss",
+    "command": [
+      "bash",
+      "scripts/validation/formal_gauss/run_formal_gauss.sh",
+      "strict-guards-final"
+    ],
+    "exit": 0,
+    "log": "ble-tx-table-gauss.log.gz"
+  },
+  {
+    "branch": "ble-tx-1--8",
+    "test": "vco",
+    "command": [
+      "python3",
+      "tests/test_vco_1--8.py",
+      "--mutants"
+    ],
+    "exit": 0,
+    "log": "ble-tx-1--8-vco.log.gz"
+  },
+  {
+    "branch": "ble-tx-table",
+    "test": "equiv",
+    "command": [
+      "bash",
+      "scripts/validation/equiv_defaults/run_equiv_defaults.sh",
+      "strict-guards-final",
+      "upstream-baseline",
+      "gauss_filter"
+    ],
+    "exit": 0,
+    "log": "ble-tx-table-equiv.log.gz"
+  },
+  {
+    "branch": "ble-rx-dm",
+    "test": "demod",
+    "command": [
+      "bash",
+      "scripts/validation/formal_demod/run_formal.sh",
+      "strict-guards-final"
+    ],
+    "exit": 0,
+    "log": "ble-rx-dm-demod.log.gz"
+  },
+  {
+    "branch": "ble-tx-fir2",
+    "test": "fir2",
+    "command": [
+      "bash",
+      "scripts/validation/formal_fir2/run_formal_fir2.sh",
+      "strict-guards-final"
+    ],
+    "exit": 0,
+    "log": "ble-tx-fir2-fir2.log.gz"
+  }
+]

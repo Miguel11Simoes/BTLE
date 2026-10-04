@@ -9,6 +9,12 @@ from pathlib import Path
 run = Path(sys.argv[1])
 order = ['rx', 'tx', 'mixed', 'idle', 'idle0']
 data = {s: json.load(open(run / f'{s}.json')) for s in order if (run / f'{s}.json').exists()}
+codes = json.loads((run / 'exit_codes.json').read_text())
+if set(data) != set(order) or set(codes) != set(order + ['setup']) or any(codes.values()):
+    raise SystemExit('FAIL: incomplete scenarios or unsuccessful simulator process')
+if any(d['window_cycles'] <= 0 for d in data.values()):
+    raise SystemExit('FAIL: empty activity window')
+
 
 def pct(a, b):
     return 'n/a' if a == 0 else f'{100.0 * (b - a) / a:+.1f} %'

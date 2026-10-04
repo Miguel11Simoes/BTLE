@@ -1,5 +1,7 @@
 # Gaussian filter: where the table lives, and the folded FIR — TX area of every option
 
+> Validation correction (2026-10-04): earlier success claims for all 270 checks are withdrawn. The strict rerun is **FAIL: 118 PASS, 20 BOTH_FAIL, 18 NO_STIMULUS, 114 ERROR; 0 DIFFERENT**. See [the integrity audit](../04%20Validation/VALIDATION_INTEGRITY.md) for evidence and limitations.
+
 **Project:** BTLE — reconfigurable RISC-V baseband  
 **Branch:** the same file on `master`, `risc-v-ble`, `ble-opt`, `ble-tx-table`, `ble-rx-dm`, `ble-tx-table-reg`, `ble-tx-table-sram`, `ble-tx-fir2`, `ble-tx-sin4`, `ble-tx-sin8`, `ble-tx-sin8-1rw`, `ble-tx-sin2`, `ble-tx-1--8` and `ble-tx-opt`  
 **Base:** tag `upstream-baseline` (`8540186`)  
@@ -205,7 +207,7 @@ trusted, because a wrong design can be small.
 | Formal | pair identity at 16 bits (all taps); whole filter equivalent to upstream for **any taps and any input**, unbounded, at 4 bits (74 s, z3); 3/3 mutants rejected (the 4-bit proof does not pass them, and the random lockstep finds each) | defaults ≡ upstream: `gauss_filter`, `gfsk_modulation`, `btle_tx` | the same |
 | Random lockstep, module level, 16 bits | 4 seeds × 2 000 000 clocks: 7 999 607 clocks compared, 1 001 125 random tap writes, 5 332 990 samples, 393 resets, no mismatch | 4 seeds × 200 random tap sets × 5 000 clocks, back-to-back samples included; 2/2 mutants | the same; 4/4 mutants, including the one-clock-ahead SRAM addressing |
 | Controller through the registers | — | 15/15 runs, 90 random tap sets reprogrammed in flight, 930 629 clocks, every output and register; 4/4 mutants | 15/15 runs, 927 488 clocks; 6/6 mutants |
-| Upstream testbenches, 270 runs | 270/270 identical; `btle_tx_tb` passes in all 54 conditions | 270/270 identical with the table on | 270/270 identical with the table on |
+| Upstream testbenches, 270 runs | 118 PASS; **FAIL overall** (integrity audit) | 118 PASS; **FAIL overall** (integrity audit) | 118 PASS; **FAIL overall** (integrity audit) |
 
 The ROM option is validated in `docs/04 Validation/TX_TABLE_VALIDATION.md` on
 `ble-tx-table` (unbounded formal proof against the FIR with the BLE taps).

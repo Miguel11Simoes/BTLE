@@ -52,14 +52,18 @@ def main():
     print('| Top | Std cells | Flip-flops | Cell area (um2) | SRAM macros | SRAM bits |')
     print('|---|---:|---:|---:|---:|---:|')
     tops = [p for p in run.iterdir() if p.is_dir()]
+    failed = not bool(tops)
     for top_dir in sorted(tops, key=lambda p: (p / 'stage.ys').stat().st_mtime):
         if not (top_dir / 'stat.json').exists():
+            failed = True
             print(f'| `{top_dir.name}` | FAIL | | | | |')
             continue
         s = summarise(top_dir)
         print(f"| `{top_dir.name}` | {s['cells']} | {s['flops']} | {s['area']:.1f} | "
               f"{s['rams']} | {s['ram_bits']} |")
 
+    if failed:
+        raise SystemExit('FAIL: empty or incomplete area results')
 
 if __name__ == '__main__':
     main()

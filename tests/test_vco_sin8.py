@@ -37,9 +37,12 @@ import os
 from pathlib import Path
 import subprocess
 import tempfile
+import sys
 
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "scripts/validation"))
+from result_guard import sim_pass, mutant_caught, positive
 
 PORTS = """
     .clk(clk), .rst(rst),
@@ -386,7 +389,10 @@ def build(work: Path, name: str, vco_text: str, top: str, reference: Path) -> Pa
 
 def simulate(work: Path, vvp: Path, *plusargs: str) -> tuple[bool, str]:
     result = subprocess.run([os.environ.get("VVP", "vvp"), "-n", str(vvp), *plusargs],
-                            cwd=work, capture_output=True, text=True)
+                            cwd=work, capture_output=True, text=True, timeout=600)
+    output = result.stdout + result.stderr
+    if not sim_pass(result.returncode, output, "PASS") and not mutant_caught(result.returncode, output):
+        raise RuntimeError(f"simulator did not complete a valid check (exit {result.returncode}): {output[-500:]}")
     lines = [l for l in (result.stdout + result.stderr).splitlines() if l.startswith(("PASS", "FAIL"))]
     ok = result.returncode == 0 and any(l.startswith("PASS") for l in lines) \
         and not any(l.startswith("FAIL") for l in lines)
@@ -413,8 +419,8 @@ def run_all(work: Path, name: str, vco_text: str, seeds: int, clocks: int, stop_
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    parser.add_argument("--seeds", type=int, default=4)
-    parser.add_argument("--clocks", type=int, default=1000000)
+    parser.add_argument("--seeds", type=positive, default=4)
+    parser.add_argument("--clocks", type=positive, default=1000000)
     parser.add_argument("--mutants", action="store_true")
     args = parser.parse_args()
 
