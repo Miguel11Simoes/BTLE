@@ -1,0 +1,298 @@
+{
+ "scenario": "mixed",
+ "window_cycles": 100000,
+ "ref": {
+  "nets": 56372,
+  "toggles": 99130055,
+  "clock_toggles": 700000,
+  "clk_cap_tog": 875719783.7999746,
+  "data_cap_tog": 372923569.61042154,
+  "hot_nets": 839,
+  "blocks": {
+   "top glue": {
+    "nets": 643,
+    "toggles": 1226282,
+    "data_cap_tog": 2258.1581200000014,
+    "clk_cap_tog": 0.0,
+    "hot_nets": 32,
+    "cells": 219
+   },
+   "auxiliary_daemon": {
+    "nets": 378,
+    "toggles": 3762629,
+    "data_cap_tog": 11524866.508144997,
+    "clk_cap_tog": 9116668.799999997,
+    "hot_nets": 152,
+    "cells": 298
+   },
+   "btle_ll": {
+    "nets": 12291,
+    "toggles": 4149520,
+    "data_cap_tog": 12118159.912133016,
+    "clk_cap_tog": 387028349.99999225,
+    "hot_nets": 87,
+    "cells": 9484
+   },
+   "btle_rx": {
+    "nets": 39014,
+    "toggles": 79109038,
+    "data_cap_tog": 319856324.2476881,
+    "clk_cap_tog": 392776480.79998213,
+    "hot_nets": 242,
+    "cells": 36947
+   },
+   "btle_tx (other)": {
+    "nets": 1338,
+    "toggles": 3743593,
+    "data_cap_tog": 9617053.164390005,
+    "clk_cap_tog": 42924315.60000018,
+    "hot_nets": 111,
+    "cells": 1089
+   },
+   "gauss_filter": {
+    "nets": 2464,
+    "toggles": 3913393,
+    "data_cap_tog": 16012060.56041597,
+    "clk_cap_tog": 33807646.800000064,
+    "hot_nets": 38,
+    "cells": 2286
+   },
+   "clock_domain_conversion": {
+    "nets": 244,
+    "toggles": 3225600,
+    "data_cap_tog": 3792847.0595269995,
+    "clk_cap_tog": 10066321.799999999,
+    "hot_nets": 177,
+    "cells": 183
+   }
+  },
+  "mem_port_toggles": 3044741,
+  "mem_instances": 15,
+  "cells": 50506,
+  "missing": 12,
+  "top_nets": [
+   [
+    1.0,
+    "clock_domain_conversion",
+    "tb_activity/u_ref/clock_domain_conversion_iq_i/rx_iq_valid"
+   ],
+   [
+    1.0,
+    "clock_domain_conversion",
+    "tb_activity/u_ref/clock_domain_conversion_iq_i/_52_"
+   ],
+   [
+    1.0,
+    "clock_domain_conversion",
+    "tb_activity/u_ref/clock_domain_conversion_iq_i/_182_"
+   ],
+   [
+    1.0,
+    "clock_domain_conversion",
+    "tb_activity/u_ref/clock_domain_conversion_iq_i/_173_"
+   ],
+   [
+    1.0,
+    "btle_tx (other)",
+    "tb_activity/u_ref/btle_phy_i.btle_tx_i/gfsk_modulation_i.bit_repeat_upsample_i.bit_upsample_valid_internal"
+   ],
+   [
+    1.0,
+    "btle_tx (other)",
+    "tb_activity/u_ref/btle_phy_i.btle_tx_i/_644_"
+   ],
+   [
+    1.0,
+    "btle_tx (other)",
+    "tb_activity/u_ref/btle_phy_i.btle_tx_i/_513_"
+   ],
+   [
+    1.0,
+    "btle_rx",
+    "tb_activity/u_ref/btle_phy_i.btle_rx_i/_32451_"
+   ],
+   [
+    1.0,
+    "btle_ll",
+    "tb_activity/u_ref/btle_ll_i/uart_frame_tx_i.tx_clk_gen_inst.count[0]"
+   ],
+   [
+    1.0,
+    "btle_ll",
+    "tb_activity/u_ref/btle_ll_i/ref_1pps_counter[0]"
+   ],
+   [
+    1.0,
+    "btle_ll",
+    "tb_activity/u_ref/btle_ll_i/clk_cross_bus_bb_to_s_axi_i.write_data[13]"
+   ],
+   [
+    1.0,
+    "btle_ll",
+    "tb_activity/u_ref/btle_ll_i/clk_cross_bus_bb_to_s_axi_i.read_data[13]"
+   ],
+   [
+    1.0,
+    "btle_ll",
+    "tb_activity/u_ref/btle_ll_i/_8590_[0]"
+   ],
+   [
+    1.0,
+    "btle_ll",
+    "tb_activity/u_ref/btle_ll_i/_8573_[0]"
+   ],
+   [
+    1.0,
+    "btle_ll",
+    "tb_activity/u_ref/btle_ll_i/_6775_"
+   ]
+  ]
+ },
+ "dut": {
+  "nets": 54144,
+  "toggles": 99237462,
+  "clock_toggles": 700000,
+  "clk_cap_tog": 847610054.9999746,
+  "data_cap_tog": 373320497.61165845,
+  "hot_nets": 954,
+  "blocks": {
+   "top glue": {
+    "nets": 643,
+    "toggles": 1226282,
+    "data_cap_tog": 2258.1581200000014,
+    "clk_cap_tog": 0.0,
+    "hot_nets": 32,
+    "cells": 219
+   },
+   "auxiliary_daemon": {
+    "nets": 378,
+    "toggles": 3762629,
+    "data_cap_tog": 11524579.263102997,
+    "clk_cap_tog": 9116668.799999997,
+    "hot_nets": 152,
+    "cells": 298
+   },
+   "btle_ll": {
+    "nets": 12285,
+    "toggles": 4192059,
+    "data_cap_tog": 12042756.231744999,
+    "clk_cap_tog": 387028349.9999923,
+    "hot_nets": 87,
+    "cells": 9478
+   },
+   "btle_rx": {
+    "nets": 39017,
+    "toggles": 79151310,
+    "data_cap_tog": 319514729.1820049,
+    "clk_cap_tog": 392776480.79998213,
+    "hot_nets": 243,
+    "cells": 36950
+   },
+   "btle_tx (other)": {
+    "nets": 1392,
+    "toggles": 6606805,
+    "data_cap_tog": 21383545.47314098,
+    "clk_cap_tog": 44443760.40000015,
+    "hot_nets": 238,
+    "cells": 1142
+   },
+   "gauss_filter": {
+    "nets": 185,
+    "toggles": 1072777,
+    "data_cap_tog": 5059782.244014998,
+    "clk_cap_tog": 4178473.2000000007,
+    "hot_nets": 25,
+    "cells": 163
+   },
+   "clock_domain_conversion": {
+    "nets": 244,
+    "toggles": 3225600,
+    "data_cap_tog": 3792847.0595269995,
+    "clk_cap_tog": 10066321.799999999,
+    "hot_nets": 177,
+    "cells": 183
+   }
+  },
+  "mem_port_toggles": 3262969,
+  "mem_instances": 14,
+  "cells": 48433,
+  "missing": 10,
+  "top_nets": [
+   [
+    1.0,
+    "clock_domain_conversion",
+    "tb_activity/u_dut/clock_domain_conversion_iq_i/rx_iq_valid"
+   ],
+   [
+    1.0,
+    "clock_domain_conversion",
+    "tb_activity/u_dut/clock_domain_conversion_iq_i/_52_"
+   ],
+   [
+    1.0,
+    "clock_domain_conversion",
+    "tb_activity/u_dut/clock_domain_conversion_iq_i/_182_"
+   ],
+   [
+    1.0,
+    "clock_domain_conversion",
+    "tb_activity/u_dut/clock_domain_conversion_iq_i/_173_"
+   ],
+   [
+    1.0,
+    "btle_tx (other)",
+    "tb_activity/u_dut/btle_phy_i.btle_tx_i/gfsk_modulation_i.bit_repeat_upsample_i.bit_upsample_valid_internal"
+   ],
+   [
+    1.0,
+    "btle_tx (other)",
+    "tb_activity/u_dut/btle_phy_i.btle_tx_i/_533_"
+   ],
+   [
+    1.0,
+    "btle_tx (other)",
+    "tb_activity/u_dut/btle_phy_i.btle_tx_i/_458_"
+   ],
+   [
+    1.0,
+    "btle_rx",
+    "tb_activity/u_dut/btle_phy_i.btle_rx_i/_32468_"
+   ],
+   [
+    1.0,
+    "btle_ll",
+    "tb_activity/u_dut/btle_ll_i/uart_frame_tx_i.tx_clk_gen_inst.count[0]"
+   ],
+   [
+    1.0,
+    "btle_ll",
+    "tb_activity/u_dut/btle_ll_i/ref_1pps_counter[0]"
+   ],
+   [
+    1.0,
+    "btle_ll",
+    "tb_activity/u_dut/btle_ll_i/clk_cross_bus_bb_to_s_axi_i.write_data[13]"
+   ],
+   [
+    1.0,
+    "btle_ll",
+    "tb_activity/u_dut/btle_ll_i/clk_cross_bus_bb_to_s_axi_i.read_data[13]"
+   ],
+   [
+    1.0,
+    "btle_ll",
+    "tb_activity/u_dut/btle_ll_i/_87_"
+   ],
+   [
+    1.0,
+    "btle_ll",
+    "tb_activity/u_dut/btle_ll_i/_8584_[0]"
+   ],
+   [
+    1.0,
+    "btle_ll",
+    "tb_activity/u_dut/btle_ll_i/_8567_[0]"
+   ]
+  ]
+ }
+}

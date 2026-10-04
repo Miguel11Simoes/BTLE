@@ -1,0 +1,7 @@
+label=openram-pdu
+date_utc=2026-10-04T20:21:02Z
+git_commit=b77331635943c9fe404689be33f575a4c875658d
+openram=1.2.48 (/home/msmiguel/venvs/openram/lib/python3.11/site-packages/openram)
+python=Python 3.11.14 numpy=1.24.4
+tech=freepdk45, nominal corner only, check_lvsdrc=False, analytical_delay=True, layout options default
+macros=sram_1rw_8x256 sram_1rw_16x128_m8 sram_1rw1r_8x256

@@ -1,0 +1,12 @@
+read_verilog -lib sdpram_one_clk.v sdpram_two_clk.v
+read_verilog auxiliary_daemon.v bit_repeat_upsample.v btle_controller.v btle_controller_wrapper.v btle_ll.v btle_phy.v btle_rx.v btle_rx_core.v btle_tx.v clock_domain_conversion_iq.v crc24.v crc24_core.v gauss_filter.v gfsk_demodulation.v gfsk_modulation.v rx_clk_gen.v scramble.v scramble_core.v search_unique_bit_sequence.v serial_in_ram_out.v tx_clk_gen.v uart_frame_rx.v uart_frame_tx.v vco.v
+hierarchy -check -top scramble
+synth -flatten -top scramble
+check -assert
+dfflibmap -liberty /home/msmiguel/eda/NangateOpenCellLibrary_typical.lib
+abc -exe /home/msmiguel/eda/oss-cad-suite-20260907/bin/yosys-abc -liberty /home/msmiguel/eda/NangateOpenCellLibrary_typical.lib
+opt_clean -purge
+read_liberty -lib /home/msmiguel/eda/NangateOpenCellLibrary_typical.lib
+tee -o /home/msmiguel/btle-runs/pdu-cmp/results/area/tx-pdu/master/scramble/stat.json stat -json -liberty /home/msmiguel/eda/NangateOpenCellLibrary_typical.lib
+tee -o /home/msmiguel/btle-runs/pdu-cmp/results/area/tx-pdu/master/scramble/stat.txt stat -liberty /home/msmiguel/eda/NangateOpenCellLibrary_typical.lib
+write_json /home/msmiguel/btle-runs/pdu-cmp/results/area/tx-pdu/master/scramble/netlist.json

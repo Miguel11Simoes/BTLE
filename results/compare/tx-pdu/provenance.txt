@@ -1,0 +1,10 @@
+label=tx-pdu
+date_utc=2026-10-04T20:21:02Z
+harness=b77331635943c9fe404689be33f575a4c875658d (branch ble-tx-pdu), dirty files under scripts/: 0
+configurations (name, measured revision, commit, verilog/ tree, parameters):
+  master	upstream-baseline	85401861e8f4b04b90cbaa0394c0f9d45ed02f18	4bacca327f4a7112a66bca5915160ebacfffb28e	<none: defaults>
+  ble-tx-pdu	ble-tx-pdu	b77331635943c9fe404689be33f575a4c875658d	0030050f09b75de63c9ee413b33fd1e0196d0706	GAUSS_TABLE=1
+activity vectors: example 0, 20 dB, 20 ppm, one set for every configuration; vectors.tar.gz, sha256 of vectors.sha256 d53f2d49ed8db456
+branches with the upstream verilog/ tree (4bacca327f4a7112a66bca5915160ebacfffb28e):
+  master	origin/master	4bacca327f4a7112a66bca5915160ebacfffb28e	same_as_upstream=yes
+  risc-v-ble	origin/risc-v-ble	4bacca327f4a7112a66bca5915160ebacfffb28e	same_as_upstream=yes
