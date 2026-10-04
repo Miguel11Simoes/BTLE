@@ -50,10 +50,10 @@ mutant() {  # $1 = name, $2 = sed expression on gauss_filter.v
 }
 # mirror taps around the wrong centre
 mutant wrong_mirror 's/t = \(pos <= 8\) \? pos : \(16 - pos\);/t = (pos <= 8) ? pos : (15 - pos);/'
-# group B indexed one position off
-mutant group_off_by_one 's/table_b\[bit_upsample_store\[10:5\]\]/table_b[bit_upsample_store[11:6]]/'
-# a zero bit adds the tap instead of subtracting it
-mutant wrong_sign 's/\? table_tap\(first_pos\+k\) : -table_tap\(first_pos\+k\)/? table_tap(first_pos+k) : table_tap(first_pos+k)/'
+# a tap paired with the wrong window position (ble-tx-pdu: the filter's formulation of 2026-10-04)
+mutant pair_off_by_one 's/w\[16-e\]/w[15-e]/'
+# the sum of the taps added instead of subtracted
+mutant wrong_offset_sign 's/\(half_sum <<< 1\) - tap_total\(0\)/(half_sum <<< 1) + tap_total(0)/'
 
 sby_rc=0
 

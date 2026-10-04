@@ -4,7 +4,7 @@
 //
 // Formal miter for optimisation B2: the upstream runtime-tap Gaussian FIR
 // (gauss_filter_ref, taken from the reference revision and renamed) against
-// gauss_filter with GAUSS_TABLE = 1 (distributed-arithmetic tables).
+// gauss_filter with GAUSS_TABLE = 1 (the constant taps).
 //
 // Supported configuration: the FIR is loaded, through its own tap interface,
 // with the taps the table was built from (GAUSS_TABLE_TAPS, default = BLE

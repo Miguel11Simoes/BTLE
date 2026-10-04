@@ -5,14 +5,17 @@
 #
 # Controller-level lockstep (tb_ctl_lockstep.v): the upstream btle_controller
 # (a git revision, default upstream-baseline; every module renamed *_ref)
-# against the working-tree btle_controller of branch ble-tx-table with
-# GAUSS_TABLE=1, driven through the AXI-lite registers. Adapted from ble-opt:
-# nothing is removed on this branch, so every output and every register is
-# compared.
+# against the working-tree btle_controller with GAUSS_TABLE=1, driven through
+# the AXI-lite registers. Adapted from ble-opt: nothing is removed on this
+# branch, so every output and every register is compared.
 #
-#   1. Mutation check: four wrong variants must each be caught: three wrong
-#      tables (a tap, a group index, a sign), and one change to the IQ-capture
-#      half flag, which shows that the outputs ble-opt excludes are compared here.
+#   1. Mutation check: five wrong variants must each be caught: three in the
+#      constant-tap Gaussian filter (a tap, the pairing of the window positions,
+#      the sign of the sum of the taps), one in the packet buffer (a byte asked
+#      for before its address is set), and one change to the IQ-capture half
+#      flag, which shows that the outputs ble-opt excludes are compared here.
+#      (On ble-tx-pdu since 2026-10-04: the filter's mutants follow its new
+#      formulation, and the packet buffer's is new.)
 #   2. Lockstep: for each packet of the Python model (examples 0, 1, 2) and
 #      each seed, no difference on any output or register read.
 #
@@ -92,10 +95,12 @@ mutate() {  # $1 = name, $2 = file, $3 = sed expression, or "perl:<expression>" 
 }
 # one table tap wrong (24 -> 23)
 mutate wrong_table_tap gauss_filter.v "s/\{16'd24, 16'd22,/{16'd23, 16'd22,/"
-# table group B indexed one position off
-mutate group_off_by_one gauss_filter.v 's/table_b\[bit_upsample_store\[10:5\]\]/table_b[bit_upsample_store[11:6]]/'
-# a zero bit adds the tap instead of subtracting it
-mutate wrong_sign gauss_filter.v 's/\? table_tap\(first_pos\+k\) : -table_tap\(first_pos\+k\)/? table_tap(first_pos+k) : table_tap(first_pos+k)/'
+# a tap paired with the wrong window position
+mutate pair_off_by_one gauss_filter.v 's/w\[16-e\]/w[15-e]/'
+# the sum of the taps added instead of subtracted
+mutate wrong_offset_sign gauss_filter.v 's/\(half_sum <<< 1\) - tap_total\(0\)/(half_sum <<< 1) + tap_total(0)/'
+# the packet buffer asked for a byte before its address is set
+mutate pdu_read_early btle_tx.v 's/localparam \[3:0\] PDU_READ_CLOCK = 4;/localparam [3:0] PDU_READ_CLOCK = 1;/'
 # IQ-capture half flag loses its mid-buffer point (ll_itrpt2: excluded on ble-opt, compared here)
 mutate capture_half_flag auxiliary_daemon.v 's/\(bram_addr_b == 0 \|\| bram_addr_b == \(BRAM_DEPTH\/2\)\)/(bram_addr_b == 0)/'
 
@@ -114,7 +119,7 @@ for ex in 0 1 2; do
 done
 gzip -9 "$out"/*.log
 {
-  echo "mutations: $(grep -c detected "$out/mutation.txt")/4 detected"
+  echo "mutations: $(grep -c detected "$out/mutation.txt")/5 detected"
   echo "lockstep runs: $((n_pass+n_fail)) pass=$n_pass fail=$n_fail"
   awk -F'\t' 'NR>1 {split($4,a," "); c+=a[2]; cmp+=a[4]; irq+=a[6]; ok+=a[8]; tx+=a[10]; rd+=a[12]}
               END {printf "compared: cycles %d compared %d rx_irqs %d rx_crc_ok %d tx_packets %d axi_reads %d\n", c, cmp, irq, ok, tx, rd}' "$out/summary.tsv"
