@@ -65,7 +65,7 @@ Current per-branch evidence:
 - `results/validation/measurement-guards-final/` on the 11 branches carrying measurement tools. The extra before/after measurement reproductions and real-tool smoke runs are on `ble-opt`.
 - The old RF source and before/after test archives are in `ble-tx-sin4:results/validation/rf-evidence-20261005/`.
 
-The source hashes are SHA-256 of canonical Git/Linux source bytes. A Windows checkout may use CRLF; compare against `git show HEAD:<path>` or normalize only checkout line endings. Commits preserve the tested source content. Changes being made concurrently in another working tree are not part of this evidence unless their files and hashes are listed in the manifest.
+The source and artifact hashes are SHA-256 of canonical Git bytes (text files use LF). A Windows checkout may use CRLF; compare against `git show HEAD:<path>` or normalize only checkout line endings. Commits preserve the tested source content. Changes being made concurrently in another working tree are not part of this evidence unless their files and hashes are listed in the manifest.
 
 Use the input archive, Python/tool setup and branch-specific `DUT_DEFAULTS` from [PRODUCT_VALIDATION.md](PRODUCT_VALIDATION.md), but use the current reference and a new result label:
 
