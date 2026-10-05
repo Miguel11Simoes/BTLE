@@ -111,6 +111,22 @@ class VerdictTests(unittest.TestCase):
                     (d/(stem+'_ref.txt')).write_text(expected)
                     self.assertEqual(rx.output_problem(d,[stem+'.txt']),problem)
 
+    def test_rejection_needs_explicit_and_independent_evidence(self):
+        with tempfile.TemporaryDirectory() as temp:
+            d=Path(temp);name='btle_rx_test_output.txt'
+            (d/name).write_text('')
+            (d/'btle_rx_test_output_ref.txt').write_text('')
+            crc=d/'btle_rx_test_output_crc_ok_ref.txt'
+            crc.write_text('0')
+            self.assertEqual(rx.output_problem(d,[name]),'MISSING_OUTPUT')
+            self.assertIsNone(rx.output_problem(d,[name],allow_rejection=True))
+            crc.write_text('1')
+            self.assertEqual(rx.output_problem(d,[name],allow_rejection=True),'MISSING_OUTPUT')
+            crc.write_text('0');(d/'btle_rx_test_output_ref.txt').write_text('01')
+            self.assertEqual(rx.output_problem(d,[name],allow_rejection=True),'MISSING_OUTPUT')
+            (d/name).write_text('xx')
+            self.assertEqual(rx.output_problem(d,[name],allow_rejection=True),'UNKNOWN_OUTPUT')
+
     def test_sby_exit_and_status_agree(self):
         with tempfile.TemporaryDirectory() as temp:
             status=Path(temp)/'status'

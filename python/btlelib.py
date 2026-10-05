@@ -87,8 +87,9 @@ def vco_fixed_point(voltage_signal, vco_input_gain):
     # Compare to the table address advancing by 1, the vco_input_gain actually is the table_size_scale_up_factor
     vco_fixed_point.cos_table, vco_fixed_point.sin_table = sin_cos_gen(vco_input_gain)
     vco_fixed_point.table_size = len(vco_fixed_point.cos_table)
-    np.savetxt('../verilog/cos_table.txt', vco_fixed_point.cos_table, fmt='%d')
-    np.savetxt('../verilog/sin_table.txt', vco_fixed_point.sin_table, fmt='%d')
+  if SAVE_FOR_VERILOG:
+    np.savetxt(SAVE_DIR+'/cos_table.txt', vco_fixed_point.cos_table, fmt='%d')
+    np.savetxt(SAVE_DIR+'/sin_table.txt', vco_fixed_point.sin_table, fmt='%d')
 
   integral_voltage_signal = np.bitwise_and(np.cumsum(voltage_signal), np.int16(vco_fixed_point.table_size-1))
 
@@ -152,7 +153,8 @@ def gfsk_modulation_fixed_point(bit):
      gfsk_modulation_fixed_point.gauss_fir = np.int8(np.round(gfsk_modulation_fixed_point.gauss_fir_tap_amp_scale_up_factor*gfsk_modulation_fixed_point.gauss_fir))
      gfsk_modulation_fixed_point.gauss_fir_out_amp_scale_down_num_bit_shift = 1 # This compbined with tap_amp_scale_up to form the vco input gain (over +1/-1), which decide the cos&sin table size
      gfsk_modulation_fixed_point.vco_input_gain = np.right_shift(np.int16(gfsk_modulation_fixed_point.gauss_fir_tap_amp_scale_up_factor), gfsk_modulation_fixed_point.gauss_fir_out_amp_scale_down_num_bit_shift)
-     np.savetxt('../verilog/gauss_filter_tap.txt', gfsk_modulation_fixed_point.gauss_fir, fmt='%d')
+  if SAVE_FOR_VERILOG:
+     np.savetxt(SAVE_DIR+'/gauss_filter_tap.txt', gfsk_modulation_fixed_point.gauss_fir, fmt='%d')
 
   num_bit = len(bit)
   bit = np.int8(bit)
@@ -339,7 +341,7 @@ def bit_to_txt_octet_per_line(bit, filename):
     fd.write(a[i:(i+2)])
     fd.write('\n')
 
-  fd.close
+  fd.close()
 
 def btle_tx(pdu_bit, *argv): # 1st arg: pdu_bit. 2nd arg: channel_number (if present). 3rd arg: crc_state_init_bit (if present)
   preamble = 'aa' # for advertisement channel; for data channel it is decided by lsb of access address
@@ -411,414 +413,90 @@ def search_unique_bit_sequence(bit, bit_sequence):
 
   return start_idx
 
+def decode_phy_bits(phy_bit, channel_number, crc_state_init_bit):
+  """Decode a stream starting with the 32-bit access address.
+
+  The header fixes the CRC location. An incomplete header/PDU/CRC is rejected;
+  a shorter capture must never move the CRC into the payload.
+  """
+  phy_bit = np.asarray(phy_bit, dtype=np.int8)
+  if phy_bit.ndim != 1 or np.any((phy_bit != 0) & (phy_bit != 1)):
+    raise ValueError('PHY bits must be a one-dimensional binary array')
+  if not 0 <= int(channel_number) <= 39:
+    raise ValueError('channel_number must be in 0..39')
+  init = np.asarray(crc_state_init_bit, dtype=np.int8)
+  if init.shape != (24,) or np.any((init != 0) & (init != 1)):
+    raise ValueError('CRC initial state must contain exactly 24 binary bits')
+  if len(phy_bit) < 32 + 16:
+    return np.empty(0, dtype=np.int8), False, 0
+  # scramble() leaves the preamble/access address untouched.
+  info = scramble(np.concatenate((np.zeros(8, dtype=np.int8), phy_bit)), channel_number)
+  width = 6 if channel_number >= 37 else 5  # legacy LE 1M packet format
+  payload_length = sum(int(info[48+k]) << k for k in range(width))
+  crc_start = 40 + 16 + payload_length * 8
+  if len(info) < crc_start + 24:
+    return np.empty(0, dtype=np.int8), False, payload_length
+  pdu = info[40:crc_start].copy()
+  good = bool(np.array_equal(crc24_core(pdu, init), info[crc_start:crc_start+24]))
+  return pdu, good, payload_length
+
+
 def btle_rx(i, q, *argv): # i and q at sampling rate SAMPLE_PER_SYMBOL
-  access_address = 'D6BE898E' # for advertisement channel, 0x8E89BED6 in standard. due to byte order here needs to be D6BE898E
-  access_address_bit = hex_string_to_bit(access_address) 
-
-  channel_number = 37 # Default broadcast channel number
-  crc_state_init_bit = np.array([1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0], dtype=np.int8) # bl.hex_string_to_bit('555555')
-  if len(argv) >= 1:
-    channel_number = argv[0]
-  if len(argv) >= 2:
-    if len(argv[1]) == 24:
-      crc_state_init_bit = argv[1]
-    elif len(argv[1]) == 0:
-      crc_state_init_bit = crc_state_init_bit
-    else:
-      print('btle_rx: The crc_state_init_bit argument needs to have exact 24 bits!')
-      print('btle_rx: Ignore the input. Use 0x555555')
-  if len(argv) >= 3:
-    if len(argv[2]) == 8:
-      access_address = argv[2]
-    elif len(argv[2]) == 0:
-      access_address = access_address
-    else:
-      print('btle_rx: The access_address argument needs to be hex string with length exact 8!')
-      print('btle_rx: Ignore the input. Use ', access_address)
-    access_address_bit = hex_string_to_bit(access_address)
-
-  i = np.int16(i)
-  q = np.int16(q)
-
-  num_sample = len(i)
-  num_bit = round(num_sample/SAMPLE_PER_SYMBOL)-1
+  channel_number = int(argv[0]) if len(argv) >= 1 else 37
+  crc_state_init_bit = argv[1] if len(argv) >= 2 and len(argv[1]) else hex_string_to_bit('555555')
+  access_address = argv[2] if len(argv) >= 3 and len(argv[2]) else 'D6BE898E'
+  if not 0 <= channel_number <= 39:
+    raise ValueError('channel_number must be in 0..39')
+  if len(crc_state_init_bit) != 24 or len(access_address) != 8:
+    raise ValueError('CRC init must have 24 bits; access address must have 8 hex digits')
+  access_address_bit = hex_string_to_bit(access_address)
+  i = np.asarray(i, dtype=np.int16); q = np.asarray(q, dtype=np.int16)
+  if i.ndim != 1 or q.ndim != 1 or len(i) != len(q):
+    raise ValueError('I and Q must be one-dimensional arrays of equal length')
+  # Matrices are for diagnostics only. Decoding/export uses the actual per-phase
+  # length, never a repeated/padded decision fabricated to fill a rectangular plot.
+  num_bit = max(0, (len(i) + SAMPLE_PER_SYMBOL - 1) // SAMPLE_PER_SYMBOL - 1)
   bit_all_sample_phase = np.zeros((SAMPLE_PER_SYMBOL, num_bit), dtype=np.int8)
   signal_for_decision = np.zeros((SAMPLE_PER_SYMBOL, num_bit), dtype=np.int32)
+  phases = []
+  chosen = None
+  for phase in range(SAMPLE_PER_SYMBOL):
+    bits, decisions = gfsk_demodulation_fixed_point(i[phase::SAMPLE_PER_SYMBOL], q[phase::SAMPLE_PER_SYMBOL])
+    bit_all_sample_phase[phase, :len(bits)] = bits
+    signal_for_decision[phase, :len(decisions)] = decisions
+    hit = search_unique_bit_sequence(bits, access_address_bit)
+    phy = bits[hit:] if hit >= 0 else np.empty(0, dtype=np.int8)
+    pdu, good, length = decode_phy_bits(phy, channel_number, crc_state_init_bit)
+    phases.append((bits, decisions, hit, phy, pdu, good, length))
+    if good and chosen is None:
+      chosen = phase
+  # Deterministic independent unit stimulus even when no phase detects a packet.
+  if chosen is None:
+    chosen = next((phase for phase, values in enumerate(phases) if values[2] >= 0), 0)
+  bits, decisions, hit, phy, pdu, good, length = phases[chosen]
+  if SAVE_FOR_VERILOG:
+    np.savetxt(SAVE_DIR+'/btle_rx_gfsk_demodulation_test_input_i.txt', i[chosen::SAMPLE_PER_SYMBOL], fmt='%d')
+    np.savetxt(SAVE_DIR+'/btle_rx_gfsk_demodulation_test_input_q.txt', q[chosen::SAMPLE_PER_SYMBOL], fmt='%d')
+    np.savetxt(SAVE_DIR+'/btle_rx_gfsk_demodulation_test_output_bit_ref.txt', bits, fmt='%d')
+    np.savetxt(SAVE_DIR+'/btle_rx_gfsk_demodulation_test_output_signal_for_decision_ref.txt', decisions, fmt='%d')
+    np.savetxt(SAVE_DIR+'/btle_rx_search_unique_bit_sequence_test_input.txt', bits, fmt='%d')
+    np.savetxt(SAVE_DIR+'/btle_rx_search_unique_bit_sequence_test_output_ref.txt', [hit], fmt='%d')
+    np.savetxt(SAVE_DIR+'/btle_rx_btle_rx_core_test_input_i.txt', i[chosen::SAMPLE_PER_SYMBOL], fmt='%d')
+    np.savetxt(SAVE_DIR+'/btle_rx_btle_rx_core_test_input_q.txt', q[chosen::SAMPLE_PER_SYMBOL], fmt='%d')
+    accepted_pdu = pdu if good else np.empty(0, dtype=np.int8)
+    bit_to_txt_octet_per_line(accepted_pdu, SAVE_DIR+'/btle_rx_btle_rx_core_test_output_ref.txt')
+    np.savetxt(SAVE_DIR+'/btle_rx_btle_rx_core_test_output_bit_ref.txt', accepted_pdu, fmt='%d')
+    np.savetxt(SAVE_DIR+'/btle_rx_btle_rx_core_test_output_crc_ok_ref.txt', [int(good)], fmt='%d')
+  # At packet level a CRC-invalid or incomplete packet is never a delivered PDU.
+  return (pdu if good else np.empty(0, dtype=np.int8), good, length if good else 0,
+          np.concatenate((np.zeros(8, dtype=np.int8), phy)) if hit >= 0 else phy,
+          bit_all_sample_phase, signal_for_decision, chosen)
 
-  # start_idx_at_symbol_rate_store = []
-  # sample_phase_idx_store = []
-  # start_idx_store = []
 
-  phy_bit = []
-  pdu_bit = []
-  num_byte_payload = int(0)
-  crc_ok = False
-  pdu_bit_start_idx = 40
-  num_bit_pdu_header = 16
-  num_miss_unique_bit_sequence = 0
-  for sample_phase_idx in range(SAMPLE_PER_SYMBOL):
-    # from rx I/Q to phy bit by gfsk demodulation
-    bit_all_sample_phase_tmp, signal_for_decision_tmp = gfsk_demodulation_fixed_point(i[sample_phase_idx::SAMPLE_PER_SYMBOL], q[sample_phase_idx::SAMPLE_PER_SYMBOL])
-    len_assign = min(len(bit_all_sample_phase_tmp), num_bit)
-    bit_all_sample_phase[sample_phase_idx, 0:len_assign] = bit_all_sample_phase_tmp[0:len_assign]
-    signal_for_decision[sample_phase_idx, 0:len_assign] = signal_for_decision_tmp[0:len_assign]
-    if len_assign < num_bit:
-      bit_all_sample_phase[sample_phase_idx, -1] = bit_all_sample_phase_tmp[-1]
-      signal_for_decision[sample_phase_idx, -1] = signal_for_decision_tmp[-1]
-    
-    start_idx_at_symbol_rate = search_unique_bit_sequence(bit_all_sample_phase[sample_phase_idx,:], access_address_bit)
-    if start_idx_at_symbol_rate != int(-1):
-      phy_bit = bit_all_sample_phase[sample_phase_idx, start_idx_at_symbol_rate:]
+def btle_rx_old(i, q, *argv):
+  """Compatibility name; use the same length-checked decoder as btle_rx."""
+  return btle_rx(i, q, *argv)
 
-      # from phy bit to crc
-      phy_bit = np.concatenate((np.zeros(8, dtype=np.int8), phy_bit))
-      info_bit_after_crc24 = scramble(phy_bit, channel_number)
-      num_byte_payload = int(0)
-      if channel_number == 37 or channel_number == 38 or channel_number == 39: # adv pdu
-        for idx in range(6):
-          num_byte_payload = num_byte_payload + int(info_bit_after_crc24[pdu_bit_start_idx+8+idx])*np.left_shift(int(1), idx)
-        # print('ADV  num_byte_payload ', num_byte_payload)
-      else: # data pdu
-        for idx in range(5):
-          num_byte_payload = num_byte_payload + int(info_bit_after_crc24[pdu_bit_start_idx+8+idx])*np.left_shift(int(1), idx)
-        # print('DATA num_byte_payload ', num_byte_payload)
-      
-      crc_bit_start_idx = pdu_bit_start_idx+num_bit_pdu_header+num_byte_payload*8
-      
-      if (crc_bit_start_idx+24) > len(info_bit_after_crc24):
-        # print('num_byte_payload ', num_byte_payload, ' too big!')
-        crc_bit_start_idx = len(info_bit_after_crc24) - 24
-
-      pdu_bit = info_bit_after_crc24[pdu_bit_start_idx:crc_bit_start_idx]
-
-      crc24_bit = crc24_core(pdu_bit, crc_state_init_bit)
-      crc24_bit_rx = info_bit_after_crc24[crc_bit_start_idx:(crc_bit_start_idx+24)]
-      # print('crc24_bit expected ', bit_to_hex_string(crc24_bit), ' rx ', bit_to_hex_string(crc24_bit_rx))
-      if np.sum(crc24_bit == crc24_bit_rx) == 24:
-        crc_ok = True
-      else:
-        crc_ok = False
-
-      if SAVE_FOR_VERILOG != 0:
-        np.savetxt(SAVE_DIR+'/btle_rx_gfsk_demodulation_test_input_i.txt', i[sample_phase_idx::SAMPLE_PER_SYMBOL], fmt='%d')
-        np.savetxt(SAVE_DIR+'/btle_rx_gfsk_demodulation_test_input_q.txt', q[sample_phase_idx::SAMPLE_PER_SYMBOL], fmt='%d')
-        np.savetxt(SAVE_DIR+'/btle_rx_gfsk_demodulation_test_output_bit_ref.txt', bit_all_sample_phase[sample_phase_idx,:], fmt='%d')
-        np.savetxt(SAVE_DIR+'/btle_rx_gfsk_demodulation_test_output_signal_for_decision_ref.txt', signal_for_decision[sample_phase_idx,:], fmt='%d')
-
-        np.savetxt(SAVE_DIR+'/btle_rx_search_unique_bit_sequence_test_input.txt', bit_all_sample_phase[sample_phase_idx,:], fmt='%d')
-        np.savetxt(SAVE_DIR+'/btle_rx_search_unique_bit_sequence_test_output_ref.txt', [start_idx_at_symbol_rate], fmt='%d')
-
-        np.savetxt(SAVE_DIR+'/btle_rx_btle_rx_core_test_input_i.txt', i[sample_phase_idx::SAMPLE_PER_SYMBOL], fmt='%d')
-        np.savetxt(SAVE_DIR+'/btle_rx_btle_rx_core_test_input_q.txt', q[sample_phase_idx::SAMPLE_PER_SYMBOL], fmt='%d')
-        bit_to_txt_octet_per_line(pdu_bit, SAVE_DIR+'/btle_rx_btle_rx_core_test_output_ref.txt')
-        np.savetxt(SAVE_DIR+'/btle_rx_btle_rx_core_test_output_bit_ref.txt', pdu_bit, fmt='%d')
-        np.savetxt(SAVE_DIR+'/btle_rx_btle_rx_core_test_output_crc_ok_ref.txt', [crc_ok], fmt='%d')
-      
-      if crc_ok:
-        break
-
-    else:
-      num_miss_unique_bit_sequence = num_miss_unique_bit_sequence + 1
-
-  if (num_miss_unique_bit_sequence == SAMPLE_PER_SYMBOL):
-    print('btle_rx: Access address NOT found!')
-    if SAVE_FOR_VERILOG != 0:
-      file_set_to_remove = [SAVE_DIR+'/btle_rx_gfsk_demodulation_test_input_i.txt', 
-                            SAVE_DIR+'/btle_rx_gfsk_demodulation_test_input_q.txt',
-                            SAVE_DIR+'/btle_rx_gfsk_demodulation_test_output_bit_ref.txt',
-                            SAVE_DIR+'/btle_rx_gfsk_demodulation_test_output_signal_for_decision_ref.txt',
-                            SAVE_DIR+'/btle_rx_search_unique_bit_sequence_test_input.txt',
-                            SAVE_DIR+'/btle_rx_search_unique_bit_sequence_test_output_ref.txt',
-                            SAVE_DIR+'/btle_rx_btle_rx_core_test_input_i.txt',
-                            SAVE_DIR+'/btle_rx_btle_rx_core_test_input_q.txt',
-                            SAVE_DIR+'/btle_rx_btle_rx_core_test_output_ref.txt',
-                            SAVE_DIR+'/btle_rx_btle_rx_core_test_output_bit_ref.txt',
-                            SAVE_DIR+'/btle_rx_btle_rx_core_test_output_crc_ok_ref.txt']
-      for filename in file_set_to_remove:
-        if os.path.exists(filename):
-          os.remove(filename)
-
-  return pdu_bit, crc_ok, num_byte_payload, phy_bit, bit_all_sample_phase, signal_for_decision, sample_phase_idx
-
-def btle_rx_old(i, q, *argv): # i and q at sampling rate SAMPLE_PER_SYMBOL
-  access_address = 'D6BE898E' # for advertisement channel, 0x8E89BED6 in standard. due to byte order here needs to be D6BE898E
-  access_address_bit = hex_string_to_bit(access_address) 
-
-  channel_number = 37 # Default broadcast channel number
-  crc_state_init_bit = np.array([1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0], dtype=np.int8) # bl.hex_string_to_bit('555555')
-  if len(argv) >= 1:
-    channel_number = argv[0]
-  if len(argv) >= 2:
-    if len(argv[1]) == 24:
-      crc_state_init_bit = argv[1]
-    elif len(argv[1]) == 0:
-      crc_state_init_bit = crc_state_init_bit
-    else:
-      print('btle_rx: The crc_state_init_bit argument needs to have exact 24 bits!')
-      print('btle_rx: Ignore the input. Use 0x555555')
-  if len(argv) >= 3:
-    if len(argv[2]) == 8:
-      access_address = argv[2]
-    elif len(argv[2]) == 0:
-      access_address = access_address
-    else:
-      print('btle_rx: The access_address argument needs to be hex string with length exact 8!')
-      print('btle_rx: Ignore the input. Use ', access_address)
-    access_address_bit = hex_string_to_bit(access_address)
-
-  i = np.int16(i)
-  q = np.int16(q)
-
-  num_sample = len(i)
-  bit_all_sample_phase = np.zeros((SAMPLE_PER_SYMBOL, round(num_sample/SAMPLE_PER_SYMBOL)-1), dtype=np.int8)
-  signal_for_decision = np.zeros((SAMPLE_PER_SYMBOL, round(num_sample/SAMPLE_PER_SYMBOL)-1), dtype=np.int32)
-
-  start_idx_at_symbol_rate_store = []
-  sample_phase_idx_store = []
-  start_idx_store = []
-
-  for sample_phase_idx in range(SAMPLE_PER_SYMBOL):
-    bit_all_sample_phase[sample_phase_idx,:], signal_for_decision[sample_phase_idx,:] = gfsk_demodulation_fixed_point(i[sample_phase_idx::SAMPLE_PER_SYMBOL], q[sample_phase_idx::SAMPLE_PER_SYMBOL])
-    start_idx_at_symbol_rate = search_unique_bit_sequence(bit_all_sample_phase[sample_phase_idx,:], access_address_bit)
-    if start_idx_at_symbol_rate != int(-1):
-      start_idx_at_symbol_rate_store.append(start_idx_at_symbol_rate)
-      sample_phase_idx_store.append(int(sample_phase_idx))
-      start_idx_store.append(start_idx_at_symbol_rate*SAMPLE_PER_SYMBOL + sample_phase_idx)
-
-  phy_bit = []
-  pdu_bit = []
-  num_byte_payload = int(0)
-  crc_ok = False
-  if len(start_idx_store) > 0:
-    # print('Access address at sample ', start_idx_store, ' with phase idx ', sample_phase_idx_store)
-    start_idx = int(np.floor(np.mean(start_idx_store)))
-
-    # Find the idx in the hit set for the optimal start_idx
-    found = False
-    for idx_for_optimal_pick in range(len(start_idx_store)):
-      tmp_idx = start_idx_store[idx_for_optimal_pick]
-      if tmp_idx == start_idx:
-        found = True
-        break
-    if found:
-      idx_for_optimal_pick = idx_for_optimal_pick
-      # print('Optimal sample idx '+str(start_idx)+'; idx in the hit set '+str(idx_for_optimal_pick))
-    else:
-      idx_for_optimal_pick = 0
-      # print('Optimal sample idx '+str(start_idx)+'; NOT in the hit set! Just select the 1st one: idx 0')
-
-    ### # if len(idx_for_optimal_pick) == 1:
-      
-    sample_phase_idx = sample_phase_idx_store[idx_for_optimal_pick]
-    start_idx_at_symbol_rate = start_idx_at_symbol_rate_store[idx_for_optimal_pick]
-    phy_bit = bit_all_sample_phase[sample_phase_idx, start_idx_at_symbol_rate:]
-    if SAVE_FOR_VERILOG != 0:
-      np.savetxt(SAVE_DIR+'/btle_rx_gfsk_demodulation_test_input_i.txt', i[sample_phase_idx::SAMPLE_PER_SYMBOL], fmt='%d')
-      np.savetxt(SAVE_DIR+'/btle_rx_gfsk_demodulation_test_input_q.txt', q[sample_phase_idx::SAMPLE_PER_SYMBOL], fmt='%d')
-      np.savetxt(SAVE_DIR+'/btle_rx_gfsk_demodulation_test_output_bit_ref.txt', bit_all_sample_phase[sample_phase_idx,:], fmt='%d')
-      np.savetxt(SAVE_DIR+'/btle_rx_gfsk_demodulation_test_output_signal_for_decision_ref.txt', signal_for_decision[sample_phase_idx,:], fmt='%d')
-
-      np.savetxt(SAVE_DIR+'/btle_rx_search_unique_bit_sequence_test_input.txt', bit_all_sample_phase[sample_phase_idx,:], fmt='%d')
-      np.savetxt(SAVE_DIR+'/btle_rx_search_unique_bit_sequence_test_output_ref.txt', [start_idx_at_symbol_rate], fmt='%d')
-
-      np.savetxt(SAVE_DIR+'/btle_rx_btle_rx_core_test_input_i.txt', i[sample_phase_idx::SAMPLE_PER_SYMBOL], fmt='%d')
-      np.savetxt(SAVE_DIR+'/btle_rx_btle_rx_core_test_input_q.txt', q[sample_phase_idx::SAMPLE_PER_SYMBOL], fmt='%d')
-    # print('Optimal start_idx ', start_idx, ' sample_phase_idx ', sample_phase_idx, ' start_idx_at_symbol_rate ', start_idx_at_symbol_rate)
-    # print(bit_to_hex_string(phy_bit))
-    
-    ### # else:
-    ### #   abs_diff_vec = np.abs(start_idx_store - start_idx)
-    ### #   idx_for_optimal_pick = np.argmin(abs_diff_vec)
-    ### #   sample_phase_idx = sample_phase_idx_store[idx_for_optimal_pick]
-    ### #   start_idx_at_symbol_rate = start_idx_at_symbol_rate_store[idx_for_optimal_pick]
-    ### #   print('Optimal start_idx ', start_idx_store[idx_for_optimal_pick], ' sample_phase_idx ', sample_phase_idx, ' start_idx_at_symbol_rate ', start_idx_at_symbol_rate)
-    ### #   print(bit_to_hex_string(bit_all_sample_phase[sample_phase_idx, start_idx_at_symbol_rate:]))
-    ### #   start_idx_store_new = np.append(start_idx_store, int(start_idx))
-    ### #   print(start_idx_store_new, int(start_idx))
-    ### #   for idx in range(len(start_idx_store_new)):
-    ### #     start_idx = start_idx_store_new[idx]
-    ### #     print(start_idx)
-    ### #     sample_phase_idx = sample_phase_idx_store[idx]
-    ### #     start_idx_at_symbol_rate = start_idx_at_symbol_rate_store[idx]
-    ### #     print(bit_to_hex_string(bit_all_sample_phase[sample_phase_idx, start_idx_at_symbol_rate:]))
-
-    # this phy_bit has access address d6be898e, but no preamble. add a fake one to align the processing inside scramble and crc
-    phy_bit = np.concatenate((np.zeros(8, dtype=np.int8), phy_bit))
-    info_bit_after_crc24 = scramble(phy_bit, channel_number)
-    pdu_bit_start_idx = 40
-    num_byte_payload = int(0)
-    if channel_number == 37 or channel_number == 38 or channel_number == 39: # adv pdu
-      for idx in range(6):
-        num_byte_payload = num_byte_payload + int(info_bit_after_crc24[pdu_bit_start_idx+8+idx])*np.left_shift(int(1), idx)
-      # print('ADV  num_byte_payload ', num_byte_payload)
-    else: # data pdu
-      for idx in range(5):
-        num_byte_payload = num_byte_payload + int(info_bit_after_crc24[pdu_bit_start_idx+8+idx])*np.left_shift(int(1), idx)
-      # print('DATA num_byte_payload ', num_byte_payload)
-    
-    num_bit_pdu_header = 16
-    crc_bit_start_idx = pdu_bit_start_idx+num_bit_pdu_header+num_byte_payload*8
-    
-    if (crc_bit_start_idx+24) > len(info_bit_after_crc24):
-      # print('num_byte_payload ', num_byte_payload, ' too big!')
-      crc_bit_start_idx = len(info_bit_after_crc24) - 24
-
-    pdu_bit = info_bit_after_crc24[pdu_bit_start_idx:crc_bit_start_idx]
-    if SAVE_FOR_VERILOG != 0:
-      bit_to_txt_octet_per_line(pdu_bit, SAVE_DIR+'/btle_rx_btle_rx_core_test_output_ref.txt')
-      np.savetxt(SAVE_DIR+'/btle_rx_btle_rx_core_test_output_bit_ref.txt', pdu_bit, fmt='%d')
-
-    crc24_bit = crc24_core(pdu_bit, crc_state_init_bit)
-    crc24_bit_rx = info_bit_after_crc24[crc_bit_start_idx:(crc_bit_start_idx+24)]
-    # print('crc24_bit expected ', bit_to_hex_string(crc24_bit), ' rx ', bit_to_hex_string(crc24_bit_rx))
-    if np.sum(crc24_bit == crc24_bit_rx) == 24:
-      crc_ok = True
-    else:
-      crc_ok = False
-    # print('crc_ok ', crc_ok)
-  else:
-    print('Access address NOT found!')
-    if SAVE_FOR_VERILOG != 0:
-      file_set_to_remove = [SAVE_DIR+'/btle_rx_gfsk_demodulation_test_input_i.txt', 
-                            SAVE_DIR+'/btle_rx_gfsk_demodulation_test_input_q.txt',
-                            SAVE_DIR+'/btle_rx_gfsk_demodulation_test_output_bit_ref.txt',
-                            SAVE_DIR+'/btle_rx_gfsk_demodulation_test_output_signal_for_decision_ref.txt',
-                            SAVE_DIR+'/btle_rx_search_unique_bit_sequence_test_input.txt',
-                            SAVE_DIR+'/btle_rx_search_unique_bit_sequence_test_output_ref.txt',
-                            SAVE_DIR+'/btle_rx_btle_rx_core_test_input_i.txt',
-                            SAVE_DIR+'/btle_rx_btle_rx_core_test_input_q.txt',
-                            SAVE_DIR+'/btle_rx_btle_rx_core_test_output_ref.txt',
-                            SAVE_DIR+'/btle_rx_btle_rx_core_test_output_bit_ref.txt']
-      for filename in file_set_to_remove:
-        if os.path.exists(filename):
-          os.remove(filename)
-
-  return pdu_bit, crc_ok, num_byte_payload, phy_bit, bit_all_sample_phase, signal_for_decision, sample_phase_idx
-
-# def btle_rx_filtered(i, q, *argv): # i and q at sampling rate SAMPLE_PER_SYMBOL
-#   if not hasattr(btle_rx, "access_address_bit"):
-#     access_address_bit = hex_string_to_bit('d6be898e')
-
-#   channel_number = 37 # Default broadcast channel number
-#   crc_state_init_bit = np.array([1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0], dtype=np.int8) # bl.hex_string_to_bit('555555')
-#   if len(argv) == 1:
-#     channel_number = argv[0]
-#   if len(argv) == 2:
-#     if len(argv[1]) == 24:
-#       crc_state_init_bit = argv[1]
-#     elif len(argv[1]) == 0:
-#       crc_state_init_bit = crc_state_init_bit
-#     else:
-#       print('btle_rx: The crc_state_init_bit argument needs to have exact 24 bits!')
-#       print('btle_rx: Ignore the input. Use 0x555555')
-
-#   # i = np.int16(np.concatenate(i, np.zeros(1, dtype=np.int16)))
-#   # q = np.int16(np.concatenate(q, np.zeros(1, dtype=np.int16)))
-#   i = np.int16(i)
-#   q = np.int16(q)
-
-#   # generate filtered fo signal
-#   fo_signal_raw = np.int32(i[0:-1])*np.int32(q[1:]) - np.int32(i[1:])*np.int32(q[0:-1])
-#   fo_signal_raw = np.convolve(fo_signal_raw, np.ones(2, dtype=np.int32), 'same')
-
-#   num_sample = len(fo_signal_raw)
-#   bit_all_sample_phase = np.zeros((SAMPLE_PER_SYMBOL, round(num_sample/SAMPLE_PER_SYMBOL)), dtype=np.int8)
-#   signal_for_decision = np.zeros((SAMPLE_PER_SYMBOL, round(num_sample/SAMPLE_PER_SYMBOL)), dtype=np.int32)
-
-#   start_idx_at_symbol_rate_store = []
-#   sample_phase_idx_store = []
-#   start_idx_store = []
-
-#   for sample_phase_idx in range(SAMPLE_PER_SYMBOL):
-#     signal_for_decision[sample_phase_idx,0:len(fo_signal_raw[sample_phase_idx::SAMPLE_PER_SYMBOL])] = fo_signal_raw[sample_phase_idx::SAMPLE_PER_SYMBOL]
-#     bit_all_sample_phase[sample_phase_idx,0:len(signal_for_decision[sample_phase_idx,:])] = np.int8(signal_for_decision[sample_phase_idx,:]>0)
-#     start_idx_at_symbol_rate = search_unique_bit_sequence(bit_all_sample_phase[sample_phase_idx,:], access_address_bit)
-#     if start_idx_at_symbol_rate != int(-1):
-#       start_idx_at_symbol_rate_store.append(start_idx_at_symbol_rate)
-#       sample_phase_idx_store.append(int(sample_phase_idx))
-#       start_idx_store.append(start_idx_at_symbol_rate*SAMPLE_PER_SYMBOL + sample_phase_idx)
-
-#   phy_bit = []
-#   pdu_bit = []
-#   num_byte_payload = int(0)
-#   crc_ok = False
-#   if len(start_idx_store) > 0:
-#     # print('Access address at sample ', start_idx_store, ' with phase idx ', sample_phase_idx_store)
-#     start_idx = int(np.floor(np.mean(start_idx_store)))
-
-#     # Find the idx in the hit set for the optimal start_idx
-#     found = False
-#     for idx_for_optimal_pick in range(len(start_idx_store)):
-#       tmp_idx = start_idx_store[idx_for_optimal_pick]
-#       if tmp_idx == start_idx:
-#         found = True
-#         break
-#     if found:
-#       idx_for_optimal_pick = idx_for_optimal_pick
-#       # print('Optimal sample idx '+str(start_idx)+'; idx in the hit set '+str(idx_for_optimal_pick))
-#     else:
-#       idx_for_optimal_pick = 0
-#       # print('Optimal sample idx '+str(start_idx)+'; NOT in the hit set! Just select the 1st one: idx 0')
-
-#     ### # if len(idx_for_optimal_pick) == 1:
-      
-#     sample_phase_idx = sample_phase_idx_store[idx_for_optimal_pick]
-#     start_idx_at_symbol_rate = start_idx_at_symbol_rate_store[idx_for_optimal_pick]
-#     phy_bit = bit_all_sample_phase[sample_phase_idx, start_idx_at_symbol_rate:]
-#     # print('Optimal start_idx ', start_idx, ' sample_phase_idx ', sample_phase_idx, ' start_idx_at_symbol_rate ', start_idx_at_symbol_rate)
-#     # print(bit_to_hex_string(phy_bit))
-    
-#     ### # else:
-#     ### #   abs_diff_vec = np.abs(start_idx_store - start_idx)
-#     ### #   idx_for_optimal_pick = np.argmin(abs_diff_vec)
-#     ### #   sample_phase_idx = sample_phase_idx_store[idx_for_optimal_pick]
-#     ### #   start_idx_at_symbol_rate = start_idx_at_symbol_rate_store[idx_for_optimal_pick]
-#     ### #   print('Optimal start_idx ', start_idx_store[idx_for_optimal_pick], ' sample_phase_idx ', sample_phase_idx, ' start_idx_at_symbol_rate ', start_idx_at_symbol_rate)
-#     ### #   print(bit_to_hex_string(bit_all_sample_phase[sample_phase_idx, start_idx_at_symbol_rate:]))
-#     ### #   start_idx_store_new = np.append(start_idx_store, int(start_idx))
-#     ### #   print(start_idx_store_new, int(start_idx))
-#     ### #   for idx in range(len(start_idx_store_new)):
-#     ### #     start_idx = start_idx_store_new[idx]
-#     ### #     print(start_idx)
-#     ### #     sample_phase_idx = sample_phase_idx_store[idx]
-#     ### #     start_idx_at_symbol_rate = start_idx_at_symbol_rate_store[idx]
-#     ### #     print(bit_to_hex_string(bit_all_sample_phase[sample_phase_idx, start_idx_at_symbol_rate:]))
-
-#     # this phy_bit has access address d6be898e, but no preamble. add a fake one to align the processing inside scramble and crc
-#     phy_bit = np.concatenate((np.zeros(8, dtype=np.int8), phy_bit))
-#     info_bit_after_crc24 = scramble(phy_bit, channel_number)
-#     pdu_bit_start_idx = 40
-#     num_byte_payload = int(0)
-#     if channel_number == 37 or channel_number == 38 or channel_number == 39: # adv pdu
-#       for idx in range(6):
-#         num_byte_payload = num_byte_payload + int(info_bit_after_crc24[pdu_bit_start_idx+8+idx])*np.left_shift(int(1), idx)
-#       # print('ADV  num_byte_payload ', num_byte_payload)
-#     else: # data pdu
-#       for idx in range(5):
-#         num_byte_payload = num_byte_payload + int(info_bit_after_crc24[pdu_bit_start_idx+8+idx])*np.left_shift(int(1), idx)
-#       # print('DATA num_byte_payload ', num_byte_payload)
-    
-#     num_bit_pdu_header = 16
-#     crc_bit_start_idx = pdu_bit_start_idx+num_bit_pdu_header+num_byte_payload*8
-    
-#     if (crc_bit_start_idx+24) > len(info_bit_after_crc24):
-#       print('num_byte_payload ', num_byte_payload, ' too big!')
-#       crc_bit_start_idx = len(info_bit_after_crc24) - 24
-
-#     pdu_bit = info_bit_after_crc24[pdu_bit_start_idx:crc_bit_start_idx]
-#     # print(bit_to_hex_string(pdu_bit))
-#     crc24_bit = crc24_core(pdu_bit, crc_state_init_bit)
-#     crc24_bit_rx = info_bit_after_crc24[crc_bit_start_idx:(crc_bit_start_idx+24)]
-#     print('crc24_bit expected ', bit_to_hex_string(crc24_bit), ' rx ', bit_to_hex_string(crc24_bit_rx))
-#     if np.sum(crc24_bit == crc24_bit_rx) == 24:
-#       crc_ok = True
-#     else:
-#       crc_ok = False
-#     # print('crc_ok ', crc_ok)
-#   else:
-#     print('Access address NOT found!')
-
-#   return pdu_bit, crc_ok, num_byte_payload, phy_bit, bit_all_sample_phase, signal_for_decision
 
 def add_freq_sampling_error(i, q, ppm_value):
   i = np.double(i)

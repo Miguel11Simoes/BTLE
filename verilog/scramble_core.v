@@ -24,7 +24,9 @@ wire [(CHANNEL_NUMBER_BIT_WIDTH-1) : 0] channel_number_internal;
 
 reg [CHANNEL_NUMBER_BIT_WIDTH : 0] lfsr;
 
-assign channel_number_internal = (channel_number == 0? {CHANNEL_NUMBER_BIT_WIDTH{1'b1}} : channel_number); // in case no valid setting yet
+// Channel 0 is valid BLE data-channel configuration; bit 0 of the LFSR
+// is forced to 1, so a zero channel number does not create a zero state.
+assign channel_number_internal = channel_number;
 
 always @ (posedge clk) begin
   if (rst) begin

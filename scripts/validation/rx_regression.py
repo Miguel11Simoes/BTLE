@@ -49,7 +49,7 @@ def classify(code, log, tb):
     return 'PASS' if all(m in flat for m in MARKERS[tb]) else 'INCOMPLETE'
 
 
-def output_problem(directory, names):
+def output_problem(directory, names, allow_rejection=False):
     for name in names:
         path = directory / name
         if not path.is_file():
@@ -59,6 +59,11 @@ def output_problem(directory, names):
             return 'UNKNOWN_OUTPUT'
         reference = directory / (path.stem + '_ref.txt')
         if not tokens:
+            crc_ref = directory / (path.stem + '_crc_ok_ref.txt')
+            if (allow_rejection and name in {'btle_rx_test_output.txt', 'btle_rx_btle_rx_core_test_output.txt'}
+                    and reference.is_file() and not reference.read_text().strip()
+                    and crc_ref.is_file() and crc_ref.read_text().strip() == '0'):
+                continue  # Explicit observed packet rejection, not an empty comparison.
             return 'MISSING_OUTPUT'
         # RX-core's bit dump is the raw demodulator stream; the similarly named
         # Python file is the decoded PDU bit stream. The upstream bench compares
@@ -156,7 +161,7 @@ def main():
                       rtl_sha256={f.name: hashlib.sha256(f.read_bytes()).hexdigest() for f in sorted((repo/'verilog').glob('*.v'))},
                       harness_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
                       trace_changes='Only $dumpfile/$dumpvars removed from simulation copies',
-                      controller_tb='Bundled upstream controller testbench with declaration-order fix U9')
+                      controller_tb='Bundled controller bench: U9, strict counts, unknown checks and explicit rejection')
     (out / 'provenance.json').write_text(json.dumps(provenance, indent=2) + '\n')
     configs = list(itertools.product((0, 1, 2), (20, 12, 8), (0, 20, 50), (0, 5)))
     with tempfile.TemporaryDirectory(prefix='btle-strict-') as temp:
@@ -220,23 +225,27 @@ def main():
         def execute(item):
             name, vec, tb = item
             case = work / (name + '_' + tb)
-            statuses = {}; codes = {}; verdicts = {}; observed = {}
+            statuses = {}; codes = {}; verdicts = {}; observed = {}; rejected = {}
             missing = [f for f in files[tb] if not (vec / f).is_file()]
             empty = [f for f in files[tb] if 'input' in f and (vec / f).is_file() and not (vec / f).read_text().strip()]
             if missing or empty:
-                return dict(config=name, testbench=tb, ref_status='NO_STIMULUS', dut_status='NO_STIMULUS', ref_exit='', dut_exit='', outputs='not_run', result='NO_STIMULUS', detail='missing/empty: ' + ','.join(missing + empty))
+                return dict(config=name, testbench=tb, ref_status='NO_STIMULUS', dut_status='NO_STIMULUS', ref_exit='', dut_exit='', outputs='not_run', result='NO_STIMULUS', coverage='not_run', detail='missing/empty: ' + ','.join(missing + empty))
             for side in ('ref', 'dut'):
                 d = case / side; d.mkdir(parents=True)
                 for f in vec.glob('*.txt'):
-                    shutil.copy2(f, d / f.name)
+                    # Saved vectors may contain old simulator outputs. Only a
+                    # file produced by this invocation can satisfy a check.
+                    if f.name not in outputs[tb]:
+                        shutil.copy2(f, d / f.name)
                 logpath = d / 'sim.log'
                 code = run([vvp, '-n', str(work / side / tb)], d, logpath, limit)
                 log = logpath.read_text(errors='replace')
                 status = classify(code, log, tb)
                 if status == 'PASS':
-                    status = output_problem(d, outputs[tb]) or status
+                    status = output_problem(d, outputs[tb], allow_rejection='VERIFIED_REJECTION:' in log) or status
                 observed[side] = {f:(d/f).read_bytes() for f in outputs[tb] if (d/f).is_file()}
                 statuses[side] = status; codes[side] = code
+                rejected[side] = 'VERIFIED_REJECTION:' in log
                 verdicts[side] = normalized('\n'.join(l for l in log.splitlines() if re.search(r'Test PASS|Test FAIL|difference found|error found|NO INPUT|FATAL|ERROR', l, re.I)))
                 with gzip.open(out / f'{name}_{tb}_{side}.log.gz', 'wt') as f:
                     f.write(log)
@@ -246,7 +255,7 @@ def main():
                         json.dump({name:data.decode(errors='replace') for name,data in observed[side].items()},f)
             equal = observed['ref'] == observed['dut'] and verdicts['ref'] == verdicts['dut']
             result = pair_verdict(statuses['ref'], statuses['dut'], equal)
-            return dict(config=name, testbench=tb, ref_status=statuses['ref'], dut_status=statuses['dut'], ref_exit=codes['ref'], dut_exit=codes['dut'], outputs='equal' if equal else 'different', result=result, detail=verdicts['ref'] + ' | ' + verdicts['dut'])
+            return dict(config=name, testbench=tb, ref_status=statuses['ref'], dut_status=statuses['dut'], ref_exit=codes['ref'], dut_exit=codes['dut'], outputs='equal' if equal else 'different', result=result, coverage='packet_rejection' if all(rejected.values()) else 'data_comparison', detail=verdicts['ref'] + ' | ' + verdicts['dut'])
         tasks = [(name, vec, tb) for name,vec in vectors for tb in TBS]
         with ThreadPoolExecutor(max_workers=jobs) as pool:
             rows = list(pool.map(execute, tasks))

@@ -54,10 +54,13 @@ initial begin
   $display("Reading input I from %s", TEST_INPUT_I_FILENAME);
   NUM_SAMPLE_INPUT = 0;
   gfsk_demodulation_test_input_i_fd = $fopen(TEST_INPUT_I_FILENAME, "r");
+  if (gfsk_demodulation_test_input_i_fd == 0) $fatal(1, "Unable to open required test file");
   tmp = $fscanf(gfsk_demodulation_test_input_i_fd, "%d", gfsk_demodulation_test_input_i_mem[NUM_SAMPLE_INPUT]);
+  if (tmp == 0 && !$feof(gfsk_demodulation_test_input_i_fd)) $fatal(1, "Malformed test vector");
   while(tmp == 1) begin
     NUM_SAMPLE_INPUT = NUM_SAMPLE_INPUT + 1;
     tmp = $fscanf(gfsk_demodulation_test_input_i_fd, "%d", gfsk_demodulation_test_input_i_mem[NUM_SAMPLE_INPUT]);
+  if (tmp == 0 && !$feof(gfsk_demodulation_test_input_i_fd)) $fatal(1, "Malformed test vector");
   end
   $fclose(gfsk_demodulation_test_input_i_fd);
   $display("%d read finish for test input I.", NUM_SAMPLE_INPUT);
@@ -65,10 +68,13 @@ initial begin
   $display("Reading input Q from %s", TEST_INPUT_Q_FILENAME);
   NUM_SAMPLE_INPUT = 0;
   gfsk_demodulation_test_input_q_fd = $fopen(TEST_INPUT_Q_FILENAME, "r");
+  if (gfsk_demodulation_test_input_q_fd == 0) $fatal(1, "Unable to open required test file");
   tmp = $fscanf(gfsk_demodulation_test_input_q_fd, "%d", gfsk_demodulation_test_input_q_mem[NUM_SAMPLE_INPUT]);
+  if (tmp == 0 && !$feof(gfsk_demodulation_test_input_q_fd)) $fatal(1, "Malformed test vector");
   while(tmp == 1) begin
     NUM_SAMPLE_INPUT = NUM_SAMPLE_INPUT + 1;
     tmp = $fscanf(gfsk_demodulation_test_input_q_fd, "%d", gfsk_demodulation_test_input_q_mem[NUM_SAMPLE_INPUT]);
+  if (tmp == 0 && !$feof(gfsk_demodulation_test_input_q_fd)) $fatal(1, "Malformed test vector");
   end
   $fclose(gfsk_demodulation_test_input_q_fd);
   $display("%d read finish for test input Q.", NUM_SAMPLE_INPUT);
@@ -77,10 +83,13 @@ initial begin
   $display("Reading output ref from %s", TEST_OUTPUT_SIGNAL_FOR_DECISION_REF_FILENAME);
   NUM_BIT_OUTPUT = 0;
   gfsk_demodulation_test_output_signal_for_decision_ref_fd = $fopen(TEST_OUTPUT_SIGNAL_FOR_DECISION_REF_FILENAME, "r");
+  if (gfsk_demodulation_test_output_signal_for_decision_ref_fd == 0) $fatal(1, "Unable to open required test file");
   tmp = $fscanf(gfsk_demodulation_test_output_signal_for_decision_ref_fd, "%d", gfsk_demodulation_test_output_signal_for_decision_ref_mem[NUM_BIT_OUTPUT]);
+  if (tmp == 0 && !$feof(gfsk_demodulation_test_output_signal_for_decision_ref_fd)) $fatal(1, "Malformed test vector");
   while(tmp == 1) begin
     NUM_BIT_OUTPUT = NUM_BIT_OUTPUT + 1;
     tmp = $fscanf(gfsk_demodulation_test_output_signal_for_decision_ref_fd, "%d", gfsk_demodulation_test_output_signal_for_decision_ref_mem[NUM_BIT_OUTPUT]);
+  if (tmp == 0 && !$feof(gfsk_demodulation_test_output_signal_for_decision_ref_fd)) $fatal(1, "Malformed test vector");
   end
   $fclose(gfsk_demodulation_test_output_signal_for_decision_ref_fd);
   $display("%d read finish from %s", NUM_BIT_OUTPUT, TEST_OUTPUT_SIGNAL_FOR_DECISION_REF_FILENAME);
@@ -88,17 +97,20 @@ initial begin
   $display("Reading output ref from %s", TEST_OUTPUT_BIT_REF_FILENAME);
   NUM_BIT_OUTPUT = 0;
   gfsk_demodulation_test_output_bit_ref_fd = $fopen(TEST_OUTPUT_BIT_REF_FILENAME, "r");
+  if (gfsk_demodulation_test_output_bit_ref_fd == 0) $fatal(1, "Unable to open required test file");
   tmp = $fscanf(gfsk_demodulation_test_output_bit_ref_fd, "%d", gfsk_demodulation_test_output_bit_ref_mem[NUM_BIT_OUTPUT]);
+  if (tmp == 0 && !$feof(gfsk_demodulation_test_output_bit_ref_fd)) $fatal(1, "Malformed test vector");
   while(tmp == 1) begin
     NUM_BIT_OUTPUT = NUM_BIT_OUTPUT + 1;
     tmp = $fscanf(gfsk_demodulation_test_output_bit_ref_fd, "%d", gfsk_demodulation_test_output_bit_ref_mem[NUM_BIT_OUTPUT]);
+  if (tmp == 0 && !$feof(gfsk_demodulation_test_output_bit_ref_fd)) $fatal(1, "Malformed test vector");
   end
   $fclose(gfsk_demodulation_test_output_bit_ref_fd);
   $display("%d read finish from %s", NUM_BIT_OUTPUT, TEST_OUTPUT_BIT_REF_FILENAME);
 
   clk = 0;
   rst = 0;
-  
+
   #200 rst = 1;
 
   #200 rst = 0;
@@ -148,12 +160,15 @@ always @ (posedge clk) begin
     end
 
     if (sample_in_count == (NUM_SAMPLE_INPUT+30)) begin
+      if (NUM_SAMPLE_INPUT <= 1 || NUM_BIT_OUTPUT <= 0 || bit_out_count !== NUM_BIT_OUTPUT+1 || signal_for_decision_out_count !== NUM_BIT_OUTPUT+1)
+        $fatal(1, "Demodulator comparison count mismatch");
       $display("%d input", NUM_SAMPLE_INPUT);
       $display("%d bit output", bit_out_count);
       $display("%d signal for decision output", signal_for_decision_out_count);
 
       $display("Save output bit to %s", TEST_OUTPUT_BIT_FILENAME);
       gfsk_demodulation_test_output_bit_fd = $fopen(TEST_OUTPUT_BIT_FILENAME, "w");
+      if (gfsk_demodulation_test_output_bit_fd == 0) $fatal(1, "Unable to open required test file");
       for (i=0; i<bit_out_count; i=i+1) begin
         $fwrite(gfsk_demodulation_test_output_bit_fd, "%d\n", gfsk_demodulation_test_output_bit_mem[i]);
       end
@@ -162,6 +177,7 @@ always @ (posedge clk) begin
 
       $display("Save output signal for decision to %s", TEST_OUTPUT_SIGNAL_FOR_DECISION_FILENAME);
       gfsk_demodulation_test_output_signal_for_decision_fd = $fopen(TEST_OUTPUT_SIGNAL_FOR_DECISION_FILENAME, "w");
+      if (gfsk_demodulation_test_output_signal_for_decision_fd == 0) $fatal(1, "Unable to open required test file");
       for (i=0; i<signal_for_decision_out_count; i=i+1) begin
         $fwrite(gfsk_demodulation_test_output_signal_for_decision_fd, "%d\n", gfsk_demodulation_test_output_signal_for_decision_mem[i]);
       end
@@ -171,12 +187,12 @@ always @ (posedge clk) begin
       $display("Compare the gfsk_demodulation_test_output_bit_mem and the gfsk_demodulation_test_output_bit_ref_mem ...");
       NUM_ERROR = 0;
       for (i=0; i<NUM_BIT_OUTPUT; i=i+1) begin
-        if (gfsk_demodulation_test_output_bit_mem[i+1] != gfsk_demodulation_test_output_bit_ref_mem[i]) begin
+        if (gfsk_demodulation_test_output_bit_mem[i+1] !== gfsk_demodulation_test_output_bit_ref_mem[i]) begin
           NUM_ERROR = NUM_ERROR + 1;
         end
       end
       if (NUM_ERROR > 0) begin
-        $display("%d error found!", NUM_ERROR);
+        $fatal(1, "%d error found!", NUM_ERROR);
         $display("Please check %s VS %s", TEST_OUTPUT_BIT_FILENAME, TEST_OUTPUT_BIT_REF_FILENAME);
       end else begin
         $display("%d error found! output bit Test PASS.", NUM_ERROR);
@@ -185,12 +201,12 @@ always @ (posedge clk) begin
       $display("Compare the gfsk_demodulation_test_output_signal_for_decision_mem and the gfsk_demodulation_test_output_signal_for_decision_ref_mem ...");
       NUM_ERROR = 0;
       for (i=0; i<NUM_BIT_OUTPUT; i=i+1) begin
-        if (gfsk_demodulation_test_output_signal_for_decision_mem[i+1] != gfsk_demodulation_test_output_signal_for_decision_ref_mem[i]) begin
+        if (gfsk_demodulation_test_output_signal_for_decision_mem[i+1] !== gfsk_demodulation_test_output_signal_for_decision_ref_mem[i]) begin
           NUM_ERROR = NUM_ERROR + 1;
         end
       end
       if (NUM_ERROR > 0) begin
-        $display("%d error found!", NUM_ERROR);
+        $fatal(1, "%d error found!", NUM_ERROR);
         $display("Please check %s VS %s", TEST_OUTPUT_SIGNAL_FOR_DECISION_FILENAME, TEST_OUTPUT_SIGNAL_FOR_DECISION_REF_FILENAME);
       end else begin
         $display("%d error found! output signal for decision Test PASS.", NUM_ERROR);
@@ -225,10 +241,9 @@ gfsk_demodulation # (
 
   .signal_for_decision(signal_for_decision),
   .signal_for_decision_valid(signal_for_decision_valid),
-  
+
   .phy_bit(bit),
   .bit_valid(bit_valid)
 );
 
 endmodule
-

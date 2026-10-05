@@ -1,0 +1,1622 @@
+[
+  {
+    "config": "ex0_snr12_ppm0_d0",
+    "file": "btle_rx_test_input_i.txt",
+    "sha256": "1f752dac8de1f5e3651f54cc24990f3c6609cea0f33ededbf0ed19f33d02c37d",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr12_ppm0_d0",
+    "file": "btle_rx_test_input_q.txt",
+    "sha256": "9411a83d311a6e671c1671be22a8eec0b52fbf5ab18b76cd4faa7a7b24a01f0e",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr12_ppm0_d0",
+    "file": "btle_tx_test_input.txt",
+    "sha256": "e57fd2468555c1568c86f7c1fc8432c9484ee7605f66ece5fb15fd2c3e77d764",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr12_ppm0_d0",
+    "file": "btle_tx_test_output_i_ref.txt",
+    "sha256": "fecd1732c322f06b803911727064395f50e51e07119d91ffd1e5624db6d17b9e",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr12_ppm0_d0",
+    "file": "btle_tx_test_output_q_ref.txt",
+    "sha256": "65b764e7c376e1a6a561dfd38c8b174c8ca19dbe5ffaf585d289e0604b291505",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr12_ppm0_d5",
+    "file": "btle_rx_test_input_i.txt",
+    "sha256": "cd609044e26c958e9babf663f9bfaf3932114ad3c60ade178fab4929bacec1db",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr12_ppm0_d5",
+    "file": "btle_rx_test_input_q.txt",
+    "sha256": "19e3442c568a88d205db322036cfb644d2b785c9b95ac6643ffd938ee2ef3ac9",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr12_ppm0_d5",
+    "file": "btle_tx_test_input.txt",
+    "sha256": "e57fd2468555c1568c86f7c1fc8432c9484ee7605f66ece5fb15fd2c3e77d764",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr12_ppm0_d5",
+    "file": "btle_tx_test_output_i_ref.txt",
+    "sha256": "fecd1732c322f06b803911727064395f50e51e07119d91ffd1e5624db6d17b9e",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr12_ppm0_d5",
+    "file": "btle_tx_test_output_q_ref.txt",
+    "sha256": "65b764e7c376e1a6a561dfd38c8b174c8ca19dbe5ffaf585d289e0604b291505",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr12_ppm20_d0",
+    "file": "btle_rx_test_input_i.txt",
+    "sha256": "a3aa3f8ebd49c28bbe074c2516bd2a5070b2083f31f09f5734ca940c9821fb26",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr12_ppm20_d0",
+    "file": "btle_rx_test_input_q.txt",
+    "sha256": "d9f7b3b6733ea0d1efc38f05c03bcf2e36ddc19f5aa0c71b70e17b08106c813f",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr12_ppm20_d0",
+    "file": "btle_tx_test_input.txt",
+    "sha256": "e57fd2468555c1568c86f7c1fc8432c9484ee7605f66ece5fb15fd2c3e77d764",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr12_ppm20_d0",
+    "file": "btle_tx_test_output_i_ref.txt",
+    "sha256": "fecd1732c322f06b803911727064395f50e51e07119d91ffd1e5624db6d17b9e",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr12_ppm20_d0",
+    "file": "btle_tx_test_output_q_ref.txt",
+    "sha256": "65b764e7c376e1a6a561dfd38c8b174c8ca19dbe5ffaf585d289e0604b291505",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr12_ppm20_d5",
+    "file": "btle_rx_test_input_i.txt",
+    "sha256": "cb6d001cc2c357473471f283b3109acbc0c026fa90d969954d83bc049b126303",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr12_ppm20_d5",
+    "file": "btle_rx_test_input_q.txt",
+    "sha256": "3d63a7da79fa2ad6ae73ac38e5eb9ff9a3251dd4cf075a7e437b1d7b412c6d7d",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr12_ppm20_d5",
+    "file": "btle_tx_test_input.txt",
+    "sha256": "e57fd2468555c1568c86f7c1fc8432c9484ee7605f66ece5fb15fd2c3e77d764",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr12_ppm20_d5",
+    "file": "btle_tx_test_output_i_ref.txt",
+    "sha256": "fecd1732c322f06b803911727064395f50e51e07119d91ffd1e5624db6d17b9e",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr12_ppm20_d5",
+    "file": "btle_tx_test_output_q_ref.txt",
+    "sha256": "65b764e7c376e1a6a561dfd38c8b174c8ca19dbe5ffaf585d289e0604b291505",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr12_ppm50_d0",
+    "file": "btle_rx_test_input_i.txt",
+    "sha256": "5a635e10a3c3f702f9c52545fbbec2ed2cd4e890b197138e1a6225e12f4fc67e",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr12_ppm50_d0",
+    "file": "btle_rx_test_input_q.txt",
+    "sha256": "c71db3ccf67148880fb245565561391c33d0c4eedc808b42ea72af216dc2c3a2",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr12_ppm50_d0",
+    "file": "btle_tx_test_input.txt",
+    "sha256": "e57fd2468555c1568c86f7c1fc8432c9484ee7605f66ece5fb15fd2c3e77d764",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr12_ppm50_d0",
+    "file": "btle_tx_test_output_i_ref.txt",
+    "sha256": "fecd1732c322f06b803911727064395f50e51e07119d91ffd1e5624db6d17b9e",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr12_ppm50_d0",
+    "file": "btle_tx_test_output_q_ref.txt",
+    "sha256": "65b764e7c376e1a6a561dfd38c8b174c8ca19dbe5ffaf585d289e0604b291505",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr12_ppm50_d5",
+    "file": "btle_rx_test_input_i.txt",
+    "sha256": "34fcbf8b67c7ec6f0c1da4c7be6cd28e820744fb1b7cf298a2a090fe9475debf",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr12_ppm50_d5",
+    "file": "btle_rx_test_input_q.txt",
+    "sha256": "71465d2d1023d4ef4a8c3aba8e881455f7be71ee75554bc8b0c41fa46bd5c687",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr12_ppm50_d5",
+    "file": "btle_tx_test_input.txt",
+    "sha256": "e57fd2468555c1568c86f7c1fc8432c9484ee7605f66ece5fb15fd2c3e77d764",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr12_ppm50_d5",
+    "file": "btle_tx_test_output_i_ref.txt",
+    "sha256": "fecd1732c322f06b803911727064395f50e51e07119d91ffd1e5624db6d17b9e",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr12_ppm50_d5",
+    "file": "btle_tx_test_output_q_ref.txt",
+    "sha256": "65b764e7c376e1a6a561dfd38c8b174c8ca19dbe5ffaf585d289e0604b291505",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr20_ppm0_d0",
+    "file": "btle_rx_test_input_i.txt",
+    "sha256": "90579efe8dc0ac582d452d552942e866fb7c8f40c03b5bf6eb7d02a7e3c75006",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr20_ppm0_d0",
+    "file": "btle_rx_test_input_q.txt",
+    "sha256": "01b4497fc245aae18adac3611d5ef3ce54da2c448828372dd5ef90f4fc6aaa65",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr20_ppm0_d0",
+    "file": "btle_tx_test_input.txt",
+    "sha256": "e57fd2468555c1568c86f7c1fc8432c9484ee7605f66ece5fb15fd2c3e77d764",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr20_ppm0_d0",
+    "file": "btle_tx_test_output_i_ref.txt",
+    "sha256": "fecd1732c322f06b803911727064395f50e51e07119d91ffd1e5624db6d17b9e",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr20_ppm0_d0",
+    "file": "btle_tx_test_output_q_ref.txt",
+    "sha256": "65b764e7c376e1a6a561dfd38c8b174c8ca19dbe5ffaf585d289e0604b291505",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr20_ppm0_d5",
+    "file": "btle_rx_test_input_i.txt",
+    "sha256": "d016bce2dd2834978fff016fe936755358568a9163b34145f325d64144a016a3",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr20_ppm0_d5",
+    "file": "btle_rx_test_input_q.txt",
+    "sha256": "fc04edc76a0137b513db82f31a34b542247f35e00d38563527cd1b5be7c47808",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr20_ppm0_d5",
+    "file": "btle_tx_test_input.txt",
+    "sha256": "e57fd2468555c1568c86f7c1fc8432c9484ee7605f66ece5fb15fd2c3e77d764",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr20_ppm0_d5",
+    "file": "btle_tx_test_output_i_ref.txt",
+    "sha256": "fecd1732c322f06b803911727064395f50e51e07119d91ffd1e5624db6d17b9e",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr20_ppm0_d5",
+    "file": "btle_tx_test_output_q_ref.txt",
+    "sha256": "65b764e7c376e1a6a561dfd38c8b174c8ca19dbe5ffaf585d289e0604b291505",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr20_ppm20_d0",
+    "file": "btle_rx_test_input_i.txt",
+    "sha256": "044098e023a7483f9150a9594c45254ad95fd1fbec188f76dfe12de0296c1bac",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr20_ppm20_d0",
+    "file": "btle_rx_test_input_q.txt",
+    "sha256": "d298a09c490f57fae481184dfcfe162a245510f65b40035dd093f19fdfe411c2",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr20_ppm20_d0",
+    "file": "btle_tx_test_input.txt",
+    "sha256": "e57fd2468555c1568c86f7c1fc8432c9484ee7605f66ece5fb15fd2c3e77d764",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr20_ppm20_d0",
+    "file": "btle_tx_test_output_i_ref.txt",
+    "sha256": "fecd1732c322f06b803911727064395f50e51e07119d91ffd1e5624db6d17b9e",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr20_ppm20_d0",
+    "file": "btle_tx_test_output_q_ref.txt",
+    "sha256": "65b764e7c376e1a6a561dfd38c8b174c8ca19dbe5ffaf585d289e0604b291505",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr20_ppm20_d5",
+    "file": "btle_rx_test_input_i.txt",
+    "sha256": "4780d04851678ae09557e50c423bd8fdb690aa8c05e7e2cd7ba7f691bd906a1b",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr20_ppm20_d5",
+    "file": "btle_rx_test_input_q.txt",
+    "sha256": "b874504e80eda6aa67f72aeb5510e8642ba77546a025b6e403c09e4dfd59f030",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr20_ppm20_d5",
+    "file": "btle_tx_test_input.txt",
+    "sha256": "e57fd2468555c1568c86f7c1fc8432c9484ee7605f66ece5fb15fd2c3e77d764",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr20_ppm20_d5",
+    "file": "btle_tx_test_output_i_ref.txt",
+    "sha256": "fecd1732c322f06b803911727064395f50e51e07119d91ffd1e5624db6d17b9e",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr20_ppm20_d5",
+    "file": "btle_tx_test_output_q_ref.txt",
+    "sha256": "65b764e7c376e1a6a561dfd38c8b174c8ca19dbe5ffaf585d289e0604b291505",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr20_ppm50_d0",
+    "file": "btle_rx_test_input_i.txt",
+    "sha256": "709cee2b8461c20ec10c94a19af79713c4ff29489ad7dcf0b52f16afd2a0ffff",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr20_ppm50_d0",
+    "file": "btle_rx_test_input_q.txt",
+    "sha256": "6c8dd0e24a188acbea6740d2d86ece8c5ecc95d557d1195efbf45aa51df4a5b0",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr20_ppm50_d0",
+    "file": "btle_tx_test_input.txt",
+    "sha256": "e57fd2468555c1568c86f7c1fc8432c9484ee7605f66ece5fb15fd2c3e77d764",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr20_ppm50_d0",
+    "file": "btle_tx_test_output_i_ref.txt",
+    "sha256": "fecd1732c322f06b803911727064395f50e51e07119d91ffd1e5624db6d17b9e",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr20_ppm50_d0",
+    "file": "btle_tx_test_output_q_ref.txt",
+    "sha256": "65b764e7c376e1a6a561dfd38c8b174c8ca19dbe5ffaf585d289e0604b291505",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr20_ppm50_d5",
+    "file": "btle_rx_test_input_i.txt",
+    "sha256": "2337d2d3f4fc95f6da34c3d56376da1fd734c900e2607d41b6e184f662c681a5",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr20_ppm50_d5",
+    "file": "btle_rx_test_input_q.txt",
+    "sha256": "ee662a8e8f06808901d2ab51bf9dfbf8007ce5520717cb243ee5213f024f61d0",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr20_ppm50_d5",
+    "file": "btle_tx_test_input.txt",
+    "sha256": "e57fd2468555c1568c86f7c1fc8432c9484ee7605f66ece5fb15fd2c3e77d764",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr20_ppm50_d5",
+    "file": "btle_tx_test_output_i_ref.txt",
+    "sha256": "fecd1732c322f06b803911727064395f50e51e07119d91ffd1e5624db6d17b9e",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr20_ppm50_d5",
+    "file": "btle_tx_test_output_q_ref.txt",
+    "sha256": "65b764e7c376e1a6a561dfd38c8b174c8ca19dbe5ffaf585d289e0604b291505",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr8_ppm0_d0",
+    "file": "btle_rx_test_input_i.txt",
+    "sha256": "cff79c7c5f2b62e605a86cf3bb8337b20ac85935585bbad9323e20aeac9ca088",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr8_ppm0_d0",
+    "file": "btle_rx_test_input_q.txt",
+    "sha256": "c5b702ff6f57a3ee5c1a6c55df4a84fa6688e7767f3e1084945e764f407c5b30",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr8_ppm0_d0",
+    "file": "btle_tx_test_input.txt",
+    "sha256": "e57fd2468555c1568c86f7c1fc8432c9484ee7605f66ece5fb15fd2c3e77d764",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr8_ppm0_d0",
+    "file": "btle_tx_test_output_i_ref.txt",
+    "sha256": "fecd1732c322f06b803911727064395f50e51e07119d91ffd1e5624db6d17b9e",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr8_ppm0_d0",
+    "file": "btle_tx_test_output_q_ref.txt",
+    "sha256": "65b764e7c376e1a6a561dfd38c8b174c8ca19dbe5ffaf585d289e0604b291505",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr8_ppm0_d5",
+    "file": "btle_rx_test_input_i.txt",
+    "sha256": "4bcfb8be78cacfe076e834981c64a91046c68d2155786ae239191a68241983fd",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr8_ppm0_d5",
+    "file": "btle_rx_test_input_q.txt",
+    "sha256": "71c6fb89da98ea3543122666a626cc67faae7bef49fd174c6ea69656e7fe23fc",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr8_ppm0_d5",
+    "file": "btle_tx_test_input.txt",
+    "sha256": "e57fd2468555c1568c86f7c1fc8432c9484ee7605f66ece5fb15fd2c3e77d764",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr8_ppm0_d5",
+    "file": "btle_tx_test_output_i_ref.txt",
+    "sha256": "fecd1732c322f06b803911727064395f50e51e07119d91ffd1e5624db6d17b9e",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr8_ppm0_d5",
+    "file": "btle_tx_test_output_q_ref.txt",
+    "sha256": "65b764e7c376e1a6a561dfd38c8b174c8ca19dbe5ffaf585d289e0604b291505",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr8_ppm20_d0",
+    "file": "btle_rx_test_input_i.txt",
+    "sha256": "b24139027197ccc2368511bfe0fc2e7c7ca36f35e7a7b67b4e5e2dc4e3782ad3",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr8_ppm20_d0",
+    "file": "btle_rx_test_input_q.txt",
+    "sha256": "f07f7c5abe213222e2b4cebc6b36eaa23027faf32b146eb52b912fe30b6ce0f1",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr8_ppm20_d0",
+    "file": "btle_tx_test_input.txt",
+    "sha256": "e57fd2468555c1568c86f7c1fc8432c9484ee7605f66ece5fb15fd2c3e77d764",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr8_ppm20_d0",
+    "file": "btle_tx_test_output_i_ref.txt",
+    "sha256": "fecd1732c322f06b803911727064395f50e51e07119d91ffd1e5624db6d17b9e",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr8_ppm20_d0",
+    "file": "btle_tx_test_output_q_ref.txt",
+    "sha256": "65b764e7c376e1a6a561dfd38c8b174c8ca19dbe5ffaf585d289e0604b291505",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr8_ppm20_d5",
+    "file": "btle_rx_test_input_i.txt",
+    "sha256": "6b8e74aed640d9340dd80fa0961d7cddddf5a9d3766cedf6b4358eed31058041",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr8_ppm20_d5",
+    "file": "btle_rx_test_input_q.txt",
+    "sha256": "1ebfe9272628a2f418bc242f7bfd8c849bb920254487923272769ae739d0c1a2",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr8_ppm20_d5",
+    "file": "btle_tx_test_input.txt",
+    "sha256": "e57fd2468555c1568c86f7c1fc8432c9484ee7605f66ece5fb15fd2c3e77d764",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr8_ppm20_d5",
+    "file": "btle_tx_test_output_i_ref.txt",
+    "sha256": "fecd1732c322f06b803911727064395f50e51e07119d91ffd1e5624db6d17b9e",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr8_ppm20_d5",
+    "file": "btle_tx_test_output_q_ref.txt",
+    "sha256": "65b764e7c376e1a6a561dfd38c8b174c8ca19dbe5ffaf585d289e0604b291505",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr8_ppm50_d0",
+    "file": "btle_rx_test_input_i.txt",
+    "sha256": "1b5b9aa0c6b23a38785b3da2499a8f6df55ff09254d9c264df58d3db64c87978",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr8_ppm50_d0",
+    "file": "btle_rx_test_input_q.txt",
+    "sha256": "d19305a9a98b65b019a8760f14272f2fcf7b2cba085ca65d36d1b21fd597529c",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr8_ppm50_d0",
+    "file": "btle_tx_test_input.txt",
+    "sha256": "e57fd2468555c1568c86f7c1fc8432c9484ee7605f66ece5fb15fd2c3e77d764",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr8_ppm50_d0",
+    "file": "btle_tx_test_output_i_ref.txt",
+    "sha256": "fecd1732c322f06b803911727064395f50e51e07119d91ffd1e5624db6d17b9e",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr8_ppm50_d0",
+    "file": "btle_tx_test_output_q_ref.txt",
+    "sha256": "65b764e7c376e1a6a561dfd38c8b174c8ca19dbe5ffaf585d289e0604b291505",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr8_ppm50_d5",
+    "file": "btle_rx_test_input_i.txt",
+    "sha256": "a0d4063709d6a5585beeccf483a941473d56b2a00e0a0f4fdca9e7da7e8ef24b",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr8_ppm50_d5",
+    "file": "btle_rx_test_input_q.txt",
+    "sha256": "b4232705da946bd93ada9b6118ed6b4b30b7bf9254bd8b3d91dd6678a8799f5f",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr8_ppm50_d5",
+    "file": "btle_tx_test_input.txt",
+    "sha256": "e57fd2468555c1568c86f7c1fc8432c9484ee7605f66ece5fb15fd2c3e77d764",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr8_ppm50_d5",
+    "file": "btle_tx_test_output_i_ref.txt",
+    "sha256": "fecd1732c322f06b803911727064395f50e51e07119d91ffd1e5624db6d17b9e",
+    "unchanged": true
+  },
+  {
+    "config": "ex0_snr8_ppm50_d5",
+    "file": "btle_tx_test_output_q_ref.txt",
+    "sha256": "65b764e7c376e1a6a561dfd38c8b174c8ca19dbe5ffaf585d289e0604b291505",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr12_ppm0_d0",
+    "file": "btle_rx_test_input_i.txt",
+    "sha256": "940444087cecbb1abdd1cdf38a585123ae9f81c584565c30265285058dab2a68",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr12_ppm0_d0",
+    "file": "btle_rx_test_input_q.txt",
+    "sha256": "bc057a06448d22759cf301111819bb10a6e37287409aa0d25e7a0427fe53510c",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr12_ppm0_d0",
+    "file": "btle_tx_test_input.txt",
+    "sha256": "26eadd8c0da068832deb8475421583eb8e5878b44b385750b5d1c4411af35bce",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr12_ppm0_d0",
+    "file": "btle_tx_test_output_i_ref.txt",
+    "sha256": "ae98db8b12442ca91ad6f3efed4e6e25c96d71e1d662116f0a34daf130de9d5f",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr12_ppm0_d0",
+    "file": "btle_tx_test_output_q_ref.txt",
+    "sha256": "94568821c01cac56809029cff6afe72d0a3de460241be52193146dbee305b5c0",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr12_ppm0_d5",
+    "file": "btle_rx_test_input_i.txt",
+    "sha256": "2eea6531e793a4cc92c2a187eae4c34e27eff248760ce688e8fc3ecd31e16b66",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr12_ppm0_d5",
+    "file": "btle_rx_test_input_q.txt",
+    "sha256": "5842df0d6e8572ce21f34124c3d84a478f6cb8d4428d11acd70040a1c8a881b9",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr12_ppm0_d5",
+    "file": "btle_tx_test_input.txt",
+    "sha256": "26eadd8c0da068832deb8475421583eb8e5878b44b385750b5d1c4411af35bce",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr12_ppm0_d5",
+    "file": "btle_tx_test_output_i_ref.txt",
+    "sha256": "ae98db8b12442ca91ad6f3efed4e6e25c96d71e1d662116f0a34daf130de9d5f",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr12_ppm0_d5",
+    "file": "btle_tx_test_output_q_ref.txt",
+    "sha256": "94568821c01cac56809029cff6afe72d0a3de460241be52193146dbee305b5c0",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr12_ppm20_d0",
+    "file": "btle_rx_test_input_i.txt",
+    "sha256": "6c344e12566b7819bace659da2bc28bbe0aa305bb5567af10cf48cbb15e21d9d",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr12_ppm20_d0",
+    "file": "btle_rx_test_input_q.txt",
+    "sha256": "96255794089c44d9d6803d4c9c5ac4cc484d9d92333c5e2d69e25925b3107fdb",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr12_ppm20_d0",
+    "file": "btle_tx_test_input.txt",
+    "sha256": "26eadd8c0da068832deb8475421583eb8e5878b44b385750b5d1c4411af35bce",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr12_ppm20_d0",
+    "file": "btle_tx_test_output_i_ref.txt",
+    "sha256": "ae98db8b12442ca91ad6f3efed4e6e25c96d71e1d662116f0a34daf130de9d5f",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr12_ppm20_d0",
+    "file": "btle_tx_test_output_q_ref.txt",
+    "sha256": "94568821c01cac56809029cff6afe72d0a3de460241be52193146dbee305b5c0",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr12_ppm20_d5",
+    "file": "btle_rx_test_input_i.txt",
+    "sha256": "cfc79199a67a8a78e3d9011de6397c63cbbbee256cac1535dab55b9d470cb11d",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr12_ppm20_d5",
+    "file": "btle_rx_test_input_q.txt",
+    "sha256": "a93c680f1def76ec0eafe98201d345ee643fc17e158714bbf2a1dcd97dbd57ff",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr12_ppm20_d5",
+    "file": "btle_tx_test_input.txt",
+    "sha256": "26eadd8c0da068832deb8475421583eb8e5878b44b385750b5d1c4411af35bce",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr12_ppm20_d5",
+    "file": "btle_tx_test_output_i_ref.txt",
+    "sha256": "ae98db8b12442ca91ad6f3efed4e6e25c96d71e1d662116f0a34daf130de9d5f",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr12_ppm20_d5",
+    "file": "btle_tx_test_output_q_ref.txt",
+    "sha256": "94568821c01cac56809029cff6afe72d0a3de460241be52193146dbee305b5c0",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr12_ppm50_d0",
+    "file": "btle_rx_test_input_i.txt",
+    "sha256": "38c6241b791c3d9e767c693560b08c5f0ded190f364ebfa43988a3b78e92c50a",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr12_ppm50_d0",
+    "file": "btle_rx_test_input_q.txt",
+    "sha256": "2d75342fd0c155fe19ca23cd385e58acb6b43c8b299256147fe4b614a70a4f62",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr12_ppm50_d0",
+    "file": "btle_tx_test_input.txt",
+    "sha256": "26eadd8c0da068832deb8475421583eb8e5878b44b385750b5d1c4411af35bce",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr12_ppm50_d0",
+    "file": "btle_tx_test_output_i_ref.txt",
+    "sha256": "ae98db8b12442ca91ad6f3efed4e6e25c96d71e1d662116f0a34daf130de9d5f",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr12_ppm50_d0",
+    "file": "btle_tx_test_output_q_ref.txt",
+    "sha256": "94568821c01cac56809029cff6afe72d0a3de460241be52193146dbee305b5c0",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr12_ppm50_d5",
+    "file": "btle_rx_test_input_i.txt",
+    "sha256": "1cd64aa305f2bd912e7261796331a2b8de0db8b7d303278325f1d59ec0aa98e6",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr12_ppm50_d5",
+    "file": "btle_rx_test_input_q.txt",
+    "sha256": "1cb15bb5c66af3d345d5fef61e7e97d322702236938b08bed3a6286d3d13713e",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr12_ppm50_d5",
+    "file": "btle_tx_test_input.txt",
+    "sha256": "26eadd8c0da068832deb8475421583eb8e5878b44b385750b5d1c4411af35bce",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr12_ppm50_d5",
+    "file": "btle_tx_test_output_i_ref.txt",
+    "sha256": "ae98db8b12442ca91ad6f3efed4e6e25c96d71e1d662116f0a34daf130de9d5f",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr12_ppm50_d5",
+    "file": "btle_tx_test_output_q_ref.txt",
+    "sha256": "94568821c01cac56809029cff6afe72d0a3de460241be52193146dbee305b5c0",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr20_ppm0_d0",
+    "file": "btle_rx_test_input_i.txt",
+    "sha256": "1d64847b255485241a19ea51aec454c2457cf97cbab090ee5406c2bd67a4cbbd",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr20_ppm0_d0",
+    "file": "btle_rx_test_input_q.txt",
+    "sha256": "1e5da81d2f63e5e781f21e79b1ea0229f2ad645aa9c2c763dcfd872deb1550ed",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr20_ppm0_d0",
+    "file": "btle_tx_test_input.txt",
+    "sha256": "26eadd8c0da068832deb8475421583eb8e5878b44b385750b5d1c4411af35bce",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr20_ppm0_d0",
+    "file": "btle_tx_test_output_i_ref.txt",
+    "sha256": "ae98db8b12442ca91ad6f3efed4e6e25c96d71e1d662116f0a34daf130de9d5f",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr20_ppm0_d0",
+    "file": "btle_tx_test_output_q_ref.txt",
+    "sha256": "94568821c01cac56809029cff6afe72d0a3de460241be52193146dbee305b5c0",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr20_ppm0_d5",
+    "file": "btle_rx_test_input_i.txt",
+    "sha256": "d1649e34eb5f50093967c52cd56eb9fea6dcf6ea8344e4bbf80238866745d314",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr20_ppm0_d5",
+    "file": "btle_rx_test_input_q.txt",
+    "sha256": "ab1a6f15418ba355715050eccc399b8ff2375cfc83e8595403b0eeba987e9943",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr20_ppm0_d5",
+    "file": "btle_tx_test_input.txt",
+    "sha256": "26eadd8c0da068832deb8475421583eb8e5878b44b385750b5d1c4411af35bce",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr20_ppm0_d5",
+    "file": "btle_tx_test_output_i_ref.txt",
+    "sha256": "ae98db8b12442ca91ad6f3efed4e6e25c96d71e1d662116f0a34daf130de9d5f",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr20_ppm0_d5",
+    "file": "btle_tx_test_output_q_ref.txt",
+    "sha256": "94568821c01cac56809029cff6afe72d0a3de460241be52193146dbee305b5c0",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr20_ppm20_d0",
+    "file": "btle_rx_test_input_i.txt",
+    "sha256": "cedd3bc9004acc63d7d35864a6de7aae38d228e455556c4ea80077047dfcf09b",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr20_ppm20_d0",
+    "file": "btle_rx_test_input_q.txt",
+    "sha256": "0dc260786646a8e23ed3816bc05b70da4cdcca67b1e796bba0a6f9b6bd848f8d",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr20_ppm20_d0",
+    "file": "btle_tx_test_input.txt",
+    "sha256": "26eadd8c0da068832deb8475421583eb8e5878b44b385750b5d1c4411af35bce",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr20_ppm20_d0",
+    "file": "btle_tx_test_output_i_ref.txt",
+    "sha256": "ae98db8b12442ca91ad6f3efed4e6e25c96d71e1d662116f0a34daf130de9d5f",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr20_ppm20_d0",
+    "file": "btle_tx_test_output_q_ref.txt",
+    "sha256": "94568821c01cac56809029cff6afe72d0a3de460241be52193146dbee305b5c0",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr20_ppm20_d5",
+    "file": "btle_rx_test_input_i.txt",
+    "sha256": "19719c5ff96343d5fe2775acf09cd00a921630852d5497b08fa89b5905aec6d2",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr20_ppm20_d5",
+    "file": "btle_rx_test_input_q.txt",
+    "sha256": "c1cb54421daed77447e95d4da6ae22b0694ac6e296a3bd7fa996fba84d103173",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr20_ppm20_d5",
+    "file": "btle_tx_test_input.txt",
+    "sha256": "26eadd8c0da068832deb8475421583eb8e5878b44b385750b5d1c4411af35bce",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr20_ppm20_d5",
+    "file": "btle_tx_test_output_i_ref.txt",
+    "sha256": "ae98db8b12442ca91ad6f3efed4e6e25c96d71e1d662116f0a34daf130de9d5f",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr20_ppm20_d5",
+    "file": "btle_tx_test_output_q_ref.txt",
+    "sha256": "94568821c01cac56809029cff6afe72d0a3de460241be52193146dbee305b5c0",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr20_ppm50_d0",
+    "file": "btle_rx_test_input_i.txt",
+    "sha256": "3de08f5ca4a685f4e94db741a22f3018cf229669c1e5a4bbba0f487ba8848ee3",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr20_ppm50_d0",
+    "file": "btle_rx_test_input_q.txt",
+    "sha256": "b59d104b10d9339b0c57d7ac8dc5aaefc22af195a05857e8b5c2b6bb5531cadf",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr20_ppm50_d0",
+    "file": "btle_tx_test_input.txt",
+    "sha256": "26eadd8c0da068832deb8475421583eb8e5878b44b385750b5d1c4411af35bce",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr20_ppm50_d0",
+    "file": "btle_tx_test_output_i_ref.txt",
+    "sha256": "ae98db8b12442ca91ad6f3efed4e6e25c96d71e1d662116f0a34daf130de9d5f",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr20_ppm50_d0",
+    "file": "btle_tx_test_output_q_ref.txt",
+    "sha256": "94568821c01cac56809029cff6afe72d0a3de460241be52193146dbee305b5c0",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr20_ppm50_d5",
+    "file": "btle_rx_test_input_i.txt",
+    "sha256": "bcde50ff4542b569fda4c8ce7592dcd60bfb9a9b2bbc83e2879e8c45829a0ef5",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr20_ppm50_d5",
+    "file": "btle_rx_test_input_q.txt",
+    "sha256": "4f1f8078a4067a537144edd2b29ec04e12ba59cf9964ceff387f09f3af163bba",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr20_ppm50_d5",
+    "file": "btle_tx_test_input.txt",
+    "sha256": "26eadd8c0da068832deb8475421583eb8e5878b44b385750b5d1c4411af35bce",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr20_ppm50_d5",
+    "file": "btle_tx_test_output_i_ref.txt",
+    "sha256": "ae98db8b12442ca91ad6f3efed4e6e25c96d71e1d662116f0a34daf130de9d5f",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr20_ppm50_d5",
+    "file": "btle_tx_test_output_q_ref.txt",
+    "sha256": "94568821c01cac56809029cff6afe72d0a3de460241be52193146dbee305b5c0",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr8_ppm0_d0",
+    "file": "btle_rx_test_input_i.txt",
+    "sha256": "5557980ece3685b056a26d2b4a4ad35a60072b9541ab48cadcc5645b7249b77a",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr8_ppm0_d0",
+    "file": "btle_rx_test_input_q.txt",
+    "sha256": "24e03b584feede3e14f98bdc89e273e8a6ef5fd4e37ec20d4710d69039a8920d",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr8_ppm0_d0",
+    "file": "btle_tx_test_input.txt",
+    "sha256": "26eadd8c0da068832deb8475421583eb8e5878b44b385750b5d1c4411af35bce",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr8_ppm0_d0",
+    "file": "btle_tx_test_output_i_ref.txt",
+    "sha256": "ae98db8b12442ca91ad6f3efed4e6e25c96d71e1d662116f0a34daf130de9d5f",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr8_ppm0_d0",
+    "file": "btle_tx_test_output_q_ref.txt",
+    "sha256": "94568821c01cac56809029cff6afe72d0a3de460241be52193146dbee305b5c0",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr8_ppm0_d5",
+    "file": "btle_rx_test_input_i.txt",
+    "sha256": "b2252e1c71ff3ad3d74785f5981dca3f1c340e870823798a33ab12023d873d55",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr8_ppm0_d5",
+    "file": "btle_rx_test_input_q.txt",
+    "sha256": "22b640abb1551ba59efe80b62f8a0672657dc0f70532b6ad643d3cfedc5c6556",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr8_ppm0_d5",
+    "file": "btle_tx_test_input.txt",
+    "sha256": "26eadd8c0da068832deb8475421583eb8e5878b44b385750b5d1c4411af35bce",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr8_ppm0_d5",
+    "file": "btle_tx_test_output_i_ref.txt",
+    "sha256": "ae98db8b12442ca91ad6f3efed4e6e25c96d71e1d662116f0a34daf130de9d5f",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr8_ppm0_d5",
+    "file": "btle_tx_test_output_q_ref.txt",
+    "sha256": "94568821c01cac56809029cff6afe72d0a3de460241be52193146dbee305b5c0",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr8_ppm20_d0",
+    "file": "btle_rx_test_input_i.txt",
+    "sha256": "18c994b0d713f43012be3c6d2bc91c3eb253ce949e3ecf449f9e24f006447166",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr8_ppm20_d0",
+    "file": "btle_rx_test_input_q.txt",
+    "sha256": "e444cd0235d377944cf1b28a9abbd4e657e5be7c0640126e253a4ac9cce1ad1f",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr8_ppm20_d0",
+    "file": "btle_tx_test_input.txt",
+    "sha256": "26eadd8c0da068832deb8475421583eb8e5878b44b385750b5d1c4411af35bce",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr8_ppm20_d0",
+    "file": "btle_tx_test_output_i_ref.txt",
+    "sha256": "ae98db8b12442ca91ad6f3efed4e6e25c96d71e1d662116f0a34daf130de9d5f",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr8_ppm20_d0",
+    "file": "btle_tx_test_output_q_ref.txt",
+    "sha256": "94568821c01cac56809029cff6afe72d0a3de460241be52193146dbee305b5c0",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr8_ppm20_d5",
+    "file": "btle_rx_test_input_i.txt",
+    "sha256": "d34bebae96e2b57cd2b96f5246926e61ec64fd987399cd3184ac00e0b8c4d677",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr8_ppm20_d5",
+    "file": "btle_rx_test_input_q.txt",
+    "sha256": "dedfee9fa70113bb5229782f55d8ea7300f1ce6216bdc4f72d6811f0ff97f7d2",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr8_ppm20_d5",
+    "file": "btle_tx_test_input.txt",
+    "sha256": "26eadd8c0da068832deb8475421583eb8e5878b44b385750b5d1c4411af35bce",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr8_ppm20_d5",
+    "file": "btle_tx_test_output_i_ref.txt",
+    "sha256": "ae98db8b12442ca91ad6f3efed4e6e25c96d71e1d662116f0a34daf130de9d5f",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr8_ppm20_d5",
+    "file": "btle_tx_test_output_q_ref.txt",
+    "sha256": "94568821c01cac56809029cff6afe72d0a3de460241be52193146dbee305b5c0",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr8_ppm50_d0",
+    "file": "btle_rx_test_input_i.txt",
+    "sha256": "b0ed25d6a187df8fb1e4b1e2a2a774a9a013e03e502864dd1e64e57efb50a95d",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr8_ppm50_d0",
+    "file": "btle_rx_test_input_q.txt",
+    "sha256": "393401a1e049d226319001853ea58f78c07407e8dcc8ede56330603d86d239e2",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr8_ppm50_d0",
+    "file": "btle_tx_test_input.txt",
+    "sha256": "26eadd8c0da068832deb8475421583eb8e5878b44b385750b5d1c4411af35bce",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr8_ppm50_d0",
+    "file": "btle_tx_test_output_i_ref.txt",
+    "sha256": "ae98db8b12442ca91ad6f3efed4e6e25c96d71e1d662116f0a34daf130de9d5f",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr8_ppm50_d0",
+    "file": "btle_tx_test_output_q_ref.txt",
+    "sha256": "94568821c01cac56809029cff6afe72d0a3de460241be52193146dbee305b5c0",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr8_ppm50_d5",
+    "file": "btle_rx_test_input_i.txt",
+    "sha256": "d92b0a388600a3a5a596d4933b8fff688f6e6596404282e9ed22ca31f8c02a06",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr8_ppm50_d5",
+    "file": "btle_rx_test_input_q.txt",
+    "sha256": "2adf0416c5686fc5e5d10315dc2932c1309a8ed38b91635d78ca569708f3a780",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr8_ppm50_d5",
+    "file": "btle_tx_test_input.txt",
+    "sha256": "26eadd8c0da068832deb8475421583eb8e5878b44b385750b5d1c4411af35bce",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr8_ppm50_d5",
+    "file": "btle_tx_test_output_i_ref.txt",
+    "sha256": "ae98db8b12442ca91ad6f3efed4e6e25c96d71e1d662116f0a34daf130de9d5f",
+    "unchanged": true
+  },
+  {
+    "config": "ex1_snr8_ppm50_d5",
+    "file": "btle_tx_test_output_q_ref.txt",
+    "sha256": "94568821c01cac56809029cff6afe72d0a3de460241be52193146dbee305b5c0",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr12_ppm0_d0",
+    "file": "btle_rx_test_input_i.txt",
+    "sha256": "9c1830241bfcf41da06d58d6103fa1c45783f11ccd874a2d36c97f4cfb23e2ae",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr12_ppm0_d0",
+    "file": "btle_rx_test_input_q.txt",
+    "sha256": "f32fef1f6e3e2851856f4b92bf57d8966c8e7fd2428218178ed7eaf7d0314f17",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr12_ppm0_d0",
+    "file": "btle_tx_test_input.txt",
+    "sha256": "d6545866fd7e53b31511e16d513611475144fa5131dbf70668593393f6c19c4c",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr12_ppm0_d0",
+    "file": "btle_tx_test_output_i_ref.txt",
+    "sha256": "bdc60307a4e28bc500f085d8024178ccbce7bd323279e6e1558e52aaf9c44e61",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr12_ppm0_d0",
+    "file": "btle_tx_test_output_q_ref.txt",
+    "sha256": "66aec047b01b1f2dc9f1228df8352b6b763250f399feba2c82cdab5f29589866",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr12_ppm0_d5",
+    "file": "btle_rx_test_input_i.txt",
+    "sha256": "b95e78d00a02dacb7cdbb656efa146ae0b55210b67797563a4d7d2660a9544df",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr12_ppm0_d5",
+    "file": "btle_rx_test_input_q.txt",
+    "sha256": "3499accf24ee10c45f12bbe28f7081e6952224f1f38178874eaf96352946b150",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr12_ppm0_d5",
+    "file": "btle_tx_test_input.txt",
+    "sha256": "d6545866fd7e53b31511e16d513611475144fa5131dbf70668593393f6c19c4c",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr12_ppm0_d5",
+    "file": "btle_tx_test_output_i_ref.txt",
+    "sha256": "bdc60307a4e28bc500f085d8024178ccbce7bd323279e6e1558e52aaf9c44e61",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr12_ppm0_d5",
+    "file": "btle_tx_test_output_q_ref.txt",
+    "sha256": "66aec047b01b1f2dc9f1228df8352b6b763250f399feba2c82cdab5f29589866",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr12_ppm20_d0",
+    "file": "btle_rx_test_input_i.txt",
+    "sha256": "6cab9a35e689446a5f1c7b440ea0ea1351499d50b308e16281d4ec7971dcef27",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr12_ppm20_d0",
+    "file": "btle_rx_test_input_q.txt",
+    "sha256": "2371cc1f900c5202db5230c1019f795aa72c2d7013f91f2dec59654ecac42e6d",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr12_ppm20_d0",
+    "file": "btle_tx_test_input.txt",
+    "sha256": "d6545866fd7e53b31511e16d513611475144fa5131dbf70668593393f6c19c4c",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr12_ppm20_d0",
+    "file": "btle_tx_test_output_i_ref.txt",
+    "sha256": "bdc60307a4e28bc500f085d8024178ccbce7bd323279e6e1558e52aaf9c44e61",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr12_ppm20_d0",
+    "file": "btle_tx_test_output_q_ref.txt",
+    "sha256": "66aec047b01b1f2dc9f1228df8352b6b763250f399feba2c82cdab5f29589866",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr12_ppm20_d5",
+    "file": "btle_rx_test_input_i.txt",
+    "sha256": "16e0f7c6c5aa87eb7f4e0512fcbb83628abc6ef09c3cd52537745e58910e3cd1",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr12_ppm20_d5",
+    "file": "btle_rx_test_input_q.txt",
+    "sha256": "73052c45fda362beff8dfa08be8bc758aaf6b8c7013469e6ba941ce96b1e26c8",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr12_ppm20_d5",
+    "file": "btle_tx_test_input.txt",
+    "sha256": "d6545866fd7e53b31511e16d513611475144fa5131dbf70668593393f6c19c4c",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr12_ppm20_d5",
+    "file": "btle_tx_test_output_i_ref.txt",
+    "sha256": "bdc60307a4e28bc500f085d8024178ccbce7bd323279e6e1558e52aaf9c44e61",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr12_ppm20_d5",
+    "file": "btle_tx_test_output_q_ref.txt",
+    "sha256": "66aec047b01b1f2dc9f1228df8352b6b763250f399feba2c82cdab5f29589866",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr12_ppm50_d0",
+    "file": "btle_rx_test_input_i.txt",
+    "sha256": "f5037d35a823facf32002e8ef788a2e81d66a5261fc2d7ce62b97f81063fbfe9",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr12_ppm50_d0",
+    "file": "btle_rx_test_input_q.txt",
+    "sha256": "0a768b33d9813418fdecca2d5c51fd074a3dc668d7525cb1eb577e248f86edcc",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr12_ppm50_d0",
+    "file": "btle_tx_test_input.txt",
+    "sha256": "d6545866fd7e53b31511e16d513611475144fa5131dbf70668593393f6c19c4c",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr12_ppm50_d0",
+    "file": "btle_tx_test_output_i_ref.txt",
+    "sha256": "bdc60307a4e28bc500f085d8024178ccbce7bd323279e6e1558e52aaf9c44e61",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr12_ppm50_d0",
+    "file": "btle_tx_test_output_q_ref.txt",
+    "sha256": "66aec047b01b1f2dc9f1228df8352b6b763250f399feba2c82cdab5f29589866",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr12_ppm50_d5",
+    "file": "btle_rx_test_input_i.txt",
+    "sha256": "3b44a2e2c2bdb74ea2e1e8cbe6e97e943dd5b6ac2412087332c97148d32be190",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr12_ppm50_d5",
+    "file": "btle_rx_test_input_q.txt",
+    "sha256": "1bd02c378ed2af6387a67b4c2365ff5925493ace17ac0f1ce1a05f3328a6813c",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr12_ppm50_d5",
+    "file": "btle_tx_test_input.txt",
+    "sha256": "d6545866fd7e53b31511e16d513611475144fa5131dbf70668593393f6c19c4c",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr12_ppm50_d5",
+    "file": "btle_tx_test_output_i_ref.txt",
+    "sha256": "bdc60307a4e28bc500f085d8024178ccbce7bd323279e6e1558e52aaf9c44e61",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr12_ppm50_d5",
+    "file": "btle_tx_test_output_q_ref.txt",
+    "sha256": "66aec047b01b1f2dc9f1228df8352b6b763250f399feba2c82cdab5f29589866",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr20_ppm0_d0",
+    "file": "btle_rx_test_input_i.txt",
+    "sha256": "86c2638b7e8a9b953121bf5f3a5139a0829acf61c6fa75a3cb949807175293cf",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr20_ppm0_d0",
+    "file": "btle_rx_test_input_q.txt",
+    "sha256": "b3b9163bdf1cdd9a9a28de2953a761a77c8c8ddd7e92971c7d36d3cfe592d67a",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr20_ppm0_d0",
+    "file": "btle_tx_test_input.txt",
+    "sha256": "d6545866fd7e53b31511e16d513611475144fa5131dbf70668593393f6c19c4c",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr20_ppm0_d0",
+    "file": "btle_tx_test_output_i_ref.txt",
+    "sha256": "bdc60307a4e28bc500f085d8024178ccbce7bd323279e6e1558e52aaf9c44e61",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr20_ppm0_d0",
+    "file": "btle_tx_test_output_q_ref.txt",
+    "sha256": "66aec047b01b1f2dc9f1228df8352b6b763250f399feba2c82cdab5f29589866",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr20_ppm0_d5",
+    "file": "btle_rx_test_input_i.txt",
+    "sha256": "da53f9a3fda1fe78f17437a425b6a1cc699c3dd0056b237ed46f408d924edafe",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr20_ppm0_d5",
+    "file": "btle_rx_test_input_q.txt",
+    "sha256": "3719907c6afa7fe058692bf65502022220998d1496538928a1d141f41084daaa",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr20_ppm0_d5",
+    "file": "btle_tx_test_input.txt",
+    "sha256": "d6545866fd7e53b31511e16d513611475144fa5131dbf70668593393f6c19c4c",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr20_ppm0_d5",
+    "file": "btle_tx_test_output_i_ref.txt",
+    "sha256": "bdc60307a4e28bc500f085d8024178ccbce7bd323279e6e1558e52aaf9c44e61",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr20_ppm0_d5",
+    "file": "btle_tx_test_output_q_ref.txt",
+    "sha256": "66aec047b01b1f2dc9f1228df8352b6b763250f399feba2c82cdab5f29589866",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr20_ppm20_d0",
+    "file": "btle_rx_test_input_i.txt",
+    "sha256": "359a9253d8aac547fb3a354d2f8ee6031d7ee24a3fec7d67bb8c6617d999b2bb",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr20_ppm20_d0",
+    "file": "btle_rx_test_input_q.txt",
+    "sha256": "084c2663e5ea53792999b3f301cd66cf02fdc0840251d40a71fc71db7820e945",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr20_ppm20_d0",
+    "file": "btle_tx_test_input.txt",
+    "sha256": "d6545866fd7e53b31511e16d513611475144fa5131dbf70668593393f6c19c4c",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr20_ppm20_d0",
+    "file": "btle_tx_test_output_i_ref.txt",
+    "sha256": "bdc60307a4e28bc500f085d8024178ccbce7bd323279e6e1558e52aaf9c44e61",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr20_ppm20_d0",
+    "file": "btle_tx_test_output_q_ref.txt",
+    "sha256": "66aec047b01b1f2dc9f1228df8352b6b763250f399feba2c82cdab5f29589866",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr20_ppm20_d5",
+    "file": "btle_rx_test_input_i.txt",
+    "sha256": "d6dae2a9d9f7ffd0279ef2050b7875132e35e897bd6d566665c795f208186e6f",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr20_ppm20_d5",
+    "file": "btle_rx_test_input_q.txt",
+    "sha256": "82daeaabe65a4bed6e30757897d347e65b6ccd27e612392ab96a88f7491070bd",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr20_ppm20_d5",
+    "file": "btle_tx_test_input.txt",
+    "sha256": "d6545866fd7e53b31511e16d513611475144fa5131dbf70668593393f6c19c4c",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr20_ppm20_d5",
+    "file": "btle_tx_test_output_i_ref.txt",
+    "sha256": "bdc60307a4e28bc500f085d8024178ccbce7bd323279e6e1558e52aaf9c44e61",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr20_ppm20_d5",
+    "file": "btle_tx_test_output_q_ref.txt",
+    "sha256": "66aec047b01b1f2dc9f1228df8352b6b763250f399feba2c82cdab5f29589866",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr20_ppm50_d0",
+    "file": "btle_rx_test_input_i.txt",
+    "sha256": "65bc79b04f6a7e2510ac85491bab3dc0987cd3944e2bee68351fdb7bc3d7a957",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr20_ppm50_d0",
+    "file": "btle_rx_test_input_q.txt",
+    "sha256": "dc79527c24e79d556750b45fb502ca0e6db4f9dac34861fb6d934220ebf6ab23",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr20_ppm50_d0",
+    "file": "btle_tx_test_input.txt",
+    "sha256": "d6545866fd7e53b31511e16d513611475144fa5131dbf70668593393f6c19c4c",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr20_ppm50_d0",
+    "file": "btle_tx_test_output_i_ref.txt",
+    "sha256": "bdc60307a4e28bc500f085d8024178ccbce7bd323279e6e1558e52aaf9c44e61",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr20_ppm50_d0",
+    "file": "btle_tx_test_output_q_ref.txt",
+    "sha256": "66aec047b01b1f2dc9f1228df8352b6b763250f399feba2c82cdab5f29589866",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr20_ppm50_d5",
+    "file": "btle_rx_test_input_i.txt",
+    "sha256": "6d934b75b4196edd6ac8a88039bb6ed650627f0c3a226cef1fef172cc93f7b0d",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr20_ppm50_d5",
+    "file": "btle_rx_test_input_q.txt",
+    "sha256": "6df6bbb2467b78049dd79a72ef89abbcb0d45afab8fa545edffcda2b0315a34b",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr20_ppm50_d5",
+    "file": "btle_tx_test_input.txt",
+    "sha256": "d6545866fd7e53b31511e16d513611475144fa5131dbf70668593393f6c19c4c",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr20_ppm50_d5",
+    "file": "btle_tx_test_output_i_ref.txt",
+    "sha256": "bdc60307a4e28bc500f085d8024178ccbce7bd323279e6e1558e52aaf9c44e61",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr20_ppm50_d5",
+    "file": "btle_tx_test_output_q_ref.txt",
+    "sha256": "66aec047b01b1f2dc9f1228df8352b6b763250f399feba2c82cdab5f29589866",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr8_ppm0_d0",
+    "file": "btle_rx_test_input_i.txt",
+    "sha256": "6495716784c03020e3d043cdaa4de53ae618faeb23705839f2ffd2b5133cb7ce",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr8_ppm0_d0",
+    "file": "btle_rx_test_input_q.txt",
+    "sha256": "e94ec57be5ac1f623715ce1974b86a7274ab24050749cb7fd829674feabc63ca",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr8_ppm0_d0",
+    "file": "btle_tx_test_input.txt",
+    "sha256": "d6545866fd7e53b31511e16d513611475144fa5131dbf70668593393f6c19c4c",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr8_ppm0_d0",
+    "file": "btle_tx_test_output_i_ref.txt",
+    "sha256": "bdc60307a4e28bc500f085d8024178ccbce7bd323279e6e1558e52aaf9c44e61",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr8_ppm0_d0",
+    "file": "btle_tx_test_output_q_ref.txt",
+    "sha256": "66aec047b01b1f2dc9f1228df8352b6b763250f399feba2c82cdab5f29589866",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr8_ppm0_d5",
+    "file": "btle_rx_test_input_i.txt",
+    "sha256": "f9ece2553d24bed14a5c6b093cebc81d85cfb08d9581db48eb5a776cce62518c",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr8_ppm0_d5",
+    "file": "btle_rx_test_input_q.txt",
+    "sha256": "f2de0969efffc0e1d2c8c20067ba28c69a24154e527b9290c4cb2398fe1ad65d",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr8_ppm0_d5",
+    "file": "btle_tx_test_input.txt",
+    "sha256": "d6545866fd7e53b31511e16d513611475144fa5131dbf70668593393f6c19c4c",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr8_ppm0_d5",
+    "file": "btle_tx_test_output_i_ref.txt",
+    "sha256": "bdc60307a4e28bc500f085d8024178ccbce7bd323279e6e1558e52aaf9c44e61",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr8_ppm0_d5",
+    "file": "btle_tx_test_output_q_ref.txt",
+    "sha256": "66aec047b01b1f2dc9f1228df8352b6b763250f399feba2c82cdab5f29589866",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr8_ppm20_d0",
+    "file": "btle_rx_test_input_i.txt",
+    "sha256": "38aed11a3cdc5a9bd49298fa049d20b07630e1399f64f63e6ff099b27554bcb2",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr8_ppm20_d0",
+    "file": "btle_rx_test_input_q.txt",
+    "sha256": "48fb496c4b83ac74cb20c27da24610b27dd5d656162bc26c033e11641241a182",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr8_ppm20_d0",
+    "file": "btle_tx_test_input.txt",
+    "sha256": "d6545866fd7e53b31511e16d513611475144fa5131dbf70668593393f6c19c4c",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr8_ppm20_d0",
+    "file": "btle_tx_test_output_i_ref.txt",
+    "sha256": "bdc60307a4e28bc500f085d8024178ccbce7bd323279e6e1558e52aaf9c44e61",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr8_ppm20_d0",
+    "file": "btle_tx_test_output_q_ref.txt",
+    "sha256": "66aec047b01b1f2dc9f1228df8352b6b763250f399feba2c82cdab5f29589866",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr8_ppm20_d5",
+    "file": "btle_rx_test_input_i.txt",
+    "sha256": "0775033636b66d5c3fe396830b6b26eefd8fbd8a68e0940321ac2dd1be0dfd70",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr8_ppm20_d5",
+    "file": "btle_rx_test_input_q.txt",
+    "sha256": "af65f2d3c64ef1f2f7ff4ca1f766b707fcb18130ff47da221117e9e168d14bd2",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr8_ppm20_d5",
+    "file": "btle_tx_test_input.txt",
+    "sha256": "d6545866fd7e53b31511e16d513611475144fa5131dbf70668593393f6c19c4c",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr8_ppm20_d5",
+    "file": "btle_tx_test_output_i_ref.txt",
+    "sha256": "bdc60307a4e28bc500f085d8024178ccbce7bd323279e6e1558e52aaf9c44e61",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr8_ppm20_d5",
+    "file": "btle_tx_test_output_q_ref.txt",
+    "sha256": "66aec047b01b1f2dc9f1228df8352b6b763250f399feba2c82cdab5f29589866",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr8_ppm50_d0",
+    "file": "btle_rx_test_input_i.txt",
+    "sha256": "2a13df8c770b13964daec06b8b214364e465e3273520ba0ffae3b0a2937ef634",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr8_ppm50_d0",
+    "file": "btle_rx_test_input_q.txt",
+    "sha256": "850003e4201405e186017eeacf58356b015f6f06e2ce8ff88701aaafa8fd2e46",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr8_ppm50_d0",
+    "file": "btle_tx_test_input.txt",
+    "sha256": "d6545866fd7e53b31511e16d513611475144fa5131dbf70668593393f6c19c4c",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr8_ppm50_d0",
+    "file": "btle_tx_test_output_i_ref.txt",
+    "sha256": "bdc60307a4e28bc500f085d8024178ccbce7bd323279e6e1558e52aaf9c44e61",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr8_ppm50_d0",
+    "file": "btle_tx_test_output_q_ref.txt",
+    "sha256": "66aec047b01b1f2dc9f1228df8352b6b763250f399feba2c82cdab5f29589866",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr8_ppm50_d5",
+    "file": "btle_rx_test_input_i.txt",
+    "sha256": "5a01173a70af7ba999b98f3eabc0aba405d4ed20af3a99eb4484cf0e9be9b7ab",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr8_ppm50_d5",
+    "file": "btle_rx_test_input_q.txt",
+    "sha256": "6dfc001799f296bdb1efb77bfdc2496a2fab2811ee0c0aa8f98d4e1530702d5e",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr8_ppm50_d5",
+    "file": "btle_tx_test_input.txt",
+    "sha256": "d6545866fd7e53b31511e16d513611475144fa5131dbf70668593393f6c19c4c",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr8_ppm50_d5",
+    "file": "btle_tx_test_output_i_ref.txt",
+    "sha256": "bdc60307a4e28bc500f085d8024178ccbce7bd323279e6e1558e52aaf9c44e61",
+    "unchanged": true
+  },
+  {
+    "config": "ex2_snr8_ppm50_d5",
+    "file": "btle_tx_test_output_q_ref.txt",
+    "sha256": "66aec047b01b1f2dc9f1228df8352b6b763250f399feba2c82cdab5f29589866",
+    "unchanged": true
+  }
+]

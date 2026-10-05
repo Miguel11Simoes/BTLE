@@ -1,3 +1,5 @@
+> Current digital validation and ASIC readiness: [Product validation](docs/04%20Validation/PRODUCT_VALIDATION.md), [open signoff work](docs/04%20Validation/ASIC_READINESS.md).
+
 > **Thesis fork, by Miguel Simões.** This repository derives from
 > [JiaoXianjun/BTLE](https://github.com/JiaoXianjun/BTLE) (tag `upstream-baseline`),
 > and is used to study a reconfigurable RISC-V core in the BLE baseband.

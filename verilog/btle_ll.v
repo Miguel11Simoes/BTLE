@@ -185,6 +185,14 @@ wire [(C_S00_AXI_DATA_WIDTH-1):0] slv_reg44;
 wire [(C_S00_AXI_DATA_WIDTH-1):0] slv_reg45;
 wire [(C_S00_AXI_DATA_WIDTH-1):0] slv_reg46;
 wire [(C_S00_AXI_DATA_WIDTH-1):0] slv_reg47;
+// Reserved read-only slots have a defined zero value.
+assign slv_reg42 = {C_S00_AXI_DATA_WIDTH{1'b0}};
+assign slv_reg43 = {C_S00_AXI_DATA_WIDTH{1'b0}};
+assign slv_reg44 = {C_S00_AXI_DATA_WIDTH{1'b0}};
+assign slv_reg45 = {C_S00_AXI_DATA_WIDTH{1'b0}};
+assign slv_reg46 = {C_S00_AXI_DATA_WIDTH{1'b0}};
+assign slv_reg47 = {C_S00_AXI_DATA_WIDTH{1'b0}};
+
 wire [(C_S00_AXI_DATA_WIDTH-1):0] slv_reg48;
 wire [(C_S00_AXI_DATA_WIDTH-1):0] slv_reg49;
 wire [(C_S00_AXI_DATA_WIDTH-1):0] slv_reg50;
@@ -492,6 +500,8 @@ always @ (posedge axi_aclk) begin
 end
 
 // =============event counters==========
+// Event 4 is reserved; do not transfer an undriven bus across clock domains.
+assign event4_counter = {C_S00_AXI_DATA_WIDTH{1'b0}};
 event_counter_pulse # (
   .COUNTER_WIDTH(C_S00_AXI_DATA_WIDTH)
 ) event_counter_pulse_rx_hit_flag_i (
@@ -2122,71 +2132,71 @@ always @(*)
 begin
       // Address decoding for reading registers
       case ( axi_araddr[ADDR_LSB+OPT_MEM_ADDR_BITS:ADDR_LSB] )
-        6'h00   : reg_data_out <= slv_reg0;
-        6'h01   : reg_data_out <= slv_reg1;
-        6'h02   : reg_data_out <= slv_reg2;
-        6'h03   : reg_data_out <= slv_reg3;
-        6'h04   : reg_data_out <= slv_reg4;
-        6'h05   : reg_data_out <= slv_reg5;
-        6'h06   : reg_data_out <= slv_reg6;
-        6'h07   : reg_data_out <= slv_reg7;
-        6'h08   : reg_data_out <= slv_reg8;
-        6'h09   : reg_data_out <= slv_reg9;
-        6'h0A   : reg_data_out <= slv_reg10;
-        6'h0B   : reg_data_out <= slv_reg11;
-        6'h0C   : reg_data_out <= slv_reg12;
-        6'h0D   : reg_data_out <= slv_reg13;
-        6'h0E   : reg_data_out <= slv_reg14;
-        6'h0F   : reg_data_out <= slv_reg15;
-        6'h10   : reg_data_out <= slv_reg16;
-        6'h11   : reg_data_out <= slv_reg17;
-        6'h12   : reg_data_out <= slv_reg18;
-        6'h13   : reg_data_out <= slv_reg19;
-        6'h14   : reg_data_out <= slv_reg20;
-        6'h15   : reg_data_out <= slv_reg21;
-        6'h16   : reg_data_out <= slv_reg22;
-        6'h17   : reg_data_out <= slv_reg23;
-        6'h18   : reg_data_out <= slv_reg24;
-        6'h19   : reg_data_out <= slv_reg25;
-        6'h1A   : reg_data_out <= slv_reg26;
-        6'h1B   : reg_data_out <= slv_reg27;
-        6'h1C   : reg_data_out <= slv_reg28;
-        6'h1D   : reg_data_out <= slv_reg29;
-        6'h1E   : reg_data_out <= slv_reg30;
-        6'h1F   : reg_data_out <= slv_reg31;
-        6'h20   : reg_data_out <= slv_reg32;
-        6'h21   : reg_data_out <= slv_reg33;
-        6'h22   : reg_data_out <= slv_reg34;
-        6'h23   : reg_data_out <= slv_reg35;
-        6'h24   : reg_data_out <= slv_reg36;
-        6'h25   : reg_data_out <= slv_reg37;
-        6'h26   : reg_data_out <= slv_reg38;
-        6'h27   : reg_data_out <= slv_reg39;
-        6'h28   : reg_data_out <= SLV_REG40;
-        6'h29   : reg_data_out <= SLV_REG41;
-        6'h2A   : reg_data_out <= SLV_REG42;
-        6'h2B   : reg_data_out <= SLV_REG43;
-        6'h2C   : reg_data_out <= SLV_REG44;
-        6'h2D   : reg_data_out <= SLV_REG45;
-        6'h2E   : reg_data_out <= SLV_REG46;
-        6'h2F   : reg_data_out <= SLV_REG47;
-        6'h30   : reg_data_out <= SLV_REG48;
-        6'h31   : reg_data_out <= SLV_REG49;
-        6'h32   : reg_data_out <= SLV_REG50;
-        6'h33   : reg_data_out <= SLV_REG51;
-        6'h34   : reg_data_out <= SLV_REG52;
-        6'h35   : reg_data_out <= SLV_REG53;
-        6'h36   : reg_data_out <= SLV_REG54;
-        6'h37   : reg_data_out <= SLV_REG55;
-        6'h38   : reg_data_out <= SLV_REG56;
-        6'h39   : reg_data_out <= SLV_REG57;
-        6'h3A   : reg_data_out <= SLV_REG58;
-        6'h3B   : reg_data_out <= SLV_REG59;
-        6'h3C   : reg_data_out <= SLV_REG60;
-        6'h3D   : reg_data_out <= SLV_REG61;
-        6'h3E   : reg_data_out <= SLV_REG62;
-        6'h3F   : reg_data_out <= SLV_REG63;
-        default : reg_data_out <= 0;
+        6'h00   : reg_data_out = slv_reg0;
+        6'h01   : reg_data_out = slv_reg1;
+        6'h02   : reg_data_out = slv_reg2;
+        6'h03   : reg_data_out = slv_reg3;
+        6'h04   : reg_data_out = slv_reg4;
+        6'h05   : reg_data_out = slv_reg5;
+        6'h06   : reg_data_out = slv_reg6;
+        6'h07   : reg_data_out = slv_reg7;
+        6'h08   : reg_data_out = slv_reg8;
+        6'h09   : reg_data_out = slv_reg9;
+        6'h0A   : reg_data_out = slv_reg10;
+        6'h0B   : reg_data_out = slv_reg11;
+        6'h0C   : reg_data_out = slv_reg12;
+        6'h0D   : reg_data_out = slv_reg13;
+        6'h0E   : reg_data_out = slv_reg14;
+        6'h0F   : reg_data_out = slv_reg15;
+        6'h10   : reg_data_out = slv_reg16;
+        6'h11   : reg_data_out = slv_reg17;
+        6'h12   : reg_data_out = slv_reg18;
+        6'h13   : reg_data_out = slv_reg19;
+        6'h14   : reg_data_out = slv_reg20;
+        6'h15   : reg_data_out = slv_reg21;
+        6'h16   : reg_data_out = slv_reg22;
+        6'h17   : reg_data_out = slv_reg23;
+        6'h18   : reg_data_out = slv_reg24;
+        6'h19   : reg_data_out = slv_reg25;
+        6'h1A   : reg_data_out = slv_reg26;
+        6'h1B   : reg_data_out = slv_reg27;
+        6'h1C   : reg_data_out = slv_reg28;
+        6'h1D   : reg_data_out = slv_reg29;
+        6'h1E   : reg_data_out = slv_reg30;
+        6'h1F   : reg_data_out = slv_reg31;
+        6'h20   : reg_data_out = slv_reg32;
+        6'h21   : reg_data_out = slv_reg33;
+        6'h22   : reg_data_out = slv_reg34;
+        6'h23   : reg_data_out = slv_reg35;
+        6'h24   : reg_data_out = slv_reg36;
+        6'h25   : reg_data_out = slv_reg37;
+        6'h26   : reg_data_out = slv_reg38;
+        6'h27   : reg_data_out = slv_reg39;
+        6'h28   : reg_data_out = SLV_REG40;
+        6'h29   : reg_data_out = SLV_REG41;
+        6'h2A   : reg_data_out = SLV_REG42;
+        6'h2B   : reg_data_out = SLV_REG43;
+        6'h2C   : reg_data_out = SLV_REG44;
+        6'h2D   : reg_data_out = SLV_REG45;
+        6'h2E   : reg_data_out = SLV_REG46;
+        6'h2F   : reg_data_out = SLV_REG47;
+        6'h30   : reg_data_out = SLV_REG48;
+        6'h31   : reg_data_out = SLV_REG49;
+        6'h32   : reg_data_out = SLV_REG50;
+        6'h33   : reg_data_out = SLV_REG51;
+        6'h34   : reg_data_out = SLV_REG52;
+        6'h35   : reg_data_out = SLV_REG53;
+        6'h36   : reg_data_out = SLV_REG54;
+        6'h37   : reg_data_out = SLV_REG55;
+        6'h38   : reg_data_out = SLV_REG56;
+        6'h39   : reg_data_out = SLV_REG57;
+        6'h3A   : reg_data_out = SLV_REG58;
+        6'h3B   : reg_data_out = SLV_REG59;
+        6'h3C   : reg_data_out = SLV_REG60;
+        6'h3D   : reg_data_out = SLV_REG61;
+        6'h3E   : reg_data_out = SLV_REG62;
+        6'h3F   : reg_data_out = SLV_REG63;
+        default : reg_data_out = 0;
       endcase
 end
 

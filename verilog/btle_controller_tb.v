@@ -182,10 +182,13 @@ initial begin
   $display("Reading input I from %s", RX_TEST_INPUT_I_FILENAME);
   NUM_SAMPLE_INPUT = 0;
   btle_rx_test_input_i_fd = $fopen(RX_TEST_INPUT_I_FILENAME, "r");
+  if (btle_rx_test_input_i_fd == 0) $fatal(1, "Unable to open required test file");
   tmp = $fscanf(btle_rx_test_input_i_fd, "%d", btle_rx_test_input_i_mem[NUM_SAMPLE_INPUT]);
+  if (tmp == 0 && !$feof(btle_rx_test_input_i_fd)) $fatal(1, "Malformed test vector");
   while(tmp == 1) begin
     NUM_SAMPLE_INPUT = NUM_SAMPLE_INPUT + 1;
     tmp = $fscanf(btle_rx_test_input_i_fd, "%d", btle_rx_test_input_i_mem[NUM_SAMPLE_INPUT]);
+  if (tmp == 0 && !$feof(btle_rx_test_input_i_fd)) $fatal(1, "Malformed test vector");
   end
   $fclose(btle_rx_test_input_i_fd);
   $display("%d read finish for test input I.", NUM_SAMPLE_INPUT);
@@ -197,10 +200,13 @@ initial begin
   $display("Reading input Q from %s", RX_TEST_INPUT_Q_FILENAME);
   NUM_SAMPLE_INPUT = 0;
   btle_rx_test_input_q_fd = $fopen(RX_TEST_INPUT_Q_FILENAME, "r");
+  if (btle_rx_test_input_q_fd == 0) $fatal(1, "Unable to open required test file");
   tmp = $fscanf(btle_rx_test_input_q_fd, "%d", btle_rx_test_input_q_mem[NUM_SAMPLE_INPUT]);
+  if (tmp == 0 && !$feof(btle_rx_test_input_q_fd)) $fatal(1, "Malformed test vector");
   while(tmp == 1) begin
     NUM_SAMPLE_INPUT = NUM_SAMPLE_INPUT + 1;
     tmp = $fscanf(btle_rx_test_input_q_fd, "%d", btle_rx_test_input_q_mem[NUM_SAMPLE_INPUT]);
+  if (tmp == 0 && !$feof(btle_rx_test_input_q_fd)) $fatal(1, "Malformed test vector");
   end
   $fclose(btle_rx_test_input_q_fd);
   $display("%d read finish for test input Q.", NUM_SAMPLE_INPUT);
@@ -209,10 +215,13 @@ initial begin
   $display("Reading output rx_crc_ok ref from %s", RX_TEST_OUTPUT_CRC_OK_REF_FILENAME);
   NUM_OCTET_OUTPUT = 0;
   btle_rx_test_output_crc_ok_ref_fd = $fopen(RX_TEST_OUTPUT_CRC_OK_REF_FILENAME, "r");
+  if (btle_rx_test_output_crc_ok_ref_fd == 0) $fatal(1, "Unable to open required test file");
   tmp = $fscanf(btle_rx_test_output_crc_ok_ref_fd, "%h", btle_rx_test_output_crc_ok_ref_mem[NUM_OCTET_OUTPUT]);
+  if (tmp == 0 && !$feof(btle_rx_test_output_crc_ok_ref_fd)) $fatal(1, "Malformed test vector");
   while(tmp == 1) begin
     NUM_OCTET_OUTPUT = NUM_OCTET_OUTPUT + 1;
     tmp = $fscanf(btle_rx_test_output_crc_ok_ref_fd, "%h", btle_rx_test_output_crc_ok_ref_mem[NUM_OCTET_OUTPUT]);
+  if (tmp == 0 && !$feof(btle_rx_test_output_crc_ok_ref_fd)) $fatal(1, "Malformed test vector");
   end
   $fclose(btle_rx_test_output_crc_ok_ref_fd);
   $display("%d read finish from %s", NUM_OCTET_OUTPUT, RX_TEST_OUTPUT_CRC_OK_REF_FILENAME);
@@ -220,10 +229,13 @@ initial begin
   $display("Reading output ref from %s", RX_TEST_OUTPUT_REF_FILENAME);
   NUM_OCTET_OUTPUT = 0;
   btle_rx_test_output_ref_fd = $fopen(RX_TEST_OUTPUT_REF_FILENAME, "r");
+  if (btle_rx_test_output_ref_fd == 0) $fatal(1, "Unable to open required test file");
   tmp = $fscanf(btle_rx_test_output_ref_fd, "%h", btle_rx_test_output_ref_mem[NUM_OCTET_OUTPUT]);
+  if (tmp == 0 && !$feof(btle_rx_test_output_ref_fd)) $fatal(1, "Malformed test vector");
   while(tmp == 1) begin
     NUM_OCTET_OUTPUT = NUM_OCTET_OUTPUT + 1;
     tmp = $fscanf(btle_rx_test_output_ref_fd, "%h", btle_rx_test_output_ref_mem[NUM_OCTET_OUTPUT]);
+  if (tmp == 0 && !$feof(btle_rx_test_output_ref_fd)) $fatal(1, "Malformed test vector");
   end
   $fclose(btle_rx_test_output_ref_fd);
   $display("%d read finish from %s", NUM_OCTET_OUTPUT, RX_TEST_OUTPUT_REF_FILENAME);
@@ -233,10 +245,13 @@ initial begin
   $display("Reading input from %s", TX_TEST_INPUT_FILENAME);
   NUM_OCTET_INPUT = 0;
   btle_tx_test_input_fd = $fopen(TX_TEST_INPUT_FILENAME, "r");
+  if (btle_tx_test_input_fd == 0) $fatal(1, "Unable to open required test file");
   tmp = $fscanf(btle_tx_test_input_fd, "%h", btle_tx_test_input_mem[NUM_OCTET_INPUT]);
+  if (tmp == 0 && !$feof(btle_tx_test_input_fd)) $fatal(1, "Malformed test vector");
   while(tmp == 1) begin
     NUM_OCTET_INPUT = NUM_OCTET_INPUT + 1;
     tmp = $fscanf(btle_tx_test_input_fd, "%h", btle_tx_test_input_mem[NUM_OCTET_INPUT]);
+  if (tmp == 0 && !$feof(btle_tx_test_input_fd)) $fatal(1, "Malformed test vector");
   end
   $fclose(btle_tx_test_input_fd);
   $display("%d read finish for test input.", NUM_OCTET_INPUT);
@@ -245,10 +260,13 @@ initial begin
   $display("Reading output ref from %s", TX_TEST_OUTPUT_I_REF_FILENAME);
   NUM_SAMPLE_OUTPUT = 0;
   btle_tx_test_output_i_ref_fd = $fopen(TX_TEST_OUTPUT_I_REF_FILENAME, "r");
+  if (btle_tx_test_output_i_ref_fd == 0) $fatal(1, "Unable to open required test file");
   tmp = $fscanf(btle_tx_test_output_i_ref_fd, "%d", btle_tx_test_output_i_ref_mem[NUM_SAMPLE_OUTPUT]);
+  if (tmp == 0 && !$feof(btle_tx_test_output_i_ref_fd)) $fatal(1, "Malformed test vector");
   while(tmp == 1) begin
     NUM_SAMPLE_OUTPUT = NUM_SAMPLE_OUTPUT + 1;
     tmp = $fscanf(btle_tx_test_output_i_ref_fd, "%d", btle_tx_test_output_i_ref_mem[NUM_SAMPLE_OUTPUT]);
+  if (tmp == 0 && !$feof(btle_tx_test_output_i_ref_fd)) $fatal(1, "Malformed test vector");
   end
   $fclose(btle_tx_test_output_i_ref_fd);
   $display("%d read finish for test output cos ref.", NUM_SAMPLE_OUTPUT);
@@ -256,10 +274,13 @@ initial begin
   $display("Reading output ref from %s", TX_TEST_OUTPUT_Q_REF_FILENAME);
   NUM_SAMPLE_OUTPUT = 0;
   btle_tx_test_output_q_ref_fd = $fopen(TX_TEST_OUTPUT_Q_REF_FILENAME, "r");
+  if (btle_tx_test_output_q_ref_fd == 0) $fatal(1, "Unable to open required test file");
   tmp = $fscanf(btle_tx_test_output_q_ref_fd, "%d", btle_tx_test_output_q_ref_mem[NUM_SAMPLE_OUTPUT]);
+  if (tmp == 0 && !$feof(btle_tx_test_output_q_ref_fd)) $fatal(1, "Malformed test vector");
   while(tmp == 1) begin
     NUM_SAMPLE_OUTPUT = NUM_SAMPLE_OUTPUT + 1;
     tmp = $fscanf(btle_tx_test_output_q_ref_fd, "%d", btle_tx_test_output_q_ref_mem[NUM_SAMPLE_OUTPUT]);
+  if (tmp == 0 && !$feof(btle_tx_test_output_q_ref_fd)) $fatal(1, "Malformed test vector");
   end
   $fclose(btle_tx_test_output_q_ref_fd);
   $display("%d read finish for test output sin ref.", NUM_SAMPLE_OUTPUT);
@@ -267,23 +288,29 @@ initial begin
   // read gauss filter tap
   $display("Reading from %s", GAUSS_FILTER_TAP_FILENAME);
   gauss_filter_tap_fd = $fopen(GAUSS_FILTER_TAP_FILENAME, "r");
+  if (gauss_filter_tap_fd == 0) $fatal(1, "Unable to open required test file");
   for (i=0; i<((NUM_TAP_GAUSS_FILTER+1)/2); i=i+1) begin
     tmp = $fscanf(gauss_filter_tap_fd, "%d", gauss_filter_tap_mem[i]);
+  if (tmp == 0 && !$feof(gauss_filter_tap_fd)) $fatal(1, "Malformed test vector");
   end
   $fclose(gauss_filter_tap_fd);
 
   // read cos and sin table
   cos_table_fd = $fopen(COS_TABLE_FILENAME, "r");
+  if (cos_table_fd == 0) $fatal(1, "Unable to open required test file");
   for (i=0; i<(1<<SIN_COS_ADDR_BIT_WIDTH); i=i+1) begin
     tmp = $fscanf(cos_table_fd, "%d", cos_table_mem[i]);
+  if (tmp == 0 && !$feof(cos_table_fd)) $fatal(1, "Malformed test vector");
     // if (i%2 == 0) // error injection
     //   cos_table_mem[i] = 0;
   end
   $fclose(cos_table_fd);
 
   sin_table_fd = $fopen(SIN_TABLE_FILENAME, "r");
+  if (sin_table_fd == 0) $fatal(1, "Unable to open required test file");
   for (i=0; i<(1<<SIN_COS_ADDR_BIT_WIDTH); i=i+1) begin
     tmp = $fscanf(sin_table_fd, "%d", sin_table_mem[i]);
+  if (tmp == 0 && !$feof(sin_table_fd)) $fatal(1, "Malformed test vector");
     // if (i%2 == 0) // error injection
     //   sin_table_mem[i] = 0;
   end
@@ -308,7 +335,7 @@ initial begin
 
   #200 bb_rst = 1; rf_rst = 1;
 
-  #200 
+  #200
   bb_rst = 0;
   rf_rst = 0;
   s00_axi_aresetn = 1;
@@ -536,10 +563,13 @@ always @ (posedge bb_clk) begin
         if (sample_out_count == 4095) begin
           $display("tx sample_out_count %d", sample_out_count);
           $display("tx Should NOT finish here!");
-          $finish;
+          if (!(tx_test_ok === 1 && rx_crc_test_ok === 1 && rx_pdu_test_ok === 1)) $fatal(1, "Controller checks incomplete or failed");
+        $finish;
         end
 
         if (tx_iq_valid_last_delay) begin
+          if (NUM_SAMPLE_OUTPUT <= 0 || sample_out_count !== NUM_SAMPLE_OUTPUT)
+            $fatal(1, "TX output length differs from the complete reference");
           $display("tx clk_count %d", clk_count);
           $display("tx init_count %d", clk_count);
           $display("tx phy_bit_count %d", phy_bit_count);
@@ -549,6 +579,7 @@ always @ (posedge bb_clk) begin
 
           $display("tx Save output I to %s", TX_TEST_OUTPUT_I_FILENAME);
           btle_tx_test_output_i_fd = $fopen(TX_TEST_OUTPUT_I_FILENAME, "w");
+          if (btle_tx_test_output_i_fd == 0) $fatal(1, "Unable to open required test file");
           for (i=0; i<sample_out_count; i=i+1) begin
             $fwrite(btle_tx_test_output_i_fd, "%d\n", btle_tx_test_output_i_mem[i]);
           end
@@ -557,6 +588,7 @@ always @ (posedge bb_clk) begin
 
           $display("tx Save output Q to %s", TX_TEST_OUTPUT_Q_FILENAME);
           btle_tx_test_output_i_fd = $fopen(TX_TEST_OUTPUT_Q_FILENAME, "w");
+          if (btle_tx_test_output_i_fd == 0) $fatal(1, "Unable to open required test file");
           for (i=0; i<sample_out_count; i=i+1) begin
             $fwrite(btle_tx_test_output_i_fd, "%d\n", btle_tx_test_output_q_mem[i]);
           end
@@ -567,7 +599,7 @@ always @ (posedge bb_clk) begin
           $display("tx compare the btle_tx_test_output_i_mem and the btle_tx_test_output_i_ref_mem ...");
           NUM_ERROR_TX_I = 0;
           for (i=0; i<NUM_SAMPLE_OUTPUT; i=i+1) begin
-            if (btle_tx_test_output_i_mem[i] != btle_tx_test_output_i_ref_mem[i]) begin
+            if (btle_tx_test_output_i_mem[i] !== btle_tx_test_output_i_ref_mem[i]) begin
               NUM_ERROR_TX_I = NUM_ERROR_TX_I + 1;
             end
           end
@@ -581,7 +613,7 @@ always @ (posedge bb_clk) begin
           $display("tx compare the btle_tx_test_output_q_mem and the btle_tx_test_output_q_ref_mem ...");
           NUM_ERROR_TX_Q = 0;
           for (i=0; i<NUM_SAMPLE_OUTPUT; i=i+1) begin
-            if (btle_tx_test_output_q_mem[i] != btle_tx_test_output_q_ref_mem[i]) begin
+            if (btle_tx_test_output_q_mem[i] !== btle_tx_test_output_q_ref_mem[i]) begin
               NUM_ERROR_TX_Q = NUM_ERROR_TX_Q + 1;
             end
           end
@@ -615,12 +647,21 @@ always @ (posedge bb_clk) begin
 
       TEST_RX: begin
         if (sample_in_count == (NUM_SAMPLE_INPUT+800)) begin
+          if (NUM_SAMPLE_INPUT <= 0) $fatal(1, "Empty RX stimulus");
+          if (rx_crc_ok_store !== btle_rx_test_output_crc_ok_ref_mem[0]) $fatal(1, "RX CRC decision mismatch");
+          if (btle_rx_test_output_crc_ok_ref_mem[0] === 1'b1 && NUM_OCTET_OUTPUT < 2) $fatal(1, "Missing accepted PDU reference");
+          if (btle_rx_test_output_crc_ok_ref_mem[0] === 1'b0) begin
+            if (NUM_OCTET_OUTPUT !== 0) $fatal(1, "Rejected packet must not carry an accepted PDU");
+            $display("VERIFIED_REJECTION: nonempty input observed, no packet accepted");
+          end
+
           $display("rx %d NUM_SAMPLE_INPUT", NUM_SAMPLE_INPUT);
           $display("rx %d sample_in_count", sample_in_count);
 
           $display("rx Save output to %s", RX_TEST_OUTPUT_FILENAME);
           btle_rx_test_output_fd = $fopen(RX_TEST_OUTPUT_FILENAME, "w");
-          for (i=0; i<(rx_payload_length+2); i=i+1) begin
+          if (btle_rx_test_output_fd == 0) $fatal(1, "Unable to open required test file");
+          for (i=0; rx_crc_ok_store && i<(rx_payload_length+2); i=i+1) begin
             $fwrite(btle_rx_test_output_fd, "%02h\n", btle_rx_test_output_mem[i]);
           end
           $fwrite(btle_rx_test_output_fd, "\n");
@@ -638,7 +679,7 @@ always @ (posedge bb_clk) begin
           $display("rx compare the btle_rx_test_output_mem and the btle_rx_test_output_ref_mem ...");
           NUM_ERROR = 0;
           for (i=0; i<NUM_OCTET_OUTPUT; i=i+1) begin
-            if (btle_rx_test_output_mem[i] != btle_rx_test_output_ref_mem[i]) begin
+            if (btle_rx_test_output_mem[i] !== btle_rx_test_output_ref_mem[i]) begin
               NUM_ERROR = NUM_ERROR + 1;
             end
           end
@@ -669,18 +710,19 @@ always @ (posedge bb_clk) begin
         end
 
         if (rx_decode_end) begin
-          read_start <= 1;
-          rx_crc_ok_store <= rx_crc_ok;
+          read_start <= rx_crc_ok;
+          rx_crc_ok_store <= rx_crc_ok_store | rx_crc_ok;
           $display("rx payload_length %d octet", rx_payload_length);
           $display("rx best_phase idx (among %4d samples) %d", SAMPLE_PER_SYMBOL, rx_best_phase);
           $display("rx crc_ok %d", rx_crc_ok);
         end
       end
-      
+
       TEST_FINISH: begin
         $display("tx test_ok %d", tx_test_ok);
         $display("rx crc test_ok %d", rx_crc_test_ok);
         $display("rx pdu test_ok %d", rx_pdu_test_ok);
+        if (!(tx_test_ok === 1 && rx_crc_test_ok === 1 && rx_pdu_test_ok === 1)) $fatal(1, "Controller checks incomplete or failed");
         $finish;
       end
     endcase
@@ -863,4 +905,3 @@ btle_controller # (
 );
 
 endmodule
-

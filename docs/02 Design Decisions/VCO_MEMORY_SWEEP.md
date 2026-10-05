@@ -1,3 +1,5 @@
+> **Status update, 2026-10-05:** the corrected RTL and strict results are documented in [PRODUCT_VALIDATION.md](../04%20Validation/PRODUCT_VALIDATION.md) and [ASIC_READINESS.md](../04%20Validation/ASIC_READINESS.md). This document preserves historical implementation/measurement results. Its PPA values do not describe the corrected circuit; earlier equality/PASS claims are not product signoff.
+
 # Single-port memory for the VCO tables: the OpenRAM sweep, and the branches it decides
 
 **Project:** BTLE — reconfigurable RISC-V baseband  

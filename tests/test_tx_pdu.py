@@ -3,17 +3,16 @@
 Author: Miguel Simões
 
 Run from the repository root with IVERILOG and VVP in PATH (or set their
-environment variables). Needs the tag upstream-baseline.
+environment variables). Needs the corrected reference commit recorded in REF_REV.
 
-REF is upstream's btle_tx (verilog/ of upstream-baseline, every module renamed
+REF is the corrected master btle_tx (override with --ref-rev; every module renamed
 *_ref): the runtime Gaussian FIR, loaded with the project's taps, the VCO with
 the full COS and SIN tables, and the packet buffer in a memory with two ports.
 DUT is this branch's btle_tx with GAUSS_TABLE=1: the constant taps, the quarter
 sine table in a memory with one port, the packet buffer in a memory of 256
 bytes with one port on clkb plus a register for byte 256, and the rewritten
 counters (bit_repeat_upsample, crc24, scramble, btle_tx). Every output of
-btle_tx is compared on every clk clock from the first reset on (!==, so an
-unknown value is a difference).
+btle_tx is compared on every clk clock from the first reset on (case inequality, plus explicit rejection of unknown valid samples).
 
 Stimulus (seeded, +seed=N): the taps and both tables are written as the
 upstream TX testbench writes them (cosine and sine at the same address on every
@@ -65,7 +64,7 @@ sys.path.insert(0, str(ROOT / "tests"))
 from result_guard import sim_pass, mutant_caught, positive
 from test_vco_sin2 import MACRO as VCO_MACRO, one_port as vco_one_port
 
-REF_REV = "upstream-baseline"
+REF_REV = "6589489b71704d0ff5d8eae499a6522ade0ac680"
 TX_FILES = ["btle_tx.v", "crc24.v", "crc24_core.v", "scramble.v", "scramble_core.v",
             "gfsk_modulation.v", "bit_repeat_upsample.v", "gauss_filter.v", "vco.v",
             "sdpram_one_clk.v", "sdpram_two_clk.v"]
@@ -192,6 +191,9 @@ module tb_tx_pdu;
                  d_i, d_q, d_iqv, d_iqvl, d_pb, d_pbv, d_pbvl, d_bu, d_buv, d_buvl, d_g, d_gv, d_gvl);
         $fatal(1, "first difference");
       end
+      if ((^{r_iqv,d_iqv,r_iqvl,d_iqvl}) === 1'bx ||
+          (r_iqv && (^{r_i,r_q}) === 1'bx) || (d_iqv && (^{d_i,d_q}) === 1'bx))
+        $fatal(1, "UNKNOWN valid transmitter output");
       if (r_iqv) begin
         iq_samples = iq_samples + 1;
         if (r_i != 0 || r_q != 0) iq_nonzero = iq_nonzero + 1;
@@ -333,8 +335,8 @@ MUTANTS = [
     ("btle_tx.v", "octet loaded one bit period late",
      [("if (clk_count == 0 && bit_count[2:0] == 0) begin // speed 1/8M",
        "if (clk_count == 0 && bit_count[2:0] == 1) begin // speed 1/8M")]),
-    ("bit_repeat_upsample.v", "the bit_valid window is one clock short",
-     [("bit_valid_window <= (bit_valid ? 4'd15 :", "bit_valid_window <= (bit_valid ? 4'd14 :")]),
+    ("bit_repeat_upsample.v", "the last marker occurs one repeat early",
+     [("saved_last && (remaining == 1)", "saved_last && (remaining == 2)")]),
     ("crc24.v", "the CRC bits sent in the wrong order",
      [("lfsr[~bit_count[4:0]]", "lfsr[bit_count[4:0] - 5'd8]")]),
     ("crc24.v", "the CRC skips 39 bits, not 40",
@@ -441,6 +443,7 @@ def campaign(work: Path, name: str, texts: dict[str, str], refs: list[Path], see
 
 
 def main() -> None:
+    global REF_REV
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     parser.add_argument("--seeds", type=positive, default=3)
     parser.add_argument("--packets", type=positive, default=10)
@@ -449,7 +452,9 @@ def main() -> None:
     parser.add_argument("--write-one-port", metavar="FILE",
                         help="write verilog/btle_tx.v with the packet buffer on the one-port macro model "
                              "(model included) to FILE, for a system run, and stop")
+    parser.add_argument("--ref-rev", default=REF_REV, help="corrected TX reference revision")
     args = parser.parse_args()
+    REF_REV = args.ref_rev
 
     if args.write_one_port:
         text = pdu_one_port((ROOT / "verilog" / "btle_tx.v").read_text())

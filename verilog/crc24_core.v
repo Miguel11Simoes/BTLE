@@ -23,7 +23,9 @@ wire [(CRC_STATE_BIT_WIDTH-1) : 0] crc_state_init_bit_switch;
 wire new_bit;
 wire [(CRC_STATE_BIT_WIDTH-1) : 0] crc_state_init_bit_internal;
 
-assign crc_state_init_bit_internal = (crc_state_init_bit == 0? {(CRC_STATE_BIT_WIDTH/2){2'b01}} : crc_state_init_bit); // in case no valid setting yet
+// Honor all explicitly programmed CRC seeds, including zero. Defaults belong
+// in the configuration register, not in the polynomial engine.
+assign crc_state_init_bit_internal = crc_state_init_bit;
 
 assign crc_state_init_bit_switch[7:0] = crc_state_init_bit_internal[(16+7):(16+0)];
 assign crc_state_init_bit_switch[(8+7):(8+0)] = crc_state_init_bit_internal[(8+7):(8+0)];

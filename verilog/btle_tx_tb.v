@@ -101,10 +101,13 @@ initial begin
   $display("Reading input from %s", TEST_INPUT_FILENAME);
   NUM_OCTET_INPUT = 0;
   btle_tx_test_input_fd = $fopen(TEST_INPUT_FILENAME, "r");
+  if (btle_tx_test_input_fd == 0) $fatal(1, "Unable to open required test file");
   tmp = $fscanf(btle_tx_test_input_fd, "%h", btle_tx_test_input_mem[NUM_OCTET_INPUT]);
+  if (tmp == 0 && !$feof(btle_tx_test_input_fd)) $fatal(1, "Malformed test vector");
   while(tmp == 1) begin
     NUM_OCTET_INPUT = NUM_OCTET_INPUT + 1;
     tmp = $fscanf(btle_tx_test_input_fd, "%h", btle_tx_test_input_mem[NUM_OCTET_INPUT]);
+  if (tmp == 0 && !$feof(btle_tx_test_input_fd)) $fatal(1, "Malformed test vector");
   end
   $fclose(btle_tx_test_input_fd);
   $display("%d read finish for test input.", NUM_OCTET_INPUT);
@@ -113,10 +116,13 @@ initial begin
   $display("Reading output ref from %s", TEST_OUTPUT_I_REF_FILENAME);
   NUM_SAMPLE_OUTPUT = 0;
   btle_tx_test_output_i_ref_fd = $fopen(TEST_OUTPUT_I_REF_FILENAME, "r");
+  if (btle_tx_test_output_i_ref_fd == 0) $fatal(1, "Unable to open required test file");
   tmp = $fscanf(btle_tx_test_output_i_ref_fd, "%d", btle_tx_test_output_i_ref_mem[NUM_SAMPLE_OUTPUT]);
+  if (tmp == 0 && !$feof(btle_tx_test_output_i_ref_fd)) $fatal(1, "Malformed test vector");
   while(tmp == 1) begin
     NUM_SAMPLE_OUTPUT = NUM_SAMPLE_OUTPUT + 1;
     tmp = $fscanf(btle_tx_test_output_i_ref_fd, "%d", btle_tx_test_output_i_ref_mem[NUM_SAMPLE_OUTPUT]);
+  if (tmp == 0 && !$feof(btle_tx_test_output_i_ref_fd)) $fatal(1, "Malformed test vector");
   end
   $fclose(btle_tx_test_output_i_ref_fd);
   $display("%d read finish for test output cos ref.", NUM_SAMPLE_OUTPUT);
@@ -124,10 +130,13 @@ initial begin
   $display("Reading output ref from %s", TEST_OUTPUT_Q_REF_FILENAME);
   NUM_SAMPLE_OUTPUT = 0;
   btle_tx_test_output_q_ref_fd = $fopen(TEST_OUTPUT_Q_REF_FILENAME, "r");
+  if (btle_tx_test_output_q_ref_fd == 0) $fatal(1, "Unable to open required test file");
   tmp = $fscanf(btle_tx_test_output_q_ref_fd, "%d", btle_tx_test_output_q_ref_mem[NUM_SAMPLE_OUTPUT]);
+  if (tmp == 0 && !$feof(btle_tx_test_output_q_ref_fd)) $fatal(1, "Malformed test vector");
   while(tmp == 1) begin
     NUM_SAMPLE_OUTPUT = NUM_SAMPLE_OUTPUT + 1;
     tmp = $fscanf(btle_tx_test_output_q_ref_fd, "%d", btle_tx_test_output_q_ref_mem[NUM_SAMPLE_OUTPUT]);
+  if (tmp == 0 && !$feof(btle_tx_test_output_q_ref_fd)) $fatal(1, "Malformed test vector");
   end
   $fclose(btle_tx_test_output_q_ref_fd);
   $display("%d read finish for test output sin ref.", NUM_SAMPLE_OUTPUT);
@@ -135,23 +144,29 @@ initial begin
   // read gauss filter tap
   $display("Reading from %s", GAUSS_FILTER_TAP_FILENAME);
   gauss_filter_tap_fd = $fopen(GAUSS_FILTER_TAP_FILENAME, "r");
+  if (gauss_filter_tap_fd == 0) $fatal(1, "Unable to open required test file");
   for (i=0; i<((NUM_TAP_GAUSS_FILTER+1)/2); i=i+1) begin
     tmp = $fscanf(gauss_filter_tap_fd, "%d", gauss_filter_tap_mem[i]);
+  if (tmp == 0 && !$feof(gauss_filter_tap_fd)) $fatal(1, "Malformed test vector");
   end
   $fclose(gauss_filter_tap_fd);
 
   // read cos and sin table
   cos_table_fd = $fopen(COS_TABLE_FILENAME, "r");
+  if (cos_table_fd == 0) $fatal(1, "Unable to open required test file");
   for (i=0; i<(1<<SIN_COS_ADDR_BIT_WIDTH); i=i+1) begin
     tmp = $fscanf(cos_table_fd, "%d", cos_table_mem[i]);
+  if (tmp == 0 && !$feof(cos_table_fd)) $fatal(1, "Malformed test vector");
     // if (i%2 == 0) // error injection
     //   cos_table_mem[i] = 0;
   end
   $fclose(cos_table_fd);
 
   sin_table_fd = $fopen(SIN_TABLE_FILENAME, "r");
+  if (sin_table_fd == 0) $fatal(1, "Unable to open required test file");
   for (i=0; i<(1<<SIN_COS_ADDR_BIT_WIDTH); i=i+1) begin
     tmp = $fscanf(sin_table_fd, "%d", sin_table_mem[i]);
+  if (tmp == 0 && !$feof(sin_table_fd)) $fatal(1, "Malformed test vector");
     // if (i%2 == 0) // error injection
     //   sin_table_mem[i] = 0;
   end
@@ -159,7 +174,7 @@ initial begin
 
   clk = 0;
   rst = 0;
-  
+
   #200 rst = 1;
 
   #200 rst = 0;
@@ -299,10 +314,13 @@ always @ (posedge clk) begin
     if (sample_out_count == 4095) begin
       $display("sample_out_count %d", sample_out_count);
       $display("Should NOT finish here!");
+      if (NUM_ERROR != 0) $fatal(1, "TX mismatch");
       $finish;
     end
 
     if (iq_valid_last_delay) begin
+          if (NUM_SAMPLE_OUTPUT <= 0 || sample_out_count !== NUM_SAMPLE_OUTPUT)
+            $fatal(1, "TX output length differs from the complete reference");
       $display("clk_count %d", clk_count);
       $display("phy_bit_count %d", phy_bit_count);
       $display("bit_upsample_count %d", bit_upsample_count);
@@ -311,6 +329,7 @@ always @ (posedge clk) begin
 
       $display("Save output I to %s", TEST_OUTPUT_I_FILENAME);
       btle_tx_test_output_i_fd = $fopen(TEST_OUTPUT_I_FILENAME, "w");
+      if (btle_tx_test_output_i_fd == 0) $fatal(1, "Unable to open required test file");
       for (i=0; i<sample_out_count; i=i+1) begin
         $fwrite(btle_tx_test_output_i_fd, "%d\n", btle_tx_test_output_i_mem[i]);
       end
@@ -319,6 +338,7 @@ always @ (posedge clk) begin
 
       $display("Save output Q to %s", TEST_OUTPUT_Q_FILENAME);
       btle_tx_test_output_i_fd = $fopen(TEST_OUTPUT_Q_FILENAME, "w");
+      if (btle_tx_test_output_i_fd == 0) $fatal(1, "Unable to open required test file");
       for (i=0; i<sample_out_count; i=i+1) begin
         $fwrite(btle_tx_test_output_i_fd, "%d\n", btle_tx_test_output_q_mem[i]);
       end
@@ -329,12 +349,12 @@ always @ (posedge clk) begin
       $display("Compare the btle_tx_test_output_i_mem and the btle_tx_test_output_i_ref_mem ...");
       NUM_ERROR = 0;
       for (i=0; i<NUM_SAMPLE_OUTPUT; i=i+1) begin
-        if (btle_tx_test_output_i_mem[i] != btle_tx_test_output_i_ref_mem[i]) begin
+        if (btle_tx_test_output_i_mem[i] !== btle_tx_test_output_i_ref_mem[i]) begin
           NUM_ERROR = NUM_ERROR + 1;
         end
       end
       if (NUM_ERROR > 0) begin
-        $display("%d error found!", NUM_ERROR);
+        $fatal(1, "%d error found!", NUM_ERROR);
         $display("Please check %s VS %s", TEST_OUTPUT_I_FILENAME, TEST_OUTPUT_I_REF_FILENAME);
       end else begin
         $display("%d error found! output I Test PASS.", NUM_ERROR);
@@ -343,17 +363,18 @@ always @ (posedge clk) begin
       $display("Compare the btle_tx_test_output_q_mem and the btle_tx_test_output_q_ref_mem ...");
       NUM_ERROR = 0;
       for (i=0; i<NUM_SAMPLE_OUTPUT; i=i+1) begin
-        if (btle_tx_test_output_q_mem[i] != btle_tx_test_output_q_ref_mem[i]) begin
+        if (btle_tx_test_output_q_mem[i] !== btle_tx_test_output_q_ref_mem[i]) begin
           NUM_ERROR = NUM_ERROR + 1;
         end
       end
       if (NUM_ERROR > 0) begin
-        $display("%d error found!", NUM_ERROR);
+        $fatal(1, "%d error found!", NUM_ERROR);
         $display("Please check %s VS %s", TEST_OUTPUT_Q_FILENAME, TEST_OUTPUT_Q_REF_FILENAME);
       end else begin
         $display("%d error found! output Q Test PASS.", NUM_ERROR);
       end
 
+      if (NUM_ERROR != 0) $fatal(1, "TX mismatch");
       $finish;
     end
 
@@ -402,7 +423,7 @@ btle_tx # (
   .cos_table_write_data(cos_table_write_data),
   .sin_table_write_address(sin_table_write_address),
   .sin_table_write_data(sin_table_write_data),
-  
+
   .preamble(preamble),
 
   .access_address(access_address),

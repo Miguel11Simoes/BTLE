@@ -1,3 +1,5 @@
+> **Status update, 2026-10-05:** the corrected RTL and strict results are documented in [PRODUCT_VALIDATION.md](PRODUCT_VALIDATION.md) and [ASIC_READINESS.md](ASIC_READINESS.md). This document preserves historical implementation/measurement results. Its PPA values do not describe the corrected circuit; earlier equality/PASS claims are not product signoff.
+
 # Validation integrity audit ? 2026-10-04
 
 The upstream regression is **FAIL on every branch**, including `master`.

@@ -79,10 +79,13 @@ initial begin
   $display("Reading input I from %s", TEST_INPUT_I_FILENAME);
   NUM_SAMPLE_INPUT = 0;
   btle_rx_test_input_i_fd = $fopen(TEST_INPUT_I_FILENAME, "r");
+  if (btle_rx_test_input_i_fd == 0) $fatal(1, "Unable to open required test file");
   tmp = $fscanf(btle_rx_test_input_i_fd, "%d", btle_rx_test_input_i_mem[NUM_SAMPLE_INPUT]);
+  if (tmp == 0 && !$feof(btle_rx_test_input_i_fd)) $fatal(1, "Malformed test vector");
   while(tmp == 1) begin
     NUM_SAMPLE_INPUT = NUM_SAMPLE_INPUT + 1;
     tmp = $fscanf(btle_rx_test_input_i_fd, "%d", btle_rx_test_input_i_mem[NUM_SAMPLE_INPUT]);
+  if (tmp == 0 && !$feof(btle_rx_test_input_i_fd)) $fatal(1, "Malformed test vector");
   end
   $fclose(btle_rx_test_input_i_fd);
   $display("%d read finish for test input I.", NUM_SAMPLE_INPUT);
@@ -94,10 +97,13 @@ initial begin
   $display("Reading input Q from %s", TEST_INPUT_Q_FILENAME);
   NUM_SAMPLE_INPUT = 0;
   btle_rx_test_input_q_fd = $fopen(TEST_INPUT_Q_FILENAME, "r");
+  if (btle_rx_test_input_q_fd == 0) $fatal(1, "Unable to open required test file");
   tmp = $fscanf(btle_rx_test_input_q_fd, "%d", btle_rx_test_input_q_mem[NUM_SAMPLE_INPUT]);
+  if (tmp == 0 && !$feof(btle_rx_test_input_q_fd)) $fatal(1, "Malformed test vector");
   while(tmp == 1) begin
     NUM_SAMPLE_INPUT = NUM_SAMPLE_INPUT + 1;
     tmp = $fscanf(btle_rx_test_input_q_fd, "%d", btle_rx_test_input_q_mem[NUM_SAMPLE_INPUT]);
+  if (tmp == 0 && !$feof(btle_rx_test_input_q_fd)) $fatal(1, "Malformed test vector");
   end
   $fclose(btle_rx_test_input_q_fd);
   $display("%d read finish for test input Q.", NUM_SAMPLE_INPUT);
@@ -106,10 +112,13 @@ initial begin
   $display("Reading output crc_ok ref from %s", TEST_OUTPUT_CRC_OK_REF_FILENAME);
   NUM_OCTET_OUTPUT = 0;
   btle_rx_test_output_crc_ok_ref_fd = $fopen(TEST_OUTPUT_CRC_OK_REF_FILENAME, "r");
+  if (btle_rx_test_output_crc_ok_ref_fd == 0) $fatal(1, "Unable to open required test file");
   tmp = $fscanf(btle_rx_test_output_crc_ok_ref_fd, "%h", btle_rx_test_output_crc_ok_ref_mem[NUM_OCTET_OUTPUT]);
+  if (tmp == 0 && !$feof(btle_rx_test_output_crc_ok_ref_fd)) $fatal(1, "Malformed test vector");
   while(tmp == 1) begin
     NUM_OCTET_OUTPUT = NUM_OCTET_OUTPUT + 1;
     tmp = $fscanf(btle_rx_test_output_crc_ok_ref_fd, "%h", btle_rx_test_output_crc_ok_ref_mem[NUM_OCTET_OUTPUT]);
+  if (tmp == 0 && !$feof(btle_rx_test_output_crc_ok_ref_fd)) $fatal(1, "Malformed test vector");
   end
   $fclose(btle_rx_test_output_crc_ok_ref_fd);
   $display("%d read finish from %s", NUM_OCTET_OUTPUT, TEST_OUTPUT_CRC_OK_REF_FILENAME);
@@ -117,17 +126,20 @@ initial begin
   $display("Reading output ref from %s", TEST_OUTPUT_REF_FILENAME);
   NUM_OCTET_OUTPUT = 0;
   btle_rx_test_output_ref_fd = $fopen(TEST_OUTPUT_REF_FILENAME, "r");
+  if (btle_rx_test_output_ref_fd == 0) $fatal(1, "Unable to open required test file");
   tmp = $fscanf(btle_rx_test_output_ref_fd, "%h", btle_rx_test_output_ref_mem[NUM_OCTET_OUTPUT]);
+  if (tmp == 0 && !$feof(btle_rx_test_output_ref_fd)) $fatal(1, "Malformed test vector");
   while(tmp == 1) begin
     NUM_OCTET_OUTPUT = NUM_OCTET_OUTPUT + 1;
     tmp = $fscanf(btle_rx_test_output_ref_fd, "%h", btle_rx_test_output_ref_mem[NUM_OCTET_OUTPUT]);
+  if (tmp == 0 && !$feof(btle_rx_test_output_ref_fd)) $fatal(1, "Malformed test vector");
   end
   $fclose(btle_rx_test_output_ref_fd);
   $display("%d read finish from %s", NUM_OCTET_OUTPUT, TEST_OUTPUT_REF_FILENAME);
 
   clk = 0;
   rst = 0;
-  
+
   #200 rst = 1;
 
   #200 rst = 0;
@@ -199,12 +211,21 @@ always @ (posedge clk) begin
     end
 
     if (sample_in_count == (NUM_SAMPLE_INPUT+800)) begin
+          if (NUM_SAMPLE_INPUT <= 0) $fatal(1, "Empty RX stimulus");
+          if (crc_ok_store !== btle_rx_test_output_crc_ok_ref_mem[0]) $fatal(1, "RX CRC decision mismatch");
+          if (btle_rx_test_output_crc_ok_ref_mem[0] === 1'b1 && NUM_OCTET_OUTPUT < 2) $fatal(1, "Missing accepted PDU reference");
+          if (btle_rx_test_output_crc_ok_ref_mem[0] === 1'b0) begin
+            if (NUM_OCTET_OUTPUT !== 0) $fatal(1, "Rejected packet must not carry an accepted PDU");
+            $display("VERIFIED_REJECTION: nonempty input observed, no packet accepted");
+          end
+
       $display("%d NUM_SAMPLE_INPUT", NUM_SAMPLE_INPUT);
       $display("%d sample_in_count", sample_in_count);
 
       $display("Save output to %s", TEST_OUTPUT_FILENAME);
       btle_rx_test_output_fd = $fopen(TEST_OUTPUT_FILENAME, "w");
-      for (i=0; i<(payload_length+2); i=i+1) begin
+      if (btle_rx_test_output_fd == 0) $fatal(1, "Unable to open required test file");
+      for (i=0; crc_ok_store && i<(payload_length+2); i=i+1) begin
         $fwrite(btle_rx_test_output_fd, "%02h\n", btle_rx_test_output_mem[i]);
       end
       $fwrite(btle_rx_test_output_fd, "\n");
@@ -221,7 +242,7 @@ always @ (posedge clk) begin
       $display("Compare the btle_rx_test_output_mem and the btle_rx_test_output_ref_mem ...");
       NUM_ERROR = 0;
       for (i=0; i<NUM_OCTET_OUTPUT; i=i+1) begin
-        if (btle_rx_test_output_mem[i] != btle_rx_test_output_ref_mem[i]) begin
+        if (btle_rx_test_output_mem[i] !== btle_rx_test_output_ref_mem[i]) begin
           NUM_ERROR = NUM_ERROR + 1;
         end
       end
@@ -230,6 +251,7 @@ always @ (posedge clk) begin
         $display("Please check %s VS %s", TEST_OUTPUT_FILENAME, TEST_OUTPUT_REF_FILENAME);
       end
 
+      if (NUM_ERROR != 0) $fatal(1, "RX PDU mismatch");
       $finish;
     end
 
@@ -248,8 +270,8 @@ always @ (posedge clk) begin
     end
 
     if (decode_end) begin
-      read_start <= 1;
-      crc_ok_store <= crc_ok;
+      read_start <= crc_ok;
+      crc_ok_store <= crc_ok_store | crc_ok;
       $display("payload_length %d octet", payload_length);
       $display("best_phase idx (among %4d samples) %d", SAMPLE_PER_SYMBOL, best_phase);
       $display("crc_ok %d", crc_ok);
@@ -291,4 +313,3 @@ btle_rx # (
 );
 
 endmodule
-

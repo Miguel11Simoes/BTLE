@@ -1,3 +1,5 @@
+> **Status update, 2026-10-05:** the corrected RTL and strict results are documented in [PRODUCT_VALIDATION.md](../04%20Validation/PRODUCT_VALIDATION.md) and [ASIC_READINESS.md](../04%20Validation/ASIC_READINESS.md). This document preserves historical implementation/measurement results. Its PPA values do not describe the corrected circuit; earlier equality/PASS claims are not product signoff.
+
 # Gaussian filter: where the table lives, and the folded FIR — TX area of every option
 
 > Validation correction (2026-10-04): earlier success claims for all 270 checks are withdrawn. The strict rerun is **FAIL: 118 PASS, 20 BOTH_FAIL, 18 NO_STIMULUS, 114 ERROR; 0 DIFFERENT**. See [the integrity audit](../04%20Validation/VALIDATION_INTEGRITY.md) for evidence and limitations.

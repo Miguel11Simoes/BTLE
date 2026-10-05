@@ -1,0 +1,7 @@
+example	seed	result	statistics
+0	1	PASS	cycles 88950 compared 88938 rx_irqs 6 rx_crc_ok 3 tx_packets 6 axi_reads 189 (all compared) corrupted_packets 3
+0	2	PASS	cycles 88985 compared 88973 rx_irqs 6 rx_crc_ok 3 tx_packets 6 axi_reads 189 (all compared) corrupted_packets 3
+1	1	PASS	cycles 57418 compared 57406 rx_irqs 6 rx_crc_ok 4 tx_packets 6 axi_reads 159 (all compared) corrupted_packets 2
+1	2	PASS	cycles 57032 compared 57020 rx_irqs 6 rx_crc_ok 5 tx_packets 6 axi_reads 159 (all compared) corrupted_packets 1
+2	1	PASS	cycles 38873 compared 38861 rx_irqs 6 rx_crc_ok 4 tx_packets 6 axi_reads 141 (all compared) corrupted_packets 2
+2	2	PASS	cycles 38420 compared 38408 rx_irqs 6 rx_crc_ok 4 tx_packets 6 axi_reads 141 (all compared) corrupted_packets 2

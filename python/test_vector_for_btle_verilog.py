@@ -81,7 +81,7 @@ if __name__ == "__main__":
     pdu_bit_in_hex = '0100' # from the output of above btle_tx command
   else:
     print('the argument example_idx needs to be 0, 1 or 2!')
-    exit()
+    raise SystemExit(2)
 
   print('config')
   print('channel_number ', channel_number)
@@ -102,7 +102,7 @@ if __name__ == "__main__":
   btle_config_fd.write(format(channel_number, 'x')+'\n')
   btle_config_fd.write(crc_state_init_hex+'\n')
   btle_config_fd.write(access_address+'\n')
-  btle_config_fd.close
+  btle_config_fd.close()
 
   print('btle_tx')
 

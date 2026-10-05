@@ -73,6 +73,7 @@ for ex in 0 1 2; do
   mkdir -p "$work/vec$ex/verilog"
   git -C "$repo" archive "$ref_rev" python | tar -x -C "$work/vec$ex"
   (cd "$work/vec$ex/python" && $PY test_vector_for_btle_verilog.py "$ex" 20 20 0) > "$out/gen_ex$ex.log" 2>&1
+  "$PY" "$repo/scripts/validation/generate_invalid_packet.py" "$work/vec$ex/verilog" >> "$out/gen_ex$ex.log" 2>&1
 done
 
 # ---- 1. mutation check ----

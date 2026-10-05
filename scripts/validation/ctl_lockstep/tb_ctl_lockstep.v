@@ -103,6 +103,12 @@ always @ (negedge bb_clk) begin
   cycles = cycles + 1;
   if (checking) begin
     compared = compared + 1;
+    if ((^{r_tx_v, d_tx_v, r_tx_vl, d_tx_vl, r_awready, d_awready,
+           r_wready, d_wready, r_bvalid, d_bvalid, r_arready, d_arready,
+           r_rvalid, d_rvalid}) === 1'bx)
+      $fatal(1, "UNKNOWN controller handshake");
+    if ((r_tx_v && (^r_tx_iq === 1'bx)) || (d_tx_v && (^d_tx_iq === 1'bx)))
+      $fatal(1, "UNKNOWN valid TX sample");
     if (r_vec !== d_vec || r_dbg !== d_dbg) begin
       mismatches = mismatches + 1;
       $display("MISMATCH outputs at cycle %0d: ref %h dut %h diff %h; capture/itrpt2/uart ref %h dut %h",
@@ -113,6 +119,7 @@ always @ (negedge bb_clk) begin
 end
 
 // ---------------- AXI-lite master ----------------
+initial begin #1000000000; $fatal(1, "controller watchdog timeout"); end
 integer seed;
 function integer rnd(input integer n); rnd = ($random(seed) & 32'h7fffffff) % n; endfunction
 task idle(input integer n); integer t; begin for (t=0; t<n; t=t+1) @(posedge bb_clk); end endtask
@@ -128,8 +135,10 @@ task axi_write(input [5:0] reg_idx, input [31:0] value);
   end
 endtask
 
+integer w, num_word, len_bytes;
 integer n_reads = 0;
 task axi_read(input [5:0] reg_idx, output [31:0] value);
+  reg [31:0] meaningful_mask;
   begin
     idle(rnd(3));
     #1 araddr = {reg_idx, 2'b00}; arvalid = 1;
@@ -137,6 +146,17 @@ task axi_read(input [5:0] reg_idx, output [31:0] value);
     #1 arvalid = 0; idle(rnd(3)); #1 rready = 1;
     @(posedge bb_clk); while (!r_rvalid) @(posedge bb_clk);
     value = r_rdata; n_reads = n_reads + 1;
+    // The final RX RAM word may contain padding bytes never written by RX.
+    // Check every delivered byte, excluding only that non-payload padding.
+    meaningful_mask = 32'hffffffff;
+    // Status[7:0] mirrors the unqualified live RAM port, even after its read
+    // pointer has passed the packet. Packet bytes are checked through reg 40.
+    if (reg_idx == 49) meaningful_mask = 32'hffffff00;
+    if (reg_idx == 40 && w == num_word-1 && (len_bytes & 3) != 0)
+      meaningful_mask = (32'h1 << (8*(len_bytes & 3)))-1;
+    if ((^(r_rdata & meaningful_mask)) === 1'bx ||
+        (^(d_rdata & meaningful_mask)) === 1'bx)
+      $fatal(1, "UNKNOWN data in completed AXI read reg %0d", reg_idx);
     if (r_rdata !== d_rdata) begin    // every register: nothing is removed on this branch
       $display("MISMATCH read reg %0d at cycle %0d: ref %h dut %h", reg_idx, cycles, r_rdata, d_rdata);
       $fatal(1, "ctl lockstep FAIL");
@@ -148,7 +168,7 @@ endtask
 // ---------------- vectors (Python model) ----------------
 reg [31:0] cfg_mem [0:31];
 integer cos_t [0:2047], sin_t [0:2047], taps [0:16];
-integer pkt_i [0:65535], pkt_q [0:65535], n_pkt;
+integer pkt_i [0:65535], pkt_q [0:65535], bad_i [0:65535], bad_q [0:65535], n_pkt;
 integer tx_oct [0:511], n_oct;
 integer fd, rc, a, k;
 reg [31:0] aa_reg; reg [5:0] ch; reg [23:0] crcinit;
@@ -160,7 +180,7 @@ task load_int_file(input [8*64-1:0] name, output integer n, input integer which)
     while (!$feof(fd)) begin
       rc = $fscanf(fd, "%d\n", a);
       if (rc == 1) begin
-        case (which) 0: cos_t[n] = a; 1: sin_t[n] = a; 2: taps[n] = a; 3: pkt_i[n] = a; 4: pkt_q[n] = a; endcase
+        case (which) 0: cos_t[n] = a; 1: sin_t[n] = a; 2: taps[n] = a; 3: pkt_i[n] = a; 4: pkt_q[n] = a; 5: bad_i[n] = a; 6: bad_q[n] = a; endcase
         n = n + 1;
       end
     end
@@ -178,16 +198,13 @@ function [15:0] noise(input integer amplitude);   // 16-bit sample
     noise = x[15:0];
   end
 endfunction
-function [15:0] pkt_i_16(input integer idx); integer x; begin x = pkt_i[idx]; pkt_i_16 = x[15:0]; end endfunction
-function [15:0] pkt_q_16(input integer idx); integer x; begin x = pkt_q[idx]; pkt_q_16 = x[15:0]; end endfunction
+function [15:0] pkt_i_16(input integer idx); integer x; begin x = corrupt ? bad_i[idx] : pkt_i[idx]; pkt_i_16 = x[15:0]; end endfunction
+function [15:0] pkt_q_16(input integer idx); integer x; begin x = corrupt ? bad_q[idx] : pkt_q[idx]; pkt_q_16 = x[15:0]; end endfunction
 always @ (posedge rf_clk) begin
   if (!rf_rst) begin
     if (send_packet && !packet_busy) begin packet_busy <= 1; rx_k <= 0; end
     if (packet_busy) begin
-      if (corrupt && rx_k >= (n_pkt*3)/4 && rx_k < (n_pkt*3)/4 + 32)   // tail replaced by noise: AA hit, CRC fails
-        rx_iq_signal_ext <= {32'd0, noise(32767), noise(32767)};
-      else
-        rx_iq_signal_ext <= {32'd0, pkt_q_16(rx_k), pkt_i_16(rx_k)};
+      rx_iq_signal_ext <= {32'd0, pkt_q_16(rx_k), pkt_i_16(rx_k)};
       if (rx_k == n_pkt-1) packet_busy <= 0;
       rx_k <= rx_k + 1;
     end else begin
@@ -197,21 +214,31 @@ always @ (posedge rf_clk) begin
 end
 
 // ---------------- scenario ----------------
-integer n_packets, p, w, num_word, len_bytes, got_irq, n_irq = 0, n_crc_ok = 0, n_tx = 0;
+integer n_packets, p, got_irq, n_irq = 0, n_crc_ok = 0, n_tx = 0;
 reg [31:0] v, status;
 
 initial begin
   if (!$value$plusargs("seed=%d", seed)) seed = 1;
   if (!$value$plusargs("packets=%d", n_packets)) n_packets = 6;
-  $readmemh("btle_config.txt", cfg_mem);
+  if (n_packets <= 0) $fatal(1, "empty controller campaign");
+  $readmemh("btle_config.txt", cfg_mem, 0, 3);
   ch = cfg_mem[1]; crcinit = cfg_mem[2];
   aa_reg = {cfg_mem[3][7:0], cfg_mem[3][15:8], cfg_mem[3][23:16], cfg_mem[3][31:24]};
   load_int_file("cos_table.txt", n_tmp, 0);
+  if (n_tmp != 2048) $fatal(1, "incomplete COS table");
   load_int_file("sin_table.txt", n_tmp, 1);
+  if (n_tmp != 2048) $fatal(1, "incomplete SIN table");
   load_int_file("gauss_filter_tap.txt", n_tmp, 2);
+  if (n_tmp != 17) $fatal(1, "incomplete Gaussian taps");
   load_int_file("btle_rx_test_input_i.txt", n_pkt, 3);
   load_int_file("btle_rx_test_input_q.txt", n_tmp, 4);
+  if (n_pkt <= 0 || n_tmp != n_pkt) $fatal(1, "incomplete RX vectors");
+  load_int_file("btle_rx_invalid_input_i.txt", n_tmp, 5);
+  if (n_tmp != n_pkt) $fatal(1, "invalid-packet I length differs");
+  load_int_file("btle_rx_invalid_input_q.txt", n_tmp, 6);
+  if (n_tmp != n_pkt) $fatal(1, "invalid-packet Q length differs");
   fd = $fopen("btle_tx_test_input.txt", "r"); n_oct = 0;
+  if (fd == 0) $fatal(1, "missing TX input");
   while (!$feof(fd)) begin rc = $fscanf(fd, "%h\n", a); if (rc == 1) begin tx_oct[n_oct] = a; n_oct = n_oct + 1; end end
   $fclose(fd);
   $display("ctl lockstep: seed %0d packets %0d rx samples %0d tx octets %0d AA %08h ch %0d",
@@ -234,7 +261,10 @@ initial begin
     // ---- RX: packet from the model, between random noise ----
     case (rnd(4)) 0: amp = 0; 1: amp = 64; 2: amp = 2047; default: amp = 32767; endcase
     idle(rnd(400));
-    corrupt = (rnd(3) == 0); if (corrupt) n_corrupt = n_corrupt + 1;
+    corrupt = (rnd(3) == 0);
+    if (p == 0) corrupt = 0;
+    if (p == 1) corrupt = 1;
+    if (corrupt) n_corrupt = n_corrupt + 1;
     #1 send_packet = 1; @(posedge rf_clk); #1 send_packet = 0;
     got_irq = 0;
     for (k=0; k<(n_pkt*2+4000) && !got_irq; k=k+1) begin @(posedge bb_clk); if (r_it0) got_irq = 1; end
@@ -242,6 +272,7 @@ initial begin
       n_irq = n_irq + 1;
       axi_write(39, 1);                                       // as btle_ll.c
       axi_read(49, status);
+      if (status[16] !== !corrupt) $fatal(1, "unexpected controller CRC acceptance");
       if (status[16]) n_crc_ok = n_crc_ok + 1;
       len_bytes = 2 + status[15:8] + 3;
       num_word = (len_bytes >> 2) + ((len_bytes & 3) ? 1 : 0);
@@ -258,6 +289,10 @@ initial begin
     axi_write(9, 1); axi_write(9, 0);
     for (k=0; k<200000 && !r_tx_vl; k=k+1) @(posedge bb_clk);
     if (r_tx_vl) n_tx = n_tx + 1;
+    else $fatal(1, "TX did not complete packet %0d: state=%0d length=%0d bit_count=%0d start=%b reg9=%h", p,
+       u_ref.btle_phy_i.btle_tx_i.phy_tx_state, u_ref.btle_phy_i.btle_tx_i.payload_length,
+       u_ref.btle_phy_i.btle_tx_i.bit_count, u_ref.btle_phy_i.btle_tx_i.tx_start,
+       u_ref.btle_ll_i.slv_reg9);
     idle(20);
     axi_read(48, v); axi_read(62, v);
   end
@@ -270,6 +305,9 @@ initial begin
   $display("ctl lockstep: cycles %0d compared %0d rx_irqs %0d rx_crc_ok %0d tx_packets %0d axi_reads %0d (all compared) corrupted_packets %0d",
            cycles, compared, n_irq, n_crc_ok, n_tx, n_reads, n_corrupt);
   $display("ctl lockstep: mismatches %0d", mismatches);
+  if (compared <= 0 || n_reads <= 0 || n_oct <= 0 ||
+      n_tx != n_packets || n_irq != n_packets)
+    $fatal(1, "INCOMPLETE controller coverage: tx=%0d rx=%0d requested=%0d", n_tx, n_irq, n_packets);
   if (mismatches == 0) $display("CTL LOCKSTEP PASS");
   $finish;
 end

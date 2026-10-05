@@ -25,7 +25,8 @@ class EntryPointTests(unittest.TestCase):
         cls.work=Path(cls.temp.name);cls.repo=cls.work/'repo';cls.bin=cls.work/'cad/bin';cls.bin.mkdir(parents=True)
         subprocess.run(['git','clone','--quiet','--shared','--no-checkout',str(ROOT),str(cls.repo)],check=True)
         subprocess.run(['git','-C',str(cls.repo),'read-tree','HEAD'],check=True)
-        for folder in ('scripts','verilog','tests'):
+        subprocess.run(['git','-C',str(cls.repo),'update-ref','refs/heads/master','refs/remotes/origin/master'],check=True)
+        for folder in ('scripts','verilog','tests','python'):
             if (ROOT/folder).exists():shutil.copytree(ROOT/folder,cls.repo/folder)
         for name in ('iverilog','yosys'):
             p=cls.bin/name;p.write_text('#!/bin/sh\nexec '+str(CAD/'bin'/name)+' "${@}"\n');p.chmod(0o755)
@@ -35,12 +36,22 @@ class EntryPointTests(unittest.TestCase):
     def tearDownClass(cls):cls.temp.cleanup()
 
     def tool(self,name,body):
-        p=self.bin/name;p.write_text('#!/usr/bin/python3\n'+body);p.chmod(0o755)
+        p=self.bin/name
+        prefix='import pathlib,json,sys\npathlib.Path('+repr(str(self.work/'calls.jsonl'))+').open("a").write(json.dumps({"tool":'+repr(name)+',"argv":sys.argv})+"\\n")\n'
+        p.write_text('#!/usr/bin/python3\n'+prefix+body);p.chmod(0o755)
 
-    def reject(self,cmd):
+    def reject(self,cmd,expect_tool="vvp",expect_mutant=False):
+        calls=self.work/'calls.jsonl'
+        calls.unlink(missing_ok=True)
         p=subprocess.run(cmd,cwd=self.repo,env=self.env,capture_output=True,text=True,timeout=180)
         self.assertNotEqual(p.returncode,0,p.stdout+p.stderr)
         self.assertNotIn('RESULT: PASS',p.stdout+p.stderr)
+        if expect_tool:
+            self.assertTrue(calls.exists(), 'intended fake engine was never invoked: '+p.stdout+p.stderr)
+            records=[json.loads(line) for line in calls.read_text().splitlines()]
+            self.assertIn(expect_tool,[row['tool'] for row in records])
+            if expect_mutant:
+                self.assertTrue(any('/mut_' in arg or '/m1_' in arg for row in records for arg in row['argv']), 'intended mutant engine was never invoked')
 
     def test_mutation_tool_crash_is_not_detection(self):
         if not any((self.repo/'scripts/validation'/r).exists() for r in ('ctl_lockstep/run_ctl_lockstep.sh','rx_lockstep/run_rx_lockstep.sh','table_random/run_table_random.sh')):
@@ -49,7 +60,7 @@ class EntryPointTests(unittest.TestCase):
         for relative,extra in [('ctl_lockstep/run_ctl_lockstep.sh',['1','1']),('rx_lockstep/run_rx_lockstep.sh',['1','1']),('table_random/run_table_random.sh',['1'])]:
             if (self.repo/'scripts/validation'/relative).exists():
                 with self.subTest(runner=relative):
-                    self.reject(['bash','scripts/validation/'+relative,'injected-mutant-crash-'+Path(relative).stem,*extra])
+                    self.reject(['bash','scripts/validation/'+relative,'injected-mutant-crash-'+Path(relative).stem,*extra,*(['master'] if relative.startswith(('ctl_lockstep/','rx_lockstep/')) else [])],expect_mutant=True)
 
     def test_exit_after_pass_is_rejected(self):
         if not (self.repo/'tests/test_vco_sin4.py').exists() and not any((self.repo/'scripts/validation'/r).exists() for r in ('ctl_lockstep/run_ctl_lockstep.sh','rx_lockstep/run_rx_lockstep.sh','table_random/run_table_random.sh')):
@@ -58,7 +69,7 @@ class EntryPointTests(unittest.TestCase):
         for relative,extra in [('ctl_lockstep/run_ctl_lockstep.sh',['1','1']),('rx_lockstep/run_rx_lockstep.sh',['1','1']),('table_random/run_table_random.sh',['1'])]:
             if (self.repo/'scripts/validation'/relative).exists():
                 with self.subTest(runner=relative):
-                    self.reject(['bash','scripts/validation/'+relative,'injected-post-pass-'+Path(relative).stem,*extra])
+                    self.reject(['bash','scripts/validation/'+relative,'injected-post-pass-'+Path(relative).stem,*extra,*(['master'] if relative.startswith(('ctl_lockstep/','rx_lockstep/')) else [])])
         if (self.repo/'tests/test_vco_sin4.py').exists():
             self.reject(['python3','tests/test_vco_sin4.py'])
 
@@ -69,7 +80,7 @@ class EntryPointTests(unittest.TestCase):
         for relative in ('formal_gauss/run_formal_gauss.sh','formal_demod/run_formal.sh'):
             if (self.repo/'scripts/validation'/relative).exists():
                 with self.subTest(runner=relative):
-                    self.reject(['bash','scripts/validation/'+relative,'injected-proof-error'])
+                    self.reject(['bash','scripts/validation/'+relative,'injected-proof-error'],expect_tool='sby')
 
     def test_empty_campaign_is_rejected(self):
         if not any((self.repo/'scripts/validation'/r).exists() for r in ('ctl_lockstep/run_ctl_lockstep.sh','rx_lockstep/run_rx_lockstep.sh','table_random/run_table_random.sh')):
@@ -77,7 +88,7 @@ class EntryPointTests(unittest.TestCase):
         for relative in ('ctl_lockstep/run_ctl_lockstep.sh','rx_lockstep/run_rx_lockstep.sh','table_random/run_table_random.sh'):
             if (self.repo/'scripts/validation'/relative).exists():
                 with self.subTest(runner=relative):
-                    self.reject(['bash','scripts/validation/'+relative,'injected-empty','0'])
+                    self.reject(['bash','scripts/validation/'+relative,'injected-empty','0'],expect_tool=None)
 
     def test_activity_wait_checks_every_process(self):
         runner=self.repo/'scripts/power/run_activity.sh'
@@ -103,6 +114,31 @@ class EntryPointTests(unittest.TestCase):
         missing=int(re.search(r'NO_STIMULUS=(\d+)',result).group(1))
         self.assertGreater(errors,0)
         self.assertEqual(errors+missing,270)
+
+
+    def test_stale_outputs_do_not_satisfy_regression(self):
+        vectors=os.environ.get('REGRESSION_VECTORS')
+        if not vectors:self.skipTest('set REGRESSION_VECTORS to a complete saved matrix')
+        copied=self.work/'stale-vectors'
+        shutil.copytree(vectors,copied)
+        # Deliberately seed old, correct-looking results alongside the inputs.
+        for ref in copied.rglob('*_ref.txt'):
+            shutil.copy2(ref,ref.with_name(ref.name.replace('_ref.txt','.txt')))
+        markers=['output bit Test PASS.','output signal for decision Test PASS.',
+                 'Test PASS.','0 difference found','output I Test PASS.','output Q Test PASS.',
+                 'output tx I Test PASS.','output tx Q Test PASS.','rx CRC Test PASS.',
+                 'rx PDU Test PASS.','TEST FINISH.','VERIFIED_REJECTION: injected stale output test']
+        self.tool('vvp','print('+repr('\n'.join(markers))+')\n')
+        previous=self.env.get('REGRESSION_VECTORS')
+        try:
+            self.env['REGRESSION_VECTORS']=str(copied)
+            self.reject(['bash','scripts/validation/run_rx_regression.sh','injected-stale-outputs','master'])
+        finally:
+            if previous is None:self.env.pop('REGRESSION_VECTORS',None)
+            else:self.env['REGRESSION_VECTORS']=previous
+        result=(self.repo/'results/validation/injected-stale-outputs/rx_regression/result.txt').read_text()
+        self.assertIn('PASS=0',result)
+
 
 
 if __name__=='__main__':unittest.main()

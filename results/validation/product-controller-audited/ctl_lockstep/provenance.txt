@@ -1,0 +1,7 @@
+label=product-controller-audited
+date_utc=2026-10-05T11:25:23Z
+ref_rev=6589489b71704d0ff5d8eae499a6522ade0ac680 (6589489b71704d0ff5d8eae499a6522ade0ac680)
+dut=working tree at d7c65e3ced84ef930348e0889e2e2814d2db04d6, dirty verilog files: 10
+dut configuration: GAUSS_TABLE=1 (nothing removed: every output and register compared)
+iverilog=Icarus Verilog version 14.0 (devel) (s20260301-411-gca6b8d376-dirty)
+seeds_per_example=2 packets_per_seed=6
