@@ -1,4 +1,4 @@
-"""Check the transmitter of ble-tx-pdu against upstream's, clock by clock, with Icarus Verilog.
+"""Check the transmitter of ble-tx-rom against upstream's, clock by clock, with Icarus Verilog.
 
 Author: Miguel Simões
 
@@ -8,10 +8,11 @@ environment variables). Needs the corrected reference commit recorded in REF_REV
 REF is the corrected master btle_tx (override with --ref-rev; every module renamed
 *_ref): the runtime Gaussian FIR, loaded with the project's taps, the VCO with
 the full COS and SIN tables, and the packet buffer in a memory with two ports.
-DUT is this branch's btle_tx with GAUSS_TABLE=1: the constant taps, the quarter
-sine table in a memory with one port, the packet buffer in a memory of 256
-bytes with one port on clkb plus a register for byte 256, and the rewritten
-counters (bit_repeat_upsample, crc24, scramble, btle_tx). Every output of
+DUT is this branch's btle_tx with GAUSS_TABLE=1: the constant taps, the COS and
+SIN tables fixed in a ROM of the first eighth of the wave (no memory), the
+packet buffer in a memory of 256 bytes with one port on clkb plus a register
+for byte 256, and the rewritten counters (bit_repeat_upsample, crc24,
+scramble, btle_tx). Every output of
 btle_tx is compared on every clk clock from the first reset on (case inequality, plus explicit rejection of unknown valid samples).
 
 Stimulus (seeded, +seed=N): the taps and both tables are written as the
@@ -31,7 +32,7 @@ verilog/btle_tx.v).
 
 The campaign runs every seed with clkb = clk and with clkb free at 100, 33.3,
 16.1, 10 and 8 MHz, each with the repository's RAM model (verilog/ as it is)
-and with one-port macro models of both memories (one address; the output
+and with the one-port macro model of the packet buffer (one address; the output
 changes only in a clock that reads; an ERROR line if a clock both writes and
 reads).
 
@@ -41,8 +42,7 @@ reads).
 With --mutants, each of 11 deliberate faults must make a run fail with a
 concrete mismatch. --write-one-port writes verilog/btle_tx.v with the packet
 buffer on the one-port macro model (model included), to run whole-system
-testbenches on it (tests/test_vco_sin2.py --write-one-port does the same for
-verilog/vco.v).
+testbenches on it. The VCO of this branch has no memory.
 """
 
 from __future__ import annotations
@@ -62,7 +62,13 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts/validation"))
 sys.path.insert(0, str(ROOT / "tests"))
 from result_guard import sim_pass, mutant_caught, positive
-from test_vco_sin2 import MACRO as VCO_MACRO, one_port as vco_one_port
+
+# the VCO of this branch has no memory: nothing to put on a macro model
+VCO_MACRO = ""
+
+
+def vco_one_port(text: str) -> str:
+    return text
 
 REF_REV = "6589489b71704d0ff5d8eae499a6522ade0ac680"
 TX_FILES = ["btle_tx.v", "crc24.v", "crc24_core.v", "scramble.v", "scramble_core.v",
