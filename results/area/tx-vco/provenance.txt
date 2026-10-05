@@ -1,0 +1,22 @@
+label=tx-vco
+date_utc=2026-10-05T22:20:11Z
+harness=144d51b7b03057be6a6d68e551966f47bc3e7723 (branch ble-tx-rom), dirty files under scripts/: 0
+tops: vco btle_tx; SRAMs are blackboxed macros (their areas: the OpenRAM runs)
+configurations (name, revision, commit, verilog/ tree, parameters):
+  master	origin/master	9d6c383110454c23600766bc70156142d8fb6c1e	b4a1da9b396c3908bc3f8f8b4cb22e23072f0092	<none: defaults>
+  ble-rx-dm	origin/ble-rx-dm	8a188e4462943115f9169d4ebc388737a3aed235	db494916774d79110eed3137a6996f04e971399c	<none: defaults>
+  ble-opt	origin/ble-opt	6f287cbd4d56414c9d0b2a807ce8d6ebdb09f706	0eeb85c8a55ddf262e774190650e4f896776d146	ENABLE_IQ_CAPTURE=0 LL_MINIMAL=1 GAUSS_TABLE=1
+  ble-tx-table	origin/ble-tx-table	23cb5a6279972d4e1953415d2e352530f324709c	f3ec5971101313a51c5fedf11a30b8ea3d6c9767	GAUSS_TABLE=1
+  ble-tx-table-reg	origin/ble-tx-table-reg	921c5d5d46d05907511b16a5b6ae415328f8642e	73fcc6e05f5b247997b0016f8dcf1d9bb512e78f	GAUSS_TABLE=1
+  ble-tx-table-sram	origin/ble-tx-table-sram	3aa166359a676358ffd9fe481102a759bd9194ca	401a5c24d94dfdca47037d4676c416da219f2440	GAUSS_TABLE=1
+  ble-tx-fir2	origin/ble-tx-fir2	472cd7cb0d608cc5a175ccebf4656f1edaf1f4ba	9d1de559c941bd9258cea1f4cf7a51330e184561	<none: defaults>
+  ble-tx-opt	origin/ble-tx-opt	9e7857378a65867dda2a4033f21b9b6ce7536207	115417085df21674f79fe5f1861f311238380ecd	GAUSS_TABLE=1
+  ble-tx-sin4	origin/ble-tx-sin4	39093de283eed1d95a662f9d62aa53885eda66d8	9bb3e53c2c9811c2d4461710422f946c89e31f74	<none: defaults>
+  ble-tx-sin8	origin/ble-tx-sin8	3559cca3937779234b7d932c9afc1056aeddc43e	341868e40ece9cf0ad681699f3e76c0848aecc85	<none: defaults>
+  ble-tx-sin8-1rw	origin/ble-tx-sin8-1rw	474ccef236fa67255bd7bbac0921e66f99ffce5d	914ec725cbefd785af97376432ba1bb52532e33f	<none: defaults>
+  ble-tx-sin2	origin/ble-tx-sin2	ec7730b61b6f6f4097f906501dddf57ecbacae6d	5b677a6c8403a57d1e5fb7399c66c68ba160eade	<none: defaults>
+  ble-tx-1--8	origin/ble-tx-1--8	dff6880b253ff386573cbdcdcaec1171bd8b46f9	24e374acf6d9f5831f549d78491bfc1793deea5a	<none: defaults>
+  ble-tx-pdu	origin/ble-tx-pdu	4e6ffc2501bbb49abaa5f20cd495063a79fc8d5a	b14bfff11f78c78ca7ad9e47288c3c48ec7525d6	GAUSS_TABLE=1
+  ble-tx-pdu-we	origin/ble-tx-pdu-we	cfa24a4f000a878fea6271be68b8981bf99aa784	65a4eeeb804e693d0eb95329dd7db33fef2ab467	GAUSS_TABLE=1 PDU_WRITE_STROBE=1
+  ble-tx-rom	origin/ble-tx-rom	144d51b7b03057be6a6d68e551966f47bc3e7723	21d60be5f1087adbf3540024d32e2b5d0660709b	GAUSS_TABLE=1
+  ble-tx-cordic	origin/ble-tx-cordic	3d9ad944f40173f4efef1d6e7eec7d6d6325017e	e5029a31f1ede97f460aa6d086efdee3bbe7f1de	GAUSS_TABLE=1

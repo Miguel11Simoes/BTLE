@@ -1,0 +1,6 @@
+ref_controller	btle_phy_i.btle_tx_i.gfsk_modulation_i.tail_i.remaining[0].  End-point = btle_phy_i.btle_tx_i.gfsk_modulation_i.tail_i.correction[15].
+dut_controller	btle_phy_i.btle_rx_i.genblk1[2].btle_rx_core_i.gfsk_demodulation_i.i0[3].  End-point = btle_phy_i.btle_rx_i.genblk1[2].btle_rx_core_i.gfsk_demodulation_i.signal_for_decision[31].
+ref_btle_rx	genblk1[5].btle_rx_core_i.gfsk_demodulation_i.i0[3].  End-point = genblk1[5].btle_rx_core_i.gfsk_demodulation_i.signal_for_decision[31].
+dut_btle_rx	genblk1[3].btle_rx_core_i.gfsk_demodulation_i.i0[6].  End-point = genblk1[3].btle_rx_core_i.gfsk_demodulation_i.signal_for_decision[30].
+ref_gauss_filter	gauss_filter_tap0[2].  End-point = bit_upsample_gauss_filter[15].
+dut_gauss_filter	bit_upsample_store[7].  End-point = bit_upsample_gauss_filter[6].

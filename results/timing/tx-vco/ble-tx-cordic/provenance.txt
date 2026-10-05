@@ -1,0 +1,9 @@
+label=tx-vco/ble-tx-cordic
+date_utc=2026-10-05T22:21:45Z
+ref=5abbbf7a093b48a64f18c2c1f84057c54d0af0e5 (5abbbf7a093b48a64f18c2c1f84057c54d0af0e5), default parameters
+dut=origin/ble-tx-cordic (3d9ad944f40173f4efef1d6e7eec7d6d6325017e, verilog tree e5029a31f1ede97f460aa6d086efdee3bbe7f1de), GAUSS_TABLE=1
+sta_set=full
+target_clock_ns=62.5
+yosys=Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+abc========= ABC command line "version"
+liberty=NangateOpenCellLibrary_typical.lib sha256=8d540a4d4cf6d09d27c87ad067857a9c0c2eeb023ab7a56e058cd3113db4e9b1
