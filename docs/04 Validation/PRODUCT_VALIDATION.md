@@ -1,3 +1,5 @@
+> **Later revision:** [RF interface and measurement audit](RF_INTERFACE_REVIEW.md) records the current RF-valid correction, rerun matrices and stricter PPA evidence checks. This document records the preceding packet-validation campaign.
+
 # Product validation - 2026-10-05
 
 **Digital verification passed the campaigns below. ASIC/product readiness: NOT READY.** See [ASIC_READINESS.md](ASIC_READINESS.md) for unresolved work. This report replaces the current-status claims in earlier regression summaries; historical files remain available as evidence of the failures that were found.

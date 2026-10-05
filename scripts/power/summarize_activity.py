@@ -3,17 +3,33 @@
 # SPDX-FileCopyrightText: 2026 Miguel Simões
 # SPDX-License-Identifier: Apache-2.0
 """Markdown summary of results/power/<label>/*.json (one file per scenario)."""
-import json, sys
+import json, math, sys
 from pathlib import Path
 
 run = Path(sys.argv[1])
 order = ['rx', 'tx', 'mixed', 'idle', 'idle0']
 data = {s: json.load(open(run / f'{s}.json')) for s in order if (run / f'{s}.json').exists()}
 codes = json.loads((run / 'exit_codes.json').read_text())
-if set(data) != set(order) or set(codes) != set(order + ['setup']) or any(codes.values()):
+if set(data) != set(order) or set(codes) != set(order + ['setup']) or any(type(code) is not int or code != 0 for code in codes.values()):
     raise SystemExit('FAIL: incomplete scenarios or unsuccessful simulator process')
-if any(d['window_cycles'] <= 0 for d in data.values()):
+if any(type(d['window_cycles']) is not int or d['window_cycles'] <= 0 for d in data.values()):
     raise SystemExit('FAIL: empty activity window')
+
+if len({d['window_cycles'] for d in data.values()}) != 1:
+    raise SystemExit('FAIL: inconsistent activity windows')
+for scenario, d in data.items():
+    if d.get('status') != 'COMPLETE' or d.get('scenario') != scenario:
+        raise SystemExit('FAIL: incomplete or mislabeled activity evidence')
+    for side in ('ref', 'dut'):
+        r = d[side]
+        if r.get('missing') != 0 or r.get('missing_nets') or r.get('cells', 0) <= 0 or r.get('nets', 0) <= 0:
+            raise SystemExit('FAIL: missing activity coverage')
+        for key in ('toggles','clock_toggles','data_cap_tog','clk_cap_tog','hot_nets','mem_port_toggles'):
+            value = r[key]
+            if type(value) not in (int, float) or not math.isfinite(value) or value < 0:
+                raise SystemExit('FAIL: invalid activity metric')
+        if r['clock_toggles'] > r['toggles']:
+            raise SystemExit('FAIL: clock toggles exceed total toggles')
 
 
 def pct(a, b):

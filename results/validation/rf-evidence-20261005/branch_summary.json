@@ -1,0 +1,1044 @@
+{
+  "reference": "5abbbf7a093b48a64f18c2c1f84057c54d0af0e5",
+  "branches": [
+    {
+      "branch": "ble-opt",
+      "regressions": [
+        {
+          "mode": "rtl",
+          "label": "rf-final-20261005",
+          "passed": 270,
+          "coverage": {
+            "data_comparison": 210,
+            "packet_rejection": 60
+          },
+          "defaults": ""
+        }
+      ],
+      "unchanged_tx_checks": [
+        {
+          "mode": "rtl",
+          "label": "product-final-20261005",
+          "passed": 167,
+          "rtl_rx_checked": 0
+        }
+      ],
+      "unchanged_tx_source_proof": "Only clock_domain_conversion_iq.v changed among existing RTL/Python/TX-check sources.",
+      "rf_contract": {
+        "passed": 12,
+        "mutants_detected": 2
+      },
+      "harness_checks": {
+        "passed": 23,
+        "skipped": 0
+      },
+      "structure": {
+        "yosys_exit": 0,
+        "lint_exit": 1,
+        "warnings": {
+          "EOFNEWLINE": 3,
+          "DECLFILENAME": 2,
+          "PINCONNECTEMPTY": 2,
+          "GENUNNAMED": 6,
+          "WIDTHTRUNC": 20,
+          "WIDTHEXPAND": 18,
+          "UNUSEDSIGNAL": 102,
+          "UNUSEDPARAM": 2,
+          "CASEINCOMPLETE": 3,
+          "SYNCASYNCNET": 1
+        }
+      },
+      "controller": {
+        "runs": 6,
+        "tx_completed": 36,
+        "rx_completed": 36,
+        "mutants_detected": 3
+      },
+      "measurement_checks": {
+        "branch": "ble-opt",
+        "exit": 0,
+        "methods_passed": 6,
+        "methods_skipped": 0,
+        "tools": [
+          "scripts/timing/seq_constraints.py",
+          "scripts/power/saif_activity.py",
+          "scripts/power/summarize_activity.py",
+          "scripts/area/summarize_area.py",
+          "scripts/compare/summarize_compare.py",
+          "scripts/area/summarize_openram.py",
+          "scripts/area/run_openram.sh"
+        ]
+      }
+    },
+    {
+      "branch": "ble-rx-dm",
+      "regressions": [
+        {
+          "mode": "rtl",
+          "label": "rf-final-20261005",
+          "passed": 270,
+          "coverage": {
+            "data_comparison": 210,
+            "packet_rejection": 60
+          },
+          "defaults": ""
+        }
+      ],
+      "unchanged_tx_checks": [
+        {
+          "mode": "rtl",
+          "label": "product-final-20261005",
+          "passed": 167,
+          "rtl_rx_checked": 0
+        }
+      ],
+      "unchanged_tx_source_proof": "Only clock_domain_conversion_iq.v changed among existing RTL/Python/TX-check sources.",
+      "rf_contract": {
+        "passed": 12,
+        "mutants_detected": 2
+      },
+      "harness_checks": {
+        "passed": 23,
+        "skipped": 0
+      },
+      "structure": {
+        "yosys_exit": 0,
+        "lint_exit": 1,
+        "warnings": {
+          "EOFNEWLINE": 3,
+          "DECLFILENAME": 2,
+          "PINCONNECTEMPTY": 2,
+          "GENUNNAMED": 6,
+          "WIDTHTRUNC": 9,
+          "WIDTHEXPAND": 18,
+          "UNUSEDSIGNAL": 102,
+          "UNUSEDPARAM": 2,
+          "CASEINCOMPLETE": 3,
+          "SYNCASYNCNET": 1
+        }
+      },
+      "measurement_checks": {
+        "branch": "ble-rx-dm",
+        "exit": 0,
+        "methods_passed": 6,
+        "methods_skipped": 0,
+        "tools": [
+          "scripts/timing/seq_constraints.py",
+          "scripts/power/saif_activity.py",
+          "scripts/power/summarize_activity.py",
+          "scripts/area/summarize_area.py",
+          "scripts/compare/summarize_compare.py",
+          "scripts/area/summarize_openram.py",
+          "scripts/area/run_openram.sh"
+        ]
+      }
+    },
+    {
+      "branch": "ble-tx-1--8",
+      "regressions": [
+        {
+          "mode": "rtl",
+          "label": "rf-final-20261005",
+          "passed": 270,
+          "coverage": {
+            "data_comparison": 210,
+            "packet_rejection": 60
+          },
+          "defaults": ""
+        },
+        {
+          "mode": "one-port",
+          "label": "rf-final-20261005-one-port",
+          "passed": 270,
+          "coverage": {
+            "data_comparison": 210,
+            "packet_rejection": 60
+          },
+          "defaults": ""
+        }
+      ],
+      "unchanged_tx_checks": [
+        {
+          "mode": "rtl",
+          "label": "product-final-20261005",
+          "passed": 167,
+          "rtl_rx_checked": 0
+        },
+        {
+          "mode": "one-port",
+          "label": "product-final-20261005-one-port",
+          "passed": 16,
+          "rtl_rx_checked": 0
+        }
+      ],
+      "unchanged_tx_source_proof": "Only clock_domain_conversion_iq.v changed among existing RTL/Python/TX-check sources.",
+      "rf_contract": {
+        "passed": 12,
+        "mutants_detected": 2
+      },
+      "harness_checks": {
+        "passed": 19,
+        "skipped": 4
+      },
+      "structure": {
+        "yosys_exit": 0,
+        "lint_exit": 1,
+        "warnings": {
+          "EOFNEWLINE": 3,
+          "DECLFILENAME": 3,
+          "PINCONNECTEMPTY": 2,
+          "GENUNNAMED": 6,
+          "WIDTHTRUNC": 8,
+          "WIDTHEXPAND": 22,
+          "UNUSEDSIGNAL": 99,
+          "UNUSEDPARAM": 2,
+          "CASEINCOMPLETE": 3,
+          "SYNCASYNCNET": 1
+        }
+      }
+    },
+    {
+      "branch": "ble-tx-fir2",
+      "regressions": [
+        {
+          "mode": "rtl",
+          "label": "rf-final-20261005",
+          "passed": 270,
+          "coverage": {
+            "data_comparison": 210,
+            "packet_rejection": 60
+          },
+          "defaults": ""
+        }
+      ],
+      "unchanged_tx_checks": [
+        {
+          "mode": "rtl",
+          "label": "product-final-20261005",
+          "passed": 167,
+          "rtl_rx_checked": 0
+        }
+      ],
+      "unchanged_tx_source_proof": "Only clock_domain_conversion_iq.v changed among existing RTL/Python/TX-check sources.",
+      "rf_contract": {
+        "passed": 12,
+        "mutants_detected": 2
+      },
+      "harness_checks": {
+        "passed": 18,
+        "skipped": 5
+      },
+      "structure": {
+        "yosys_exit": 0,
+        "lint_exit": 1,
+        "warnings": {
+          "EOFNEWLINE": 3,
+          "DECLFILENAME": 2,
+          "PINCONNECTEMPTY": 2,
+          "GENUNNAMED": 6,
+          "WIDTHTRUNC": 8,
+          "WIDTHEXPAND": 18,
+          "UNUSEDSIGNAL": 100,
+          "UNUSEDPARAM": 2,
+          "CASEINCOMPLETE": 3,
+          "SYNCASYNCNET": 1
+        }
+      },
+      "measurement_checks": {
+        "branch": "ble-tx-fir2",
+        "exit": 0,
+        "methods_passed": 1,
+        "methods_skipped": 5,
+        "tools": [
+          "scripts/area/summarize_area.py"
+        ]
+      }
+    },
+    {
+      "branch": "ble-tx-opt",
+      "regressions": [
+        {
+          "mode": "rtl",
+          "label": "rf-final-20261005",
+          "passed": 270,
+          "coverage": {
+            "data_comparison": 210,
+            "packet_rejection": 60
+          },
+          "defaults": "gauss_filter.v:GAUSS_TABLE=1"
+        }
+      ],
+      "unchanged_tx_checks": [
+        {
+          "mode": "rtl",
+          "label": "product-final-20261005",
+          "passed": 167,
+          "rtl_rx_checked": 0
+        }
+      ],
+      "unchanged_tx_source_proof": "Only clock_domain_conversion_iq.v changed among existing RTL/Python/TX-check sources.",
+      "rf_contract": {
+        "passed": 12,
+        "mutants_detected": 2
+      },
+      "harness_checks": {
+        "passed": 23,
+        "skipped": 0
+      },
+      "structure": {
+        "yosys_exit": 0,
+        "lint_exit": 1,
+        "warnings": {
+          "EOFNEWLINE": 3,
+          "DECLFILENAME": 3,
+          "PINCONNECTEMPTY": 2,
+          "GENUNNAMED": 6,
+          "WIDTHTRUNC": 12,
+          "WIDTHEXPAND": 18,
+          "UNUSEDSIGNAL": 99,
+          "UNUSEDPARAM": 2,
+          "CASEINCOMPLETE": 3,
+          "SYNCASYNCNET": 1
+        }
+      },
+      "controller": {
+        "runs": 6,
+        "tx_completed": 36,
+        "rx_completed": 36,
+        "mutants_detected": 4
+      },
+      "measurement_checks": {
+        "branch": "ble-tx-opt",
+        "exit": 0,
+        "methods_passed": 6,
+        "methods_skipped": 0,
+        "tools": [
+          "scripts/timing/seq_constraints.py",
+          "scripts/power/saif_activity.py",
+          "scripts/power/summarize_activity.py",
+          "scripts/area/summarize_area.py",
+          "scripts/compare/summarize_compare.py",
+          "scripts/area/summarize_openram.py",
+          "scripts/area/run_openram.sh"
+        ]
+      }
+    },
+    {
+      "branch": "ble-tx-sin2",
+      "regressions": [
+        {
+          "mode": "rtl",
+          "label": "rf-final-20261005",
+          "passed": 270,
+          "coverage": {
+            "data_comparison": 210,
+            "packet_rejection": 60
+          },
+          "defaults": ""
+        },
+        {
+          "mode": "one-port",
+          "label": "rf-final-20261005-one-port",
+          "passed": 270,
+          "coverage": {
+            "data_comparison": 210,
+            "packet_rejection": 60
+          },
+          "defaults": ""
+        }
+      ],
+      "unchanged_tx_checks": [
+        {
+          "mode": "rtl",
+          "label": "product-final-20261005",
+          "passed": 167,
+          "rtl_rx_checked": 0
+        },
+        {
+          "mode": "one-port",
+          "label": "product-final-20261005-one-port",
+          "passed": 16,
+          "rtl_rx_checked": 0
+        }
+      ],
+      "unchanged_tx_source_proof": "Only clock_domain_conversion_iq.v changed among existing RTL/Python/TX-check sources.",
+      "rf_contract": {
+        "passed": 12,
+        "mutants_detected": 2
+      },
+      "harness_checks": {
+        "passed": 19,
+        "skipped": 4
+      },
+      "structure": {
+        "yosys_exit": 0,
+        "lint_exit": 1,
+        "warnings": {
+          "EOFNEWLINE": 3,
+          "DECLFILENAME": 3,
+          "PINCONNECTEMPTY": 2,
+          "GENUNNAMED": 6,
+          "WIDTHTRUNC": 8,
+          "WIDTHEXPAND": 18,
+          "UNUSEDSIGNAL": 99,
+          "UNUSEDPARAM": 2,
+          "CASEINCOMPLETE": 3,
+          "SYNCASYNCNET": 1
+        }
+      },
+      "measurement_checks": {
+        "branch": "ble-tx-sin2",
+        "exit": 0,
+        "methods_passed": 1,
+        "methods_skipped": 5,
+        "tools": [
+          "scripts/area/summarize_openram.py",
+          "scripts/area/run_openram.sh"
+        ]
+      }
+    },
+    {
+      "branch": "ble-tx-sin4",
+      "regressions": [
+        {
+          "mode": "rtl",
+          "label": "rf-final-20261005",
+          "passed": 270,
+          "coverage": {
+            "data_comparison": 210,
+            "packet_rejection": 60
+          },
+          "defaults": ""
+        }
+      ],
+      "unchanged_tx_checks": [
+        {
+          "mode": "rtl",
+          "label": "product-final-20261005",
+          "passed": 167,
+          "rtl_rx_checked": 0
+        }
+      ],
+      "unchanged_tx_source_proof": "Only clock_domain_conversion_iq.v changed among existing RTL/Python/TX-check sources.",
+      "rf_contract": {
+        "passed": 12,
+        "mutants_detected": 2
+      },
+      "harness_checks": {
+        "passed": 19,
+        "skipped": 4
+      },
+      "structure": {
+        "yosys_exit": 0,
+        "lint_exit": 1,
+        "warnings": {
+          "EOFNEWLINE": 3,
+          "DECLFILENAME": 2,
+          "PINCONNECTEMPTY": 2,
+          "GENUNNAMED": 6,
+          "WIDTHTRUNC": 8,
+          "WIDTHEXPAND": 18,
+          "UNUSEDSIGNAL": 99,
+          "UNUSEDPARAM": 2,
+          "CASEINCOMPLETE": 3,
+          "SYNCASYNCNET": 1
+        }
+      }
+    },
+    {
+      "branch": "ble-tx-sin8",
+      "regressions": [
+        {
+          "mode": "rtl",
+          "label": "rf-final-20261005",
+          "passed": 270,
+          "coverage": {
+            "data_comparison": 210,
+            "packet_rejection": 60
+          },
+          "defaults": ""
+        }
+      ],
+      "unchanged_tx_checks": [
+        {
+          "mode": "rtl",
+          "label": "product-final-20261005",
+          "passed": 167,
+          "rtl_rx_checked": 0
+        }
+      ],
+      "unchanged_tx_source_proof": "Only clock_domain_conversion_iq.v changed among existing RTL/Python/TX-check sources.",
+      "rf_contract": {
+        "passed": 12,
+        "mutants_detected": 2
+      },
+      "harness_checks": {
+        "passed": 19,
+        "skipped": 4
+      },
+      "structure": {
+        "yosys_exit": 0,
+        "lint_exit": 1,
+        "warnings": {
+          "EOFNEWLINE": 3,
+          "DECLFILENAME": 3,
+          "PINCONNECTEMPTY": 2,
+          "GENUNNAMED": 6,
+          "WIDTHTRUNC": 8,
+          "WIDTHEXPAND": 18,
+          "UNUSEDSIGNAL": 99,
+          "UNUSEDPARAM": 2,
+          "CASEINCOMPLETE": 3,
+          "SYNCASYNCNET": 1
+        }
+      }
+    },
+    {
+      "branch": "ble-tx-sin8-1rw",
+      "regressions": [
+        {
+          "mode": "rtl",
+          "label": "rf-final-20261005",
+          "passed": 270,
+          "coverage": {
+            "data_comparison": 210,
+            "packet_rejection": 60
+          },
+          "defaults": ""
+        },
+        {
+          "mode": "one-port",
+          "label": "rf-final-20261005-one-port",
+          "passed": 270,
+          "coverage": {
+            "data_comparison": 210,
+            "packet_rejection": 60
+          },
+          "defaults": ""
+        }
+      ],
+      "unchanged_tx_checks": [
+        {
+          "mode": "rtl",
+          "label": "product-final-20261005",
+          "passed": 167,
+          "rtl_rx_checked": 0
+        },
+        {
+          "mode": "one-port",
+          "label": "product-final-20261005-one-port",
+          "passed": 16,
+          "rtl_rx_checked": 0
+        }
+      ],
+      "unchanged_tx_source_proof": "Only clock_domain_conversion_iq.v changed among existing RTL/Python/TX-check sources.",
+      "rf_contract": {
+        "passed": 12,
+        "mutants_detected": 2
+      },
+      "harness_checks": {
+        "passed": 19,
+        "skipped": 4
+      },
+      "structure": {
+        "yosys_exit": 0,
+        "lint_exit": 1,
+        "warnings": {
+          "EOFNEWLINE": 3,
+          "DECLFILENAME": 3,
+          "PINCONNECTEMPTY": 2,
+          "GENUNNAMED": 6,
+          "WIDTHTRUNC": 8,
+          "WIDTHEXPAND": 18,
+          "UNUSEDSIGNAL": 99,
+          "UNUSEDPARAM": 2,
+          "CASEINCOMPLETE": 3,
+          "SYNCASYNCNET": 1
+        }
+      },
+      "measurement_checks": {
+        "branch": "ble-tx-sin8-1rw",
+        "exit": 0,
+        "methods_passed": 1,
+        "methods_skipped": 5,
+        "tools": [
+          "scripts/area/summarize_openram.py",
+          "scripts/area/run_openram.sh"
+        ]
+      }
+    },
+    {
+      "branch": "ble-tx-table",
+      "regressions": [
+        {
+          "mode": "rtl",
+          "label": "rf-final-20261005",
+          "passed": 270,
+          "coverage": {
+            "data_comparison": 210,
+            "packet_rejection": 60
+          },
+          "defaults": "gauss_filter.v:GAUSS_TABLE=1"
+        }
+      ],
+      "unchanged_tx_checks": [
+        {
+          "mode": "rtl",
+          "label": "product-final-20261005",
+          "passed": 167,
+          "rtl_rx_checked": 0
+        }
+      ],
+      "unchanged_tx_source_proof": "Only clock_domain_conversion_iq.v changed among existing RTL/Python/TX-check sources.",
+      "rf_contract": {
+        "passed": 12,
+        "mutants_detected": 2
+      },
+      "harness_checks": {
+        "passed": 23,
+        "skipped": 0
+      },
+      "structure": {
+        "yosys_exit": 0,
+        "lint_exit": 1,
+        "warnings": {
+          "EOFNEWLINE": 3,
+          "DECLFILENAME": 2,
+          "PINCONNECTEMPTY": 2,
+          "GENUNNAMED": 6,
+          "WIDTHTRUNC": 12,
+          "WIDTHEXPAND": 18,
+          "UNUSEDSIGNAL": 99,
+          "UNUSEDPARAM": 2,
+          "CASEINCOMPLETE": 3,
+          "SYNCASYNCNET": 1
+        }
+      },
+      "controller": {
+        "runs": 6,
+        "tx_completed": 36,
+        "rx_completed": 36,
+        "mutants_detected": 4
+      },
+      "measurement_checks": {
+        "branch": "ble-tx-table",
+        "exit": 0,
+        "methods_passed": 6,
+        "methods_skipped": 0,
+        "tools": [
+          "scripts/timing/seq_constraints.py",
+          "scripts/power/saif_activity.py",
+          "scripts/power/summarize_activity.py",
+          "scripts/area/summarize_area.py",
+          "scripts/compare/summarize_compare.py",
+          "scripts/area/summarize_openram.py",
+          "scripts/area/run_openram.sh"
+        ]
+      }
+    },
+    {
+      "branch": "ble-tx-table-reg",
+      "regressions": [
+        {
+          "mode": "rtl",
+          "label": "rf-final-20261005",
+          "passed": 270,
+          "coverage": {
+            "data_comparison": 210,
+            "packet_rejection": 60
+          },
+          "defaults": "gauss_filter.v:GAUSS_TABLE=1"
+        }
+      ],
+      "unchanged_tx_checks": [
+        {
+          "mode": "rtl",
+          "label": "product-final-20261005",
+          "passed": 167,
+          "rtl_rx_checked": 0
+        }
+      ],
+      "unchanged_tx_source_proof": "Only clock_domain_conversion_iq.v changed among existing RTL/Python/TX-check sources.",
+      "rf_contract": {
+        "passed": 12,
+        "mutants_detected": 2
+      },
+      "harness_checks": {
+        "passed": 22,
+        "skipped": 1
+      },
+      "structure": {
+        "yosys_exit": 0,
+        "lint_exit": 1,
+        "warnings": {
+          "EOFNEWLINE": 3,
+          "DECLFILENAME": 3,
+          "PINCONNECTEMPTY": 2,
+          "GENUNNAMED": 6,
+          "WIDTHTRUNC": 10,
+          "WIDTHEXPAND": 18,
+          "UNUSEDSIGNAL": 101,
+          "UNUSEDPARAM": 2,
+          "CASEINCOMPLETE": 3,
+          "SYNCASYNCNET": 1
+        }
+      },
+      "controller": {
+        "runs": 6,
+        "tx_completed": 36,
+        "rx_completed": 36,
+        "mutants_detected": 4
+      },
+      "measurement_checks": {
+        "branch": "ble-tx-table-reg",
+        "exit": 0,
+        "methods_passed": 5,
+        "methods_skipped": 1,
+        "tools": [
+          "scripts/timing/seq_constraints.py",
+          "scripts/power/saif_activity.py",
+          "scripts/power/summarize_activity.py",
+          "scripts/area/summarize_area.py",
+          "scripts/compare/summarize_compare.py"
+        ]
+      }
+    },
+    {
+      "branch": "ble-tx-table-sram",
+      "regressions": [
+        {
+          "mode": "rtl",
+          "label": "rf-final-20261005",
+          "passed": 270,
+          "coverage": {
+            "data_comparison": 210,
+            "packet_rejection": 60
+          },
+          "defaults": "gauss_filter.v:GAUSS_TABLE=1"
+        }
+      ],
+      "unchanged_tx_checks": [
+        {
+          "mode": "rtl",
+          "label": "product-final-20261005",
+          "passed": 167,
+          "rtl_rx_checked": 0
+        }
+      ],
+      "unchanged_tx_source_proof": "Only clock_domain_conversion_iq.v changed among existing RTL/Python/TX-check sources.",
+      "rf_contract": {
+        "passed": 12,
+        "mutants_detected": 2
+      },
+      "harness_checks": {
+        "passed": 22,
+        "skipped": 1
+      },
+      "structure": {
+        "yosys_exit": 0,
+        "lint_exit": 1,
+        "warnings": {
+          "EOFNEWLINE": 3,
+          "DECLFILENAME": 3,
+          "PINCONNECTEMPTY": 2,
+          "GENUNNAMED": 6,
+          "WIDTHTRUNC": 10,
+          "WIDTHEXPAND": 18,
+          "UNUSEDSIGNAL": 100,
+          "UNUSEDPARAM": 2,
+          "CASEINCOMPLETE": 3,
+          "SYNCASYNCNET": 1
+        }
+      },
+      "controller": {
+        "runs": 6,
+        "tx_completed": 36,
+        "rx_completed": 36,
+        "mutants_detected": 6
+      },
+      "measurement_checks": {
+        "branch": "ble-tx-table-sram",
+        "exit": 0,
+        "methods_passed": 6,
+        "methods_skipped": 0,
+        "tools": [
+          "scripts/timing/seq_constraints.py",
+          "scripts/power/saif_activity.py",
+          "scripts/power/summarize_activity.py",
+          "scripts/area/summarize_area.py",
+          "scripts/compare/summarize_compare.py",
+          "scripts/area/summarize_openram.py",
+          "scripts/area/run_openram.sh"
+        ]
+      }
+    },
+    {
+      "branch": "master",
+      "regressions": [
+        {
+          "mode": "rtl",
+          "label": "rf-final-20261005",
+          "passed": 270,
+          "coverage": {
+            "data_comparison": 210,
+            "packet_rejection": 60
+          },
+          "defaults": ""
+        }
+      ],
+      "unchanged_tx_checks": [
+        {
+          "mode": "rtl",
+          "label": "product-final-20261005",
+          "passed": 167,
+          "rtl_rx_checked": 0
+        }
+      ],
+      "unchanged_tx_source_proof": "Only clock_domain_conversion_iq.v changed among existing RTL/Python/TX-check sources.",
+      "rf_contract": {
+        "passed": 12,
+        "mutants_detected": 2
+      },
+      "harness_checks": {
+        "passed": 18,
+        "skipped": 5
+      },
+      "structure": {
+        "yosys_exit": 0,
+        "lint_exit": 1,
+        "warnings": {
+          "EOFNEWLINE": 3,
+          "DECLFILENAME": 2,
+          "PINCONNECTEMPTY": 2,
+          "GENUNNAMED": 6,
+          "WIDTHTRUNC": 8,
+          "WIDTHEXPAND": 18,
+          "UNUSEDSIGNAL": 99,
+          "UNUSEDPARAM": 2,
+          "CASEINCOMPLETE": 3,
+          "SYNCASYNCNET": 1
+        }
+      }
+    },
+    {
+      "branch": "risc-v-ble",
+      "regressions": [
+        {
+          "mode": "rtl",
+          "label": "rf-final-20261005",
+          "passed": 270,
+          "coverage": {
+            "data_comparison": 210,
+            "packet_rejection": 60
+          },
+          "defaults": ""
+        }
+      ],
+      "unchanged_tx_checks": [
+        {
+          "mode": "rtl",
+          "label": "product-final-20261005",
+          "passed": 167,
+          "rtl_rx_checked": 0
+        }
+      ],
+      "unchanged_tx_source_proof": "Only clock_domain_conversion_iq.v changed among existing RTL/Python/TX-check sources.",
+      "rf_contract": {
+        "passed": 12,
+        "mutants_detected": 2
+      },
+      "harness_checks": {
+        "passed": 18,
+        "skipped": 5
+      },
+      "structure": {
+        "yosys_exit": 0,
+        "lint_exit": 1,
+        "warnings": {
+          "EOFNEWLINE": 3,
+          "DECLFILENAME": 2,
+          "PINCONNECTEMPTY": 2,
+          "GENUNNAMED": 6,
+          "WIDTHTRUNC": 8,
+          "WIDTHEXPAND": 18,
+          "UNUSEDSIGNAL": 99,
+          "UNUSEDPARAM": 2,
+          "CASEINCOMPLETE": 3,
+          "SYNCASYNCNET": 1
+        }
+      }
+    },
+    {
+      "branch": "ble-tx-pdu",
+      "regressions": [
+        {
+          "mode": "rtl",
+          "label": "rf-final-20261005",
+          "passed": 270,
+          "coverage": {
+            "data_comparison": 210,
+            "packet_rejection": 60
+          },
+          "defaults": "gauss_filter.v:GAUSS_TABLE=1"
+        },
+        {
+          "mode": "one-port",
+          "label": "rf-final-20261005-one-port",
+          "passed": 270,
+          "coverage": {
+            "data_comparison": 210,
+            "packet_rejection": 60
+          },
+          "defaults": "gauss_filter.v:GAUSS_TABLE=1"
+        }
+      ],
+      "unchanged_tx_checks": [
+        {
+          "mode": "rtl",
+          "label": "product-final-20261005",
+          "passed": 167,
+          "rtl_rx_checked": 167
+        },
+        {
+          "mode": "one-port",
+          "label": "product-final-20261005-one-port",
+          "passed": 16,
+          "rtl_rx_checked": 0
+        }
+      ],
+      "unchanged_tx_source_proof": "Only clock_domain_conversion_iq.v changed among existing RTL/Python/TX-check sources.",
+      "rf_contract": {
+        "passed": 12,
+        "mutants_detected": 2
+      },
+      "harness_checks": {
+        "passed": 23,
+        "skipped": 0
+      },
+      "structure": {
+        "yosys_exit": 0,
+        "lint_exit": 1,
+        "warnings": {
+          "EOFNEWLINE": 3,
+          "DECLFILENAME": 4,
+          "PINCONNECTEMPTY": 2,
+          "GENUNNAMED": 6,
+          "WIDTHTRUNC": 11,
+          "WIDTHEXPAND": 20,
+          "UNUSEDSIGNAL": 100,
+          "UNUSEDPARAM": 4,
+          "CASEINCOMPLETE": 2,
+          "SYNCASYNCNET": 1
+        }
+      },
+      "controller": {
+        "runs": 6,
+        "tx_completed": 36,
+        "rx_completed": 36,
+        "mutants_detected": 5
+      },
+      "measurement_checks": {
+        "branch": "ble-tx-pdu",
+        "exit": 0,
+        "methods_passed": 6,
+        "methods_skipped": 0,
+        "tools": [
+          "scripts/timing/seq_constraints.py",
+          "scripts/power/saif_activity.py",
+          "scripts/power/summarize_activity.py",
+          "scripts/area/summarize_area.py",
+          "scripts/compare/summarize_compare.py",
+          "scripts/area/summarize_openram.py",
+          "scripts/area/run_openram.sh"
+        ]
+      }
+    },
+    {
+      "branch": "ble-tx-pdu-we",
+      "regressions": [
+        {
+          "mode": "rtl",
+          "label": "rf-final-20261005",
+          "passed": 270,
+          "coverage": {
+            "data_comparison": 210,
+            "packet_rejection": 60
+          },
+          "defaults": "gauss_filter.v:GAUSS_TABLE=1 btle_tx.v:PDU_WRITE_STROBE=1 btle_controller.v:PDU_WRITE_STROBE=1"
+        },
+        {
+          "mode": "one-port",
+          "label": "rf-final-20261005-one-port",
+          "passed": 270,
+          "coverage": {
+            "data_comparison": 210,
+            "packet_rejection": 60
+          },
+          "defaults": "gauss_filter.v:GAUSS_TABLE=1 btle_tx.v:PDU_WRITE_STROBE=1 btle_controller.v:PDU_WRITE_STROBE=1"
+        }
+      ],
+      "unchanged_tx_checks": [
+        {
+          "mode": "rtl",
+          "label": "product-strobe-final",
+          "passed": 167,
+          "rtl_rx_checked": 167
+        },
+        {
+          "mode": "one-port",
+          "label": "product-strobe-final-one-port",
+          "passed": 16,
+          "rtl_rx_checked": 0
+        }
+      ],
+      "unchanged_tx_source_proof": "Only clock_domain_conversion_iq.v changed among existing RTL/Python/TX-check sources.",
+      "rf_contract": {
+        "passed": 12,
+        "mutants_detected": 2
+      },
+      "harness_checks": {
+        "passed": 27,
+        "skipped": 0
+      },
+      "structure": {
+        "yosys_exit": 0,
+        "lint_exit": 1,
+        "warnings": {
+          "EOFNEWLINE": 3,
+          "DECLFILENAME": 4,
+          "PINCONNECTEMPTY": 2,
+          "GENUNNAMED": 6,
+          "WIDTHTRUNC": 11,
+          "WIDTHEXPAND": 20,
+          "UNUSEDSIGNAL": 100,
+          "UNUSEDPARAM": 4,
+          "CASEINCOMPLETE": 2,
+          "SYNCASYNCNET": 1
+        }
+      },
+      "controller": {
+        "runs": 6,
+        "tx_completed": 36,
+        "rx_completed": 36,
+        "mutants_detected": 8
+      },
+      "measurement_checks": {
+        "branch": "ble-tx-pdu-we",
+        "exit": 0,
+        "methods_passed": 6,
+        "methods_skipped": 0,
+        "tools": [
+          "scripts/timing/seq_constraints.py",
+          "scripts/power/saif_activity.py",
+          "scripts/power/summarize_activity.py",
+          "scripts/area/summarize_area.py",
+          "scripts/compare/summarize_compare.py",
+          "scripts/area/summarize_openram.py",
+          "scripts/area/run_openram.sh"
+        ]
+      }
+    }
+  ],
+  "product_ready": false,
+  "reason": "strict lint and ASIC signoff remain open"
+}

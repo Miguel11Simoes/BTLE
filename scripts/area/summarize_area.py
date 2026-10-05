@@ -9,6 +9,8 @@ SRAM bits held by the blackboxed sdpram_* macros, read from the netlist
 parameters. The cell total is cross-checked between stat.json and the netlist.
 """
 import json
+import math
+from collections import Counter
 import sys
 from pathlib import Path
 
@@ -25,19 +27,32 @@ def param(cell, name):
 def design_stat(stat):
     design = stat['design']
     by_type = design.get('num_cells_by_type', {})
-    return int(design['num_cells']), float(design.get('area', 0.0)), by_type
+    total, area = design['num_cells'], design['area']
+    if type(total) is not int or total < 0 or not isinstance(area, (int, float)) or isinstance(area, bool) or not math.isfinite(area) or area < 0:
+        raise RuntimeError('invalid cell count or area')
+    if any(type(n) is not int or n < 0 for n in by_type.values()) or sum(by_type.values()) != total:
+        raise RuntimeError('incomplete cell-type statistics')
+    return total, float(area), by_type
 
 
 def summarise(top_dir):
     stat = json.loads((top_dir / 'stat.json').read_text())
     netlist = json.loads((top_dir / 'netlist.json').read_text())
     cells_total, area, by_type = design_stat(stat)
-    top = next(n for n, m in netlist['modules'].items()
-               if m.get('attributes', {}).get('top'))
+    tops = [n for n, m in netlist['modules'].items() if m.get('attributes', {}).get('top') not in (None, 0, '0', '0'*32)]
+    if len(tops) != 1: raise RuntimeError('netlist must have exactly one selected top')
+    top = tops[0]
+    if top.lstrip('\\') != top_dir.name: raise RuntimeError('netlist top does not match requested top')
     cells = netlist['modules'][top]['cells'].values()
     rams = [c for c in cells if c['type'].lstrip('\\').startswith('sdpram_')]
     if len(list(netlist['modules'][top]['cells'])) != cells_total:
         raise RuntimeError(f'{top_dir.name}: netlist/stat cell-total mismatch')
+    actual = Counter(c['type'].lstrip('\\') for c in cells)
+    declared = {t.lstrip('\\'): n for t, n in by_type.items()}
+    if actual != declared: raise RuntimeError('netlist/stat cell-type mismatch')
+    if cells_total > len(rams) and area <= 0: raise RuntimeError('standard-cell area missing/zero')
+    if any(param(c, 'DATA_WIDTH') <= 0 or param(c, 'ADDRESS_WIDTH') < 0 for c in rams):
+        raise RuntimeError('invalid memory geometry')
     ram_bits = sum(param(c, 'DATA_WIDTH') << param(c, 'ADDRESS_WIDTH') for c in rams)
     flops = sum(n for t, n in by_type.items() if t.lstrip('\\').startswith(('DFF', 'SDFF')))
     return {'cells': cells_total - len(rams), 'flops': flops, 'area': area,

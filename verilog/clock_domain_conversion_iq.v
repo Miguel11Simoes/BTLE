@@ -42,6 +42,9 @@ module clock_domain_conversion_iq #
   output reg                           tx_iq_valid_last_ext
 );
 
+// Keep the 2:1 sampling phase independent of source-valid gaps.
+reg rx_sample_phase;
+
 reg tx_iq_valid_delay1;
 reg tx_iq_valid_last_delay1;
 
@@ -51,11 +54,13 @@ always @ (posedge bb_clk) begin
     rx_i_signal <= 0;
     rx_q_signal <= 0;
     rx_iq_valid <= 0;
+    rx_sample_phase <= 0;
     bb_gpio     <= 0;
   end else begin
     rx_i_signal <= rx_iq_signal_ext[(RF_I_OR_Q_BIT_WIDTH-1)   : 0                  ];
     rx_q_signal <= rx_iq_signal_ext[(2*RF_I_OR_Q_BIT_WIDTH-1) : RF_I_OR_Q_BIT_WIDTH];
-    rx_iq_valid <= (~rx_iq_valid); // rx_iq_valid_ext is always 1 (under 8MHz clk). we need valid every other 16MHz clk to get 8MHz valid under 16MHz (8Msps rate is half of 16MHz clk)
+    rx_sample_phase <= ~rx_sample_phase;
+    rx_iq_valid <= (~rx_sample_phase) && rx_iq_valid_ext;
     bb_gpio     <= rf_gpio;
   end
 end

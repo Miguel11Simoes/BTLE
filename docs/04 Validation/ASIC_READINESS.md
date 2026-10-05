@@ -1,6 +1,6 @@
 # ASIC readiness - 2026-10-05
 
-**Status: NOT READY for tapeout or a market release.** The selected target is ASIC; the foundry/PDK and the product boundary (PHY/baseband or a complete controller/Link Layer) are not decided. Passing the digital campaigns in [PRODUCT_VALIDATION.md](PRODUCT_VALIDATION.md) does not close the items below.
+**Status: NOT READY for tapeout or a market release.** The selected target is ASIC; the foundry/PDK and the product boundary (PHY/baseband or a complete controller/Link Layer) are not decided. Passing the digital campaigns in [RF_INTERFACE_REVIEW.md](RF_INTERFACE_REVIEW.md) and [PRODUCT_VALIDATION.md](PRODUCT_VALIDATION.md) does not close the items below.
 
 ## Digital defects repaired
 
@@ -14,6 +14,8 @@
 - Harness fault-injection tests require evidence that the intended fake simulator/prover actually ran. A missing Git reference, compilation failure or vector-generation failure cannot satisfy a simulator-failure test.
 
 - SRAM summaries reject missing counts/characterization and invalid numeric inputs. The characterization parser rejects empty campaigns, inconsistent periods and nonfinite measurements. Partial diagnostic reports have a failing exit status.
+
+- RF receive-valid gaps are honored without changing the sample phase. Measurement tools reject incomplete timing, area and activity evidence; older activity reports with missing nets are not complete.
 
 ## Remaining engineering work
 
@@ -33,7 +35,7 @@
 Concrete limits already visible in the RTL:
 
 - `clk_cross_bus` transfers a continuously changing bus through a dual-clock RAM at a constant address. Simulation equality is not a proof of coherent asynchronous transfer or metastability safety.
-- `clock_domain_conversion_iq` assumes continuous RF samples and a 2:1 clock relationship; its RX logic generates alternate valid cycles rather than honoring arbitrary `rx_iq_valid_ext` gaps. A different radio/clock interface requires an explicit implementation and tests.
+- `clock_domain_conversion_iq` now honors `rx_iq_valid_ext` gaps while preserving its related 2:1 sampling phase. The direct multibit crossing still requires a defined related-clock timing contract; arbitrary asynchronous clocks are not supported or signed off.
 - Two or three state machines per branch still lack illegal-state recovery cases. The current tests do not constitute a fault-tolerance claim.
 - The independently checked Python packet model/test matrix covers legacy-shaped LE 1M packets (data payloads up to 31 bytes; additional advertising cases at 37). RTL has wider length fields in places. This report does not claim complete coverage of every modern Bluetooth packet format or a complete production Link Layer/HCI.
 - Optimized branches retain their documented programming, table-symmetry, sample-rate, write-hold and packet-buffer restrictions. These must become enforced integration contracts for the chosen product.

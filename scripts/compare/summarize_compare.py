@@ -16,6 +16,7 @@ summary.
 Usage: summarize_compare.py <repo> <label> <name> ...
 """
 import json
+import math
 import re
 import sys
 from pathlib import Path
@@ -76,10 +77,20 @@ def read_timing(run):
     return rows
 
 
+def validate_activity_numbers(value):
+    if isinstance(value, dict):
+        for child in value.values(): validate_activity_numbers(child)
+    elif isinstance(value, (list, tuple)):
+        for child in value: validate_activity_numbers(child)
+    elif isinstance(value, (int, float)):
+        if isinstance(value, bool) or not math.isfinite(value) or value < 0:
+            raise RuntimeError('invalid numeric activity evidence')
+
+
 def read_activity(run):
     out = {}
     codes = json.loads((run / 'exit_codes.json').read_text())
-    if set(codes) != set(SCENARIOS + ['setup']) or any(codes.values()):
+    if set(codes) != set(SCENARIOS + ['setup']) or any(type(code) is not int or code != 0 for code in codes.values()):
         raise RuntimeError('FAIL: incomplete or failed activity processes: ' + str(run))
     events = {}
     runs = run / 'runs.txt'
@@ -92,7 +103,14 @@ def read_activity(run):
         if not f.exists():
             continue
         d = json.loads(f.read_text())
+        validate_activity_numbers(d)
+        if d.get('status') != 'COMPLETE': raise RuntimeError('incomplete/unverified activity: ' + str(f))
+        for side_name in ('ref', 'dut'):
+            if d[side_name].get('missing') != 0 or d[side_name].get('missing_nets') or d[side_name].get('cells', 0) <= 0 or d[side_name].get('nets', 0) <= 0:
+                raise RuntimeError('missing activity nets: ' + str(f))
         w = d['window_cycles']
+        if type(w) is not int or w <= 0: raise RuntimeError('invalid activity window')
+        if d.get('scenario') != s: raise RuntimeError('mislabeled activity scenario')
         side = {}
         for k in ('ref', 'dut'):
             r = d[k]
@@ -111,6 +129,7 @@ def read_activity(run):
 
 def main():
     repo, label, names = Path(sys.argv[1]), sys.argv[2], sys.argv[3:]
+    if not names or len(names) != len(set(names)): raise SystemExit('nonempty unique configuration list required')
     res = repo / 'results'
     prov = (res / 'compare' / label / 'provenance.txt').read_text()
     conf = {}

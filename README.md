@@ -1,3 +1,5 @@
+> Latest audit: [RF interface, measurement integrity and current results](docs/04%20Validation/RF_INTERFACE_REVIEW.md).
+
 > Current digital validation and ASIC readiness: [Product validation](docs/04%20Validation/PRODUCT_VALIDATION.md), [open signoff work](docs/04%20Validation/ASIC_READINESS.md).
 
 > **Thesis fork, by Miguel Simões.** This repository derives from

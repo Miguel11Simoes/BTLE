@@ -106,17 +106,7 @@ EOF
 status=0
 for m in "${macros[@]}"; do macro "$m" || status=1; done
 
-python3 - "$work/sizes.tsv" "$label" > "$out/summary.md" <<'PYEOF'
-import sys
-rows = [l.split('\t') for l in open(sys.argv[1]).read().split('\n') if l.strip()]
-print(f'# OpenRAM macros, FreePDK45 (run {sys.argv[2]})\n')
-print('| Macro | Ports | Words x bits | Bits | Width (um) | Height (um) | Area (um2) | um2 per bit |')
-print('|---|---|---|---:|---:|---:|---:|---:|')
-for name, ports, ws, nw, w, h, mask in rows:
-    bits, area = int(ws) * int(nw), float(w) * float(h)
-    ports = ports.upper() + (f', {mask}-bit write mask' if mask else '')
-    print(f'| `{name}` | {ports} | {nw} x {ws} | {bits} | {float(w):.3f} | {float(h):.3f} | {area:.1f} | {area/bits:.2f} |')
-PYEOF
+python3 "$repo/scripts/area/summarize_openram.py" "$work/sizes.tsv" "$label" "${macros[@]}" > "$out/summary.md"
 cat "$out/summary.md"
 gzip -9 "$out"/*.log "$out"/*.lib 2>/dev/null || true
 rm -rf "$work"

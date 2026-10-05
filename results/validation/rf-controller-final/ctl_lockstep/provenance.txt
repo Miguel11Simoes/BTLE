@@ -1,0 +1,7 @@
+label=rf-controller-final
+date_utc=2026-10-05T18:17:09Z
+ref_rev=5abbbf7a093b48a64f18c2c1f84057c54d0af0e5 (5abbbf7a093b48a64f18c2c1f84057c54d0af0e5)
+dut=working tree at 41dd8e39263e5158855ef28d70c767a96e2fc2fa, dirty verilog files: 1
+dut configuration: GAUSS_TABLE=1 (nothing removed: every output and register compared)
+iverilog=Icarus Verilog version 14.0 (devel) (s20260301-411-gca6b8d376-dirty)
+seeds_per_example=2 packets_per_seed=6
