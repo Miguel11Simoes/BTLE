@@ -1,0 +1,178 @@
+[
+  {
+    "rtl_rx_checked": false,
+    "channel": 0,
+    "payload_octets": 0,
+    "crc_init": "555555",
+    "samples": 656,
+    "expected_samples": 656,
+    "crc": true,
+    "pdu": "0100",
+    "result": "PASS"
+  },
+  {
+    "rtl_rx_checked": false,
+    "channel": 0,
+    "payload_octets": 1,
+    "crc_init": "555555",
+    "samples": 720,
+    "expected_samples": 720,
+    "crc": true,
+    "pdu": "010156",
+    "result": "PASS"
+  },
+  {
+    "rtl_rx_checked": false,
+    "channel": 0,
+    "payload_octets": 8,
+    "crc_init": "555555",
+    "samples": 1168,
+    "expected_samples": 1168,
+    "crc": true,
+    "pdu": "01089ab901616878b756",
+    "result": "PASS"
+  },
+  {
+    "rtl_rx_checked": false,
+    "channel": 0,
+    "payload_octets": 31,
+    "crc_init": "555555",
+    "samples": 2640,
+    "expected_samples": 2640,
+    "crc": true,
+    "pdu": "011f01c783d07f45c95cec6c35a0d5d28278d1a51fe8815ff3d95825b526fba4e4",
+    "result": "PASS"
+  },
+  {
+    "rtl_rx_checked": false,
+    "channel": 10,
+    "payload_octets": 0,
+    "crc_init": "555555",
+    "samples": 656,
+    "expected_samples": 656,
+    "crc": true,
+    "pdu": "0100",
+    "result": "PASS"
+  },
+  {
+    "rtl_rx_checked": false,
+    "channel": 10,
+    "payload_octets": 1,
+    "crc_init": "555555",
+    "samples": 720,
+    "expected_samples": 720,
+    "crc": true,
+    "pdu": "010167",
+    "result": "PASS"
+  },
+  {
+    "rtl_rx_checked": false,
+    "channel": 10,
+    "payload_octets": 8,
+    "crc_init": "555555",
+    "samples": 1168,
+    "expected_samples": 1168,
+    "crc": true,
+    "pdu": "0108bc2ee38b1f34337a",
+    "result": "PASS"
+  },
+  {
+    "rtl_rx_checked": false,
+    "channel": 10,
+    "payload_octets": 31,
+    "crc_init": "555555",
+    "samples": 2640,
+    "expected_samples": 2640,
+    "crc": true,
+    "pdu": "011f7bb82da764fcc0803b75a9e701c60452e198909e8b1df1b2ec2aa9b213e3f2",
+    "result": "PASS"
+  },
+  {
+    "rtl_rx_checked": false,
+    "channel": 37,
+    "payload_octets": 0,
+    "crc_init": "555555",
+    "samples": 656,
+    "expected_samples": 656,
+    "crc": true,
+    "pdu": "4200",
+    "result": "PASS"
+  },
+  {
+    "rtl_rx_checked": false,
+    "channel": 37,
+    "payload_octets": 1,
+    "crc_init": "555555",
+    "samples": 720,
+    "expected_samples": 720,
+    "crc": true,
+    "pdu": "4201e6",
+    "result": "PASS"
+  },
+  {
+    "rtl_rx_checked": false,
+    "channel": 37,
+    "payload_octets": 8,
+    "crc_init": "555555",
+    "samples": 1168,
+    "expected_samples": 1168,
+    "crc": true,
+    "pdu": "4208761cccf507f64587",
+    "result": "PASS"
+  },
+  {
+    "rtl_rx_checked": false,
+    "channel": 37,
+    "payload_octets": 31,
+    "crc_init": "555555",
+    "samples": 2640,
+    "expected_samples": 2640,
+    "crc": true,
+    "pdu": "421f9b0d44480231a87549cea59f7813fdf5dbd048ecbe9bd3b84164b3ef25e8cb",
+    "result": "PASS"
+  },
+  {
+    "rtl_rx_checked": false,
+    "channel": 0,
+    "payload_octets": 0,
+    "crc_init": "000000",
+    "samples": 656,
+    "expected_samples": 656,
+    "crc": true,
+    "pdu": "0100",
+    "result": "PASS"
+  },
+  {
+    "rtl_rx_checked": false,
+    "channel": 0,
+    "payload_octets": 31,
+    "crc_init": "000000",
+    "samples": 2640,
+    "expected_samples": 2640,
+    "crc": true,
+    "pdu": "011f276a0505a044ae8686cacf3e8699bc537341457c75f2c0c60b9446e9df14aa",
+    "result": "PASS"
+  },
+  {
+    "rtl_rx_checked": false,
+    "channel": 10,
+    "payload_octets": 8,
+    "crc_init": "123456",
+    "samples": 1168,
+    "expected_samples": 1168,
+    "crc": true,
+    "pdu": "010873ce1c4f1ce84af2",
+    "result": "PASS"
+  },
+  {
+    "rtl_rx_checked": false,
+    "channel": 39,
+    "payload_octets": 31,
+    "crc_init": "ffffff",
+    "samples": 2640,
+    "expected_samples": 2640,
+    "crc": true,
+    "pdu": "421f236b12922d3b854149c5d6cc93bd01fa50cc28b389abc3025056c182f1959b",
+    "result": "PASS"
+  }
+]

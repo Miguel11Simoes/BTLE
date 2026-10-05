@@ -1,0 +1,15 @@
+{
+  "branch": "ble-tx-rom",
+  "exit": 0,
+  "methods_passed": 6,
+  "methods_skipped": 0,
+  "tools": [
+    "scripts/timing/seq_constraints.py",
+    "scripts/power/saif_activity.py",
+    "scripts/power/summarize_activity.py",
+    "scripts/area/summarize_area.py",
+    "scripts/compare/summarize_compare.py",
+    "scripts/area/summarize_openram.py",
+    "scripts/area/run_openram.sh"
+  ]
+}

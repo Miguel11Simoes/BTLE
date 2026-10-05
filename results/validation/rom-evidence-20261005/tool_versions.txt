@@ -1,0 +1,16 @@
+/home/msmiguel/eda/oss-cad-suite-20260907/bin/iverilog -V
+Icarus Verilog version 14.0 (devel) (s20260301-411-gca6b8d376-dirty)
+
+/home/msmiguel/eda/oss-cad-suite-20260907/bin/vvp -V
+Icarus Verilog runtime version 14.0 (devel) (s20260301-411-gca6b8d376-dirty)
+
+/home/msmiguel/eda/oss-cad-suite-20260907/bin/yosys -V
+Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+
+verilator --version
+Verilator 5.020 2024-01-01 rev (Debian 5.020-1)
+
+/home/msmiguel/venvs/btle/bin/python -c import sys,numpy;print(sys.version);print("numpy",numpy.__version__)
+3.11.14 (main, Nov 19 2025, 22:47:14) [Clang 21.1.4 ]
+numpy 2.4.6
+

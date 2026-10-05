@@ -1,0 +1,144 @@
+{
+ "reference": "5abbbf7a093b48a64f18c2c1f84057c54d0af0e5",
+ "branch": "ble-tx-rom",
+ "commit": "144d51b7b03057be6a6d68e551966f47bc3e7723",
+ "input_archive": {
+  "path": "results/validation/product-evidence-20261005/vectors.tar.gz",
+  "sha256": "10c5cff448797924a8c94e2d33ce76da0ea10d5e65edc915a3b1920b93a95349"
+ },
+ "regressions": [
+  {
+   "mode": "rtl",
+   "label": "rom-final-20261005",
+   "passed": 270,
+   "coverage": {
+    "data_comparison": 210,
+    "packet_rejection": 60
+   },
+   "defaults": "gauss_filter.v:GAUSS_TABLE=1",
+   "packed_files": 1144
+  },
+  {
+   "mode": "one-port",
+   "label": "rom-final-20261005-one-port",
+   "passed": 270,
+   "coverage": {
+    "data_comparison": 210,
+    "packet_rejection": 60
+   },
+   "defaults": "gauss_filter.v:GAUSS_TABLE=1",
+   "packed_files": 1144
+  }
+ ],
+ "tx_checks": [
+  {
+   "mode": "rtl",
+   "label": "rom-final-20261005",
+   "passed": 167,
+   "rtl_rx_checked": 167
+  },
+  {
+   "mode": "one-port",
+   "label": "rom-final-20261005-one-port",
+   "passed": 16,
+   "rtl_rx_checked": 0
+  }
+ ],
+ "rf_contract": {
+  "label": "rom-contract-final",
+  "passed": 12,
+  "mutants_detected": 2,
+  "mutants": [
+   "gate_feedback",
+   "ignore_valid"
+  ]
+ },
+ "harness_checks": {
+  "passed": 23,
+  "skipped": 0
+ },
+ "suite": {
+  "passed": 34,
+  "skipped": 0
+ },
+ "measurement_checks": {
+  "branch": "ble-tx-rom",
+  "exit": 0,
+  "methods_passed": 6,
+  "methods_skipped": 0,
+  "tools": [
+   "scripts/timing/seq_constraints.py",
+   "scripts/power/saif_activity.py",
+   "scripts/power/summarize_activity.py",
+   "scripts/area/summarize_area.py",
+   "scripts/compare/summarize_compare.py",
+   "scripts/area/summarize_openram.py",
+   "scripts/area/run_openram.sh"
+  ]
+ },
+ "structure": {
+  "label": "rom-structure-final",
+  "yosys_exit": 0,
+  "lint_exit": 1,
+  "warnings": {
+   "EOFNEWLINE": 3,
+   "DECLFILENAME": 3,
+   "PINCONNECTEMPTY": 2,
+   "GENUNNAMED": 6,
+   "WIDTHTRUNC": 11,
+   "WIDTHEXPAND": 20,
+   "UNUSEDSIGNAL": 104,
+   "UNUSEDPARAM": 4,
+   "CASEINCOMPLETE": 2,
+   "SYNCASYNCNET": 1
+  }
+ },
+ "product_mutations": {
+  "label": "rom-mutations-final",
+  "baselines": [
+   "baseline_tx",
+   "baseline_readback"
+  ],
+  "caught": [
+   "truncated_tail",
+   "channel_zero_remapped",
+   "crc_zero_replaced",
+   "undriven_reserved"
+  ]
+ },
+ "controller": {
+  "label": "rom-controller-final",
+  "runs": 6,
+  "tx_completed": 36,
+  "rx_completed": 36,
+  "mutants_caught": 5
+ },
+ "pdu": {
+  "runs": 24,
+  "mutants_caught": 11
+ },
+ "vco": {
+  "seeds": 4,
+  "clocks_per_seed": 1000002,
+  "compared": 3991804,
+  "sweep_clocks_per_seed": 6146,
+  "mutants_caught": 7,
+  "mutants": [
+   "one ROM entry off by one (|sin| at offset 168)",
+   "the fold above 256 off by one (511 - o instead of 512 - o)",
+   "cosine and sine not swapped in the odd quadrants",
+   "the cosine sign ignores the odd quadrants",
+   "the outputs one clock early (not registered)",
+   "valid one clock early",
+   "the phase from the wrong bits of the integral"
+  ]
+ },
+ "focused": {
+  "rx_model": "5 tests",
+  "gauss_tail": "1040 packet samples, dynamic signed taps including wraparound, 32 lengths",
+  "upsample": "64 packets, 2024 samples, gaps 0..31 clocks",
+  "readback": "7 reserved registers, independent clocks, backpressure"
+ },
+ "product_ready": false,
+ "reason": "Digital campaigns only; see docs/04 Validation/ASIC_READINESS.md."
+}

@@ -1,0 +1,21 @@
+2026-10-05T22:18:43Z ble-tx-rom at 144d51b7b03057be6a6d68e551966f47bc3e7723, k=rom, ref 5abbbf7a093b48a64f18c2c1f84057c54d0af0e5
+2026-10-05T22:18:44Z one_port_write: exit 0 (0 s)
+one-port btle_tx.v sha256 6971be297e0564b83f3e615c113e617acb8b96c9d81af85ada819eb3d2b3d4e9
+2026-10-05T22:19:26Z one_port_matrix: exit 0 (42 s)
+2026-10-05T22:19:26Z matrix: exit 0 (42 s)
+2026-10-05T22:19:29Z one_port_tx_packet: exit 0 (3 s)
+2026-10-05T22:19:32Z tx_packet: exit 0 (48 s)
+2026-10-05T22:19:32Z rf_contract: exit 0 (0 s)
+2026-10-05T22:20:18Z guards: exit 0 (46 s)
+2026-10-05T22:20:20Z measurement: exit 0 (2 s)
+2026-10-05T22:20:22Z rx_model: exit 0 (2 s)
+2026-10-05T22:20:22Z gauss_tail: exit 0 (0 s)
+2026-10-05T22:20:22Z upsample: exit 0 (0 s)
+2026-10-05T22:20:22Z readback: exit 0 (0 s)
+2026-10-05T22:20:26Z product_mutations: exit 0 (4 s)
+2026-10-05T22:21:17Z controller: exit 0 (51 s)
+2026-10-05T22:21:44Z pdu: exit 0 (27 s)
+2026-10-05T22:22:37Z vco: exit 0 (53 s)
+2026-10-05T22:22:38Z structure: exit 0 (1 s)
+2026-10-05T22:23:07Z suite: exit 0 (29 s)
+2026-10-05T22:23:07Z campaign ended
