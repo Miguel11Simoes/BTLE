@@ -1,0 +1,82 @@
+{
+ "sram_1rw_8x256": {
+  "ports": "1rw",
+  "words": 256,
+  "bits": 8,
+  "period_ns": 5.0,
+  "leakage_mW": 0.013260300000000001,
+  "leakage_openram_mW": 0.013260300000000001,
+  "leakage_source": "OpenRAM",
+  "power_mW": {
+   "clk0": {
+    "!csb0 & !web0": [
+     0.2657752,
+     0.2554858
+    ],
+    "csb0 & !web0": [
+     0.08598177,
+     0.08315876
+    ],
+    "!csb0 & web0": [
+     0.2540048,
+     0.2378854
+    ],
+    "csb0 & web0": [
+     0.07921275,
+     0.0735509
+    ]
+   }
+  },
+  "access_pJ": {
+   "write": 0.921243,
+   "read": 0.847816
+  },
+  "clock_pJ": 0.315608,
+  "energy_pJ": {
+   "write": 1.236851,
+   "read": 1.163424,
+   "idle": 0.315608,
+   "idle_web_low": 0.35655
+  }
+ },
+ "sram_1rw_8x512": {
+  "ports": "1rw",
+  "words": 512,
+  "bits": 8,
+  "period_ns": 5.0,
+  "leakage_mW": 3.463244,
+  "leakage_openram_mW": 3.463244,
+  "leakage_source": "OpenRAM",
+  "power_mW": {
+   "clk0": {
+    "!csb0 & !web0": [
+     0.3284273,
+     3.788752
+    ],
+    "csb0 & !web0": [
+     0.1050371,
+     3.542216
+    ],
+    "!csb0 & web0": [
+     0.3245213,
+     0.3088014
+    ],
+    "csb0 & web0": [
+     0.09734382,
+     0.09157174
+    ]
+   }
+  },
+  "access_pJ": {
+   "write": 9.820659,
+   "read": 1.111018
+  },
+  "clock_pJ": -16.843931,
+  "energy_pJ": {
+   "write": -7.023272,
+   "read": -15.732913,
+   "idle": -16.843931,
+   "idle_web_low": -8.198087
+  }
+ }
+}

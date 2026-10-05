@@ -1,0 +1,5 @@
+rx: scenario rx window 100000 cycles (20651..120651) rx_packets 18 rx_irqs 17 rx_crc_ok 13 tx_packets 0 axi_reads 306 mismatches 0
+tx: scenario tx window 100000 cycles (20651..120651) rx_packets 0 rx_irqs 0 rx_crc_ok 0 tx_packets 17 axi_reads 0 mismatches 0
+mixed: scenario mixed window 100000 cycles (20651..120651) rx_packets 9 rx_irqs 9 rx_crc_ok 6 tx_packets 8 axi_reads 202 mismatches 0
+idle: scenario idle window 100000 cycles (20651..120651) rx_packets 0 rx_irqs 0 rx_crc_ok 0 tx_packets 0 axi_reads 0 mismatches 0
+idle0: scenario idle0 window 100000 cycles (20651..120651) rx_packets 0 rx_irqs 0 rx_crc_ok 0 tx_packets 0 axi_reads 0 mismatches 0

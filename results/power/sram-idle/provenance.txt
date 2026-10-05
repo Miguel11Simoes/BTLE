@@ -1,0 +1,7 @@
+label=sram-idle
+date_utc=2026-10-05T22:26:35Z
+git_commit=d39ee32a1a240ed4cd9fe69feef935d0afd4dd58
+words and inputs: results/power/sram-energy/ble-tx-pdu-we, scenarios idle tx (PDUMEM, PDUIN)
+macro=sram_1rw_8x256, OpenRAM's netlist (netlist_only, every bitcell); ngspice of OpenRAM's conda
+measure=sram_leakage.py --data: deselected, the given address and data inputs, one clock pulse at 1-2 ns,
+        every data cell started at its bit, 5 us; fills of the unknown words: zero seed:1 seed:2

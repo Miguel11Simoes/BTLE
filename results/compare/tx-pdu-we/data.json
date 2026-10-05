@@ -1,0 +1,1473 @@
+{
+ "label": "tx-pdu-we",
+ "names": [
+  "master",
+  "ble-tx-pdu-we"
+ ],
+ "configurations": {
+  "master": {
+   "rev": "upstream-baseline",
+   "commit": "85401861e8f4b04b90cbaa0394c0f9d45ed02f18",
+   "tree": "4bacca327f4a7112a66bca5915160ebacfffb28e",
+   "params": "<none: defaults>"
+  },
+  "ble-tx-pdu-we": {
+   "rev": "ble-tx-pdu-we",
+   "commit": "eec6c8f5c4749227379aad4defa88f025705a583",
+   "tree": "f61412fd9c87c334a459e052f20d84d28934c097",
+   "params": "GAUSS_TABLE=1 PDU_WRITE_STROBE=1"
+  }
+ },
+ "area": {
+  "master": {
+   "crc24": {
+    "cells": 287,
+    "flops": 52,
+    "area": 495.3,
+    "macros": 0,
+    "sram_bits": 0
+   },
+   "scramble": {
+    "cells": 121,
+    "flops": 25,
+    "area": 213.9,
+    "macros": 0,
+    "sram_bits": 0
+   },
+   "bit_repeat_upsample": {
+    "cells": 94,
+    "flops": 36,
+    "area": 225.6,
+    "macros": 0,
+    "sram_bits": 0
+   },
+   "gauss_filter": {
+    "cells": 2286,
+    "flops": 178,
+    "area": 3366.0,
+    "macros": 0,
+    "sram_bits": 0
+   },
+   "vco": {
+    "cells": 86,
+    "flops": 15,
+    "area": 150.0,
+    "macros": 2,
+    "sram_bits": 32768
+   },
+   "gfsk_modulation": {
+    "cells": 2466,
+    "flops": 229,
+    "area": 3740.2,
+    "macros": 2,
+    "sram_bits": 32768
+   },
+   "btle_tx": {
+    "cells": 3409,
+    "flops": 404,
+    "area": 5322.9,
+    "macros": 3,
+    "sram_bits": 36864
+   },
+   "gfsk_demodulation": {
+    "cells": 3899,
+    "flops": 100,
+    "area": 4757.4,
+    "macros": 0,
+    "sram_bits": 0
+   },
+   "search_unique_bit_sequence": {
+    "cells": 202,
+    "flops": 33,
+    "area": 324.8,
+    "macros": 0,
+    "sram_bits": 0
+   },
+   "btle_rx_core": {
+    "cells": 4438,
+    "flops": 202,
+    "area": 5669.0,
+    "macros": 0,
+    "sram_bits": 0
+   },
+   "btle_rx": {
+    "cells": 36864,
+    "flops": 2068,
+    "area": 48824.3,
+    "macros": 8,
+    "sram_bits": 32768
+   },
+   "btle_phy": {
+    "cells": 40339,
+    "flops": 2472,
+    "area": 54040.3,
+    "macros": 11,
+    "sram_bits": 69632
+   },
+   "clock_domain_conversion_iq": {
+    "cells": 183,
+    "flops": 61,
+    "area": 357.5,
+    "macros": 0,
+    "sram_bits": 0
+   },
+   "auxiliary_daemon": {
+    "cells": 299,
+    "flops": 48,
+    "area": 486.2,
+    "macros": 1,
+    "sram_bits": 1048576
+   },
+   "btle_ll": {
+    "cells": 9453,
+    "flops": 2036,
+    "area": 16746.3,
+    "macros": 3,
+    "sram_bits": 17862
+   },
+   "btle_controller": {
+    "cells": 50295,
+    "flops": 4578,
+    "area": 71706.4,
+    "macros": 15,
+    "sram_bits": 1136070
+   }
+  },
+  "ble-tx-pdu-we": {
+   "crc24": {
+    "cells": 210,
+    "flops": 38,
+    "area": 359.1,
+    "macros": 0,
+    "sram_bits": 0
+   },
+   "scramble": {
+    "cells": 90,
+    "flops": 17,
+    "area": 154.3,
+    "macros": 0,
+    "sram_bits": 0
+   },
+   "bit_repeat_upsample": {
+    "cells": 61,
+    "flops": 14,
+    "area": 110.1,
+    "macros": 0,
+    "sram_bits": 0
+   },
+   "gauss_filter": {
+    "cells": 166,
+    "flops": 22,
+    "area": 256.7,
+    "macros": 0,
+    "sram_bits": 0
+   },
+   "vco": {
+    "cells": 349,
+    "flops": 63,
+    "area": 635.7,
+    "macros": 1,
+    "sram_bits": 4096
+   },
+   "gfsk_modulation": {
+    "cells": 562,
+    "flops": 99,
+    "area": 994.8,
+    "macros": 1,
+    "sram_bits": 4096
+   },
+   "btle_tx": {
+    "cells": 1299,
+    "flops": 257,
+    "area": 2415.0,
+    "macros": 2,
+    "sram_bits": 6144
+   },
+   "gfsk_demodulation": {
+    "cells": 3899,
+    "flops": 100,
+    "area": 4757.4,
+    "macros": 0,
+    "sram_bits": 0
+   },
+   "search_unique_bit_sequence": {
+    "cells": 202,
+    "flops": 33,
+    "area": 324.8,
+    "macros": 0,
+    "sram_bits": 0
+   },
+   "btle_rx_core": {
+    "cells": 4435,
+    "flops": 202,
+    "area": 5664.7,
+    "macros": 0,
+    "sram_bits": 0
+   },
+   "btle_rx": {
+    "cells": 36910,
+    "flops": 2068,
+    "area": 48826.4,
+    "macros": 8,
+    "sram_bits": 32768
+   },
+   "btle_phy": {
+    "cells": 38136,
+    "flops": 2325,
+    "area": 51174.1,
+    "macros": 10,
+    "sram_bits": 38912
+   },
+   "clock_domain_conversion_iq": {
+    "cells": 183,
+    "flops": 61,
+    "area": 357.5,
+    "macros": 0,
+    "sram_bits": 0
+   },
+   "auxiliary_daemon": {
+    "cells": 299,
+    "flops": 48,
+    "area": 486.2,
+    "macros": 1,
+    "sram_bits": 1048576
+   },
+   "btle_ll": {
+    "cells": 9478,
+    "flops": 2036,
+    "area": 16748.2,
+    "macros": 3,
+    "sram_bits": 17862
+   },
+   "btle_controller": {
+    "cells": 48056,
+    "flops": 4432,
+    "area": 68767.4,
+    "macros": 14,
+    "sram_bits": 1105350
+   }
+  }
+ },
+ "timing": {
+  "master": {
+   "ref_controller": {
+    "unbuffered_ns": 6.073,
+    "comb_path_ns": 1.631,
+    "seq_overhead_ns": 0.359,
+    "min_period_ns": 1.991,
+    "slack_at_target_ns": 60.509,
+    "fmax_MHz": 502.3,
+    "start": "btle_phy_i.btle_rx_i.genblk1[2].btle_rx_core_i.gfsk_demodulation_i.i1[5]",
+    "end": "btle_phy_i.btle_rx_i.genblk1[2].btle_rx_core_i.gfsk_demodulation_i.signal_for_decision[31]"
+   },
+   "dut_controller": {
+    "unbuffered_ns": 6.073,
+    "comb_path_ns": 1.631,
+    "seq_overhead_ns": 0.359,
+    "min_period_ns": 1.991,
+    "slack_at_target_ns": 60.509,
+    "fmax_MHz": 502.3,
+    "start": "btle_phy_i.btle_rx_i.genblk1[2].btle_rx_core_i.gfsk_demodulation_i.i1[5]",
+    "end": "btle_phy_i.btle_rx_i.genblk1[2].btle_rx_core_i.gfsk_demodulation_i.signal_for_decision[31]"
+   }
+  },
+  "ble-tx-pdu-we": {
+   "ref_controller": {
+    "unbuffered_ns": 6.073,
+    "comb_path_ns": 1.631,
+    "seq_overhead_ns": 0.359,
+    "min_period_ns": 1.991,
+    "slack_at_target_ns": 60.509,
+    "fmax_MHz": 502.3,
+    "start": "btle_phy_i.btle_rx_i.genblk1[2].btle_rx_core_i.gfsk_demodulation_i.i1[5]",
+    "end": "btle_phy_i.btle_rx_i.genblk1[2].btle_rx_core_i.gfsk_demodulation_i.signal_for_decision[31]"
+   },
+   "dut_controller": {
+    "unbuffered_ns": 7.146,
+    "comb_path_ns": 1.69,
+    "seq_overhead_ns": 0.359,
+    "min_period_ns": 2.05,
+    "slack_at_target_ns": 60.45,
+    "fmax_MHz": 487.9,
+    "start": "btle_ll_i.clk_cross_bus_bb_to_s_axi_i.write_data[16]",
+    "end": "btle_ll_i.clk_cross_bus_bb_to_s_axi_i.write_data[76]"
+   }
+  }
+ },
+ "activity": {
+  "master": {
+   "rx": {
+    "ref": {
+     "toggles_per_cycle": 920.25343,
+     "hot_nets": 517,
+     "data": 352403879.1614143,
+     "clock": 875719783.7999746,
+     "total": 1228123662.9613888,
+     "mem": 2718167,
+     "cells": 50506,
+     "blocks": {
+      "top glue": {
+       "toggles_per_cycle": 11.11784,
+       "data": 1379.88036,
+       "clock": 0.0,
+       "cells": 219
+      },
+      "auxiliary_daemon": {
+       "toggles_per_cycle": 29.12048,
+       "data": 8778145.440064995,
+       "clock": 9116668.799999997,
+       "cells": 298
+      },
+      "btle_ll": {
+       "toggles_per_cycle": 41.71794,
+       "data": 11854792.651802957,
+       "clock": 387028349.99999225,
+       "cells": 9484
+      },
+      "btle_rx": {
+       "toggles_per_cycle": 818.96549,
+       "data": 328034523.2493167,
+       "clock": 392776480.79998213,
+       "cells": 36947
+      },
+      "btle_tx (other)": {
+       "toggles_per_cycle": 6.0,
+       "data": 1451583.5,
+       "clock": 42924315.60000018,
+       "cells": 1089
+      },
+      "gauss_filter": {
+       "toggles_per_cycle": 0.0,
+       "data": 0.0,
+       "clock": 33807646.800000064,
+       "cells": 2286
+      },
+      "clock_domain_conversion": {
+       "toggles_per_cycle": 20.33168,
+       "data": 2283454.4398680003,
+       "clock": 10066321.799999999,
+       "cells": 183
+      }
+     }
+    },
+    "dut": {
+     "toggles_per_cycle": 920.25343,
+     "hot_nets": 517,
+     "data": 352403879.1614143,
+     "clock": 875719783.7999746,
+     "total": 1228123662.9613888,
+     "mem": 2718167,
+     "cells": 50506,
+     "blocks": {
+      "top glue": {
+       "toggles_per_cycle": 11.11784,
+       "data": 1379.88036,
+       "clock": 0.0,
+       "cells": 219
+      },
+      "auxiliary_daemon": {
+       "toggles_per_cycle": 29.12048,
+       "data": 8778145.440064995,
+       "clock": 9116668.799999997,
+       "cells": 298
+      },
+      "btle_ll": {
+       "toggles_per_cycle": 41.71794,
+       "data": 11854792.651802957,
+       "clock": 387028349.99999225,
+       "cells": 9484
+      },
+      "btle_rx": {
+       "toggles_per_cycle": 818.96549,
+       "data": 328034523.2493167,
+       "clock": 392776480.79998213,
+       "cells": 36947
+      },
+      "btle_tx (other)": {
+       "toggles_per_cycle": 6.0,
+       "data": 1451583.5,
+       "clock": 42924315.60000018,
+       "cells": 1089
+      },
+      "gauss_filter": {
+       "toggles_per_cycle": 0.0,
+       "data": 0.0,
+       "clock": 33807646.800000064,
+       "cells": 2286
+      },
+      "clock_domain_conversion": {
+       "toggles_per_cycle": 20.33168,
+       "data": 2283454.4398680003,
+       "clock": 10066321.799999999,
+       "cells": 183
+      }
+     }
+    },
+    "window": 100000,
+    "events": "scenario rx window 100000 cycles (20651..120651) rx_packets 18 rx_irqs 17 rx_crc_ok 13 tx_packets 0 axi_reads 306 mismatches 0"
+   },
+   "tx": {
+    "ref": {
+     "toggles_per_cycle": 292.21646,
+     "hot_nets": 754,
+     "data": 123817324.2996954,
+     "clock": 875719783.7999746,
+     "total": 999537108.0996699,
+     "mem": 2745143,
+     "cells": 50506,
+     "blocks": {
+      "top glue": {
+       "toggles_per_cycle": 7.11818,
+       "data": 3028.5440000000035,
+       "clock": 0.0,
+       "cells": 219
+      },
+      "auxiliary_daemon": {
+       "toggles_per_cycle": 5.2664,
+       "data": 1786143.9099570005,
+       "clock": 9116668.799999997,
+       "cells": 298
+      },
+      "btle_ll": {
+       "toggles_per_cycle": 28.92403,
+       "data": 8906271.51598598,
+       "clock": 387028349.99999225,
+       "cells": 9484
+      },
+      "btle_rx": {
+       "toggles_per_cycle": 91.61483,
+       "data": 60610568.935946,
+       "clock": 392776480.79998213,
+       "cells": 36947
+      },
+      "btle_tx (other)": {
+       "toggles_per_cycle": 67.97603,
+       "data": 17669172.916061003,
+       "clock": 42924315.60000018,
+       "cells": 1089
+      },
+      "gauss_filter": {
+       "toggles_per_cycle": 79.14181,
+       "data": 32348909.642247997,
+       "clock": 33807646.800000064,
+       "cells": 2286
+      },
+      "clock_domain_conversion": {
+       "toggles_per_cycle": 19.17518,
+       "data": 2493228.8354970007,
+       "clock": 10066321.799999999,
+       "cells": 183
+      }
+     }
+    },
+    "dut": {
+     "toggles_per_cycle": 292.21646,
+     "hot_nets": 754,
+     "data": 123817324.2996954,
+     "clock": 875719783.7999746,
+     "total": 999537108.0996699,
+     "mem": 2745143,
+     "cells": 50506,
+     "blocks": {
+      "top glue": {
+       "toggles_per_cycle": 7.11818,
+       "data": 3028.5440000000035,
+       "clock": 0.0,
+       "cells": 219
+      },
+      "auxiliary_daemon": {
+       "toggles_per_cycle": 5.2664,
+       "data": 1786143.9099570005,
+       "clock": 9116668.799999997,
+       "cells": 298
+      },
+      "btle_ll": {
+       "toggles_per_cycle": 28.92403,
+       "data": 8906271.51598598,
+       "clock": 387028349.99999225,
+       "cells": 9484
+      },
+      "btle_rx": {
+       "toggles_per_cycle": 91.61483,
+       "data": 60610568.935946,
+       "clock": 392776480.79998213,
+       "cells": 36947
+      },
+      "btle_tx (other)": {
+       "toggles_per_cycle": 67.97603,
+       "data": 17669172.916061003,
+       "clock": 42924315.60000018,
+       "cells": 1089
+      },
+      "gauss_filter": {
+       "toggles_per_cycle": 79.14181,
+       "data": 32348909.642247997,
+       "clock": 33807646.800000064,
+       "cells": 2286
+      },
+      "clock_domain_conversion": {
+       "toggles_per_cycle": 19.17518,
+       "data": 2493228.8354970007,
+       "clock": 10066321.799999999,
+       "cells": 183
+      }
+     }
+    },
+    "window": 100000,
+    "events": "scenario tx window 100000 cycles (20651..120651) rx_packets 0 rx_irqs 0 rx_crc_ok 0 tx_packets 17 axi_reads 0 mismatches 0"
+   },
+   "mixed": {
+    "ref": {
+     "toggles_per_cycle": 984.30055,
+     "hot_nets": 839,
+     "data": 372923569.6104233,
+     "clock": 875719783.7999746,
+     "total": 1248643353.410398,
+     "mem": 3044741,
+     "cells": 50506,
+     "blocks": {
+      "top glue": {
+       "toggles_per_cycle": 12.26282,
+       "data": 2258.158120000002,
+       "clock": 0.0,
+       "cells": 219
+      },
+      "auxiliary_daemon": {
+       "toggles_per_cycle": 37.62629,
+       "data": 11524866.508144993,
+       "clock": 9116668.799999997,
+       "cells": 298
+      },
+      "btle_ll": {
+       "toggles_per_cycle": 41.4952,
+       "data": 12118159.91213302,
+       "clock": 387028349.99999225,
+       "cells": 9484
+      },
+      "btle_rx": {
+       "toggles_per_cycle": 791.09038,
+       "data": 319856324.2476886,
+       "clock": 392776480.79998213,
+       "cells": 36947
+      },
+      "btle_tx (other)": {
+       "toggles_per_cycle": 37.43593,
+       "data": 9617053.16438999,
+       "clock": 42924315.60000018,
+       "cells": 1089
+      },
+      "gauss_filter": {
+       "toggles_per_cycle": 39.13393,
+       "data": 16012060.560415978,
+       "clock": 33807646.800000064,
+       "cells": 2286
+      },
+      "clock_domain_conversion": {
+       "toggles_per_cycle": 32.256,
+       "data": 3792847.0595269958,
+       "clock": 10066321.799999999,
+       "cells": 183
+      }
+     }
+    },
+    "dut": {
+     "toggles_per_cycle": 984.30055,
+     "hot_nets": 839,
+     "data": 372923569.6104233,
+     "clock": 875719783.7999746,
+     "total": 1248643353.410398,
+     "mem": 3044741,
+     "cells": 50506,
+     "blocks": {
+      "top glue": {
+       "toggles_per_cycle": 12.26282,
+       "data": 2258.158120000002,
+       "clock": 0.0,
+       "cells": 219
+      },
+      "auxiliary_daemon": {
+       "toggles_per_cycle": 37.62629,
+       "data": 11524866.508144993,
+       "clock": 9116668.799999997,
+       "cells": 298
+      },
+      "btle_ll": {
+       "toggles_per_cycle": 41.4952,
+       "data": 12118159.91213302,
+       "clock": 387028349.99999225,
+       "cells": 9484
+      },
+      "btle_rx": {
+       "toggles_per_cycle": 791.09038,
+       "data": 319856324.2476886,
+       "clock": 392776480.79998213,
+       "cells": 36947
+      },
+      "btle_tx (other)": {
+       "toggles_per_cycle": 37.43593,
+       "data": 9617053.16438999,
+       "clock": 42924315.60000018,
+       "cells": 1089
+      },
+      "gauss_filter": {
+       "toggles_per_cycle": 39.13393,
+       "data": 16012060.560415978,
+       "clock": 33807646.800000064,
+       "cells": 2286
+      },
+      "clock_domain_conversion": {
+       "toggles_per_cycle": 32.256,
+       "data": 3792847.0595269958,
+       "clock": 10066321.799999999,
+       "cells": 183
+      }
+     }
+    },
+    "window": 100000,
+    "events": "scenario mixed window 100000 cycles (20651..120651) rx_packets 9 rx_irqs 9 rx_crc_ok 6 tx_packets 8 axi_reads 202 mismatches 0"
+   },
+   "idle": {
+    "ref": {
+     "toggles_per_cycle": 989.37002,
+     "hot_nets": 631,
+     "data": 381726762.9065892,
+     "clock": 875719783.7999746,
+     "total": 1257446546.7065637,
+     "mem": 3096050,
+     "cells": 50506,
+     "blocks": {
+      "top glue": {
+       "toggles_per_cycle": 14.96095,
+       "data": 0.0,
+       "clock": 0.0,
+       "cells": 219
+      },
+      "auxiliary_daemon": {
+       "toggles_per_cycle": 41.76689,
+       "data": 14593416.415115993,
+       "clock": 9116668.799999997,
+       "cells": 298
+      },
+      "btle_ll": {
+       "toggles_per_cycle": 27.93287,
+       "data": 7934650.949887995,
+       "clock": 387028349.99999225,
+       "cells": 9484
+      },
+      "btle_rx": {
+       "toggles_per_cycle": 869.86599,
+       "data": 353720410.7696423,
+       "clock": 392776480.79998213,
+       "cells": 36947
+      },
+      "btle_tx (other)": {
+       "toggles_per_cycle": 6.0,
+       "data": 1451583.5,
+       "clock": 42924315.60000018,
+       "cells": 1089
+      },
+      "gauss_filter": {
+       "toggles_per_cycle": 0.0,
+       "data": 0.0,
+       "clock": 33807646.800000064,
+       "cells": 2286
+      },
+      "clock_domain_conversion": {
+       "toggles_per_cycle": 35.84332,
+       "data": 4026701.2719429997,
+       "clock": 10066321.799999999,
+       "cells": 183
+      }
+     }
+    },
+    "dut": {
+     "toggles_per_cycle": 989.37002,
+     "hot_nets": 631,
+     "data": 381726762.9065892,
+     "clock": 875719783.7999746,
+     "total": 1257446546.7065637,
+     "mem": 3096050,
+     "cells": 50506,
+     "blocks": {
+      "top glue": {
+       "toggles_per_cycle": 14.96095,
+       "data": 0.0,
+       "clock": 0.0,
+       "cells": 219
+      },
+      "auxiliary_daemon": {
+       "toggles_per_cycle": 41.76689,
+       "data": 14593416.415115993,
+       "clock": 9116668.799999997,
+       "cells": 298
+      },
+      "btle_ll": {
+       "toggles_per_cycle": 27.93287,
+       "data": 7934650.949887995,
+       "clock": 387028349.99999225,
+       "cells": 9484
+      },
+      "btle_rx": {
+       "toggles_per_cycle": 869.86599,
+       "data": 353720410.7696423,
+       "clock": 392776480.79998213,
+       "cells": 36947
+      },
+      "btle_tx (other)": {
+       "toggles_per_cycle": 6.0,
+       "data": 1451583.5,
+       "clock": 42924315.60000018,
+       "cells": 1089
+      },
+      "gauss_filter": {
+       "toggles_per_cycle": 0.0,
+       "data": 0.0,
+       "clock": 33807646.800000064,
+       "cells": 2286
+      },
+      "clock_domain_conversion": {
+       "toggles_per_cycle": 35.84332,
+       "data": 4026701.2719429997,
+       "clock": 10066321.799999999,
+       "cells": 183
+      }
+     }
+    },
+    "window": 100000,
+    "events": "scenario idle window 100000 cycles (20651..120651) rx_packets 0 rx_irqs 0 rx_crc_ok 0 tx_packets 0 axi_reads 0 mismatches 0"
+   },
+   "idle0": {
+    "ref": {
+     "toggles_per_cycle": 134.8141,
+     "hot_nets": 339,
+     "data": 72232133.79579087,
+     "clock": 875719783.7999746,
+     "total": 947951917.5957655,
+     "mem": 2299975,
+     "cells": 50506,
+     "blocks": {
+      "top glue": {
+       "toggles_per_cycle": 7.0,
+       "data": 0.0,
+       "clock": 0.0,
+       "cells": 219
+      },
+      "auxiliary_daemon": {
+       "toggles_per_cycle": 5.2664,
+       "data": 1786143.9099570005,
+       "clock": 9116668.799999997,
+       "cells": 298
+      },
+      "btle_ll": {
+       "toggles_per_cycle": 27.93287,
+       "data": 7934650.949887999,
+       "clock": 387028349.99999225,
+       "cells": 9484
+      },
+      "btle_rx": {
+       "toggles_per_cycle": 91.61483,
+       "data": 60610568.93594589,
+       "clock": 392776480.79998213,
+       "cells": 36947
+      },
+      "btle_tx (other)": {
+       "toggles_per_cycle": 6.0,
+       "data": 1451583.5,
+       "clock": 42924315.60000018,
+       "cells": 1089
+      },
+      "gauss_filter": {
+       "toggles_per_cycle": 0.0,
+       "data": 0.0,
+       "clock": 33807646.800000064,
+       "cells": 2286
+      },
+      "clock_domain_conversion": {
+       "toggles_per_cycle": 4.0,
+       "data": 449186.5,
+       "clock": 10066321.799999999,
+       "cells": 183
+      }
+     }
+    },
+    "dut": {
+     "toggles_per_cycle": 134.8141,
+     "hot_nets": 339,
+     "data": 72232133.79579087,
+     "clock": 875719783.7999746,
+     "total": 947951917.5957655,
+     "mem": 2299975,
+     "cells": 50506,
+     "blocks": {
+      "top glue": {
+       "toggles_per_cycle": 7.0,
+       "data": 0.0,
+       "clock": 0.0,
+       "cells": 219
+      },
+      "auxiliary_daemon": {
+       "toggles_per_cycle": 5.2664,
+       "data": 1786143.9099570005,
+       "clock": 9116668.799999997,
+       "cells": 298
+      },
+      "btle_ll": {
+       "toggles_per_cycle": 27.93287,
+       "data": 7934650.949887999,
+       "clock": 387028349.99999225,
+       "cells": 9484
+      },
+      "btle_rx": {
+       "toggles_per_cycle": 91.61483,
+       "data": 60610568.93594589,
+       "clock": 392776480.79998213,
+       "cells": 36947
+      },
+      "btle_tx (other)": {
+       "toggles_per_cycle": 6.0,
+       "data": 1451583.5,
+       "clock": 42924315.60000018,
+       "cells": 1089
+      },
+      "gauss_filter": {
+       "toggles_per_cycle": 0.0,
+       "data": 0.0,
+       "clock": 33807646.800000064,
+       "cells": 2286
+      },
+      "clock_domain_conversion": {
+       "toggles_per_cycle": 4.0,
+       "data": 449186.5,
+       "clock": 10066321.799999999,
+       "cells": 183
+      }
+     }
+    },
+    "window": 100000,
+    "events": "scenario idle0 window 100000 cycles (20651..120651) rx_packets 0 rx_irqs 0 rx_crc_ok 0 tx_packets 0 axi_reads 0 mismatches 0"
+   }
+  },
+  "ble-tx-pdu-we": {
+   "rx": {
+    "ref": {
+     "toggles_per_cycle": 920.25343,
+     "hot_nets": 517,
+     "data": 352403879.1614119,
+     "clock": 875719783.7999746,
+     "total": 1228123662.9613864,
+     "mem": 2718167,
+     "cells": 50506,
+     "blocks": {
+      "top glue": {
+       "toggles_per_cycle": 11.11784,
+       "data": 1379.88036,
+       "clock": 0.0,
+       "cells": 219
+      },
+      "auxiliary_daemon": {
+       "toggles_per_cycle": 29.12048,
+       "data": 8778145.440064998,
+       "clock": 9116668.799999997,
+       "cells": 298
+      },
+      "btle_ll": {
+       "toggles_per_cycle": 41.71794,
+       "data": 11854792.651802953,
+       "clock": 387028349.99999225,
+       "cells": 9484
+      },
+      "btle_rx": {
+       "toggles_per_cycle": 818.96549,
+       "data": 328034523.2493162,
+       "clock": 392776480.79998213,
+       "cells": 36947
+      },
+      "btle_tx (other)": {
+       "toggles_per_cycle": 6.0,
+       "data": 1451583.5,
+       "clock": 42924315.60000018,
+       "cells": 1089
+      },
+      "gauss_filter": {
+       "toggles_per_cycle": 0.0,
+       "data": 0.0,
+       "clock": 33807646.800000064,
+       "cells": 2286
+      },
+      "clock_domain_conversion": {
+       "toggles_per_cycle": 20.33168,
+       "data": 2283454.439868,
+       "clock": 10066321.799999999,
+       "cells": 183
+      }
+     }
+    },
+    "dut": {
+     "toggles_per_cycle": 920.05725,
+     "hot_nets": 514,
+     "data": 352551614.0847677,
+     "clock": 847989916.1999745,
+     "total": 1200541530.2847424,
+     "mem": 2718167,
+     "cells": 48427,
+     "blocks": {
+      "top glue": {
+       "toggles_per_cycle": 11.11784,
+       "data": 1379.88036,
+       "clock": 189930.6,
+       "cells": 221
+      },
+      "auxiliary_daemon": {
+       "toggles_per_cycle": 29.12048,
+       "data": 8778052.247263,
+       "clock": 9116668.799999997,
+       "cells": 298
+      },
+      "btle_ll": {
+       "toggles_per_cycle": 41.33605,
+       "data": 11545258.220704984,
+       "clock": 387028349.9999922,
+       "cells": 9488
+      },
+      "btle_rx": {
+       "toggles_per_cycle": 819.1512,
+       "data": 328491885.79657066,
+       "clock": 392776480.79998213,
+       "cells": 36936
+      },
+      "btle_tx (other)": {
+       "toggles_per_cycle": 6.0,
+       "data": 1451583.5,
+       "clock": 44633691.00000015,
+       "cells": 1135
+      },
+      "gauss_filter": {
+       "toggles_per_cycle": 0.0,
+       "data": 0.0,
+       "clock": 4178473.2000000007,
+       "cells": 166
+      },
+      "clock_domain_conversion": {
+       "toggles_per_cycle": 20.33168,
+       "data": 2283454.439868,
+       "clock": 10066321.799999999,
+       "cells": 183
+      }
+     }
+    },
+    "window": 100000,
+    "events": "scenario rx window 100000 cycles (20651..120651) rx_packets 18 rx_irqs 17 rx_crc_ok 13 tx_packets 0 axi_reads 306 mismatches 0"
+   },
+   "tx": {
+    "ref": {
+     "toggles_per_cycle": 292.21646,
+     "hot_nets": 754,
+     "data": 123817324.29969534,
+     "clock": 875719783.7999746,
+     "total": 999537108.0996699,
+     "mem": 2745143,
+     "cells": 50506,
+     "blocks": {
+      "top glue": {
+       "toggles_per_cycle": 7.11818,
+       "data": 3028.5440000000035,
+       "clock": 0.0,
+       "cells": 219
+      },
+      "auxiliary_daemon": {
+       "toggles_per_cycle": 5.2664,
+       "data": 1786143.9099570008,
+       "clock": 9116668.799999997,
+       "cells": 298
+      },
+      "btle_ll": {
+       "toggles_per_cycle": 28.92403,
+       "data": 8906271.515985982,
+       "clock": 387028349.99999225,
+       "cells": 9484
+      },
+      "btle_rx": {
+       "toggles_per_cycle": 91.61483,
+       "data": 60610568.93594593,
+       "clock": 392776480.79998213,
+       "cells": 36947
+      },
+      "btle_tx (other)": {
+       "toggles_per_cycle": 67.97603,
+       "data": 17669172.916061006,
+       "clock": 42924315.60000018,
+       "cells": 1089
+      },
+      "gauss_filter": {
+       "toggles_per_cycle": 79.14181,
+       "data": 32348909.64224803,
+       "clock": 33807646.800000064,
+       "cells": 2286
+      },
+      "clock_domain_conversion": {
+       "toggles_per_cycle": 19.17518,
+       "data": 2493228.835497,
+       "clock": 10066321.799999999,
+       "cells": 183
+      }
+     }
+    },
+    "dut": {
+     "toggles_per_cycle": 290.82341,
+     "hot_nets": 781,
+     "data": 125525316.83247086,
+     "clock": 847989916.1999745,
+     "total": 973515233.0324454,
+     "mem": 3182191,
+     "cells": 48427,
+     "blocks": {
+      "top glue": {
+       "toggles_per_cycle": 7.13042,
+       "data": 4179.216608000004,
+       "clock": 189930.6,
+       "cells": 221
+      },
+      "auxiliary_daemon": {
+       "toggles_per_cycle": 5.2664,
+       "data": 1786143.9099570008,
+       "clock": 9116668.799999997,
+       "cells": 298
+      },
+      "btle_ll": {
+       "toggles_per_cycle": 29.94909,
+       "data": 9070196.466945965,
+       "clock": 387028349.9999922,
+       "cells": 9488
+      },
+      "btle_rx": {
+       "toggles_per_cycle": 90.10957,
+       "data": 60521821.95698203,
+       "clock": 392776480.79998213,
+       "cells": 36936
+      },
+      "btle_tx (other)": {
+       "toggles_per_cycle": 123.62249,
+       "data": 41058520.36252304,
+       "clock": 44633691.00000015,
+       "cells": 1135
+      },
+      "gauss_filter": {
+       "toggles_per_cycle": 22.57026,
+       "data": 10591226.083958011,
+       "clock": 4178473.2000000007,
+       "cells": 166
+      },
+      "clock_domain_conversion": {
+       "toggles_per_cycle": 19.17518,
+       "data": 2493228.835497,
+       "clock": 10066321.799999999,
+       "cells": 183
+      }
+     }
+    },
+    "window": 100000,
+    "events": "scenario tx window 100000 cycles (20651..120651) rx_packets 0 rx_irqs 0 rx_crc_ok 0 tx_packets 17 axi_reads 0 mismatches 0"
+   },
+   "mixed": {
+    "ref": {
+     "toggles_per_cycle": 984.30055,
+     "hot_nets": 839,
+     "data": 372923569.61042285,
+     "clock": 875719783.7999746,
+     "total": 1248643353.4103975,
+     "mem": 3044741,
+     "cells": 50506,
+     "blocks": {
+      "top glue": {
+       "toggles_per_cycle": 12.26282,
+       "data": 2258.1581199999996,
+       "clock": 0.0,
+       "cells": 219
+      },
+      "auxiliary_daemon": {
+       "toggles_per_cycle": 37.62629,
+       "data": 11524866.50814499,
+       "clock": 9116668.799999997,
+       "cells": 298
+      },
+      "btle_ll": {
+       "toggles_per_cycle": 41.4952,
+       "data": 12118159.912132997,
+       "clock": 387028349.99999225,
+       "cells": 9484
+      },
+      "btle_rx": {
+       "toggles_per_cycle": 791.09038,
+       "data": 319856324.2476917,
+       "clock": 392776480.79998213,
+       "cells": 36947
+      },
+      "btle_tx (other)": {
+       "toggles_per_cycle": 37.43593,
+       "data": 9617053.164390007,
+       "clock": 42924315.60000018,
+       "cells": 1089
+      },
+      "gauss_filter": {
+       "toggles_per_cycle": 39.13393,
+       "data": 16012060.560415983,
+       "clock": 33807646.800000064,
+       "cells": 2286
+      },
+      "clock_domain_conversion": {
+       "toggles_per_cycle": 32.256,
+       "data": 3792847.059526996,
+       "clock": 10066321.799999999,
+       "cells": 183
+      }
+     }
+    },
+    "dut": {
+     "toggles_per_cycle": 983.6001,
+     "hot_nets": 951,
+     "data": 373901604.7859706,
+     "clock": 847989916.1999745,
+     "total": 1221891520.9859452,
+     "mem": 3262233,
+     "cells": 48427,
+     "blocks": {
+      "top glue": {
+       "toggles_per_cycle": 12.26894,
+       "data": 2833.4944240000027,
+       "clock": 189930.6,
+       "cells": 221
+      },
+      "auxiliary_daemon": {
+       "toggles_per_cycle": 37.62629,
+       "data": 11524579.263102988,
+       "clock": 9116668.799999997,
+       "cells": 298
+      },
+      "btle_ll": {
+       "toggles_per_cycle": 41.13064,
+       "data": 11812468.444282992,
+       "clock": 387028349.9999922,
+       "cells": 9488
+      },
+      "btle_rx": {
+       "toggles_per_cycle": 791.10981,
+       "data": 320296757.50974315,
+       "clock": 392776480.79998213,
+       "cells": 36936
+      },
+      "btle_tx (other)": {
+       "toggles_per_cycle": 65.04104,
+       "data": 21221888.403451018,
+       "clock": 44633691.00000015,
+       "cells": 1135
+      },
+      "gauss_filter": {
+       "toggles_per_cycle": 11.16738,
+       "data": 5250230.611439001,
+       "clock": 4178473.2000000007,
+       "cells": 166
+      },
+      "clock_domain_conversion": {
+       "toggles_per_cycle": 32.256,
+       "data": 3792847.059526996,
+       "clock": 10066321.799999999,
+       "cells": 183
+      }
+     }
+    },
+    "window": 100000,
+    "events": "scenario mixed window 100000 cycles (20651..120651) rx_packets 9 rx_irqs 9 rx_crc_ok 6 tx_packets 8 axi_reads 202 mismatches 0"
+   },
+   "idle": {
+    "ref": {
+     "toggles_per_cycle": 989.37002,
+     "hot_nets": 631,
+     "data": 381726762.9065912,
+     "clock": 875719783.7999746,
+     "total": 1257446546.7065659,
+     "mem": 3096050,
+     "cells": 50506,
+     "blocks": {
+      "top glue": {
+       "toggles_per_cycle": 14.96095,
+       "data": 0.0,
+       "clock": 0.0,
+       "cells": 219
+      },
+      "auxiliary_daemon": {
+       "toggles_per_cycle": 41.76689,
+       "data": 14593416.415115995,
+       "clock": 9116668.799999997,
+       "cells": 298
+      },
+      "btle_ll": {
+       "toggles_per_cycle": 27.93287,
+       "data": 7934650.949887997,
+       "clock": 387028349.99999225,
+       "cells": 9484
+      },
+      "btle_rx": {
+       "toggles_per_cycle": 869.86599,
+       "data": 353720410.7696456,
+       "clock": 392776480.79998213,
+       "cells": 36947
+      },
+      "btle_tx (other)": {
+       "toggles_per_cycle": 6.0,
+       "data": 1451583.5,
+       "clock": 42924315.60000018,
+       "cells": 1089
+      },
+      "gauss_filter": {
+       "toggles_per_cycle": 0.0,
+       "data": 0.0,
+       "clock": 33807646.800000064,
+       "cells": 2286
+      },
+      "clock_domain_conversion": {
+       "toggles_per_cycle": 35.84332,
+       "data": 4026701.271943,
+       "clock": 10066321.799999999,
+       "cells": 183
+      }
+     }
+    },
+    "dut": {
+     "toggles_per_cycle": 990.5639,
+     "hot_nets": 632,
+     "data": 382313572.3543426,
+     "clock": 847989916.1999745,
+     "total": 1230303488.554317,
+     "mem": 3096050,
+     "cells": 48427,
+     "blocks": {
+      "top glue": {
+       "toggles_per_cycle": 14.96095,
+       "data": 0.0,
+       "clock": 189930.6,
+       "cells": 221
+      },
+      "auxiliary_daemon": {
+       "toggles_per_cycle": 41.76689,
+       "data": 14592796.972091995,
+       "clock": 9116668.799999997,
+       "cells": 298
+      },
+      "btle_ll": {
+       "toggles_per_cycle": 28.93059,
+       "data": 8093304.835624991,
+       "clock": 387028349.9999922,
+       "cells": 9488
+      },
+      "btle_rx": {
+       "toggles_per_cycle": 870.06215,
+       "data": 354149185.77468204,
+       "clock": 392776480.79998213,
+       "cells": 36936
+      },
+      "btle_tx (other)": {
+       "toggles_per_cycle": 6.0,
+       "data": 1451583.5,
+       "clock": 44633691.00000015,
+       "cells": 1135
+      },
+      "gauss_filter": {
+       "toggles_per_cycle": 0.0,
+       "data": 0.0,
+       "clock": 4178473.2000000007,
+       "cells": 166
+      },
+      "clock_domain_conversion": {
+       "toggles_per_cycle": 35.84332,
+       "data": 4026701.271943,
+       "clock": 10066321.799999999,
+       "cells": 183
+      }
+     }
+    },
+    "window": 100000,
+    "events": "scenario idle window 100000 cycles (20651..120651) rx_packets 0 rx_irqs 0 rx_crc_ok 0 tx_packets 0 axi_reads 0 mismatches 0"
+   },
+   "idle0": {
+    "ref": {
+     "toggles_per_cycle": 134.8141,
+     "hot_nets": 339,
+     "data": 72232133.79579093,
+     "clock": 875719783.7999746,
+     "total": 947951917.5957655,
+     "mem": 2299975,
+     "cells": 50506,
+     "blocks": {
+      "top glue": {
+       "toggles_per_cycle": 7.0,
+       "data": 0.0,
+       "clock": 0.0,
+       "cells": 219
+      },
+      "auxiliary_daemon": {
+       "toggles_per_cycle": 5.2664,
+       "data": 1786143.9099570003,
+       "clock": 9116668.799999997,
+       "cells": 298
+      },
+      "btle_ll": {
+       "toggles_per_cycle": 27.93287,
+       "data": 7934650.949888001,
+       "clock": 387028349.99999225,
+       "cells": 9484
+      },
+      "btle_rx": {
+       "toggles_per_cycle": 91.61483,
+       "data": 60610568.935945965,
+       "clock": 392776480.79998213,
+       "cells": 36947
+      },
+      "btle_tx (other)": {
+       "toggles_per_cycle": 6.0,
+       "data": 1451583.5,
+       "clock": 42924315.60000018,
+       "cells": 1089
+      },
+      "gauss_filter": {
+       "toggles_per_cycle": 0.0,
+       "data": 0.0,
+       "clock": 33807646.800000064,
+       "cells": 2286
+      },
+      "clock_domain_conversion": {
+       "toggles_per_cycle": 4.0,
+       "data": 449186.5,
+       "clock": 10066321.799999999,
+       "cells": 183
+      }
+     }
+    },
+    "dut": {
+     "toggles_per_cycle": 134.30656,
+     "hot_nets": 338,
+     "data": 72302040.70256397,
+     "clock": 847989916.1999745,
+     "total": 920291956.9025385,
+     "mem": 2299975,
+     "cells": 48427,
+     "blocks": {
+      "top glue": {
+       "toggles_per_cycle": 7.0,
+       "data": 0.0,
+       "clock": 189930.6,
+       "cells": 221
+      },
+      "auxiliary_daemon": {
+       "toggles_per_cycle": 5.2664,
+       "data": 1786143.9099570003,
+       "clock": 9116668.799999997,
+       "cells": 298
+      },
+      "btle_ll": {
+       "toggles_per_cycle": 28.93059,
+       "data": 8093304.835624998,
+       "clock": 387028349.9999922,
+       "cells": 9488
+      },
+      "btle_rx": {
+       "toggles_per_cycle": 90.10957,
+       "data": 60521821.95698199,
+       "clock": 392776480.79998213,
+       "cells": 36936
+      },
+      "btle_tx (other)": {
+       "toggles_per_cycle": 6.0,
+       "data": 1451583.5,
+       "clock": 44633691.00000015,
+       "cells": 1135
+      },
+      "gauss_filter": {
+       "toggles_per_cycle": 0.0,
+       "data": 0.0,
+       "clock": 4178473.2000000007,
+       "cells": 166
+      },
+      "clock_domain_conversion": {
+       "toggles_per_cycle": 4.0,
+       "data": 449186.5,
+       "clock": 10066321.799999999,
+       "cells": 183
+      }
+     }
+    },
+    "window": 100000,
+    "events": "scenario idle0 window 100000 cycles (20651..120651) rx_packets 0 rx_irqs 0 rx_crc_ok 0 tx_packets 0 axi_reads 0 mismatches 0"
+   }
+  }
+ },
+ "checks": [
+  {
+   "check": "`master` controller cells equal the committed run `baseline-upstream` (50 295)",
+   "ok": true
+  },
+  {
+   "check": "upstream controller timed identically in every run (period and path)",
+   "ok": true
+  },
+  {
+   "check": "`master` dut controller timed identically to the upstream reference",
+   "ok": true
+  },
+  {
+   "check": "upstream side identical in every run, scenario `rx`",
+   "ok": true
+  },
+  {
+   "check": "`master` equals upstream exactly, scenario `rx`",
+   "ok": true
+  },
+  {
+   "check": "upstream side identical in every run, scenario `tx`",
+   "ok": true
+  },
+  {
+   "check": "`master` equals upstream exactly, scenario `tx`",
+   "ok": true
+  },
+  {
+   "check": "upstream side identical in every run, scenario `mixed`",
+   "ok": true
+  },
+  {
+   "check": "`master` equals upstream exactly, scenario `mixed`",
+   "ok": true
+  },
+  {
+   "check": "upstream side identical in every run, scenario `idle`",
+   "ok": true
+  },
+  {
+   "check": "`master` equals upstream exactly, scenario `idle`",
+   "ok": true
+  },
+  {
+   "check": "upstream side identical in every run, scenario `idle0`",
+   "ok": true
+  },
+  {
+   "check": "`master` equals upstream exactly, scenario `idle0`",
+   "ok": true
+  },
+  {
+   "check": "`master`: activity run on the shared vector set (`vectors.sha256`)",
+   "ok": true
+  },
+  {
+   "check": "`ble-tx-pdu-we`: activity run on the shared vector set (`vectors.sha256`)",
+   "ok": true
+  },
+  {
+   "check": "`master`: gate-level outputs identical to upstream on every clock, 5 scenarios",
+   "ok": true
+  },
+  {
+   "check": "`ble-tx-pdu-we`: gate-level outputs identical to upstream on every clock, 5 scenarios",
+   "ok": true
+  }
+ ]
+}

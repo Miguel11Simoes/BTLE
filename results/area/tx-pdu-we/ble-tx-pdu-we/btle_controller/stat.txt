@@ -1,0 +1,55 @@
+35. Printing statistics.
+
+=== btle_controller ===
+
+        +----------Local Count, excluding submodules.
+        |        +-Local Area, excluding submodules.
+        |        | 
+    48441        - wires
+    55046        - wire bits
+      482        - public wires
+     6735        - public wire bits
+       86        - ports
+      635        - port bits
+    48070 6.88E+04 cells
+        1        -   $print
+     2813 2.99E+03   AND2_X1
+      742   986.86   AND3_X1
+      640  1021.44   AND4_X1
+      400      532   AOI211_X1
+     4633 4.93E+03   AOI21_X1
+      102  162.792   AOI221_X1
+      405   861.84   AOI222_X1
+     1485  1975.05   AOI22_X1
+       60    319.2   DFFR_X1
+        2    10.64   DFFS_X1
+     4370 1.98E+04   DFF_X1
+     4039 2.15E+03   INV_X1
+      888 1.65E+03   MUX2_X1
+     5442 4.34E+03   NAND2_X1
+     1039 1.11E+03   NAND3_X1
+      341   453.53   NAND4_X1
+     4881  3.9E+03   NOR2_X1
+      581  618.184   NOR3_X1
+      213   283.29   NOR4_X1
+      279   371.07   OAI211_X1
+     4350   4628.4   OAI21_X1
+       77  122.892   OAI221_X1
+        3    6.384   OAI222_X1
+      225   299.25   OAI22_X1
+        3    5.586   OAI33_X1
+      946 1.01E+03   OR2_X1
+      917  1219.61   OR3_X1
+       38   60.648   OR4_X1
+     4440  7086.24   XNOR2_X1
+     3701 5.91E+03   XOR2_X1
+        3        -   sdpram_one_clk
+       11        -   sdpram_two_clk
+
+   Area for cell type $print is unknown!
+   Area for cell type \sdpram_one_clk is unknown!
+   Area for cell type \sdpram_two_clk is unknown!
+
+   Chip area for module '\btle_controller': 68767.384000
+     of which used for sequential elements: 20090.980000 (29.22%)
+

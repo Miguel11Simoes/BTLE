@@ -1,0 +1,14 @@
+label=sram-char-trimmed
+date_utc=2026-10-05T02:47:41Z
+git_commit=f810ae4b74b0145b3596307275151991a7762bd3
+openram=1.2.48 (/home/msmiguel/venvs/openram/lib/python3.11/site-packages/openram)
+ngspice=
+tech=freepdk45, nominal corner only (TT, 1.0 V, 25 C), check_lvsdrc=False, netlist_only=True,
+     analytical_delay=False (SPICE), trim_netlist=True, load_scales=[1] slew_scales=[1],
+     period: 5 ns, given
+macros=sram_1rw_8x256 sram_1rw_8x512
+note: char.json and summary.md regenerated at 83b26dd by scripts/power/summarize_sram_char.py from the same .lib and .log files (the runner of f810ae4 gave each case relative to the static leakage only; access energies are now relative to a deselected clock)
+note: char.json and summary.md rewritten again at 3d94645b by scripts/power/summarize_sram_char.py (no --leakage): the
+      leakage is OpenRAM's figure, the supply power 5-10 ns after a power-up from 0 V, not the settled one, so
+      the deselected-clock column is a signed diagnostic; the access energies are unchanged. This run is kept
+      for its access energies, against the untrimmed netlist of run sram-char.

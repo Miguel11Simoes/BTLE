@@ -1,0 +1,10 @@
+label=sram-leakage
+date_utc=2026-10-05T21:17:57Z
+git_commit=3d94645b34fe50335b9de0fefc7f7fb1709213e6
+openram=1.2.48 (/home/msmiguel/venvs/openram/lib/python3.11/site-packages/openram)
+simulator=ngspice of OpenRAM's conda: ngspice compiled from ngspice revision 26
+tech=freepdk45, nominal corner only (TT, 1.0 V, 25 C), netlist_only=True (OpenRAM's whole netlist, every bitcell)
+measure=sram_leakage.py: OpenRAM's leakage run (UIC, every port deselected, address and data 0), every
+        bitcell at 0, one clock pulse at 1-2 ns, 5 us at a step of at most 1 ns; leakage = average supply
+        power over 4.5-5 us
+macros=sram_1rw_8x256 sram_1rw_8x512

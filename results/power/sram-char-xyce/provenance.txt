@@ -1,0 +1,15 @@
+label=sram-char-xyce
+date_utc=2026-10-05T11:59:11Z
+git_commit=9c9227f05078decaf58f2697afd94b3772503464
+openram=1.2.48 (/home/msmiguel/venvs/openram/lib/python3.11/site-packages/openram)
+simulator=xyce (num_sim_threads=4); OpenRAM's conda has: ngspice compiled from ngspice revision 26; Xyce DEVELOPMENT-202312200606-(Public_Release-7.4.0-36-gb7bb12d8)-opensource
+tech=freepdk45, nominal corner only (TT, 1.0 V, 25 C), check_lvsdrc=False, netlist_only=True,
+     analytical_delay=False (SPICE), trim_netlist=False, load_scales=[1] slew_scales=[1],
+     period: 5 ns, given
+macros=sram_1rw_8x256 sram_1rw_8x512 sram_1rw1r_8x512 sram_1rw1r_8x2048
+note: stopped by hand at 2026-10-05T12:34:35Z after the two one-port macros: on the 512 x 8 one Xyce gives a leakage of 3.46 mW and 3.8 mW in a write of a 0 and in the clock after it, an artefact (ngspice: 130 uW); the two-port macros were not run to the end. Kept to show why Xyce is not used; the energies come from run sram-char (ngspice).
+note: char.json and summary.md rewritten at 3d94645b by scripts/power/summarize_sram_char.py (no --leakage). OpenRAM
+      runs Xyce without UIC, from its DC operating point, so its leakage is not the 10-ns snapshot that the
+      summary's sentence describes for ngspice: 13.3 uW on the 256 x 8 macro, near the 15.0 uW of run
+      sram-leakage, and 3.46 mW on the 512 x 8 one, an artefact, as is its 3.8 mW write of a 0. Kept to
+      show why Xyce is not used.

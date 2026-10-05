@@ -1,0 +1,9 @@
+label=tx-pdu-we/ble-tx-pdu-we
+date_utc=2026-10-05T01:38:37Z
+ref=upstream-baseline (85401861e8f4b04b90cbaa0394c0f9d45ed02f18), default parameters
+dut=ble-tx-pdu-we (eec6c8f5c4749227379aad4defa88f025705a583, verilog tree f61412fd9c87c334a459e052f20d84d28934c097), GAUSS_TABLE=1 PDU_WRITE_STROBE=1
+sta_set=controller
+target_clock_ns=62.5
+yosys=Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+abc========= ABC command line "version"
+liberty=NangateOpenCellLibrary_typical.lib sha256=8d540a4d4cf6d09d27c87ad067857a9c0c2eeb023ab7a56e058cd3113db4e9b1

@@ -1,0 +1,82 @@
+{
+ "sram_1rw_8x256": {
+  "ports": "1rw",
+  "words": 256,
+  "bits": 8,
+  "period_ns": 5.0,
+  "leakage_mW": 0.01502404,
+  "leakage_openram_mW": 0.11507719999999999,
+  "leakage_source": "run_sram_leakage.sh (results/power/sram-leakage/leakage.json)",
+  "power_mW": {
+   "clk0": {
+    "!csb0 & !web0": [
+     0.2618894,
+     0.253104
+    ],
+    "csb0 & !web0": [
+     0.1133853,
+     0.09501403
+    ],
+    "!csb0 & web0": [
+     0.2516709,
+     0.2360978
+    ],
+    "csb0 & web0": [
+     0.08355292,
+     0.07584257
+    ]
+   }
+  },
+  "access_pJ": {
+   "write": 0.888995,
+   "read": 0.820933
+  },
+  "clock_pJ": 0.323369,
+  "energy_pJ": {
+   "write": 1.212363,
+   "read": 1.144302,
+   "idle": 0.323369,
+   "idle_web_low": 0.445878
+  }
+ },
+ "sram_1rw_8x512": {
+  "ports": "1rw",
+  "words": 512,
+  "bits": 8,
+  "period_ns": 5.0,
+  "leakage_mW": 0.02510857,
+  "leakage_openram_mW": 0.13030640000000002,
+  "leakage_source": "run_sram_leakage.sh (results/power/sram-leakage/leakage.json)",
+  "power_mW": {
+   "clk0": {
+    "!csb0 & !web0": [
+     0.3189215,
+     0.3444942
+    ],
+    "csb0 & !web0": [
+     0.1338865,
+     0.117489
+    ],
+    "!csb0 & web0": [
+     0.3208293,
+     0.3051186
+    ],
+    "csb0 & web0": [
+     0.1033727,
+     0.09549542
+    ]
+   }
+  },
+  "access_pJ": {
+   "write": 1.161369,
+   "read": 1.067699
+  },
+  "clock_pJ": 0.371627,
+  "energy_pJ": {
+   "write": 1.532996,
+   "read": 1.439327,
+   "idle": 0.371627,
+   "idle_web_low": 0.502896
+  }
+ }
+}

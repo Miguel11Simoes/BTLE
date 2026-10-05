@@ -1,0 +1,12 @@
+label=sram-energy
+date_utc=2026-10-05T22:26:20Z
+harness=d39ee32a1a240ed4cd9fe69feef935d0afd4dd58 (branch int-we), dirty files under scripts/: 0
+ref=5abbbf7a093b48a64f18c2c1f84057c54d0af0e5 (5abbbf7a093b48a64f18c2c1f84057c54d0af0e5), default parameters, in every simulation
+configurations (name, measured revision, commit, verilog/ tree, parameters):
+  master	5abbbf7a093b48a64f18c2c1f84057c54d0af0e5	5abbbf7a093b48a64f18c2c1f84057c54d0af0e5	b4a1da9b396c3908bc3f8f8b4cb22e23072f0092	<none: defaults>
+  ble-tx-pdu	origin/ble-tx-pdu	4e6ffc2501bbb49abaa5f20cd495063a79fc8d5a	b14bfff11f78c78ca7ad9e47288c3c48ec7525d6	GAUSS_TABLE=1
+  ble-tx-pdu-we	origin/ble-tx-pdu-we	cfa24a4f000a878fea6271be68b8981bf99aa784	65a4eeeb804e693d0eb95329dd7db33fef2ab467	GAUSS_TABLE=1 PDU_WRITE_STROBE=1
+window_cycles=100000 (bb_clk = s00_axi_aclk = 16 MHz, rf_clk 8 MHz) seed=1 scenarios=rx tx mixed idle idle0
+vectors=VEC_DIR d53f2d49ed8db456 (sha256 of vectors.sha256)
+iverilog=Icarus Verilog version 14.0 (devel) (s20260301-411-gca6b8d376-dirty)
+sram characterization=/home/msmiguel/btle-runs/pduwe-int/results/power/sram-char (907962cb97f55d7c sha256 of char.json)

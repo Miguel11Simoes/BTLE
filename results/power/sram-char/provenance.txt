@@ -1,0 +1,23 @@
+label=sram-char
+date_utc=2026-10-05T02:46:07Z
+git_commit=f810ae4b74b0145b3596307275151991a7762bd3
+openram=1.2.48 (/home/msmiguel/venvs/openram/lib/python3.11/site-packages/openram)
+ngspice=revision 26, OpenRAM's conda (its version probe in f810ae4 matched nothing; fixed in 9c9227f)
+tech=freepdk45, nominal corner only (TT, 1.0 V, 25 C), check_lvsdrc=False, netlist_only=True,
+     analytical_delay=False (SPICE), trim_netlist=False, load_scales=[1] slew_scales=[1],
+     period: 5 ns, given
+macros=sram_1rw_8x256 sram_1rw_8x512 sram_1rw1r_8x512 sram_1rw1r_8x2048
+note: the runner's shell was ended at about 2026-10-05T11:25Z together with its launcher (the OpenRAM
+      processes, in their own process group under timeout, kept running); its last steps were done by
+      hand: each finished macro's .lib copied from its work folder, <macro>.openram.log is OpenRAM's own log
+      (timestamped), char.json and summary.md written by scripts/power/summarize_sram_char.py at 83b26dd
+      (access energies relative to a deselected clock), logs and .lib compressed.
+note: the WSL machine was suspended for about 5.6 h during the run (the PC slept); the simulations resumed.
+note: sram_1rw1r_8x512 not characterized with ngspice: OpenRAM's leakage run ended (0.1266815 mW, the supply power
+      5-10 ns after a power-up from 0 V), its measurement run did not: it reached the runner's 6 h limit
+      (timeout 21600) and was stopped at 2026-10-05T14:24Z, without a .lib.
+note: sram_1rw1r_8x2048 not characterized with ngspice: its leakage run had not ended after about 4.3 h of CPU (ngspice 26 on the whole 2 048 x 8 two-port netlist); stopped by hand at 2026-10-05T12:48Z.
+note: char.json and summary.md rewritten at 3d94645b by scripts/power/summarize_sram_char.py --leakage
+      results/power/sram-leakage/leakage.json: the settled leakage replaces OpenRAM's figure (kept as
+      leakage_openram_mW), and clock_pJ, the energy of a deselected clock, is relative to it. The .lib
+      files are OpenRAM's, unchanged.

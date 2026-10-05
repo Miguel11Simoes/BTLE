@@ -9,6 +9,7 @@
 #   A1  ENABLE_IQ_CAPTURE=0   no diagnostic IQ-capture RAM
 #   A2  LL_MINIMAL=1          minimal Link Layer (no UART HCI, 1 PPS, debug registers)
 #   B2  GAUSS_TABLE=1         fixed-tap Gaussian table instead of the runtime FIR
+#       PDU_WRITE_STROBE=1    the TX packet buffer written when its pair is new (ble-tx-pdu-we)
 #
 # B1 (the shared demodulator) is not a parameter: a branch has it in its RTL or
 # not. So upstream-baseline and ble-rx-dm print nothing, ble-tx-table prints
@@ -25,7 +26,7 @@ declared=$(awk '$0 ~ "^[[:space:]]*module[[:space:]]+btle_controller([^a-zA-Z0-9
                 f && /parameter/ {for (i=1;i<=NF;i++) if ($i ~ /^[A-Za-z_][A-Za-z0-9_]*$/ && $(i+1) == "=") print $i}
                 f && /^[[:space:]]*\)[[:space:]]*\(/ {exit}' "$rtl/btle_controller.v")
 params=""
-for kv in ENABLE_IQ_CAPTURE=0 LL_MINIMAL=1 GAUSS_TABLE=1; do
+for kv in ENABLE_IQ_CAPTURE=0 LL_MINIMAL=1 GAUSS_TABLE=1 PDU_WRITE_STROBE=1; do
   if grep -qx "${kv%%=*}" <<< "$declared"; then params="$params $kv"; fi
 done
 echo "${params# }"
