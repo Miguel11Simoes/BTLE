@@ -3,9 +3,9 @@
 # Single-port memory for the VCO tables: the OpenRAM sweep, and the branches it decides
 
 **Project:** BTLE — reconfigurable RISC-V baseband  
-**Branch:** every branch carries this same file (`master`, `risc-v-ble`, `ble-tx-table`, `ble-tx-table-reg`, `ble-tx-table-sram`, `ble-tx-fir2`, `ble-tx-sin4`, `ble-tx-sin8`, `ble-tx-sin8-1rw`, `ble-tx-sin2`, `ble-tx-1--8`, `ble-tx-opt`, `ble-tx-pdu`, `ble-rx-dm`, `ble-opt`)  
+**Branch:** every branch carries this same file (`master`, `risc-v-ble`, `ble-tx-table`, `ble-tx-table-reg`, `ble-tx-table-sram`, `ble-tx-fir2`, `ble-tx-sin4`, `ble-tx-sin8`, `ble-tx-sin8-1rw`, `ble-tx-sin2`, `ble-tx-1--8`, `ble-tx-opt`, `ble-tx-pdu`, `ble-tx-pdu-we`, `ble-tx-rom`, `ble-tx-cordic`, `ble-rx-dm`, `ble-opt`)  
 **Base:** tag `upstream-baseline` (`8540186`)  
-**Date:** 2026-10-03; updated 2026-10-04 (the two branches built and measured, and the 256 × 16 as `ble-tx-1--8`, § 5; the 512 × 8 again on `ble-tx-pdu`, with B2 and a one-port packet buffer, § 5)  
+**Date:** 2026-10-03; updated 2026-10-04 (the two branches built and measured, and the 256 × 16 as `ble-tx-1--8`, § 5; the 512 × 8 again on `ble-tx-pdu`, with B2 and a one-port packet buffer, § 5) and 2026-10-05 (the last column of § 2.2 corrected: OpenRAM's analytical clock power, not an energy per access; `ble-tx-pdu-we`; `ble-tx-rom` and `ble-tx-cordic`, the VCO without memory, § 5)  
 **Author:** Miguel Simões  
 **Status:** executed: run `openram-1rw-sweep` of `scripts/area/run_openram.sh` on branch
 `ble-tx-sin8-1rw` (commit `176a79b`): 9 single-port macros requested, 8 generated. Measured
@@ -15,7 +15,10 @@ before any RTL of the new branches; `ble-tx-sin128` was deleted after it (§ 4).
 `TX_SIN2_COMPARISON.md`, at the root of each), and so was the 256 × 16 memory, as branch
 `ble-tx-1--8` (run `tx-1--8`; report `TX_1--8_COMPARISON.md`). `ble-tx-pdu` reuses the
 512 × 8 memory of `ble-tx-sin2` with B2 and a one-port packet buffer (run `tx-pdu`;
-report `docs/04 Validation/TX_PDU_VALIDATION.md`).
+report `docs/04 Validation/TX_PDU_VALIDATION.md`), and `ble-tx-pdu-we` the same
+transmitter (run `tx-pdu-we`). `ble-tx-rom` and `ble-tx-cordic` then remove the VCO memory
+(run `tx-vco`, on the audited RTL; reports `docs/04 Validation/TX_ROM_VALIDATION.md` and
+`TX_CORDIC_VALIDATION.md`).
 
 ---
 
@@ -112,18 +115,24 @@ What the table shows:
 
 ### 2.2 Timing and power, from each `.lib`
 
-| Memory | Data valid after the **falling** clock edge | Minimum clock period | Setup / hold | Leakage | Clock energy per access |
+| Memory | Data valid after the **falling** clock edge | Minimum clock period | Setup / hold | Leakage | Clock power, analytical model (every gate at 100 MHz) |
 |---|---:|---:|---:|---:|---:|
-| 512 × 16 (mask) | 0.321 ns | 1.188 ns | 0.009 / 0.001 ns | 8.6 µW | 1.30 pJ |
-| 512 × 8 | 0.286 ns | 1.058 ns | 0.009 / 0.001 ns | 4.5 µW | 0.72 pJ |
-| 256 × 16 (mask) | 0.285 ns | 1.054 ns | 0.009 / 0.001 ns | 4.5 µW | 0.73 pJ |
-| 128 × 32 (mask) | 0.287 ns | 1.062 ns | 0.009 / 0.001 ns | 4.5 µW | 0.77 pJ |
-| 64 × 64 (no mask) | 0.271 ns | 1.001 ns | 0.009 / 0.001 ns | 4.5 µW | 0.82 pJ |
+| 512 × 16 (mask) | 0.321 ns | 1.188 ns | 0.009 / 0.001 ns | 8.6 µW | 1.30 mW |
+| 512 × 8 | 0.286 ns | 1.058 ns | 0.009 / 0.001 ns | 4.5 µW | 0.72 mW |
+| 256 × 16 (mask) | 0.285 ns | 1.054 ns | 0.009 / 0.001 ns | 4.5 µW | 0.73 mW |
+| 128 × 32 (mask) | 0.287 ns | 1.062 ns | 0.009 / 0.001 ns | 4.5 µW | 0.77 mW |
+| 64 × 64 (no mask) | 0.271 ns | 1.001 ns | 0.009 / 0.001 ns | 4.5 µW | 0.82 mW |
 
 The variants without the mask have the same delays and minimum period. The
-energy is the `internal_power` of the clock pin written by OpenRAM's analytical
-model (the same value for read and write), in the energy unit of the `.lib`
-(pF × V² = pJ).
+last column is the `internal_power` of the clock pin written by OpenRAM's
+analytical model: one estimate of the whole array's dynamic power, in mW, with
+every gate switching at 100 MHz (FreePDK45's `default_event_frequency`),
+written alike for a write, a read and a deselected clock. It is neither an
+energy per access nor different for an idle clock. (This table first read it
+as pJ per access, in the energy unit of the `.lib`; OpenRAM writes average
+power there, mW, from its model or, with SPICE, from its measurement. A SPICE
+characterization of the 512 × 8 one-port macro, and of the 256 × 8 packet
+buffer of `ble-tx-pdu`, is in `BRANCH_COMPARISON.md` § 6.6.)
 
 ## 3. Timing at 16 MHz
 
@@ -242,7 +251,20 @@ packet buffer is the largest part of the transmitter. `ble-tx-pdu` keeps the
 memory of `ble-tx-sin2` and gives the buffer one port too, 256 words and a
 register for byte 256 (6 979.1 µm², run `openram-pdu`), with B2 and exact
 rewrites of the logic: the transmitter measures **20 098.5 µm²**, −88.0 %
-against `master` (run `tx-pdu`, `BRANCH_COMPARISON.md` § 4.2).
+against `master` (run `tx-pdu`, `BRANCH_COMPARISON.md` § 4.2). `ble-tx-pdu-we`
+keeps it and writes the buffer only when its pair is new; the VCO memory, read
+on every clock, then takes most of the transmitter's SRAM dynamic power (§ 6.6
+there).
+
+**No memory at all.** The last step fixes the tables. `ble-tx-rom` and
+`ble-tx-cordic` keep the transmitter of `ble-tx-pdu` and give the VCO the
+project's tables from the first eighth of the wave, as `ble-tx-1--8` stores
+them, but in logic: a ROM of 257 pairs, or an exact CORDIC. Measured on the
+audited RTL (run `tx-vco`, `BRANCH_COMPARISON.md` § 4.4), the ROM is 593.2 µm²,
+against 635.7 µm² of logic and 10 703.9 µm² of memory for the sine table of
+`ble-tx-pdu`, and the transmitter 9 488.5 µm², −53.1 % against `ble-tx-pdu`;
+the CORDIC is 2 317.9 µm², and its transmitter 11 121.3 µm². The tables are
+then not programmable at all.
 
 ## 6. What this does not claim
 
@@ -254,9 +276,11 @@ against `master` (run `tx-pdu`, `BRANCH_COMPARISON.md` § 4.2).
   memory; other choices, which might let the 64 × 64 with its mask route, were
   not tried.
 - **Timing and power are OpenRAM's analytical model**, at the nominal corner
-  only, not a SPICE characterisation. Per sample, `ble-tx-sin2` reads twice, so
-  its memory energy is about twice that of one read (2 × 0.72 against 0.73 pJ
-  for 256 × 16).
+  only, not a SPICE characterisation. Its power does not tell a read from an
+  idle clock, so it cannot rank `ble-tx-sin2`, which reads twice per sample,
+  against `ble-tx-1--8`, which reads once; § 6.6 of `BRANCH_COMPARISON.md`
+  measures the 512 × 8 macro with SPICE (1.07 pJ per read), not the
+  256 × 16 one.
 - **No RTL yet.** The logic each alternative adds is estimated, not measured;
   each branch will measure it when it is built, with the validation of
   `ble-tx-sin8` (module lockstep, mutants, gate-level lockstep against

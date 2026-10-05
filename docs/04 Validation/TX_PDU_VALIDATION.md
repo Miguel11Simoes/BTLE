@@ -5,7 +5,7 @@
 **Project:** BTLE — reconfigurable RISC-V baseband  
 **Branch:** `ble-tx-pdu`, from `ble-tx-opt` (`894e9b2`)  
 **Base:** tag `upstream-baseline` (`8540186`)  
-**Date:** 2026-10-04  
+**Date:** 2026-10-04; corrected 2026-10-05 (the two-clock rule of a pair, § 2; the energy figure of § 6)  
 **Author:** Miguel Simões  
 **Status:** executed: `tests/test_tx_pdu.py` and `tests/test_vco_sin2.py` (with their mutants);
 runs `tx-pdu` and `tx-pdu-one-port` of `scripts/validation/run_rx_regression.sh` (the strict
@@ -85,7 +85,12 @@ The repository's firmware (`firmware/btle_ll.c`) does not transmit, so a
 driver written for it must do the same. A byte rewritten while it is being
 read, between the request and the clock in which the transmitter takes it, may
 differ: upstream reads it in the last of those clocks. Writing the addresses
-the packet does not use is allowed at any time.
+the packet does not use is allowed at any time, with one condition while a
+packet is sent: each pair must stay two `clkb` clocks, because a pair that
+lasts one clock is not written if that clock reads. The Link Layer's register
+8 keeps a pair at least three clocks (two AXI writes are at least three clocks
+apart); the `ext_` pair of baremetal mode must do the same. (Corrected
+2026-10-05: this paragraph first said "at any time" without the condition.)
 
 The other place for the one-port memory, on `clk`, was tried first, in the
 same analysis: there the pair has to cross from `clkb`, and a pair that lasts
@@ -211,9 +216,13 @@ Run `tx-pdu`, the whole controller against upstream
   switches as with B2 (79.1 → 21.7 toggles per cycle) and the rest of the
   transmitter 85 % more (68.0 → 125.7), as on `ble-tx-sin2`, whose two reads per
   sample it keeps; the RAM-port toggles rise 16.0 % in `tx` (7.2 % in `mixed`).
-  In OpenRAM's analytical model the 256 × 8 one-port buffer leaks 2.3 µW and
-  takes 0.42 pJ per access, against 4.9 µW for upstream's 512 × 8 with two
-  ports.
+  OpenRAM's analytical model puts the leakage of the 256 × 8 one-port buffer
+  at 2.3 µW, against 4.9 µW for upstream's 512 × 8 with two ports. (This
+  report first added "0.42 pJ per access": that figure is the model's clock
+  power, 0.42 mW with every gate at 100 MHz, the same for any cycle, not an
+  energy per access. The buffer of this branch is written on every AXI clock;
+  `ble-tx-pdu-we` writes it only when its pair is new, and measures the energy
+  of both with SPICE, `BRANCH_COMPARISON.md` § 6.6.)
 
 ## 7. What the branch gives up
 
@@ -227,8 +236,9 @@ Run `tx-pdu`, the whole controller against upstream
 - **Rewriting a packet byte while it is read**: the packet must be written
   before `tx_start`, as the upstream testbenches do (the repository's
   firmware does not transmit); a byte rewritten in the 12 clocks between its
-  request and its use may differ from upstream's. The AXI clock must run at
-  8 MHz or faster.
+  request and its use may differ from upstream's; while a packet is sent, a
+  pair must stay two AXI clocks (§ 2). The AXI clock must run at 8 MHz or
+  faster.
 
 The receiver, the Link Layer and the IQ-capture debug memory lose nothing.
 
