@@ -1,0 +1,2 @@
+RECOVERY PASS: 2 illegal state encodings recovered without valid outputs
+results/validation/lint-recovery-final/testbench.v:39: $finish called at 176000 (1ps)

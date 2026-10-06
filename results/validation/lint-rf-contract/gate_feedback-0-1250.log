@@ -1,0 +1,2 @@
+CLOCK CONTRACT PASS mode 0 phase_ps 1250 checked 478 accepted 0 quiet 478
+/tmp/btle-lint-20261005/ble-tx-rom/tests/clock_domain_contract_tb.v:61: $finish called at 4850000 (1ps)

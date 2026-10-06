@@ -28,6 +28,7 @@ module uart_frame_tx
 	output	reg					uart_tx		 	//uart_tx_data
 );
 
+localparam integer LAST_DATA_BIT = FRAME_WD-1;
 wire	bps_clk;
 
 tx_clk_gen
@@ -53,14 +54,8 @@ localparam	IDLE		=	6'b00_0000	,
 			DONE		=	6'b10_0000	;
 
 wire	[1:0]	verify_mode;
-generate
-	if (PARITY == "ODD")
-		assign verify_mode = 2'b01;
-	else if (PARITY == "EVEN")
-		assign verify_mode = 2'b10;
-	else
-		assign verify_mode = 2'b00;
-endgenerate
+assign verify_mode = (PARITY == "ODD") ? 2'b01 :
+                     (PARITY == "EVEN") ? 2'b10 : 2'b00;
 
 reg		[FRAME_WD-1:0]	data_reg	;
 reg		[log2(FRAME_WD-1)-1:0] cnt	;
@@ -72,7 +67,7 @@ always @(posedge clk or negedge rst_n) begin
 	if (!rst_n)
 		cnt <= 'd0;
 	else if (cstate == SHIFT_PRO & bps_clk == 1'b1) 
-		if (cnt == FRAME_WD-1)
+		if (cnt == LAST_DATA_BIT[log2(FRAME_WD-1)-1:0])
 			cnt <= 'd0;
 		else
 			cnt <= cnt + 1'b1;
@@ -92,7 +87,7 @@ always @(*) begin
 		IDLE		: nstate = frame_en ? READY : IDLE	;
 		READY		: nstate = (bps_clk == 1'b1) ? START_BIT : READY;
 		START_BIT	: nstate = (bps_clk == 1'b1) ? SHIFT_PRO : START_BIT;
-		SHIFT_PRO	: nstate = (cnt == FRAME_WD-1 & bps_clk == 1'b1) ? PARITY_BIT : SHIFT_PRO;
+		SHIFT_PRO	: nstate = (cnt == LAST_DATA_BIT[log2(FRAME_WD-1)-1:0] & bps_clk == 1'b1) ? PARITY_BIT : SHIFT_PRO;
 		PARITY_BIT	: nstate = (bps_clk == 1'b1) ? STOP_BIT : PARITY_BIT;
 		STOP_BIT	: nstate = (bps_clk == 1'b1) ? DONE : STOP_BIT;
 		DONE		: nstate = IDLE;
@@ -159,7 +154,7 @@ end
 function integer log2(input integer v);
   begin
 	log2=0;
-	while(v>>log2) 
+	while ((v >> log2) != 0)
 	  log2=log2+1;
   end
 endfunction

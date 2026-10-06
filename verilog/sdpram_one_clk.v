@@ -35,4 +35,9 @@ always @ (posedge clk) begin
   read_data <= memory[read_address];
 end
 
+
+// Intentionally unused compatibility/debug fields. No functional fanout is added.
+wire unused_interface_fields = &{1'b0,
+  rst};
+
 endmodule

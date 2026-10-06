@@ -1,0 +1,7 @@
+label=lint-controller-final
+date_utc=2026-10-06T00:12:20Z
+ref_rev=9d6c383110454c23600766bc70156142d8fb6c1e (9d6c383110454c23600766bc70156142d8fb6c1e)
+dut=working tree at bbef478b8b5386b16802abcf59deade3630d7f82, dirty verilog files: 19
+dut configuration: GAUSS_TABLE=1 (nothing removed: every output and register compared)
+iverilog=Icarus Verilog version 14.0 (devel) (s20260301-411-gca6b8d376-dirty)
+seeds_per_example=2 packets_per_seed=6

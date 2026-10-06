@@ -56,7 +56,7 @@ always @(posedge clk or negedge rst_n) begin
 		clk_count <= 'd0;
 	else if (!cstate) 
 		clk_count <= 'd0;
-	else if (clk_count == SMP_CLK_CNT)
+	else if (clk_count == SMP_CLK_CNT[CNT_WIDTH-1:0])
 		clk_count <= 'd0;
 	else
 		clk_count <= clk_count + 1'b1;
@@ -65,7 +65,7 @@ end
 always @(posedge clk or negedge rst_n) begin
 	if (!rst_n) 
 		sample_clk <= 1'b0;
-	else if (clk_count == 1'b1) 
+	else if (clk_count == {{(CNT_WIDTH-1){1'b0}}, 1'b1})
 		sample_clk <= 1'b1;
 	else 
 		sample_clk <= 1'b0;
@@ -74,7 +74,7 @@ end
 function integer log2(input integer v);
   begin
 	log2=0;
-	while(v>>log2) 
+	while ((v >> log2) != 0)
 	  log2=log2+1;
   end
 endfunction

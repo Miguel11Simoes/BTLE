@@ -1,0 +1,3 @@
+FAIL: 0/0 lint configurations; reviewed exceptions: 0
+
+unreviewed or broad lint directive: /tmp/btle-lint-guards-q5nc7wrz/verilog/btle_controller.v

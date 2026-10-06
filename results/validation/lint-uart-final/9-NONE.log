@@ -1,0 +1,2 @@
+UART PASS checks=40000 tx=24 rx=24 resets=3
+/tmp/btle-uart-lint-ihfek0nv/tb.v:39: $finish called at 400070000 (1ps)

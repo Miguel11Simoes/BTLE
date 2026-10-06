@@ -1,0 +1,72 @@
+[
+  {
+    "file": "verilog/btle_controller.v",
+    "rule": "SYNCASYNCNET",
+    "declaration": "input  wire s00_axi_aresetn,"
+  },
+  {
+    "file": "verilog/btle_ll.v",
+    "rule": "DECLFILENAME",
+    "declaration": "module rx_ram #"
+  },
+  {
+    "file": "verilog/btle_ll.v",
+    "rule": "DECLFILENAME",
+    "declaration": "module octet_to_word #"
+  },
+  {
+    "file": "verilog/btle_ll.v",
+    "rule": "DECLFILENAME",
+    "declaration": "module event_counter_pulse # ("
+  },
+  {
+    "file": "verilog/btle_ll.v",
+    "rule": "DECLFILENAME",
+    "declaration": "module event_counter_level # ("
+  },
+  {
+    "file": "verilog/btle_ll.v",
+    "rule": "DECLFILENAME",
+    "declaration": "module ll_s_axi #"
+  },
+  {
+    "file": "verilog/btle_ll.v",
+    "rule": "DECLFILENAME",
+    "declaration": "module uart_frame_rx"
+  },
+  {
+    "file": "verilog/btle_ll.v",
+    "rule": "DECLFILENAME",
+    "declaration": "module uart_frame_tx"
+  },
+  {
+    "file": "verilog/btle_ll.v",
+    "rule": "DECLFILENAME",
+    "declaration": "module tx_clk_gen"
+  },
+  {
+    "file": "verilog/btle_ll.v",
+    "rule": "DECLFILENAME",
+    "declaration": "module rx_clk_gen"
+  },
+  {
+    "file": "verilog/btle_ll.v",
+    "rule": "DECLFILENAME",
+    "declaration": "module clk_cross_bus #"
+  },
+  {
+    "file": "verilog/btle_tx.v",
+    "rule": "DECLFILENAME",
+    "declaration": "module pdu_buffer #"
+  },
+  {
+    "file": "verilog/btle_tx.v",
+    "rule": "DECLFILENAME",
+    "declaration": "module pdu_buffer_ram #"
+  },
+  {
+    "file": "verilog/gfsk_modulation.v",
+    "rule": "DECLFILENAME",
+    "declaration": "module btle_gauss_tail #("
+  }
+]

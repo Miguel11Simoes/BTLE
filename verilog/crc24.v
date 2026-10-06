@@ -111,4 +111,9 @@ crc24_core # (
   .lfsr(lfsr)
 );
 
+
+// Intentionally unused compatibility/debug fields. No functional fanout is added.
+wire unused_interface_fields = &{1'b0,
+  NUM_BIT_PAYLOAD_LENGTH};
+
 endmodule

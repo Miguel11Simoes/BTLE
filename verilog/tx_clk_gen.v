@@ -55,7 +55,7 @@ always @(posedge clk or negedge rst_n) begin
 	else if (!c_state)
 		count <= {BPS_WD{1'b0}};
 	else begin
-		if (count == BPS_CNT) 
+		if (count == BPS_CNT[BPS_WD-1:0])
 			count <= {BPS_WD{1'b0}};
 		else
 			count <= count + 1'b1;
@@ -74,10 +74,9 @@ end
 function integer log2(input integer v);
   begin
 	log2=0;
-	while(v>>log2) 
+	while ((v >> log2) != 0)
 	  log2=log2+1;
   end
 endfunction
 
 endmodule
-

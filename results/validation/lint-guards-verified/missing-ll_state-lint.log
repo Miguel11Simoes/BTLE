@@ -1,0 +1,15 @@
+FAIL: 0/2 lint configurations; reviewed exceptions: 14
+
+%Warning-CASEINCOMPLETE: verilog/btle_ll.v:399:5: Case values incompletely covered (example pattern 0x7)
+  399 |     case(ll_state)
+      |     ^~~~
+                         ... For warning description see https://verilator.org/warn/CASEINCOMPLETE?v=5.020
+                         ... Use "/* verilator lint_off CASEINCOMPLETE */" and lint_on around source to disable this message.
+%Error: Exiting due to 1 warning(s)
+
+%Warning-CASEINCOMPLETE: verilog/btle_ll.v:399:5: Case values incompletely covered (example pattern 0x7)
+  399 |     case(ll_state)
+      |     ^~~~
+                         ... For warning description see https://verilator.org/warn/CASEINCOMPLETE?v=5.020
+                         ... Use "/* verilator lint_off CASEINCOMPLETE */" and lint_on around source to disable this message.
+%Error: Exiting due to 1 warning(s)

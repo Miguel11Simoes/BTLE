@@ -8,7 +8,7 @@ def main():
     parser.add_argument('--output',type=Path,required=True)
     args=parser.parse_args();args.output.mkdir(parents=True,exist_ok=False)
     mutations=[
-      ('truncated_tail','gfsk_modulation.v','assign last = raw_valid && (padding == NUM_TAPS-1);','assign last = raw_last;','test_tx_packet.py','TX output length differs from the complete reference'),
+      ('truncated_tail','gfsk_modulation.v',"assign last = raw_valid && ({27'b0, padding} == NUM_TAPS-1);",'assign last = raw_last;','test_tx_packet.py','TX output length differs from the complete reference'),
       ('channel_zero_remapped','scramble_core.v','assign channel_number_internal = channel_number;',"assign channel_number_internal = (channel_number == 0) ? 6'd63 : channel_number;",'test_tx_packet.py','error found!'),
       ('crc_zero_replaced','crc24_core.v','assign crc_state_init_bit_internal = crc_state_init_bit;',"assign crc_state_init_bit_internal = (crc_state_init_bit == 0) ? 24'h555555 : crc_state_init_bit;",'test_tx_packet.py','error found!'),
       ('undriven_reserved','btle_ll.v',"assign slv_reg42 = {C_S00_AXI_DATA_WIDTH{1'b0}};",'','test_control_readback.py','reserved read 42 is not known zero'),

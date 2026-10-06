@@ -1,0 +1,44 @@
+[
+  {
+    "name": "baseline_tx",
+    "exit": 0,
+    "expected_failure": false,
+    "witness": "",
+    "result": "PASS"
+  },
+  {
+    "name": "baseline_readback",
+    "exit": 0,
+    "expected_failure": false,
+    "witness": "",
+    "result": "PASS"
+  },
+  {
+    "name": "truncated_tail",
+    "exit": 1,
+    "expected_failure": true,
+    "witness": "TX output length differs from the complete reference",
+    "result": "PASS"
+  },
+  {
+    "name": "channel_zero_remapped",
+    "exit": 1,
+    "expected_failure": true,
+    "witness": "error found!",
+    "result": "PASS"
+  },
+  {
+    "name": "crc_zero_replaced",
+    "exit": 1,
+    "expected_failure": true,
+    "witness": "error found!",
+    "result": "PASS"
+  },
+  {
+    "name": "undriven_reserved",
+    "exit": 1,
+    "expected_failure": true,
+    "witness": "reserved read 42 is not known zero",
+    "result": "PASS"
+  }
+]

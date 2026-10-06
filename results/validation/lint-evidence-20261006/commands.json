@@ -1,0 +1,215 @@
+[
+  {
+    "branch": "ble-tx-rom",
+    "test": "lint",
+    "exit": 0,
+    "command": [
+      "/home/msmiguel/venvs/btle/bin/python",
+      "scripts/validation/run_lint.py",
+      "--output",
+      "results/validation/lint-verified"
+    ]
+  },
+  {
+    "branch": "ble-tx-rom",
+    "test": "lint-guards",
+    "exit": 0,
+    "command": [
+      "/home/msmiguel/venvs/btle/bin/python",
+      "tests/test_lint_guards.py",
+      "--output",
+      "results/validation/lint-guards-verified"
+    ]
+  },
+  {
+    "branch": "ble-tx-rom",
+    "test": "uart",
+    "exit": 0,
+    "command": [
+      "/home/msmiguel/venvs/btle/bin/python",
+      "tests/test_uart_lint_equivalence.py",
+      "--reference",
+      "bbef478b8b5386b16802abcf59deade3630d7f82",
+      "--output",
+      "results/validation/lint-uart-final"
+    ]
+  },
+  {
+    "branch": "ble-tx-rom",
+    "test": "vco",
+    "exit": 0,
+    "command": [
+      "/home/msmiguel/venvs/btle/bin/python",
+      "tests/test_vco_fixed.py",
+      "--seeds",
+      "2",
+      "--clocks",
+      "100000",
+      "--mutants"
+    ]
+  },
+  {
+    "branch": "ble-tx-rom",
+    "test": "pdu",
+    "exit": 0,
+    "command": [
+      "/home/msmiguel/venvs/btle/bin/python",
+      "tests/test_tx_pdu.py",
+      "--seeds",
+      "2",
+      "--packets",
+      "6",
+      "--jobs",
+      "2",
+      "--mutants"
+    ]
+  },
+  {
+    "branch": "ble-tx-rom",
+    "test": "recovery",
+    "exit": 0,
+    "command": [
+      "/home/msmiguel/venvs/btle/bin/python",
+      "tests/test_lint_recovery.py",
+      "--output",
+      "results/validation/lint-recovery-final"
+    ]
+  },
+  {
+    "branch": "ble-tx-rom",
+    "test": "guards",
+    "exit": 0,
+    "command": [
+      "/home/msmiguel/venvs/btle/bin/python",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tests",
+      "-p",
+      "test_validation*.py",
+      "-v"
+    ]
+  },
+  {
+    "branch": "ble-tx-rom",
+    "test": "product-mutants",
+    "exit": 0,
+    "command": [
+      "/home/msmiguel/venvs/btle/bin/python",
+      "tests/test_product_mutations.py",
+      "--output",
+      "results/validation/lint-product-mutants"
+    ]
+  },
+  {
+    "branch": "ble-tx-rom",
+    "test": "test_gauss_tail.py",
+    "exit": 0,
+    "command": [
+      "/home/msmiguel/venvs/btle/bin/python",
+      "tests/test_gauss_tail.py"
+    ]
+  },
+  {
+    "branch": "ble-tx-rom",
+    "test": "test_upsample.py",
+    "exit": 0,
+    "command": [
+      "/home/msmiguel/venvs/btle/bin/python",
+      "tests/test_upsample.py"
+    ]
+  },
+  {
+    "branch": "ble-tx-rom",
+    "test": "test_control_readback.py",
+    "exit": 0,
+    "command": [
+      "/home/msmiguel/venvs/btle/bin/python",
+      "tests/test_control_readback.py"
+    ]
+  },
+  {
+    "branch": "ble-tx-rom",
+    "test": "rf-contract",
+    "exit": 0,
+    "command": [
+      "/home/msmiguel/venvs/btle/bin/python",
+      "tests/test_clock_domain_contract.py",
+      "--output",
+      "results/validation/lint-rf-contract",
+      "--mutants"
+    ]
+  },
+  {
+    "branch": "ble-tx-rom",
+    "test": "rtl",
+    "exit": 0,
+    "command": [
+      "bash",
+      "scripts/validation/run_rx_regression.sh",
+      "lint-functional",
+      "9d6c383110454c23600766bc70156142d8fb6c1e"
+    ]
+  },
+  {
+    "branch": "ble-tx-rom",
+    "test": "rtl-tx",
+    "exit": 0,
+    "command": [
+      "/home/msmiguel/venvs/btle/bin/python",
+      "tests/test_tx_packet.py",
+      "--output",
+      "results/validation/lint-functional/tx_packets.json",
+      "--rtl-rx"
+    ]
+  },
+  {
+    "branch": "ble-tx-rom",
+    "test": "one-port",
+    "exit": 0,
+    "command": [
+      "bash",
+      "scripts/validation/run_rx_regression.sh",
+      "lint-functional-one-port",
+      "9d6c383110454c23600766bc70156142d8fb6c1e"
+    ]
+  },
+  {
+    "branch": "ble-tx-rom",
+    "test": "one-port-tx",
+    "exit": 0,
+    "command": [
+      "/home/msmiguel/venvs/btle/bin/python",
+      "tests/test_tx_packet.py",
+      "--output",
+      "results/validation/lint-functional-one-port/tx_packets.json",
+      "--quick"
+    ]
+  },
+  {
+    "branch": "ble-tx-rom",
+    "test": "controller",
+    "exit": 0,
+    "command": [
+      "bash",
+      "scripts/validation/ctl_lockstep/run_ctl_lockstep.sh",
+      "lint-controller-final",
+      "2",
+      "6",
+      "9d6c383110454c23600766bc70156142d8fb6c1e"
+    ]
+  },
+  {
+    "branch": "ble-tx-rom",
+    "test": "yosys",
+    "exit": 0,
+    "command": [
+      "/home/msmiguel/eda/oss-cad-suite-20260907/bin/yosys",
+      "-Q",
+      "-T",
+      "-s",
+      "/tmp/btle-lint-20261005/ble-tx-rom/results/validation/lint-structure-final/elaborate.ys"
+    ]
+  }
+]

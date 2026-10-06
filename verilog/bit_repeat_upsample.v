@@ -16,7 +16,8 @@ module bit_repeat_upsample #(
   output reg bit_upsample_valid_last
 );
   localparam integer COUNT_WIDTH = (SAMPLE_PER_SYMBOL > 1) ? $clog2(SAMPLE_PER_SYMBOL) : 1;
-  localparam [COUNT_WIDTH-1:0] REPEATS = SAMPLE_PER_SYMBOL-1;
+  localparam integer REPEATS_INT = SAMPLE_PER_SYMBOL-1;
+  localparam [COUNT_WIDTH-1:0] REPEATS = REPEATS_INT[COUNT_WIDTH-1:0];
   reg [COUNT_WIDTH-1:0] remaining;
   reg wait_cycle, saved_last;
   always @(posedge clk) begin

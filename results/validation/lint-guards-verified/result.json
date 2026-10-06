@@ -1,0 +1,75 @@
+{
+  "status": "PASS",
+  "checks": [
+    {
+      "name": "baseline-lint",
+      "exit": 0,
+      "expected_failure": false,
+      "witness": null,
+      "status": "PASS"
+    },
+    {
+      "name": "baseline-recovery",
+      "exit": 0,
+      "expected_failure": false,
+      "witness": null,
+      "status": "PASS"
+    },
+    {
+      "name": "width",
+      "exit": 1,
+      "expected_failure": true,
+      "witness": "%Warning-WIDTHTRUNC",
+      "status": "PASS"
+    },
+    {
+      "name": "unused",
+      "exit": 1,
+      "expected_failure": true,
+      "witness": "%Warning-UNUSEDSIGNAL",
+      "status": "PASS"
+    },
+    {
+      "name": "syntax",
+      "exit": 1,
+      "expected_failure": true,
+      "witness": "%Error",
+      "status": "PASS"
+    },
+    {
+      "name": "unreviewed-waiver",
+      "exit": 1,
+      "expected_failure": true,
+      "witness": "unreviewed or broad lint directive",
+      "status": "PASS"
+    },
+    {
+      "name": "missing-ll_state-lint",
+      "exit": 1,
+      "expected_failure": true,
+      "witness": "%Warning-CASEINCOMPLETE",
+      "status": "PASS"
+    },
+    {
+      "name": "missing-ll_state-behavior",
+      "exit": 1,
+      "expected_failure": true,
+      "witness": "LL illegal state did not recover",
+      "status": "PASS"
+    },
+    {
+      "name": "missing-phy_rx_state-lint",
+      "exit": 1,
+      "expected_failure": true,
+      "witness": "%Warning-CASEINCOMPLETE",
+      "status": "PASS"
+    },
+    {
+      "name": "missing-phy_rx_state-behavior",
+      "exit": 1,
+      "expected_failure": true,
+      "witness": "RX illegal state did not recover safely",
+      "status": "PASS"
+    }
+  ]
+}

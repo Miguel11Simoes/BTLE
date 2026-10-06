@@ -96,7 +96,7 @@ function signed [(GAUSS_FILTER_BIT_WIDTH-1) : 0] table_tap;
   integer t;
   begin
     t = (pos <= 8) ? pos : (16 - pos);
-    table_tap = (GAUSS_TABLE_TAPS >> (t*16));
+    table_tap = GAUSS_TABLE_TAPS[t*16 +: GAUSS_FILTER_BIT_WIDTH];
   end
 endfunction
 
@@ -119,11 +119,11 @@ endfunction
 // 0, 1 or 2 times.
 genvar e;
 generate
-if (GAUSS_TABLE) begin : gen_table
+if (GAUSS_TABLE != 0) begin : gen_table
   wire [16:0] w = {bit_upsample_store[15:0], bit_upsample}; // w[k] = window position k
   wire signed [(GAUSS_FILTER_BIT_WIDTH-1) : 0] term [0:8];
   for (e=0; e<8; e=e+1) begin : pairs
-    assign term[e] = table_tap(e) * ({1'b0, w[e]} + {1'b0, w[16-e]});
+    assign term[e] = table_tap(e) * ({{(GAUSS_FILTER_BIT_WIDTH-1){1'b0}}, w[e]} + {{(GAUSS_FILTER_BIT_WIDTH-1){1'b0}}, w[16-e]});
   end
   assign term[8] = w[8] ? table_tap(8) : 0;
   wire signed [(GAUSS_FILTER_BIT_WIDTH-1) : 0] half_sum = term[0] + term[1] + term[2] + term[3] +
@@ -175,7 +175,7 @@ always @ (posedge clk) begin
       bit_upsample_store[(NUM_TAP_GAUSS_FILTER-2) : 1] <= bit_upsample_store[(NUM_TAP_GAUSS_FILTER-3) : 0];
       bit_upsample_store[0] <= bit_upsample;
 
-      bit_upsample_gauss_filter <= (GAUSS_TABLE ? table_sum : fir_sum);
+      bit_upsample_gauss_filter <= ((GAUSS_TABLE != 0) ? table_sum : fir_sum);
     end 
   end
 end

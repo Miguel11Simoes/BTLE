@@ -331,4 +331,9 @@ generate
   end
 endgenerate
 
+
+// Intentionally unused compatibility/debug fields. No functional fanout is added.
+wire unused_interface_fields = &{1'b0,
+  bit_internal, bit_valid};
+
 endmodule

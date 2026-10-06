@@ -28,6 +28,20 @@ class EntryPointTests(unittest.TestCase):
         subprocess.run(['git','-C',str(cls.repo),'update-ref','refs/heads/master','refs/remotes/origin/master'],check=True)
         for folder in ('scripts','verilog','tests','python'):
             if (ROOT/folder).exists():shutil.copytree(ROOT/folder,cls.repo/folder)
+        # This fixture tests failing engines, not RTL equivalence. Snapshot the
+        # common dependency files into its PRIVATE reference so the RX runner's
+        # shared-source guard remains satisfied even with uncommitted RTL edits.
+        # Functional reference comparisons are separate real-simulator campaigns.
+        shared = ['search_unique_bit_sequence.v', 'scramble_core.v', 'crc24_core.v',
+                  'serial_in_ram_out.v', 'sdpram_two_clk.v']
+        subprocess.run(['git', '-C', str(cls.repo), 'read-tree', 'master'], check=True)
+        subprocess.run(['git', '-C', str(cls.repo), 'add', *['verilog/'+f for f in shared]], check=True)
+        tree = subprocess.check_output(['git', '-C', str(cls.repo), 'write-tree'], text=True).strip()
+        identity = dict(os.environ, GIT_AUTHOR_NAME='Harness fixture', GIT_AUTHOR_EMAIL='fixture@localhost',
+                        GIT_COMMITTER_NAME='Harness fixture', GIT_COMMITTER_EMAIL='fixture@localhost')
+        fixture_ref = subprocess.check_output(['git', '-C', str(cls.repo), 'commit-tree', tree, '-p', 'master',
+            '-m', 'Private fault-injection fixture: align common dependency sources'], env=identity, text=True).strip()
+        subprocess.run(['git', '-C', str(cls.repo), 'update-ref', 'refs/heads/master', fixture_ref], check=True)
         for name in ('iverilog','yosys'):
             p=cls.bin/name;p.write_text('#!/bin/sh\nexec '+str(CAD/'bin'/name)+' "${@}"\n');p.chmod(0o755)
         cls.env=dict(os.environ,OSS_CAD=str(cls.bin.parent),VVP=str(cls.bin/'vvp'),IVERILOG=str(cls.bin/'iverilog'))

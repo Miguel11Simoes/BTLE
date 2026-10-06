@@ -101,7 +101,7 @@ always @ (posedge clk) begin
         end
         if (octet_count == 2) begin
           // payload_length <= (adv_pdu_flag? octet[5:0] : octet[4:0]);
-          payload_length <= octet;
+          payload_length <= {{(NUM_BIT_PAYLOAD_LENGTH+1-8){1'b0}}, octet};
           payload_length_valid <= 1;
           bit_count <= 0;
           phy_rx_state <= CHECK_CRC;
@@ -137,10 +137,23 @@ always @ (posedge clk) begin
         //   octet_valid <= 0;
         // end
       end
+      default: begin
+        phy_rx_state <= IDLE;
+        bit_valid_delay <= 0;
+        octet <= 0;
+        octet_valid <= 0;
+        bit_count <= 0;
+        payload_length <= 0;
+        payload_length_valid <= 0;
+        decode_end <= 0;
+        crc_ok <= 0;
+      end
     endcase
   end
 end
 
+wire signed [(2*GFSK_DEMODULATION_BIT_WIDTH-1):0] unused_demod_decision;
+wire unused_demod_decision_valid;
 gfsk_demodulation # (
   .GFSK_DEMODULATION_BIT_WIDTH(GFSK_DEMODULATION_BIT_WIDTH)
 ) gfsk_demodulation_i (
@@ -151,8 +164,8 @@ gfsk_demodulation # (
   .q(q),
   .iq_valid(iq_valid),
 
-  .signal_for_decision(),
-  .signal_for_decision_valid(),
+  .signal_for_decision(unused_demod_decision),
+  .signal_for_decision_valid(unused_demod_decision_valid),
   
   .phy_bit(phy_bit),
   .bit_valid(phy_bit_valid)
@@ -201,4 +214,3 @@ crc24_core # (
 );
 
 endmodule
-

@@ -425,6 +425,9 @@ always @ (posedge axi_aclk) begin
         if (tx_iq_valid_last)
           ll_state <= STANDBY;
       end
+      default: begin
+        ll_state <= STANDBY;
+      end
     endcase
   end
 end
@@ -845,7 +848,7 @@ clk_cross_bus #
 
 `KEEP_FOR_DBG reg  [25:0] decode_end_to_host_read_counter;
 `KEEP_FOR_DBG reg  [25:0] decode_end_to_host_read_counter_max;
-assign slv_reg41 = decode_end_to_host_read_counter;
+assign slv_reg41 = {{(C_S00_AXI_DATA_WIDTH-26){1'b0}}, decode_end_to_host_read_counter};
 always @ (posedge axi_aclk) begin
   if ((~axi_aresetn) | reg_gpio[15]) begin
     decode_end_to_host_read_counter_max <= 0;
@@ -1000,10 +1003,27 @@ uart_frame_rx #(
   .frame_error(frame_error)
 );
 
+
+// Intentionally unused compatibility/debug fields. No functional fanout is added.
+wire unused_interface_fields = &{1'b0,
+  axi_araddr_core_bb, event0_counter_delay3, event0_event5_unequal, i_abs_add_q_abs, rf_gain,
+  rx_i_signal, rx_iq_valid, rx_q_signal, slv_reg0[31:16], slv_reg1[31:20],
+  slv_reg11[31:6], slv_reg12[31:24], slv_reg13, slv_reg14, slv_reg15,
+  slv_reg16, slv_reg17, slv_reg18, slv_reg19, slv_reg2[31:27], slv_reg2[15:8],
+  slv_reg20, slv_reg21, slv_reg22, slv_reg23, slv_reg24,
+  slv_reg25, slv_reg26, slv_reg27, slv_reg28, slv_reg29,
+  slv_reg3[31:27], slv_reg3[15:8], slv_reg30, slv_reg31, slv_reg32, slv_reg33,
+  slv_reg34, slv_reg35, slv_reg36, slv_reg37, slv_reg38,
+  slv_reg39_bb, slv_reg4[31:8], slv_reg6[31:24], slv_reg7[31:6], slv_reg8[31:25], slv_reg8[15:8],
+  slv_reg9[31:1], slv_reg_rden_bb, timestamp_rx_decode_end_axi, timestamp_rx_hit_flag_axi};
+
 endmodule
 
 // ======================sub modules==========================================
+// Bundled helper: preserve the existing single-file compilation interface.
+/* verilator lint_off DECLFILENAME */
 module rx_ram #
+/* verilator lint_on DECLFILENAME */
 (
   parameter integer LEN_UNIQUE_BIT_SEQUENCE = 32,
   parameter integer CHANNEL_NUMBER_BIT_WIDTH = 6,
@@ -1047,8 +1067,6 @@ localparam ADDR_WIDTH_DPRAM = NUM_BIT_PAYLOAD_LENGTH+1;
 `KEEP_FOR_DBG reg  [(ADDR_WIDTH_DPRAM-1) : 0] read_address;
 `KEEP_FOR_DBG wire [(C_S00_AXI_DATA_WIDTH-1) : 0] write_data;
 `KEEP_FOR_DBG wire write_enable;
-`KEEP_FOR_DBG wire [(C_S00_AXI_DATA_WIDTH-1) : 0] read_data;
-
 `KEEP_FOR_DBG wire word_out_strobe;
 `KEEP_FOR_DBG wire [(C_S00_AXI_DATA_WIDTH-1):0] word_out;
 
@@ -1071,8 +1089,8 @@ assign write_enable = word_out_strobe;
 assign header_payload_crc_len = 2 + rx_payload_length_axi_lock + 3; // 2 bytes header, payload length, 3 bytes CRC
 
 // 5'd40 means slv_reg40 read signal
-assign rd_en_axi = ( simulation_en? simulation_rx_ram_read_en : (slv_reg_rden && axi_araddr_core == RD_DATA_AXI_REG_IDX) );
-assign reset_rd_addr_axi = (slv_reg_wren && axi_awaddr_core == RD_DATA_AXI_REG_IDX);
+assign rd_en_axi = ( simulation_en? simulation_rx_ram_read_en : (slv_reg_rden && axi_araddr_core == RD_DATA_AXI_REG_IDX[5:0]) );
+assign reset_rd_addr_axi = (slv_reg_wren && axi_awaddr_core == RD_DATA_AXI_REG_IDX[5:0]);
 
 // process to generate octet & strobe & octet count, etc.
 always @ (posedge axi_aclk) begin
@@ -1173,9 +1191,18 @@ sdpram_one_clk #
   .read_data(rd_data_axi)
 );
 
+
+// Intentionally unused compatibility/debug fields. No functional fanout is added.
+wire unused_interface_fields = &{1'b0,
+  bb_clk, bb_rst, rx_channel_number_axi, rx_crc_ok_axi_lock, rx_crc_state_init_bit_axi,
+  rx_decode_run_axi, rx_hit_flag_axi, rx_unique_bit_sequence_axi};
+
 endmodule
 
+// Bundled helper: preserve the existing single-file compilation interface.
+/* verilator lint_off DECLFILENAME */
 module octet_to_word #
+/* verilator lint_on DECLFILENAME */
 (
   parameter integer NUM_OCTET_TOTAL_BITWIDTH = 7,
   parameter integer C_S00_AXI_DATA_WIDTH  = 32
@@ -1192,7 +1219,7 @@ module octet_to_word #
   output reg word_out_strobe
 );
 
-reg [31:0] octet_buf;
+reg [31:8] octet_buf; // Only the previous three octets are needed.
 
 // octet to word
 always @(posedge clk) begin
@@ -1202,7 +1229,7 @@ always @(posedge clk) begin
     word_out_strobe <= 0;
   end else if (octet_in_strobe) begin
     octet_buf[31 : 24] <= octet_in;
-    octet_buf[23 : 0]  <= octet_buf[31 : 8];
+    octet_buf[23 : 8]  <= octet_buf[31 : 16];
     word_out_strobe  <= (octet_count[1 : 0] == 3? 1 : 0);
     word_out <= octet_count[1 : 0] == 3? {octet_in, octet_buf[31 : 8]} : word_out;
   end else if (octet_count == num_octet_total) begin
@@ -1219,7 +1246,10 @@ always @(posedge clk) begin
 end
 endmodule
 
+// Bundled helper: preserve the existing single-file compilation interface.
+/* verilator lint_off DECLFILENAME */
 module event_counter_pulse # (
+/* verilator lint_on DECLFILENAME */
   parameter integer COUNTER_WIDTH = 32
 ) (
   input wire clk,
@@ -1239,7 +1269,10 @@ always @ (posedge clk) begin
 end
 endmodule
 
+// Bundled helper: preserve the existing single-file compilation interface.
+/* verilator lint_off DECLFILENAME */
 module event_counter_level # (
+/* verilator lint_on DECLFILENAME */
   parameter integer COUNTER_WIDTH = 32
 ) (
   input wire clk,
@@ -1269,7 +1302,10 @@ endmodule
 
 `timescale 1 ns / 1 ps
 
+// Bundled helper: preserve the existing single-file compilation interface.
+/* verilator lint_off DECLFILENAME */
 module ll_s_axi #
+/* verilator lint_on DECLFILENAME */
 (
   // Users to add parameters here
 
@@ -1481,30 +1517,6 @@ reg [C_S_AXI_DATA_WIDTH-1:0]  slv_reg36;
 reg [C_S_AXI_DATA_WIDTH-1:0]  slv_reg37;
 reg [C_S_AXI_DATA_WIDTH-1:0]  slv_reg38;
 reg [C_S_AXI_DATA_WIDTH-1:0]  slv_reg39;
-reg [C_S_AXI_DATA_WIDTH-1:0]  slv_reg40;
-reg [C_S_AXI_DATA_WIDTH-1:0]  slv_reg41;
-reg [C_S_AXI_DATA_WIDTH-1:0]  slv_reg42;
-reg [C_S_AXI_DATA_WIDTH-1:0]  slv_reg43;
-reg [C_S_AXI_DATA_WIDTH-1:0]  slv_reg44;
-reg [C_S_AXI_DATA_WIDTH-1:0]  slv_reg45;
-reg [C_S_AXI_DATA_WIDTH-1:0]  slv_reg46;
-reg [C_S_AXI_DATA_WIDTH-1:0]  slv_reg47;
-reg [C_S_AXI_DATA_WIDTH-1:0]  slv_reg48;
-reg [C_S_AXI_DATA_WIDTH-1:0]  slv_reg49;
-reg [C_S_AXI_DATA_WIDTH-1:0]  slv_reg50;
-reg [C_S_AXI_DATA_WIDTH-1:0]  slv_reg51;
-reg [C_S_AXI_DATA_WIDTH-1:0]  slv_reg52;
-reg [C_S_AXI_DATA_WIDTH-1:0]  slv_reg53;
-reg [C_S_AXI_DATA_WIDTH-1:0]  slv_reg54;
-reg [C_S_AXI_DATA_WIDTH-1:0]  slv_reg55;
-reg [C_S_AXI_DATA_WIDTH-1:0]  slv_reg56;
-reg [C_S_AXI_DATA_WIDTH-1:0]  slv_reg57;
-reg [C_S_AXI_DATA_WIDTH-1:0]  slv_reg58;
-reg [C_S_AXI_DATA_WIDTH-1:0]  slv_reg59;
-reg [C_S_AXI_DATA_WIDTH-1:0]  slv_reg60;
-reg [C_S_AXI_DATA_WIDTH-1:0]  slv_reg61;
-reg [C_S_AXI_DATA_WIDTH-1:0]  slv_reg62;
-reg [C_S_AXI_DATA_WIDTH-1:0]  slv_reg63;
 // wire    slv_reg_rden;
 wire    slv_reg_wren;
 reg     [C_S_AXI_DATA_WIDTH-1:0]   reg_data_out;
@@ -2074,7 +2086,7 @@ begin
   if ( S_AXI_ARESETN == 1'b0 )
     begin
       axi_arready <= 1'b0;
-      axi_araddr  <= 32'b0;
+      axi_araddr  <= {C_S_AXI_ADDR_WIDTH{1'b0}};
     end 
   else
     begin    
@@ -2223,6 +2235,11 @@ end
 
 // User logic ends
 
+
+// Intentionally unused compatibility/debug fields. No functional fanout is added.
+wire unused_interface_fields = &{1'b0,
+  S_AXI_ARPROT, S_AXI_AWPROT, axi_araddr[1:0], axi_awaddr[1:0]};
+
 endmodule
 
 `ifdef AVOID_DUPLICATION
@@ -2242,7 +2259,10 @@ endmodule
 // Module Function:
 `timescale 1ns / 1ps
 
+// Bundled helper: preserve the existing single-file compilation interface.
+/* verilator lint_off DECLFILENAME */
 module uart_frame_rx
+/* verilator lint_on DECLFILENAME */
 #(
   parameter integer CLK_FREQUENCE  = 50_000_000,    //hz
   parameter integer BAUD_RATE    = 9600    ,    //9600,19200,38400,57600,115200,230400,460800,921600
@@ -2344,7 +2364,7 @@ end
 reg    [1:0]  sample_result  ;
 always @(posedge clk or negedge rst_n) begin
   if (!rst_n) 
-    sample_result <= 1'b0;
+    sample_result <= 2'b0;
   else if (sample_clk) begin
     case (sample_clk_cnt)
       4'd0:sample_result <= 2'd0;
@@ -2448,7 +2468,7 @@ rx_clk_gen_inst
 function integer log2(input integer v);
   begin
   log2=0;
-  while(v>>log2) 
+  while ((v >> log2) != 0)
     log2=log2+1;
   end
 endfunction
@@ -2470,7 +2490,10 @@ endmodule
 // ********************************************************************
 // Module Function:
 `timescale 1ns / 1ps
+// Bundled helper: preserve the existing single-file compilation interface.
+/* verilator lint_off DECLFILENAME */
 module uart_frame_tx
+/* verilator lint_on DECLFILENAME */
 #(
   parameter integer CLK_FREQUENCE  = 50_000_000,    //hz
   parameter integer BAUD_RATE    = 9600    ,    //9600,19200,38400,57600,115200,230400,460800,921600
@@ -2617,7 +2640,7 @@ end
 function integer log2(input integer v);
   begin
   log2=0;
-  while(v>>log2) 
+  while ((v >> log2) != 0)
     log2=log2+1;
   end
 endfunction
@@ -2638,7 +2661,10 @@ endmodule
 // ********************************************************************
 // Module Function: generate_uart_tx_baud_rate_clk
 `timescale 1ns / 1ps
+// Bundled helper: preserve the existing single-file compilation interface.
+/* verilator lint_off DECLFILENAME */
 module tx_clk_gen
+/* verilator lint_on DECLFILENAME */
 #(
   parameter integer CLK_FREQUENCE  = 50_000_000,    //hz
   parameter integer BAUD_RATE    = 9600         //9600、19200 、38400 、57600 、115200、230400、460800、921600
@@ -2700,7 +2726,7 @@ end
 function integer log2(input integer v);
   begin
   log2=0;
-  while(v>>log2) 
+  while ((v >> log2) != 0)
     log2=log2+1;
   end
 endfunction
@@ -2722,7 +2748,10 @@ endmodule
 // Module Function: generate uart rx sample clk = 9 x BAUD_RATE
 `timescale 1ns / 1ps
 
+// Bundled helper: preserve the existing single-file compilation interface.
+/* verilator lint_off DECLFILENAME */
 module rx_clk_gen
+/* verilator lint_on DECLFILENAME */
 #(
   parameter integer CLK_FREQUENCE  = 50_000_000,  //hz
   parameter integer BAUD_RATE    = 9600       //9600, 19200, 38400, 57600, 115200, 230400, 460800, 921600
@@ -2783,7 +2812,7 @@ end
 function integer log2(input integer v);
   begin
   log2=0;
-  while(v>>log2) 
+  while ((v >> log2) != 0)
     log2=log2+1;
   end
 endfunction
@@ -2792,7 +2821,10 @@ endmodule
 
 `endif
 
+// Bundled helper: preserve the existing single-file compilation interface.
+/* verilator lint_off DECLFILENAME */
 module clk_cross_bus #
+/* verilator lint_on DECLFILENAME */
 (
   parameter integer DATA_WIDTH = 8
 ) (

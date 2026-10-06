@@ -1,0 +1,754 @@
+{
+  "status": "PASS_WITH_DOCUMENTED_EXCEPTIONS",
+  "asic_ready": false,
+  "branches": [
+    {
+      "branch": "ble-opt",
+      "incoming_parent": "83072d352807ebb9f4c02f31c971aeed1cb3a5bb",
+      "regressions": [
+        {
+          "label": "lint-functional",
+          "passed": 270,
+          "coverage": {
+            "data_comparison": 210,
+            "packet_rejection": 60
+          }
+        }
+      ],
+      "lint": {
+        "configurations": 8,
+        "exceptions": 12,
+        "status": "PASS",
+        "tool": "Verilator 5.020 2024-01-01 rev (Debian 5.020-1)"
+      },
+      "illegal_state_checks": 3,
+      "lint_negative_controls": 10,
+      "uart": {
+        "configurations": 9,
+        "cycles": 360000
+      },
+      "tx_waveforms": 167,
+      "rtl_rx_loopbacks": 0,
+      "product_mutants": 4,
+      "controller": {
+        "runs": 6,
+        "tx": 36,
+        "rx": 36,
+        "mutants": 3
+      },
+      "harness": {
+        "passed": 23,
+        "skipped": 0
+      },
+      "yosys": "PASS"
+    },
+    {
+      "branch": "ble-rx-dm",
+      "incoming_parent": "b0d7126001a9e6e34425142fe6867ed027e40739",
+      "regressions": [
+        {
+          "label": "lint-functional",
+          "passed": 270,
+          "coverage": {
+            "data_comparison": 210,
+            "packet_rejection": 60
+          }
+        }
+      ],
+      "lint": {
+        "configurations": 1,
+        "exceptions": 12,
+        "status": "PASS",
+        "tool": "Verilator 5.020 2024-01-01 rev (Debian 5.020-1)"
+      },
+      "illegal_state_checks": 3,
+      "lint_negative_controls": 10,
+      "uart": {
+        "configurations": 9,
+        "cycles": 360000
+      },
+      "tx_waveforms": 167,
+      "rtl_rx_loopbacks": 0,
+      "product_mutants": 4,
+      "harness": {
+        "passed": 23,
+        "skipped": 0
+      },
+      "yosys": "PASS"
+    },
+    {
+      "branch": "ble-tx-1--8",
+      "incoming_parent": "590590a0d78c595b10f82980aba9bc82c9e6808d",
+      "regressions": [
+        {
+          "label": "lint-functional",
+          "passed": 270,
+          "coverage": {
+            "data_comparison": 210,
+            "packet_rejection": 60
+          }
+        },
+        {
+          "label": "lint-functional-one-port",
+          "passed": 270,
+          "coverage": {
+            "data_comparison": 210,
+            "packet_rejection": 60
+          }
+        }
+      ],
+      "lint": {
+        "configurations": 1,
+        "exceptions": 13,
+        "status": "PASS",
+        "tool": "Verilator 5.020 2024-01-01 rev (Debian 5.020-1)"
+      },
+      "illegal_state_checks": 3,
+      "lint_negative_controls": 10,
+      "uart": {
+        "configurations": 9,
+        "cycles": 360000
+      },
+      "tx_waveforms": 183,
+      "rtl_rx_loopbacks": 0,
+      "product_mutants": 4,
+      "harness": {
+        "passed": 19,
+        "skipped": 4
+      },
+      "yosys": "PASS"
+    },
+    {
+      "branch": "ble-tx-fir2",
+      "incoming_parent": "ad301286584770c20161dce191a12ddb2ea9e451",
+      "regressions": [
+        {
+          "label": "lint-functional",
+          "passed": 270,
+          "coverage": {
+            "data_comparison": 210,
+            "packet_rejection": 60
+          }
+        }
+      ],
+      "lint": {
+        "configurations": 1,
+        "exceptions": 12,
+        "status": "PASS",
+        "tool": "Verilator 5.020 2024-01-01 rev (Debian 5.020-1)"
+      },
+      "illegal_state_checks": 3,
+      "lint_negative_controls": 10,
+      "uart": {
+        "configurations": 9,
+        "cycles": 360000
+      },
+      "tx_waveforms": 167,
+      "rtl_rx_loopbacks": 0,
+      "product_mutants": 4,
+      "harness": {
+        "passed": 18,
+        "skipped": 5
+      },
+      "yosys": "PASS"
+    },
+    {
+      "branch": "ble-tx-opt",
+      "incoming_parent": "386b5ad09d0a74fd002fde6bfd85f3b41ef5b3a6",
+      "regressions": [
+        {
+          "label": "lint-functional",
+          "passed": 270,
+          "coverage": {
+            "data_comparison": 210,
+            "packet_rejection": 60
+          }
+        }
+      ],
+      "lint": {
+        "configurations": 2,
+        "exceptions": 13,
+        "status": "PASS",
+        "tool": "Verilator 5.020 2024-01-01 rev (Debian 5.020-1)"
+      },
+      "illegal_state_checks": 3,
+      "lint_negative_controls": 10,
+      "uart": {
+        "configurations": 9,
+        "cycles": 360000
+      },
+      "tx_waveforms": 167,
+      "rtl_rx_loopbacks": 0,
+      "product_mutants": 4,
+      "controller": {
+        "runs": 6,
+        "tx": 36,
+        "rx": 36,
+        "mutants": 4
+      },
+      "harness": {
+        "passed": 23,
+        "skipped": 0
+      },
+      "yosys": "PASS"
+    },
+    {
+      "branch": "ble-tx-sin2",
+      "incoming_parent": "041f20dced9e0801624db17c8eb8de1bba8bef8a",
+      "regressions": [
+        {
+          "label": "lint-functional",
+          "passed": 270,
+          "coverage": {
+            "data_comparison": 210,
+            "packet_rejection": 60
+          }
+        },
+        {
+          "label": "lint-functional-one-port",
+          "passed": 270,
+          "coverage": {
+            "data_comparison": 210,
+            "packet_rejection": 60
+          }
+        }
+      ],
+      "lint": {
+        "configurations": 1,
+        "exceptions": 13,
+        "status": "PASS",
+        "tool": "Verilator 5.020 2024-01-01 rev (Debian 5.020-1)"
+      },
+      "illegal_state_checks": 3,
+      "lint_negative_controls": 10,
+      "uart": {
+        "configurations": 9,
+        "cycles": 360000
+      },
+      "tx_waveforms": 183,
+      "rtl_rx_loopbacks": 0,
+      "product_mutants": 4,
+      "harness": {
+        "passed": 19,
+        "skipped": 4
+      },
+      "yosys": "PASS"
+    },
+    {
+      "branch": "ble-tx-sin4",
+      "incoming_parent": "f9ebaf2b731a101681c4561ce5f25f44ce491971",
+      "regressions": [
+        {
+          "label": "lint-functional",
+          "passed": 270,
+          "coverage": {
+            "data_comparison": 210,
+            "packet_rejection": 60
+          }
+        }
+      ],
+      "lint": {
+        "configurations": 1,
+        "exceptions": 12,
+        "status": "PASS",
+        "tool": "Verilator 5.020 2024-01-01 rev (Debian 5.020-1)"
+      },
+      "illegal_state_checks": 3,
+      "lint_negative_controls": 10,
+      "uart": {
+        "configurations": 9,
+        "cycles": 360000
+      },
+      "tx_waveforms": 167,
+      "rtl_rx_loopbacks": 167,
+      "product_mutants": 4,
+      "harness": {
+        "passed": 19,
+        "skipped": 4
+      },
+      "yosys": "PASS"
+    },
+    {
+      "branch": "ble-tx-sin8",
+      "incoming_parent": "9833e73a2a138bcaf0fc4dcf0a7ed86706c3aa7d",
+      "regressions": [
+        {
+          "label": "lint-functional",
+          "passed": 270,
+          "coverage": {
+            "data_comparison": 210,
+            "packet_rejection": 60
+          }
+        }
+      ],
+      "lint": {
+        "configurations": 1,
+        "exceptions": 13,
+        "status": "PASS",
+        "tool": "Verilator 5.020 2024-01-01 rev (Debian 5.020-1)"
+      },
+      "illegal_state_checks": 3,
+      "lint_negative_controls": 10,
+      "uart": {
+        "configurations": 9,
+        "cycles": 360000
+      },
+      "tx_waveforms": 167,
+      "rtl_rx_loopbacks": 0,
+      "product_mutants": 4,
+      "harness": {
+        "passed": 19,
+        "skipped": 4
+      },
+      "yosys": "PASS"
+    },
+    {
+      "branch": "ble-tx-sin8-1rw",
+      "incoming_parent": "81f550531f23110c13c65287f89195fd03fd5983",
+      "regressions": [
+        {
+          "label": "lint-functional",
+          "passed": 270,
+          "coverage": {
+            "data_comparison": 210,
+            "packet_rejection": 60
+          }
+        },
+        {
+          "label": "lint-functional-one-port",
+          "passed": 270,
+          "coverage": {
+            "data_comparison": 210,
+            "packet_rejection": 60
+          }
+        }
+      ],
+      "lint": {
+        "configurations": 1,
+        "exceptions": 13,
+        "status": "PASS",
+        "tool": "Verilator 5.020 2024-01-01 rev (Debian 5.020-1)"
+      },
+      "illegal_state_checks": 3,
+      "lint_negative_controls": 10,
+      "uart": {
+        "configurations": 9,
+        "cycles": 360000
+      },
+      "tx_waveforms": 183,
+      "rtl_rx_loopbacks": 0,
+      "product_mutants": 4,
+      "harness": {
+        "passed": 19,
+        "skipped": 4
+      },
+      "yosys": "PASS"
+    },
+    {
+      "branch": "ble-tx-table",
+      "incoming_parent": "cdac5784ae10115a1127bd810e7a92d6f9822675",
+      "regressions": [
+        {
+          "label": "lint-functional",
+          "passed": 270,
+          "coverage": {
+            "data_comparison": 210,
+            "packet_rejection": 60
+          }
+        }
+      ],
+      "lint": {
+        "configurations": 2,
+        "exceptions": 12,
+        "status": "PASS",
+        "tool": "Verilator 5.020 2024-01-01 rev (Debian 5.020-1)"
+      },
+      "illegal_state_checks": 3,
+      "lint_negative_controls": 10,
+      "uart": {
+        "configurations": 9,
+        "cycles": 360000
+      },
+      "tx_waveforms": 167,
+      "rtl_rx_loopbacks": 0,
+      "product_mutants": 4,
+      "controller": {
+        "runs": 6,
+        "tx": 36,
+        "rx": 36,
+        "mutants": 4
+      },
+      "harness": {
+        "passed": 23,
+        "skipped": 0
+      },
+      "yosys": "PASS"
+    },
+    {
+      "branch": "ble-tx-table-reg",
+      "incoming_parent": "37696b1846003ec78c153d333c00a9add0a3f712",
+      "regressions": [
+        {
+          "label": "lint-functional",
+          "passed": 270,
+          "coverage": {
+            "data_comparison": 210,
+            "packet_rejection": 60
+          }
+        }
+      ],
+      "lint": {
+        "configurations": 2,
+        "exceptions": 14,
+        "status": "PASS",
+        "tool": "Verilator 5.020 2024-01-01 rev (Debian 5.020-1)"
+      },
+      "illegal_state_checks": 3,
+      "lint_negative_controls": 10,
+      "uart": {
+        "configurations": 9,
+        "cycles": 360000
+      },
+      "tx_waveforms": 167,
+      "rtl_rx_loopbacks": 0,
+      "product_mutants": 4,
+      "controller": {
+        "runs": 6,
+        "tx": 36,
+        "rx": 36,
+        "mutants": 4
+      },
+      "harness": {
+        "passed": 22,
+        "skipped": 1
+      },
+      "yosys": "PASS"
+    },
+    {
+      "branch": "ble-tx-table-sram",
+      "incoming_parent": "6bf19ee9a9439667992aed2ef3db92b0541f10d9",
+      "regressions": [
+        {
+          "label": "lint-functional",
+          "passed": 270,
+          "coverage": {
+            "data_comparison": 210,
+            "packet_rejection": 60
+          }
+        }
+      ],
+      "lint": {
+        "configurations": 2,
+        "exceptions": 14,
+        "status": "PASS",
+        "tool": "Verilator 5.020 2024-01-01 rev (Debian 5.020-1)"
+      },
+      "illegal_state_checks": 3,
+      "lint_negative_controls": 10,
+      "uart": {
+        "configurations": 9,
+        "cycles": 360000
+      },
+      "tx_waveforms": 167,
+      "rtl_rx_loopbacks": 0,
+      "product_mutants": 4,
+      "controller": {
+        "runs": 6,
+        "tx": 36,
+        "rx": 36,
+        "mutants": 6
+      },
+      "harness": {
+        "passed": 22,
+        "skipped": 1
+      },
+      "yosys": "PASS"
+    },
+    {
+      "branch": "master",
+      "incoming_parent": "7c91ff311df6658a4c7d9cab03b992ea10fab5ee",
+      "regressions": [
+        {
+          "label": "lint-functional",
+          "passed": 270,
+          "coverage": {
+            "data_comparison": 210,
+            "packet_rejection": 60
+          }
+        }
+      ],
+      "lint": {
+        "configurations": 1,
+        "exceptions": 12,
+        "status": "PASS",
+        "tool": "Verilator 5.020 2024-01-01 rev (Debian 5.020-1)"
+      },
+      "illegal_state_checks": 3,
+      "lint_negative_controls": 10,
+      "uart": {
+        "configurations": 9,
+        "cycles": 360000
+      },
+      "tx_waveforms": 167,
+      "rtl_rx_loopbacks": 0,
+      "product_mutants": 4,
+      "harness": {
+        "passed": 18,
+        "skipped": 5
+      },
+      "yosys": "PASS"
+    },
+    {
+      "branch": "risc-v-ble",
+      "incoming_parent": "0401c21c82ed66e85e96d05f39f1d688d2b707d6",
+      "regressions": [
+        {
+          "label": "lint-functional",
+          "passed": 270,
+          "coverage": {
+            "data_comparison": 210,
+            "packet_rejection": 60
+          }
+        }
+      ],
+      "lint": {
+        "configurations": 1,
+        "exceptions": 12,
+        "status": "PASS",
+        "tool": "Verilator 5.020 2024-01-01 rev (Debian 5.020-1)"
+      },
+      "illegal_state_checks": 3,
+      "lint_negative_controls": 10,
+      "uart": {
+        "configurations": 9,
+        "cycles": 360000
+      },
+      "tx_waveforms": 167,
+      "rtl_rx_loopbacks": 0,
+      "product_mutants": 4,
+      "harness": {
+        "passed": 18,
+        "skipped": 5
+      },
+      "yosys": "PASS"
+    },
+    {
+      "branch": "ble-tx-pdu",
+      "incoming_parent": "c19439bc3cec7f9db0b21e8774831fc0c49607c8",
+      "regressions": [
+        {
+          "label": "lint-functional",
+          "passed": 270,
+          "coverage": {
+            "data_comparison": 210,
+            "packet_rejection": 60
+          }
+        },
+        {
+          "label": "lint-functional-one-port",
+          "passed": 270,
+          "coverage": {
+            "data_comparison": 210,
+            "packet_rejection": 60
+          }
+        }
+      ],
+      "lint": {
+        "configurations": 2,
+        "exceptions": 15,
+        "status": "PASS",
+        "tool": "Verilator 5.020 2024-01-01 rev (Debian 5.020-1)"
+      },
+      "illegal_state_checks": 2,
+      "lint_negative_controls": 8,
+      "uart": {
+        "configurations": 9,
+        "cycles": 360000
+      },
+      "tx_waveforms": 183,
+      "rtl_rx_loopbacks": 167,
+      "product_mutants": 4,
+      "controller": {
+        "runs": 6,
+        "tx": 36,
+        "rx": 36,
+        "mutants": 5
+      },
+      "harness": {
+        "passed": 23,
+        "skipped": 0
+      },
+      "yosys": "PASS",
+      "pdu": {
+        "runs": 24,
+        "mutants": 11
+      }
+    },
+    {
+      "branch": "ble-tx-pdu-we",
+      "incoming_parent": "73ec4c820a20ecce7c7eafa708a4c2b2fb919000",
+      "regressions": [
+        {
+          "label": "lint-functional",
+          "passed": 270,
+          "coverage": {
+            "data_comparison": 210,
+            "packet_rejection": 60
+          }
+        },
+        {
+          "label": "lint-functional-one-port",
+          "passed": 270,
+          "coverage": {
+            "data_comparison": 210,
+            "packet_rejection": 60
+          }
+        }
+      ],
+      "lint": {
+        "configurations": 4,
+        "exceptions": 15,
+        "status": "PASS",
+        "tool": "Verilator 5.020 2024-01-01 rev (Debian 5.020-1)"
+      },
+      "illegal_state_checks": 2,
+      "lint_negative_controls": 8,
+      "uart": {
+        "configurations": 9,
+        "cycles": 360000
+      },
+      "tx_waveforms": 183,
+      "rtl_rx_loopbacks": 167,
+      "product_mutants": 4,
+      "controller": {
+        "runs": 6,
+        "tx": 36,
+        "rx": 36,
+        "mutants": 8
+      },
+      "harness": {
+        "passed": 27,
+        "skipped": 0
+      },
+      "yosys": "PASS",
+      "pdu": {
+        "runs": 48,
+        "mutants": 13
+      }
+    },
+    {
+      "branch": "ble-tx-rom",
+      "incoming_parent": "bbef478b8b5386b16802abcf59deade3630d7f82",
+      "regressions": [
+        {
+          "label": "lint-functional",
+          "passed": 270,
+          "coverage": {
+            "data_comparison": 210,
+            "packet_rejection": 60
+          }
+        },
+        {
+          "label": "lint-functional-one-port",
+          "passed": 270,
+          "coverage": {
+            "data_comparison": 210,
+            "packet_rejection": 60
+          }
+        }
+      ],
+      "lint": {
+        "configurations": 2,
+        "exceptions": 14,
+        "status": "PASS",
+        "tool": "Verilator 5.020 2024-01-01 rev (Debian 5.020-1)"
+      },
+      "illegal_state_checks": 2,
+      "lint_negative_controls": 8,
+      "uart": {
+        "configurations": 9,
+        "cycles": 360000
+      },
+      "tx_waveforms": 183,
+      "rtl_rx_loopbacks": 167,
+      "product_mutants": 4,
+      "controller": {
+        "runs": 6,
+        "tx": 36,
+        "rx": 36,
+        "mutants": 5
+      },
+      "harness": {
+        "passed": 23,
+        "skipped": 0
+      },
+      "yosys": "PASS",
+      "pdu": {
+        "runs": 24,
+        "mutants": 11
+      },
+      "fixed_vco": {
+        "seeds": 2,
+        "random_clocks_per_seed": 100000,
+        "mutants": 7
+      }
+    },
+    {
+      "branch": "ble-tx-cordic",
+      "incoming_parent": "f30feae67e30ed2f92b7a46368ab65a31abba823",
+      "regressions": [
+        {
+          "label": "lint-functional",
+          "passed": 270,
+          "coverage": {
+            "data_comparison": 210,
+            "packet_rejection": 60
+          }
+        },
+        {
+          "label": "lint-functional-one-port",
+          "passed": 270,
+          "coverage": {
+            "data_comparison": 210,
+            "packet_rejection": 60
+          }
+        }
+      ],
+      "lint": {
+        "configurations": 2,
+        "exceptions": 14,
+        "status": "PASS",
+        "tool": "Verilator 5.020 2024-01-01 rev (Debian 5.020-1)"
+      },
+      "illegal_state_checks": 2,
+      "lint_negative_controls": 8,
+      "uart": {
+        "configurations": 9,
+        "cycles": 360000
+      },
+      "tx_waveforms": 183,
+      "rtl_rx_loopbacks": 167,
+      "product_mutants": 4,
+      "controller": {
+        "runs": 6,
+        "tx": 36,
+        "rx": 36,
+        "mutants": 5
+      },
+      "harness": {
+        "passed": 23,
+        "skipped": 0
+      },
+      "yosys": "PASS",
+      "pdu": {
+        "runs": 24,
+        "mutants": 11
+      },
+      "fixed_vco": {
+        "seeds": 2,
+        "random_clocks_per_seed": 100000,
+        "mutants": 11
+      }
+    }
+  ]
+}

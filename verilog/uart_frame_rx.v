@@ -47,14 +47,8 @@ reg	[4:0]	cstate;
 reg [4:0]	nstate;
 //
 wire	[1:0]	verify_mode;
-generate
-	if (PARITY == "ODD")
-		assign verify_mode = 2'b01;
-	else if (PARITY == "EVEN")
-		assign verify_mode = 2'b10;
-	else
-		assign verify_mode = 2'b00;
-endgenerate
+assign verify_mode = (PARITY == "ODD") ? 2'b01 :
+                     (PARITY == "EVEN") ? 2'b10 : 2'b00;
 //detect the start condition--the negedge of uart_rx
 reg		uart_rx0,uart_rx1,uart_rx2,uart_rx3;
 
@@ -115,7 +109,7 @@ end
 reg		[1:0]	sample_result	;
 always @(posedge clk or negedge rst_n) begin
 	if (!rst_n) 
-		sample_result <= 1'b0;
+		sample_result <= 2'b0;
 	else if (sample_clk) begin
 		case (sample_clk_cnt)
 			4'd0:sample_result <= 2'd0;
@@ -138,9 +132,9 @@ always @(*) begin
 		START_BIT	: nstate = (baud_rate_clk & sample_result[1] == 1'b0) ? DATA_FRAME : START_BIT ;
 		DATA_FRAME	: begin
 						case (verify_mode[1]^verify_mode[0])
-							1'b1: nstate = (sample_bit_cnt == FRAME_WD & baud_rate_clk) ? PARITY_BIT : DATA_FRAME ;		//parity is enable
-							1'b0: nstate = (sample_bit_cnt == FRAME_WD & baud_rate_clk) ? STOP_BIT : DATA_FRAME ;		//parity is disable
-							default: nstate = (sample_bit_cnt == FRAME_WD & baud_rate_clk) ? STOP_BIT : DATA_FRAME ;	//defasult is disable
+							1'b1: nstate = (sample_bit_cnt == FRAME_WD[log2(FRAME_WD+1)-1:0] & baud_rate_clk) ? PARITY_BIT : DATA_FRAME ;		//parity is enable
+							1'b0: nstate = (sample_bit_cnt == FRAME_WD[log2(FRAME_WD+1)-1:0] & baud_rate_clk) ? STOP_BIT : DATA_FRAME ;		//parity is disable
+							default: nstate = (sample_bit_cnt == FRAME_WD[log2(FRAME_WD+1)-1:0] & baud_rate_clk) ? STOP_BIT : DATA_FRAME ;	//defasult is disable
 						endcase
 					end
 		PARITY_BIT	: nstate = baud_rate_clk ? STOP_BIT : PARITY_BIT ;
@@ -219,7 +213,7 @@ rx_clk_gen_inst
 function integer log2(input integer v);
   begin
 	log2=0;
-	while(v>>log2) 
+	while ((v >> log2) != 0)
 	  log2=log2+1;
   end
 endfunction

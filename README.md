@@ -1,6 +1,6 @@
-> Latest audit: [RF interface, measurement integrity and current results](docs/04%20Validation/RF_INTERFACE_REVIEW.md).
+> Latest audit: [RF interface, measurement integrity and current results](docs/Validation/RF_INTERFACE_REVIEW.md).
 
-> Current digital validation and ASIC readiness: [Product validation](docs/04%20Validation/PRODUCT_VALIDATION.md), [open signoff work](docs/04%20Validation/ASIC_READINESS.md).
+> Current digital validation and ASIC readiness: [Product validation](docs/Validation/PRODUCT_VALIDATION.md), [open signoff work](docs/Validation/ASIC_READINESS.md).
 
 > **Thesis fork, by Miguel Simões.** This repository derives from
 > [JiaoXianjun/BTLE](https://github.com/JiaoXianjun/BTLE) (tag `upstream-baseline`),

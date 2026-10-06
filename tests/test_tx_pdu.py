@@ -351,7 +351,7 @@ MUTANTS = [
      [("end else if (data_in_valid && data_in_count != 41) begin",
        "end else if (data_in_valid && data_in_count != 40) begin")]),
     ("gauss_filter.v", "a tap paired with the wrong position",
-     [("table_tap(e) * ({1'b0, w[e]} + {1'b0, w[16-e]})", "table_tap(e) * ({1'b0, w[e]} + {1'b0, w[15-e]})")]),
+     [("table_tap(e) * ({{(GAUSS_FILTER_BIT_WIDTH-1){1'b0}}, w[e]} + {{(GAUSS_FILTER_BIT_WIDTH-1){1'b0}}, w[16-e]})", "table_tap(e) * ({{(GAUSS_FILTER_BIT_WIDTH-1){1'b0}}, w[e]} + {1'b0, w[15-e]})")]),
     ("gauss_filter.v", "the sum of the taps added instead of subtracted",
      [("assign table_sum = (half_sum <<< 1) - tap_total(0);", "assign table_sum = (half_sum <<< 1) + tap_total(0);")]),
 ]

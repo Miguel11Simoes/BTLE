@@ -1,0 +1,2 @@
+FATAL: /tmp/btle-product-mutations-vbzjt_y7/tests/reserved_registers_tb.v:33: reserved read 42 is not known zero: zzzzzzzz
+       Time: 721000  Scope: reserved_registers_tb.read_zero

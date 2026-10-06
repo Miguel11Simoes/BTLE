@@ -86,4 +86,9 @@ always @ (posedge clk) begin
   end
 end
 
+
+// Intentionally unused compatibility/debug fields. No functional fanout is added.
+wire unused_interface_fields = &{1'b0,
+  NUM_BIT_PAYLOAD_LENGTH, data_out_valid_internal};
+
 endmodule

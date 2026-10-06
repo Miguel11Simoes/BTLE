@@ -1,0 +1,17 @@
+FAIL: 0/2 lint configurations; reviewed exceptions: 14
+
+%Warning-UNUSEDSIGNAL: verilog/btle_controller.v:548:6: Signal is not used: 'accidental_orphan_signal'
+                                                      : ... note: In instance 'btle_controller'
+  548 | wire accidental_orphan_signal = gpio[0];
+      |      ^~~~~~~~~~~~~~~~~~~~~~~~
+                       ... For warning description see https://verilator.org/warn/UNUSEDSIGNAL?v=5.020
+                       ... Use "/* verilator lint_off UNUSEDSIGNAL */" and lint_on around source to disable this message.
+%Error: Exiting due to 1 warning(s)
+
+%Warning-UNUSEDSIGNAL: verilog/btle_controller.v:548:6: Signal is not used: 'accidental_orphan_signal'
+                                                      : ... note: In instance 'btle_controller'
+  548 | wire accidental_orphan_signal = gpio[0];
+      |      ^~~~~~~~~~~~~~~~~~~~~~~~
+                       ... For warning description see https://verilator.org/warn/UNUSEDSIGNAL?v=5.020
+                       ... Use "/* verilator lint_off UNUSEDSIGNAL */" and lint_on around source to disable this message.
+%Error: Exiting due to 1 warning(s)

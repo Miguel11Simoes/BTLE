@@ -1,0 +1,33 @@
+Traceback (most recent call last):
+  File "/tmp/btle-product-mutations-vbzjt_y7/tests/test_tx_packet.py", line 83, in <module>
+    if __name__=='__main__':main()
+                            ^^^^^^
+  File "/tmp/btle-product-mutations-vbzjt_y7/tests/test_tx_packet.py", line 61, in main
+    raise RuntimeError(f'TX channel={ch} length={n} exit={run.returncode}: '+log[-2500:])
+RuntimeError: TX channel=0 length=0 exit=1: WARNING: /tmp/btle-tx-packet-kixu13rs/rtl/btle_tx_tb.v:76: $readmemh(btle_config.txt): Not enough words in the file for the requested range [0:31].
+CHANNEL_NUMBER  0
+CRC_STATE_INIT_BIT 555555
+ACCESS_ADDRESS 60850a1b
+PREAMBLE 55
+Reading input from                                            btle_tx_test_input.txt
+          2 read finish for test input.
+Reading output ref from                                     btle_tx_test_output_i_ref.txt
+        656 read finish for test output cos ref.
+Reading output ref from                                     btle_tx_test_output_q_ref.txt
+        656 read finish for test output sin ref.
+Reading from                                              gauss_filter_tap.txt
+tx pkt mem initialized.
+gauss filter taps initialized.
+cos sin table initialized.
+payload_length   0
+clk_count       3369
+phy_bit_count         80
+bit_upsample_count        640
+bit_upsample_gauss_filter_count        656
+sample_out_count        656
+Save output I to                                         btle_tx_test_output_i.txt
+Save output Q to                                         btle_tx_test_output_q.txt
+Compare the btle_tx_test_output_i_mem and the btle_tx_test_output_i_ref_mem ...
+FATAL: /tmp/btle-tx-packet-kixu13rs/rtl/btle_tx_tb.v:357:         328 error found!
+       Time: 210968750  Scope: btle_tx_tb
+

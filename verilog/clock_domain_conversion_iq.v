@@ -91,5 +91,10 @@ always @ (posedge rf_clk) begin
   end
 end
 
+
+// Intentionally unused compatibility/debug fields. No functional fanout is added.
+wire unused_interface_fields = &{1'b0,
+  rx_iq_signal_ext[63:32]};
+
 endmodule
 

@@ -103,7 +103,7 @@ mutate wrong_offset_sign gauss_filter.v 's/\(half_sum <<< 1\) - tap_total\(0\)/(
 # the packet buffer asked for a byte before its address is set
 mutate pdu_read_early btle_tx.v 's/localparam \[3:0\] PDU_READ_CLOCK = 4;/localparam [3:0] PDU_READ_CLOCK = 1;/'
 # IQ-capture half flag loses its mid-buffer point (ll_itrpt2: excluded on ble-opt, compared here)
-mutate capture_half_flag auxiliary_daemon.v 's/\(bram_addr_b == 0 \|\| bram_addr_b == \(BRAM_DEPTH\/2\)\)/(bram_addr_b == 0)/'
+mutate capture_half_flag auxiliary_daemon.v 's/^assign bram_addr_b_half_flag = .*;/assign bram_addr_b_half_flag = (bram_addr_b == 0);/'
 
 # ---- 2. lockstep ----
 build "$work/sim" "$repo/verilog"

@@ -202,7 +202,7 @@ always @ (posedge clk) begin
 
           bit_count <= bit_count + 1;
 
-          if (bit_count == ((payload_length+2)*8 - 1)) begin
+          if ({{(32-NUM_BIT_PAYLOAD_LENGTH-4){1'b0}}, bit_count} == (({{(32-8){1'b0}}, payload_length}+32'd2)*8 - 1)) begin
             info_bit_valid_last <= 1;
             phy_tx_state <= WAIT_LAST_SAMPLE;
           end
@@ -344,7 +344,10 @@ endmodule
 // transmit). A byte rewritten while it is being read (between the request and
 // the clock in which btle_tx takes it) may differ: upstream reads it at the
 // last of those clocks.
+// Bundled helper: preserve the existing single-file compilation interface.
+/* verilator lint_off DECLFILENAME */
 module pdu_buffer #
+/* verilator lint_on DECLFILENAME */
 (
   parameter integer ADDRESS_WIDTH = 9
 ) (
@@ -430,7 +433,10 @@ endmodule
 // picks it is here, and the repository's RAM model (sdpram_one_clk) gets that
 // address on both of its ports. The model also reads in the other clocks;
 // pdu_buffer takes read_data only in the clock after a read.
+// Bundled helper: preserve the existing single-file compilation interface.
+/* verilator lint_off DECLFILENAME */
 module pdu_buffer_ram #
+/* verilator lint_on DECLFILENAME */
 (
   parameter integer DATA_WIDTH = 8,
   parameter integer ADDRESS_WIDTH = 8
@@ -463,5 +469,10 @@ sdpram_one_clk # (
   .read_address(address),
   .read_data(read_data)
 );
+
+
+// Intentionally unused compatibility/debug fields. No functional fanout is added.
+wire unused_interface_fields = &{1'b0,
+  read_enable};
 
 endmodule

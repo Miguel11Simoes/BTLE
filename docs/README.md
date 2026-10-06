@@ -10,45 +10,46 @@
 This folder holds the documentation written for the dissertation. It covers the
 code inherited from the upstream [BTLE](https://github.com/JiaoXianjun/BTLE)
 project and the work built on top of it. The upstream documentation stays where
-the upstream put it. [07 Reference Manual](07%20Reference%20Manual/UPSTREAM_DOCUMENTATION.md)
+the upstream put it. [Reference Manual](Reference%20Manual/UPSTREAM_DOCUMENTATION.md)
 lists where each piece is.
+
+Latest lint and documentation update: [LINT_CLOSURE.md](Validation/LINT_CLOSURE.md).
 
 ## Where to start
 
 | If you want to... | Read |
 |---|---|
 | Know what this repository is and what is mine | [../CHANGES.md](../CHANGES.md) |
-| Understand the inherited hardware | [01 Architecture/UPSTREAM_ARCHITECTURE.md](01%20Architecture/UPSTREAM_ARCHITECTURE.md) |
-| Program the Link Layer registers | [01 Architecture/LL_REGISTER_MAP.md](01%20Architecture/LL_REGISTER_MAP.md) |
-| Know what the thesis is trying to decide | [02 Design Decisions/SCOPE.md](02%20Design%20Decisions/SCOPE.md) |
-| See where the BLE area goes and how to shrink it | [02 Design Decisions/AREA_REDUCTION_PLAN.md](02%20Design%20Decisions/AREA_REDUCTION_PLAN.md) |
-| Know what is tested and what is not | [04 Validation/UPSTREAM_TEST_INVENTORY.md](04%20Validation/UPSTREAM_TEST_INVENTORY.md) |
-| See the Gaussian table (B2) alone, its proofs and its saving | [04 Validation/TX_TABLE_VALIDATION.md](04%20Validation/TX_TABLE_VALIDATION.md) |
-| See B2 and the {cos, sin} memory together: its checks, area and activity | [04 Validation/TX_OPT_VALIDATION.md](04%20Validation/TX_OPT_VALIDATION.md) |
-| See the packet buffer with one port, with B2, the sine table of `ble-tx-sin2` and exact rewrites, the smallest transmitter with programmable VCO tables: its checks, area and activity | [04 Validation/TX_PDU_VALIDATION.md](04%20Validation/TX_PDU_VALIDATION.md) |
-| See the VCO without memory, its tables fixed in a ROM of an eighth of the wave, the smallest transmitter measured: its checks, area, timing and SRAM energy | [04 Validation/TX_ROM_VALIDATION.md](04%20Validation/TX_ROM_VALIDATION.md) |
-| Compare every branch: area (the transmitter with its SRAM macros), timing, switching activity | [04 Validation/BRANCH_COMPARISON.md](04%20Validation/BRANCH_COMPARISON.md) |
-| Choose where the Gaussian table lives (OTP, ROM, SRAM, REG) or a folded FIR, by TX area | [02 Design Decisions/GAUSS_FILTER_OPTIONS.md](02%20Design%20Decisions/GAUSS_FILTER_OPTIONS.md) |
-| Choose the single-port memory of the VCO tables (OpenRAM sweep: 512×16, 512×8, 256×16, 128×32, 64×64) | [02 Design Decisions/VCO_MEMORY_SWEEP.md](02%20Design%20Decisions/VCO_MEMORY_SWEEP.md) |
-| Reproduce the upstream results | [06 Guides/REPRODUCE_UPSTREAM.md](06%20Guides/REPRODUCE_UPSTREAM.md) |
-| Add a document or record a change | [06 Guides/CONTRIBUTING.md](06%20Guides/CONTRIBUTING.md) |
+| Understand the inherited hardware | [Architecture/UPSTREAM_ARCHITECTURE.md](Architecture/UPSTREAM_ARCHITECTURE.md) |
+| Program the Link Layer registers | [Architecture/LL_REGISTER_MAP.md](Architecture/LL_REGISTER_MAP.md) |
+| Know what the thesis is trying to decide | [Design Decisions/SCOPE.md](Design%20Decisions/SCOPE.md) |
+| See where the BLE area goes and how to shrink it | [Design Decisions/AREA_REDUCTION_PLAN.md](Design%20Decisions/AREA_REDUCTION_PLAN.md) |
+| Know what is tested and what is not | [Validation/UPSTREAM_TEST_INVENTORY.md](Validation/UPSTREAM_TEST_INVENTORY.md) |
+| See the Gaussian table (B2) alone, its proofs and its saving | [Validation/TX_TABLE_VALIDATION.md](Validation/TX_TABLE_VALIDATION.md) |
+| See B2 and the {cos, sin} memory together: its checks, area and activity | [Validation/TX_OPT_VALIDATION.md](Validation/TX_OPT_VALIDATION.md) |
+| See the packet buffer with one port, with B2, the sine table of `ble-tx-sin2` and exact rewrites, the smallest transmitter with programmable VCO tables: its checks, area and activity | [Validation/TX_PDU_VALIDATION.md](Validation/TX_PDU_VALIDATION.md) |
+| See the VCO without memory, its tables fixed in a ROM of an eighth of the wave, the smallest transmitter measured: its checks, area, timing and SRAM energy | [Validation/TX_ROM_VALIDATION.md](Validation/TX_ROM_VALIDATION.md) |
+| Compare every branch: area (the transmitter with its SRAM macros), timing, switching activity | [Validation/BRANCH_COMPARISON.md](Validation/BRANCH_COMPARISON.md) |
+| Choose where the Gaussian table lives (OTP, ROM, SRAM, REG) or a folded FIR, by TX area | [Design Decisions/GAUSS_FILTER_OPTIONS.md](Design%20Decisions/GAUSS_FILTER_OPTIONS.md) |
+| Choose the single-port memory of the VCO tables (OpenRAM sweep: 512×16, 512×8, 256×16, 128×32, 64×64) | [Design Decisions/VCO_MEMORY_SWEEP.md](Design%20Decisions/VCO_MEMORY_SWEEP.md) |
+| Reproduce the upstream results | [Guides/REPRODUCE_UPSTREAM.md](Guides/REPRODUCE_UPSTREAM.md) |
+| Add a document or record a change | [Guides/CONTRIBUTING.md](Guides/CONTRIBUTING.md) |
 
 ## Folder layout
 
-The numbering matches the `snitch_cluster_tese` repository, so the same kind of
-document has the same number in both theses. A folder exists only once it has
-content, which is why some numbers are missing.
+Folders are named by subject, without numeric prefixes. A folder is created
+when it has content; planned sections are listed below.
 
 | Folder | Holds | Status |
 |---|---|---|
-| `01 Architecture/` | How the hardware is built: hierarchy, clocks, interfaces, registers | Upstream described |
-| `02 Design Decisions/` | Scope, open questions, decisions and the reasons for them; area reduction plan | Four decisions open; area baseline measured |
-| `03 RISC-V Integration/` | Implementation of the core and its interface to the PHY | Not started |
-| `04 Validation/` | Test inventory, evidence, results | B2 and the {cos, sin} memory together, checked and measured (branch `ble-tx-opt`); branches compared |
-| `05 Thesis/` | Reports written for the dissertation | Not started |
-| `06 Guides/` | How to reproduce, build and contribute | Written, not yet executed |
-| `07 Reference Manual/` | Pointers to the upstream documentation | Written |
-| `09 Meetings and Discussions/` | Meeting notes with the supervisor | Not started |
+| `Architecture/` | How the hardware is built: hierarchy, clocks, interfaces, registers | Upstream described |
+| `Design Decisions/` | Scope, open questions, decisions and the reasons for them; area reduction plan | Four decisions open; area baseline measured |
+| `RISC-V Integration/` | Implementation of the core and its interface to the PHY | Not started |
+| `Validation/` | Test inventory, evidence, results | B2 and the {cos, sin} memory together, checked and measured (branch `ble-tx-opt`); branches compared |
+| `Thesis/` | Reports written for the dissertation | Not started |
+| `Guides/` | How to reproduce, build and contribute | Written, not yet executed |
+| `Reference Manual/` | Pointers to the upstream documentation | Written |
+| `Meetings and Discussions/` | Meeting notes with the supervisor | Not started |
 
 ## Repository map
 
@@ -89,4 +90,4 @@ flows.
 Every document written here starts with the same header block (Project, Branch,
 Date, Author) and has `Author: Miguel Simões`. Claims are either backed by a
 file, a command or a log, or marked as not verified.
-[06 Guides/CONTRIBUTING.md](06%20Guides/CONTRIBUTING.md) has the full rules.
+[Guides/CONTRIBUTING.md](Guides/CONTRIBUTING.md) has the full rules.

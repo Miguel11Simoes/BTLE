@@ -361,4 +361,8 @@ always @ (posedge clk) begin
   sin_out <= sin_negative ? -$signed({1'b0, sin_magnitude}) : $signed({1'b0, sin_magnitude});
 end
 
+// Fixed tables deliberately ignore programming ports. Rounding keeps bits [14:8].
+wire unused_fixed_table_interface = &{1'b0, cos_table_write_address, cos_table_write_data,
+  sin_table_write_address, sin_table_write_data};
+
 endmodule

@@ -90,7 +90,11 @@ module btle_controller #
 
   // Ports of Axi Slave Bus Interface
   input  wire s00_axi_aclk,
+// AXI logic samples reset synchronously; legacy UART asserts it asynchronously.
+// Preserve this interface contract. Reset release timing still requires RDC signoff.
+/* verilator lint_off SYNCASYNCNET */
   input  wire s00_axi_aresetn,
+/* verilator lint_on SYNCASYNCNET */
   input  wire [C_S00_AXI_ADDR_WIDTH-1 : 0] s00_axi_awaddr,
   input  wire [2 : 0] s00_axi_awprot,
   input  wire s00_axi_awvalid,
@@ -535,5 +539,10 @@ btle_phy #
   .rx_pdu_octet_mem_addr(rx_pdu_octet_mem_addr),
   .rx_pdu_octet_mem_data(ext_rx_pdu_octet_mem_data)
 );
+
+
+// Intentionally unused compatibility/debug fields. No functional fanout is added.
+wire unused_interface_fields = &{1'b0,
+  gpio[7:1]};
 
 endmodule

@@ -1,0 +1,17 @@
+FAIL: 0/2 lint configurations; reviewed exceptions: 14
+
+%Warning-WIDTHTRUNC: verilog/btle_ll.v:2089:19: Operator ASSIGNDLY expects 8 bits on the Assign RHS, but Assign RHS's CONST '32'h0' generates 32 bits.
+                                              : ... note: In instance 'btle_controller.btle_ll_i.ll_s_axi_i'
+ 2089 |       axi_araddr  <= 32'b0;
+      |                   ^~
+                     ... For warning description see https://verilator.org/warn/WIDTHTRUNC?v=5.020
+                     ... Use "/* verilator lint_off WIDTHTRUNC */" and lint_on around source to disable this message.
+%Error: Exiting due to 1 warning(s)
+
+%Warning-WIDTHTRUNC: verilog/btle_ll.v:2089:19: Operator ASSIGNDLY expects 8 bits on the Assign RHS, but Assign RHS's CONST '32'h0' generates 32 bits.
+                                              : ... note: In instance 'btle_controller.btle_ll_i.ll_s_axi_i'
+ 2089 |       axi_araddr  <= 32'b0;
+      |                   ^~
+                     ... For warning description see https://verilator.org/warn/WIDTHTRUNC?v=5.020
+                     ... Use "/* verilator lint_off WIDTHTRUNC */" and lint_on around source to disable this message.
+%Error: Exiting due to 1 warning(s)

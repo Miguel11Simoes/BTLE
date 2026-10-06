@@ -1,0 +1,2 @@
+READBACK PASS: 7 reserved registers, independent clocks, backpressure
+/tmp/btle-product-mutations-vbzjt_y7/tests/reserved_registers_tb.v:47: $finish called at 1456000 (1ps)

@@ -1,0 +1,105 @@
+{
+  "status": "PASS",
+  "reference": "bbef478b8b5386b16802abcf59deade3630d7f82",
+  "source_sha256": {
+    "uart_frame_rx": {
+      "reference": "5805f25e51fcb79c37847ecedd8339448460d9d905ae02123e258d4a16b79068",
+      "current": "70d556ff3e1d1cd55832d4ea7f74926a5d8e01664b79e1400994f1591f3ed82a"
+    },
+    "uart_frame_tx": {
+      "reference": "7b3873f32345bff47273feb41296220305c7bc29f1372d4a61bc4cfe571e9979",
+      "current": "bba1e6f0da2c805995ea705306423d3305b92526dd0b9d7b792d5da1300753e9"
+    },
+    "rx_clk_gen": {
+      "reference": "ee574cd36f9b09aa207c31872ce5acd89febba4a5bfceb2294cd1e731b97de52",
+      "current": "41cc3ed3f48ac9b6c75ad56da56148f128e6a556c5e572d9be96a3e070bb7d2b"
+    },
+    "tx_clk_gen": {
+      "reference": "a61a685da7cddffe8e3ff0b1e66b3133bd9b94df95a10ae5fdbd5a1196986693",
+      "current": "0b8f76bd51788dc04c33b7f31a4be9590a3f9f5521a0237025891fa27ccd11d3"
+    }
+  },
+  "cases": [
+    {
+      "width": 5,
+      "parity": "NONE",
+      "checks": 40000,
+      "transmits": 27,
+      "receives": 27,
+      "resets": 3,
+      "status": "PASS"
+    },
+    {
+      "width": 6,
+      "parity": "NONE",
+      "checks": 40000,
+      "transmits": 27,
+      "receives": 27,
+      "resets": 3,
+      "status": "PASS"
+    },
+    {
+      "width": 7,
+      "parity": "NONE",
+      "checks": 40000,
+      "transmits": 24,
+      "receives": 27,
+      "resets": 3,
+      "status": "PASS"
+    },
+    {
+      "width": 8,
+      "parity": "NONE",
+      "checks": 40000,
+      "transmits": 24,
+      "receives": 24,
+      "resets": 3,
+      "status": "PASS"
+    },
+    {
+      "width": 9,
+      "parity": "NONE",
+      "checks": 40000,
+      "transmits": 24,
+      "receives": 24,
+      "resets": 3,
+      "status": "PASS"
+    },
+    {
+      "width": 5,
+      "parity": "ODD",
+      "checks": 40000,
+      "transmits": 27,
+      "receives": 27,
+      "resets": 3,
+      "status": "PASS"
+    },
+    {
+      "width": 5,
+      "parity": "EVEN",
+      "checks": 40000,
+      "transmits": 27,
+      "receives": 27,
+      "resets": 3,
+      "status": "PASS"
+    },
+    {
+      "width": 8,
+      "parity": "ODD",
+      "checks": 40000,
+      "transmits": 24,
+      "receives": 24,
+      "resets": 3,
+      "status": "PASS"
+    },
+    {
+      "width": 8,
+      "parity": "EVEN",
+      "checks": 40000,
+      "transmits": 24,
+      "receives": 24,
+      "resets": 3,
+      "status": "PASS"
+    }
+  ]
+}

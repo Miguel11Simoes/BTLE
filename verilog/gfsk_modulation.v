@@ -137,7 +137,10 @@ endmodule
 
 // Full-convolution packet tail adapter. No valid sample is generated on the
 // clock immediately after the previous one: compatible with one-port VCOs.
+// Bundled helper: preserve the existing single-file compilation interface.
+/* verilator lint_off DECLFILENAME */
 module btle_gauss_tail #(
+/* verilator lint_on DECLFILENAME */
   parameter integer WIDTH = 16,
   parameter integer NUM_TAPS = 17,
   parameter integer FIXED_TAPS = 0,
@@ -166,14 +169,15 @@ module btle_gauss_tail #(
   assign filter_source_last = (remaining == 0) && source_valid && source_last;
   assign value = raw_filter + correction;
   assign valid = raw_valid;
-  assign last = raw_valid && (padding == NUM_TAPS-1);
+  localparam integer LAST_TAP = NUM_TAPS-1;
+  assign last = raw_valid && ({27'b0, padding} == NUM_TAPS-1);
   always @* begin
     next_correction = 0;
     index = 0;
     for (j=0; j<NUM_TAPS-1; j=j+1) begin
       index = (j<=8) ? j : NUM_TAPS-1-j;
-      if (remaining != 0 && j < NUM_TAPS-remaining) begin
-        if (FIXED_TAPS)
+      if (remaining != 0 && j < NUM_TAPS-{27'b0, remaining}) begin
+        if (FIXED_TAPS != 0)
           next_correction = next_correction + $signed(TAPS[index*16 +: 16]);
         else
           next_correction = next_correction + taps[index];
@@ -195,7 +199,7 @@ module btle_gauss_tail #(
       if (filter_valid) correction <= next_correction;
       if (remaining == 0) begin
         if (source_valid && source_last) begin
-          remaining <= NUM_TAPS-1;
+          remaining <= LAST_TAP[4:0];
           wait_cycle <= 1;
         end
       end else begin
@@ -204,7 +208,7 @@ module btle_gauss_tail #(
       end
       if (raw_valid) begin
         if (raw_last) padding <= 1;
-        else if (padding == NUM_TAPS-1) padding <= 0;
+        else if ({27'b0, padding} == NUM_TAPS-1) padding <= 0;
         else if (padding != 0) padding <= padding+1'b1;
       end
     end

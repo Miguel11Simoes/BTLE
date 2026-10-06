@@ -1,0 +1,12 @@
+Traceback (most recent call last):
+  File "/tmp/btle-lint-guards-q5nc7wrz/tests/test_lint_recovery.py", line 82, in <module>
+    main()
+  File "/tmp/btle-lint-guards-q5nc7wrz/tests/test_lint_recovery.py", line 77, in main
+    raise RuntimeError(output)
+RuntimeError: FATAL: /tmp/btle-lint-guards-q5nc7wrz/evidence/missing-ll_state-behavior/testbench.v:35: LL illegal state did not recover
+       Time: 176000  Scope: lint_recovery_tb
+
+
+
+FATAL: /tmp/btle-lint-guards-q5nc7wrz/evidence/missing-ll_state-behavior/testbench.v:35: LL illegal state did not recover
+       Time: 176000  Scope: lint_recovery_tb
