@@ -14,9 +14,9 @@ separation between what was inherited and what was built for the thesis.
 
 ## 1. Every new document
 
-- Goes under `docs/`, in the numbered folder that matches its kind (see
-  [../README.md](../README.md)). Create a missing folder with the same number and
-  name it has in `snitch_cluster_tese`.
+- Goes under `docs/`, in the folder that matches its kind (see
+  [../README.md](../README.md)). Create a missing folder with the name the index
+  gives it, without a number.
 - Starts with this header:
 
   ```markdown

@@ -12,7 +12,8 @@
 
 The upstream documentation is spread over several READMEs, a notebook and a
 folder of PDFs. It is left where it is, so that its links and images keep
-working. This page says where each topic is covered and how reliable that
+working, but for the folder of PDFs, `doc/`, which moved into `docs/` on
+2026-10-06. This page says where each topic is covered and how reliable that
 source is.
 
 | Topic | Upstream source | Notes |
@@ -24,7 +25,7 @@ source is.
 | Python CLI/TUI for the SDR tools | [host/python/btle_cli/README.md](../../host/python/btle_cli/README.md), [docs/MCP.md](../../host/python/btle_cli/docs/MCP.md) | Independent of the RTL. |
 | USRP replay | [usrp_replay_example/README.md](../../usrp_replay_example/README.md) | |
 | Supported HackRF/bladeRF library versions | [compatible_hackrf_bladerf_lib.txt](../../compatible_hackrf_bladerf_lib.txt) | |
-| BLE background (third-party PDFs) | [doc/](../../doc/): `TI-BLE-INTRODUCTION.pdf`, `ibeacon.pdf`, `BLE_sniffer_guide.pdf` | Not written by upstream. |
+| BLE background (third-party PDFs) | [docs/](../): `TI-BLE-INTRODUCTION.pdf`, `ibeacon.pdf`, `BLE_sniffer_guide.pdf` (upstream's `doc/` until 2026-10-06) | Not written by upstream. |
 | Register map, hierarchy, clocks | not documented upstream | See [../Architecture/](../Architecture/). |
 
 ## External specification

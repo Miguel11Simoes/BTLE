@@ -10,8 +10,9 @@
 This folder holds the documentation written for the dissertation. It covers the
 code inherited from the upstream [BTLE](https://github.com/JiaoXianjun/BTLE)
 project and the work built on top of it. The upstream documentation stays where
-the upstream put it. [Reference Manual](Reference%20Manual/UPSTREAM_DOCUMENTATION.md)
-lists where each piece is.
+the upstream put it, but for its `doc/` folder, merged into this one
+([Upstream documents](#upstream-documents)).
+[Reference Manual](Reference%20Manual/UPSTREAM_DOCUMENTATION.md) lists where each piece is.
 
 Latest lint and documentation update: [LINT_CLOSURE.md](Validation/LINT_CLOSURE.md).
 
@@ -51,11 +52,22 @@ when it has content; planned sections are listed below.
 | `Reference Manual/` | Pointers to the upstream documentation | Written |
 | `Meetings and Discussions/` | Meeting notes with the supervisor | Not started |
 
+## Upstream documents
+
+Upstream's `doc/` folder moved here on 2026-10-06 with its three third-party
+PDFs: [TI-BLE-INTRODUCTION.pdf](TI-BLE-INTRODUCTION.pdf), [ibeacon.pdf](ibeacon.pdf)
+and [BLE_sniffer_guide.pdf](BLE_sniffer_guide.pdf). Its README read:
+
+> See some docs which are useful in [https://github.com/JiaoXianjun/doc](https://github.com/JiaoXianjun/doc)
+>
+> See new type of discovery packet in host/btle-tools/src/packets_discovery.txt
+
 ## Repository map
 
 Everything outside `docs/`, `CHANGES.md` and the header of `README.md` is
 inherited unchanged from tag `upstream-baseline`. The folders stay where the
-upstream put them. The Vivado projects, the test-vector generator and the
+upstream put them, but for `doc/`, whose PDFs and README moved into `docs/` on
+2026-10-06 (only the root `README.md` linked them). The Vivado projects, the test-vector generator and the
 OpenLane notebook use relative paths between folders (for example
 `fpga/*/btle.tcl` loads `../../verilog/`), so moving a folder would break those
 flows.
@@ -72,9 +84,9 @@ flows.
 | `host/python/btle_cli/` | Python CLI/TUI around `btle_rx`/`btle_tx` | upstream |
 | `open_btle_baseband_chip/` | Chip write-up and Colab notebook (Python, Verilog, Vivado, OpenLane2/SKY130) | upstream |
 | `usrp_replay_example/` | Replay of a recorded BLE packet on a USRP | upstream |
-| `doc/` | Third-party PDFs (TI BLE intro, iBeacon, sniffer guide) | upstream |
+| `docs/*.pdf` | Third-party PDFs (TI BLE intro, iBeacon, sniffer guide), upstream's `doc/` until 2026-10-06 | upstream |
 | `fpga/adi-hdl/`, `BTLE-hw-img/` | Git submodules (ADI HDL library, prebuilt images); empty until initialised | upstream |
-| `docs/` | This documentation | mine |
+| `docs/` | This documentation, and upstream's `doc/` (§ Upstream documents) | mine, but for the PDFs |
 | `CHANGES.md` | Derivation notice and change log against the baseline | mine |
 | `scripts/area/` | Per-module Yosys area flow (Nangate45, SRAMs as macros) | mine |
 | `results/area/<label>/` | Area runs: summary, stats, compressed logs, provenance | mine |
