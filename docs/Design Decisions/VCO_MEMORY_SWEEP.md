@@ -301,6 +301,7 @@ The macro name is `sram_<ports>_<word bits>x<words>[_m<mask bits>]`. The run
 takes 45 minutes: 1.5 to 5.3 minutes per macro, and 21 for the 64 × 64 without
 the mask. The results, with each macro's LEF, `.lib` and log, are in
 [`results/area/openram-1rw-sweep/`](../../results/area/openram-1rw-sweep/summary.md)
-on `ble-tx-sin8-1rw`, `ble-tx-sin2` and the four measurement branches (`ble-opt`,
-`ble-tx-table`, `ble-rx-dm`, `ble-tx-opt`). The script returns an error because
+on `ble-tx-sin8-1rw`, `ble-tx-sin2` and the eight measurement branches (`ble-opt`,
+`ble-tx-table`, `ble-rx-dm`, `ble-tx-opt`, `ble-tx-pdu`, `ble-tx-pdu-we`, `ble-tx-rom`,
+`ble-tx-cordic`). The script returns an error because
 one macro (64 × 64 with the mask) failed; the other eight are complete.

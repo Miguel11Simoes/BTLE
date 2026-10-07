@@ -82,7 +82,8 @@ area of the SRAM macros is added to the std-cell area. The RAMs every option
 shares (TX COS/SIN tables, 32 768 bits, and the TX packet buffer, 4 096 bits)
 are left out. Results in
 [`results/compare/tx-area/summary.md`](../../results/compare/tx-area/summary.md)
-(on the four TX branches). With those RAMs counted as SRAM macros, the
+(on `ble-tx-table`, `ble-tx-table-reg`, `ble-tx-table-sram` and `ble-tx-fir2`, and on
+`ble-tx-opt` and the branches cut from it). With those RAMs counted as SRAM macros, the
 transmitter is about 97 % memory and every option here moves its total by
 −1.8 to +11.9 %: `docs/Validation/BRANCH_COMPARISON.md` § 4. With
 `ble-tx-sin2` (40 293 µm², the one-port sine table; `ble-tx-1--8` is within
