@@ -7,7 +7,7 @@
 **Project:** BTLE — reconfigurable RISC-V baseband  
 **Branch:** every branch carries this same file (`master`, `risc-v-ble`, `ble-tx-table`, `ble-tx-table-reg`, `ble-tx-table-sram`, `ble-tx-fir2`, `ble-tx-sin4`, `ble-tx-sin8`, `ble-tx-sin8-1rw`, `ble-tx-sin2`, `ble-tx-1--8`, `ble-tx-opt`, `ble-tx-pdu`, `ble-tx-pdu-we`, `ble-tx-rom`, `ble-tx-cordic`, `ble-rx-dm`, `ble-opt`)  
 **Base:** tag `upstream-baseline` (`8540186`)  
-**Date:** 2026-09-28; updated 2026-09-29 (six transmitter branches, SRAM macro areas), 2026-10-03 (the VCO-memory sweep), 2026-10-04 (`ble-tx-sin8-1rw`, `ble-tx-sin2` and `ble-tx-1--8`, the one-port VCO memories, runs `tx-1rw` and `tx-1--8`; `ble-tx-pdu`, the one-port packet buffer, run `tx-pdu`) and 2026-10-05 (`ble-tx-pdu-we`, the packet buffer written only when its pair is new, run `tx-pdu-we`; the energy of the transmitter's SRAMs, § 6.6; corrections listed in `CHANGES.md`; `ble-tx-rom` and `ble-tx-cordic`, the VCO without memory, and run `tx-vco`, every transmitter on the audited RTL, § 4.4)  
+**Date:** 2026-09-28; updated 2026-09-29 (six transmitter branches, SRAM macro areas), 2026-10-03 (the VCO-memory sweep), 2026-10-04 (`ble-tx-sin8-1rw`, `ble-tx-sin2` and `ble-tx-1--8`, the one-port VCO memories, runs `tx-1rw` and `tx-1--8`; `ble-tx-pdu`, the one-port packet buffer, run `tx-pdu`), 2026-10-05 (`ble-tx-pdu-we`, the packet buffer written only when its pair is new, run `tx-pdu-we`; the energy of the transmitter's SRAMs, § 6.6; corrections listed in `CHANGES.md`; `ble-tx-rom` and `ble-tx-cordic`, the VCO without memory, and run `tx-vco`, every transmitter on the audited RTL, § 4.4) and 2026-10-07 (`ble-tx-rom` and `ble-tx-cordic` in the table of § 2; the lint closure, §§ 4.4, 7 and 10)  
 **Author:** Miguel Simões  
 **Status:** executed: run `all-branches`, harness `scripts/compare/` at `f540e99` (summary
 regenerated at `696b036`, § 11); with the same harness and the same vectors, run `tx-variants`
@@ -190,31 +190,46 @@ deterministic for identical inputs, `master` reproduces the committed
 `baseline-upstream` area run exactly, and it came out identical in all eight runs
 (§§ 3, 6.1).
 
-| | `master` / `risc-v-ble` | `ble-tx-table` | `ble-tx-table-reg` | `ble-tx-table-sram` | `ble-tx-fir2` | `ble-tx-sin4` | `ble-tx-sin8` | `ble-tx-sin8-1rw` | `ble-tx-sin2` | `ble-tx-1--8` | `ble-tx-opt` | `ble-tx-pdu` | `ble-tx-pdu-we` | `ble-rx-dm` | `ble-opt` |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| **Content** | upstream BTLE (+ thesis docs on `risc-v-ble`) | **B2** | B2's tables in flip-flops | B2's tables in SRAM | folded FIR | quarter-wave VCO tables | one {cos, sin} memory for the quarter-wave tables | the {cos, sin} memory with **one port** | the quarter **sine** table alone, **one port** | an **eighth** of the {cos, sin} tables, **one port** | **B2 + the {cos, sin} memory** | **B2**, the quarter **sine** table and the **packet buffer** with **one port**, exact counters | as `ble-tx-pdu`, the packet buffer written only when its pair is **new** (a write strobe) | **B1** | **B1 + B2 + A1 + A2** |
-| Configuration measured | defaults | `GAUSS_TABLE=1` | `GAUSS_TABLE=1` | `GAUSS_TABLE=1` | defaults | defaults | defaults | defaults | defaults | defaults | `GAUSS_TABLE=1` | `GAUSS_TABLE=1` | `GAUSS_TABLE=1`, `PDU_WRITE_STROBE=1` | defaults | `ENABLE_IQ_CAPTURE=0`, `LL_MINIMAL=1`, `GAUSS_TABLE=1` |
-| GFSK demodulators in `btle_rx` | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | **1, shared** | **1, shared** |
-| Gaussian filter | FIR, runtime taps | **fixed-tap table** | **table in 2 560 flip-flops**, runtime taps | **table in SRAM**, runtime taps | **folded FIR**, runtime taps | FIR, runtime taps | FIR, runtime taps | FIR, runtime taps | FIR, runtime taps | FIR, runtime taps | **fixed-tap table** | **fixed taps**, paired | **fixed taps**, paired | FIR, runtime taps | **fixed-tap table** |
-| VCO COS / SIN tables | 2 × 2 048 × 8 | 2 × 2 048 × 8 | 2 × 2 048 × 8 | 2 × 2 048 × 8 | 2 × 2 048 × 8 | **2 × 512 × 8** | **1 × 512 × 16** ({cos, sin}) | **1 × 512 × 16** ({cos, sin}), one port | **1 × 512 × 8** (sine), one port; cos 0 in a register | **1 × 256 × 16** ({cos, sin}, 0°–45°), one port; 45° in a register | **1 × 512 × 16** ({cos, sin}) | **1 × 512 × 8** (sine), one port; cos 0 in a register | **1 × 512 × 8** (sine), one port; cos 0 in a register | 2 × 2 048 × 8 | 2 × 2 048 × 8 |
-| IQ-capture debug RAM (1 Mbit) | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes | **removed** |
-| Link Layer | full | full | full | full | full | full | full | full | full | full | full | full | full | full | **minimal** |
-| **Std cells, `btle_controller`** | 50 295 | 48 227 (−4.1 %) | 58 091 (+15.5 %) | 49 324 (−1.9 %) | 49 620 (−1.3 %) | 50 397 (+0.2 %) | 50 716 (+0.8 %) | 50 708 (+0.8 %) | 50 621 (+0.6 %) | 50 904 (+1.2 %) | 48 559 (−3.5 %) | 48 164 (−4.2 %) | 48 056 (−4.5 %) | 23 346 (−53.6 %) | **16 102 (−68.0 %)** |
-| Flip-flops | 4 578 | 4 422 (−3.4 %) | 7 222 (+57.8 %) | 4 667 (+1.9 %) | 4 570 (−0.2 %) | 4 581 (+0.1 %) | 4 656 (+1.7 %) | 4 642 (+1.4 %) | 4 639 (+1.3 %) | 4 654 (+1.7 %) | 4 500 (−1.7 %) | 4 430 (−3.2 %) | 4 432 (−3.2 %) | 3 926 (−14.2 %) | 2 673 (−41.6 %) |
-| Cell area (µm²) | 71 706 | 68 667 (−4.2 %) | 91 556 (+27.7 %) | 70 896 (−1.1 %) | 70 652 (−1.5 %) | 71 863 (+0.2 %) | 72 484 (+1.1 %) | 72 414 (+1.0 %) | 72 278 (+0.8 %) | 72 617 (+1.3 %) | 69 412 (−3.2 %) | 68 767 (−4.1 %) | 68 767 (−4.1 %) | 38 782 (−45.9 %) | 26 681 (−62.8 %) |
-| **SRAM bits** | 1 136 070 | 1 136 070 | 1 136 070 | 1 138 630 (+0.2 %) | 1 136 070 | 1 111 494 (−2.2 %) | 1 111 494 (−2.2 %) | 1 111 494 (−2.2 %) | 1 107 398 (−2.5 %) | 1 107 398 (−2.5 %) | 1 111 494 (−2.2 %) | 1 105 350 (−2.7 %) | 1 105 350 (−2.7 %) | 1 136 070 | **87 046 (−92.3 %)** |
-| **Transmitter with its SRAM macros (µm², § 4)** | 167 731 | 164 734 (−1.8 %) | 187 610 (+11.9 %) | 185 280 (+10.5 %) | 166 704 (−0.6 %) | **76 552 (−54.4 %)** | **67 437 (−59.8 %)** | **46 773 (−72.1 %)** | **40 293 (−76.0 %)** | **40 359 (−75.9 %)** | **64 441 (−61.6 %)** | **20 098 (−88.0 %)** | **20 098 (−88.0 %)** | 167 737 (0) | 164 734 (−1.8 %) |
-| Min period at 16 MHz (62.5 ns) | 1.991 ns | 1.905 ns | 1.995 ns | 2.011 ns | 1.877 ns | 2.007 ns | 1.910 ns | 1.974 ns | 1.938 ns | 1.949 ns | 1.917 ns | 1.919 ns | 2.050 ns | 1.834 ns | 1.944 ns |
-| Slack / Fmax | +60.509 ns / 502 MHz | +60.595 ns / 525 MHz | +60.505 ns / 501 MHz | +60.489 ns / 497 MHz | +60.623 ns / 533 MHz | +60.493 ns / 498 MHz | +60.590 ns / 524 MHz | +60.526 ns / 507 MHz | +60.562 ns / 516 MHz | +60.551 ns / 513 MHz | +60.583 ns / 522 MHz | +60.581 ns / 521 MHz | +60.450 ns / 488 MHz | +60.666 ns / 545 MHz | +60.556 ns / 514 MHz |
-| Worst path | demodulator multiply, one of 8 copies | Link Layer 64-bit timestamp | demodulator multiply, one of 8 copies | the same | the same | the same | Link Layer 64-bit timestamp | demodulator multiply, one of 8 copies | demodulator multiply, one of 8 copies | demodulator multiply, one of 8 copies | demodulator multiply, one of 8 copies | demodulator multiply, one of 8 copies | Link Layer 64-bit timestamp | shared demodulator multiply | Link Layer 64-bit timestamp |
-| **Data + clock switched capacitance, `mixed`** | 1.25 × 10⁹ fF | −3.2 % | +40.8 % | +0.6 % | −0.5 % | +0.1 % | +1.3 % | +1.3 % | +1.8 % | +1.5 % | −1.8 % | −2.2 % | −2.1 % | −9.5 % | **−30.3 %** |
-| … over the 5 scenarios | — | −2.3 to −5.0 % | +39.9 to +53.0 % (4 scenarios, § 6.1) | +0.6 to +1.8 % (4 scenarios) | −0.1 to −1.1 % | 0 to +0.4 % | +1.2 to +1.8 % | +1.0 to +1.9 % | +0.9 to +3.4 % | +1.2 to +2.3 % | −1.1 to −3.1 % | −2.2 to −3.0 % | −2.9 to −2.1 % | −5.9 to −12.9 % | −25.5 to −34.7 % |
-| Clock pins (load × toggles) | 8.76 × 10⁸ fF | −3.4 % | +57.3 % | +1.9 % | −0.2 % | +0.1 % | +1.7 % | +1.4 % | +1.3 % | +1.6 % | −1.7 % | −3.2 % | −3.2 % | −14.1 % | −41.4 % |
-| Non-clock toggles / cycle, `mixed` | 984.3 | 956.4 (−2.8 %) | 988.0 (+0.4 %) | 958.7 (−2.6 %) | 971.0 (−1.4 %) | 987.0 (+0.3 %) | 989.4 (+0.5 %) | 994.3 (+1.0 %) | 1012.1 (+2.8 %) | 996.0 (+1.2 %) | 962.7 (−2.2 %) | 985.4 (+0.1 %) | 983.6 (−0.1 %) | 1 004.5 (+2.1 %) | 939.7 (−4.5 %) |
-| Nets with activity > 10 %, `mixed` | 839 | 827 | 836 | 824 | 841 | 851 | 845 | 882 | 951 | 887 | 837 | 954 | 951 | 4 002 (×4.8) | 3 908 (×4.7) |
-| RAM-port toggles, `mixed` | 3 044 741 | unchanged | unchanged | +10.8 % | unchanged | −0.4 % | −0.4 % | −0.4 % | +7.0 % | −0.5 % | −0.4 % | +7.2 % | +7.1 % | unchanged | −40.0 % |
-| Functions removed | — | runtime Gaussian taps | none; 928 clocks after a tap write before the next transmission | the same | none | COS/SIN tables without quarter-wave symmetry | as `ble-tx-sin4`; table writes limited to w + 1 in any w clocks (§ 8) | as `ble-tx-sin4`; a table write waits for a clock without a read (§ 8) | as `ble-tx-sin4`, and the COS table apart from cos 0; sine writes wait while transmitting; one sample every two clocks at most (§ 8) | as `ble-tx-sin4`; cos[k] and sin[512 − k] stored as one; a table write waits for a clock without a read (§ 8) | runtime Gaussian taps; COS/SIN tables as `ble-tx-sin8` (§ 8) | runtime Gaussian taps; COS/SIN tables as `ble-tx-sin2`; a packet byte rewritten while it is being read (§ 8) | runtime Gaussian taps; COS/SIN tables as `ble-tx-sin2`; a packet byte rewritten while it is being read (§ 8) | **none** | runtime taps, IQ capture, UART HCI, 1 PPS, latency counter |
-| Gate-level outputs vs upstream, 5 scenarios | — | identical, every output | identical in 4; `tx` transmits before the rebuild (§ 6.1) | the same | identical, every output | identical, every output | identical, every output | identical, every output | identical, every output | identical, every output | identical, every output | identical, every output | identical, every output | identical, every output | identical, except the 3 removed outputs |
+† `ble-tx-rom` and `ble-tx-cordic` exist only after the product audit, so their
+columns are of the audited RTL, from run `tx-vco` (§§ 4.4, 5.1), at the revisions it
+measured (`144d51b`, `3d9ad94`: before the lint closure, `LINT_CLOSURE.md`), and their
+differences are against corrected `master` (`5abbbf7`) in the same run: 52 497 cells,
+4 722 flip-flops, 74 746 µm² of cells, 1 136 070 SRAM bits, a transmitter of
+171 284 µm² and a minimum period of 3.458 ns. In that run `ble-tx-pdu` measures
+48 192 cells, 4 443 flip-flops, 68 833 µm² and a transmitter of 20 237 µm² (−88.2 %),
+1.904 ns: the two columns are to be read against those figures, not against the
+`ble-tx-pdu` column below, which is of the RTL before the audit. The controller's cells
+and flip-flops come from the netlists of the timing run, which uses the area flow of
+§ 3 (the same counts as the area run on `master`); the SRAM bits are those of
+`ble-tx-pdu` without its sine table (4 096 bits: the VCO has no macro). Their switching
+activity was not measured (§ 10), and they were validated at module and controller
+level against corrected `master`, not in the gate-level lockstep of § 6.1 (§ 7).
+
+| | `master` / `risc-v-ble` | `ble-tx-table` | `ble-tx-table-reg` | `ble-tx-table-sram` | `ble-tx-fir2` | `ble-tx-sin4` | `ble-tx-sin8` | `ble-tx-sin8-1rw` | `ble-tx-sin2` | `ble-tx-1--8` | `ble-tx-opt` | `ble-tx-pdu` | `ble-tx-pdu-we` | `ble-tx-rom` † | `ble-tx-cordic` † | `ble-rx-dm` | `ble-opt` |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| **Content** | upstream BTLE (+ thesis docs on `risc-v-ble`) | **B2** | B2's tables in flip-flops | B2's tables in SRAM | folded FIR | quarter-wave VCO tables | one {cos, sin} memory for the quarter-wave tables | the {cos, sin} memory with **one port** | the quarter **sine** table alone, **one port** | an **eighth** of the {cos, sin} tables, **one port** | **B2 + the {cos, sin} memory** | **B2**, the quarter **sine** table and the **packet buffer** with **one port**, exact counters | as `ble-tx-pdu`, the packet buffer written only when its pair is **new** (a write strobe) | **B2**, the packet buffer of `ble-tx-pdu`, **no VCO memory**: the tables fixed in a **ROM** (an eighth of the wave, 257 pairs) | as `ble-tx-rom`, the tables computed by an **exact CORDIC** (15 iterations in one clock) | **B1** | **B1 + B2 + A1 + A2** |
+| Configuration measured | defaults | `GAUSS_TABLE=1` | `GAUSS_TABLE=1` | `GAUSS_TABLE=1` | defaults | defaults | defaults | defaults | defaults | defaults | `GAUSS_TABLE=1` | `GAUSS_TABLE=1` | `GAUSS_TABLE=1`, `PDU_WRITE_STROBE=1` | `GAUSS_TABLE=1` | `GAUSS_TABLE=1` | defaults | `ENABLE_IQ_CAPTURE=0`, `LL_MINIMAL=1`, `GAUSS_TABLE=1` |
+| GFSK demodulators in `btle_rx` | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | **1, shared** | **1, shared** |
+| Gaussian filter | FIR, runtime taps | **fixed-tap table** | **table in 2 560 flip-flops**, runtime taps | **table in SRAM**, runtime taps | **folded FIR**, runtime taps | FIR, runtime taps | FIR, runtime taps | FIR, runtime taps | FIR, runtime taps | FIR, runtime taps | **fixed-tap table** | **fixed taps**, paired | **fixed taps**, paired | **fixed taps**, paired | **fixed taps**, paired | FIR, runtime taps | **fixed-tap table** |
+| VCO COS / SIN tables | 2 × 2 048 × 8 | 2 × 2 048 × 8 | 2 × 2 048 × 8 | 2 × 2 048 × 8 | 2 × 2 048 × 8 | **2 × 512 × 8** | **1 × 512 × 16** ({cos, sin}) | **1 × 512 × 16** ({cos, sin}), one port | **1 × 512 × 8** (sine), one port; cos 0 in a register | **1 × 256 × 16** ({cos, sin}, 0°–45°), one port; 45° in a register | **1 × 512 × 16** ({cos, sin}) | **1 × 512 × 8** (sine), one port; cos 0 in a register | **1 × 512 × 8** (sine), one port; cos 0 in a register | **none**: fixed, a ROM in logic of 257 {cos, sin} pairs (0°–45°) | **none**: fixed, computed by a CORDIC | 2 × 2 048 × 8 | 2 × 2 048 × 8 |
+| IQ-capture debug RAM (1 Mbit) | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes | **removed** |
+| Link Layer | full | full | full | full | full | full | full | full | full | full | full | full | full | full | full | full | **minimal** |
+| **Std cells, `btle_controller`** | 50 295 | 48 227 (−4.1 %) | 58 091 (+15.5 %) | 49 324 (−1.9 %) | 49 620 (−1.3 %) | 50 397 (+0.2 %) | 50 716 (+0.8 %) | 50 708 (+0.8 %) | 50 621 (+0.6 %) | 50 904 (+1.2 %) | 48 559 (−3.5 %) | 48 164 (−4.2 %) | 48 056 (−4.5 %) | 48 250 (−8.1 %) † | 49 763 (−5.2 %) † | 23 346 (−53.6 %) | **16 102 (−68.0 %)** |
+| Flip-flops | 4 578 | 4 422 (−3.4 %) | 7 222 (+57.8 %) | 4 667 (+1.9 %) | 4 570 (−0.2 %) | 4 581 (+0.1 %) | 4 656 (+1.7 %) | 4 642 (+1.4 %) | 4 639 (+1.3 %) | 4 654 (+1.7 %) | 4 500 (−1.7 %) | 4 430 (−3.2 %) | 4 432 (−3.2 %) | 4 411 (−6.6 %) † | 4 411 (−6.6 %) † | 3 926 (−14.2 %) | 2 673 (−41.6 %) |
+| Cell area (µm²) | 71 706 | 68 667 (−4.2 %) | 91 556 (+27.7 %) | 70 896 (−1.1 %) | 70 652 (−1.5 %) | 71 863 (+0.2 %) | 72 484 (+1.1 %) | 72 414 (+1.0 %) | 72 278 (+0.8 %) | 72 617 (+1.3 %) | 69 412 (−3.2 %) | 68 767 (−4.1 %) | 68 767 (−4.1 %) | 68 739 (−8.0 %) † | 70 270 (−6.0 %) † | 38 782 (−45.9 %) | 26 681 (−62.8 %) |
+| **SRAM bits** | 1 136 070 | 1 136 070 | 1 136 070 | 1 138 630 (+0.2 %) | 1 136 070 | 1 111 494 (−2.2 %) | 1 111 494 (−2.2 %) | 1 111 494 (−2.2 %) | 1 107 398 (−2.5 %) | 1 107 398 (−2.5 %) | 1 111 494 (−2.2 %) | 1 105 350 (−2.7 %) | 1 105 350 (−2.7 %) | 1 101 254 (−3.1 %) † | 1 101 254 (−3.1 %) † | 1 136 070 | **87 046 (−92.3 %)** |
+| **Transmitter with its SRAM macros (µm², § 4)** | 167 731 | 164 734 (−1.8 %) | 187 610 (+11.9 %) | 185 280 (+10.5 %) | 166 704 (−0.6 %) | **76 552 (−54.4 %)** | **67 437 (−59.8 %)** | **46 773 (−72.1 %)** | **40 293 (−76.0 %)** | **40 359 (−75.9 %)** | **64 441 (−61.6 %)** | **20 098 (−88.0 %)** | **20 098 (−88.0 %)** | **9 489 (−94.5 %)** † | **11 121 (−93.5 %)** † | 167 737 (0) | 164 734 (−1.8 %) |
+| Min period at 16 MHz (62.5 ns) | 1.991 ns | 1.905 ns | 1.995 ns | 2.011 ns | 1.877 ns | 2.007 ns | 1.910 ns | 1.974 ns | 1.938 ns | 1.949 ns | 1.917 ns | 1.919 ns | 2.050 ns | 2.002 ns † | 5.501 ns † | 1.834 ns | 1.944 ns |
+| Slack / Fmax | +60.509 ns / 502 MHz | +60.595 ns / 525 MHz | +60.505 ns / 501 MHz | +60.489 ns / 497 MHz | +60.623 ns / 533 MHz | +60.493 ns / 498 MHz | +60.590 ns / 524 MHz | +60.526 ns / 507 MHz | +60.562 ns / 516 MHz | +60.551 ns / 513 MHz | +60.583 ns / 522 MHz | +60.581 ns / 521 MHz | +60.450 ns / 488 MHz | +60.498 ns / 500 MHz † | +56.999 ns / 182 MHz † | +60.666 ns / 545 MHz | +60.556 ns / 514 MHz |
+| Worst path | demodulator multiply, one of 8 copies | Link Layer 64-bit timestamp | demodulator multiply, one of 8 copies | the same | the same | the same | Link Layer 64-bit timestamp | demodulator multiply, one of 8 copies | demodulator multiply, one of 8 copies | demodulator multiply, one of 8 copies | demodulator multiply, one of 8 copies | demodulator multiply, one of 8 copies | Link Layer 64-bit timestamp | demodulator multiply, one of 8 copies | **the CORDIC**, in the transmitter | shared demodulator multiply | Link Layer 64-bit timestamp |
+| **Data + clock switched capacitance, `mixed`** | 1.25 × 10⁹ fF | −3.2 % | +40.8 % | +0.6 % | −0.5 % | +0.1 % | +1.3 % | +1.3 % | +1.8 % | +1.5 % | −1.8 % | −2.2 % | −2.1 % | not measured | not measured | −9.5 % | **−30.3 %** |
+| … over the 5 scenarios | — | −2.3 to −5.0 % | +39.9 to +53.0 % (4 scenarios, § 6.1) | +0.6 to +1.8 % (4 scenarios) | −0.1 to −1.1 % | 0 to +0.4 % | +1.2 to +1.8 % | +1.0 to +1.9 % | +0.9 to +3.4 % | +1.2 to +2.3 % | −1.1 to −3.1 % | −2.2 to −3.0 % | −2.1 to −2.9 % | — | — | −5.9 to −12.9 % | −25.5 to −34.7 % |
+| Clock pins (load × toggles) | 8.76 × 10⁸ fF | −3.4 % | +57.3 % | +1.9 % | −0.2 % | +0.1 % | +1.7 % | +1.4 % | +1.3 % | +1.6 % | −1.7 % | −3.2 % | −3.2 % | not measured | not measured | −14.1 % | −41.4 % |
+| Non-clock toggles / cycle, `mixed` | 984.3 | 956.4 (−2.8 %) | 988.0 (+0.4 %) | 958.7 (−2.6 %) | 971.0 (−1.4 %) | 987.0 (+0.3 %) | 989.4 (+0.5 %) | 994.3 (+1.0 %) | 1012.1 (+2.8 %) | 996.0 (+1.2 %) | 962.7 (−2.2 %) | 985.4 (+0.1 %) | 983.6 (−0.1 %) | not measured | not measured | 1 004.5 (+2.1 %) | 939.7 (−4.5 %) |
+| Nets with activity > 10 %, `mixed` | 839 | 827 | 836 | 824 | 841 | 851 | 845 | 882 | 951 | 887 | 837 | 954 | 951 | not measured | not measured | 4 002 (×4.8) | 3 908 (×4.7) |
+| RAM-port toggles, `mixed` | 3 044 741 | unchanged | unchanged | +10.8 % | unchanged | −0.4 % | −0.4 % | −0.4 % | +7.0 % | −0.5 % | −0.4 % | +7.2 % | +7.1 % | not measured | not measured | unchanged | −40.0 % |
+| Functions removed | — | runtime Gaussian taps | none; 928 clocks after a tap write before the next transmission | the same | none | COS/SIN tables without quarter-wave symmetry | as `ble-tx-sin4`; table writes limited to w + 1 in any w clocks (§ 8) | as `ble-tx-sin4`; a table write waits for a clock without a read (§ 8) | as `ble-tx-sin4`, and the COS table apart from cos 0; sine writes wait while transmitting; one sample every two clocks at most (§ 8) | as `ble-tx-sin4`; cos[k] and sin[512 − k] stored as one; a table write waits for a clock without a read (§ 8) | runtime Gaussian taps; COS/SIN tables as `ble-tx-sin8` (§ 8) | runtime Gaussian taps; COS/SIN tables as `ble-tx-sin2`; a packet byte rewritten while it is being read (§ 8) | runtime Gaussian taps; COS/SIN tables as `ble-tx-sin2`; a packet byte rewritten while it is being read (§ 8) | runtime Gaussian taps; **the COS/SIN tables**, fixed (writes ignored); a packet byte rewritten while it is being read (§ 8) | as `ble-tx-rom` (§ 8) | **none** | runtime taps, IQ capture, UART HCI, 1 PPS, latency counter |
+| Gate-level outputs vs upstream, 5 scenarios | — | identical, every output | identical in 4; `tx` transmits before the rebuild (§ 6.1) | the same | identical, every output | identical, every output | identical, every output | identical, every output | identical, every output | identical, every output | identical, every output | identical, every output | identical, every output | not run; module and controller lockstep against corrected `master` (§ 7) | the same | identical, every output | identical, except the 3 removed outputs |
 
 ## 3. Area
 
@@ -529,10 +544,15 @@ The figures of §§ 3–4.3 are of the RTL before the product audit, whose
 corrections changed the transmitter of every branch (`PRODUCT_VALIDATION.md`).
 Run [`tx-vco`](../../results/area/tx-vco/summary.md) measures the VCO and the
 whole transmitter (`btle_tx`) of every branch again, each at its head after
-the audit, with the flow of § 3 (`scripts/area/run_area.sh`) and the
+the audit (2026-10-05, the revisions in its `provenance.txt`), with the flow of
+§ 3 (`scripts/area/run_area.sh`) and the
 configuration of § 1; `master`'s `verilog/` is corrected `master`'s
 (`5abbbf7`), which is also `risc-v-ble`'s. The macros are those of § 4.2: their
-areas depend on their geometry only, which the audit did not change.
+areas depend on their geometry only, which the audit did not change. The lint
+closure of 2026-10-06 (`LINT_CLOSURE.md`) changed the RTL of every branch after
+this run (explicit widths, illegal states that recover to idle, the CORDIC's
+unused last angle removed) and was validated, not measured again: §§ 4.4 and 5.1
+describe the revisions before it.
 
 | Branch | `vco` cells (µm²) | `btle_tx` cells (µm²) | before the audit (§ 4.2) | Gaussian-table macros | COS + SIN macros | PDU buffer | **Total (µm²)** | vs `master` | Total, all 1RW (µm²) | vs `master` |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
@@ -595,7 +615,9 @@ clock-to-Q and setup added. Results in
 [`results/timing/tx-1--8/`](../../results/timing/tx-1--8/),
 [`results/timing/tx-pdu/`](../../results/timing/tx-pdu/) and
 [`results/timing/tx-pdu-we/`](../../results/timing/tx-pdu-we/).
-Target: the 16 MHz baseband clock, 62.5 ns.
+Target: the 16 MHz baseband clock, 62.5 ns. The table is of the RTL before the
+product audit; `ble-tx-rom` and `ble-tx-cordic`, which exist only after it, are
+timed in § 5.1.
 
 | | `master` / `risc-v-ble` | `ble-tx-table` | `ble-tx-table-reg` | `ble-tx-table-sram` | `ble-tx-fir2` | `ble-tx-sin4` | `ble-tx-sin8` | `ble-tx-sin8-1rw` | `ble-tx-sin2` | `ble-tx-1--8` | `ble-tx-opt` | `ble-tx-pdu` | `ble-tx-pdu-we` | `ble-rx-dm` | `ble-opt` |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
@@ -1023,6 +1045,14 @@ of the synthesised netlist is compared with upstream on every clock.
 | Gate-level lockstep, runs `tx-variants`, `tx-sin8`, `tx-opt`, `tx-1rw`, `tx-1--8`, `tx-pdu` and `tx-pdu-we` | 4/5 scenarios, 0 mismatches; `tx` transmits before the 928-clock rebuild (§ 6.1) | the same | 5/5 scenarios, 0 mismatches | 5/5 scenarios, 0 mismatches, with the full 2 048-entry tables written through the registers (25 packets sent) | 5/5 scenarios, 0 mismatches, with the full tables written through the registers (25 packets sent) | 5/5 scenarios, 0 mismatches (run `tx-1rw`), tables written through the registers | 5/5 scenarios, 0 mismatches (run `tx-1rw`), tables written through the registers | 5/5 scenarios, 0 mismatches (run `tx-1--8`), tables written through the registers | 5/5 scenarios, 0 mismatches (run `tx-opt`), tables written through the registers | 5/5 scenarios, 0 mismatches (run `tx-pdu`), tables and packets written through the registers | 5/5 scenarios, 0 mismatches (run `tx-pdu-we`), tables and packets written through the registers |
 | Report | `GAUSS_FILTER_OPTIONS.md` § 7 | `GAUSS_FILTER_OPTIONS.md` § 7 | `GAUSS_FILTER_OPTIONS.md` § 7 | `TX_SIN4_COMPARISON.md` (on `ble-tx-sin4`) | `TX_SIN8_COMPARISON.md` (on `ble-tx-sin8`) | `TX_SIN8_1RW_COMPARISON.md` (on `ble-tx-sin8-1rw`) | `TX_SIN2_COMPARISON.md` (on `ble-tx-sin2`) | `TX_1--8_COMPARISON.md` (on `ble-tx-1--8`) | `docs/Validation/TX_OPT_VALIDATION.md` (on `ble-tx-opt`) | `docs/Validation/TX_PDU_VALIDATION.md` (on `ble-tx-pdu`) | `docs/Validation/TX_PDU_WE_VALIDATION.md` (on `ble-tx-pdu-we`) |
 
+The rows "Upstream testbenches, 270 runs" above are the strict runner of the
+integrity audit on the RTL before the product audit. The product audit then
+corrected the RTL of every branch and replaced that runner with its own 270-case
+matrix (210 data comparisons and 60 verified rejections), which every branch passes,
+270/270, and 270/270 again on a one-port model where the branch has one-port memories
+(`PRODUCT_VALIDATION.md`, `RF_INTERFACE_REVIEW.md`); after the lint closure of
+2026-10-06 all 18 branches pass it again, and pass the lint gate (`LINT_CLOSURE.md`).
+
 `ble-tx-rom` and `ble-tx-cordic` were validated on the audited RTL, with the
 product audit's campaign against corrected `master` (`5abbbf7`), not with the
 strict runner of the integrity audit like the branches above:
@@ -1034,7 +1064,8 @@ strict runner of the integrity audit like the branches above:
 | The product audit's matrix, 270 cases | 270/270 (210 data comparisons, 60 verified rejections), and 270/270 on the one-port model of the packet buffer | the same |
 | TX waveforms | 167/167, every PDU decoded by the RTL receiver; 16/16 on the one-port model | the same |
 | RF contract, controller, defects | 12/12, 2/2 mutants; controller lockstep 6/6 runs (36 TX, 36 RX), 5/5 mutations; 4/4 product defects | the same |
-| Structure | Yosys passes; strict lint fails, as on every branch: 156 diagnostics (+3 against `ble-tx-pdu`: the table writes it ignores) | 159 (+6: the table writes, and bits the CORDIC computes but does not use) |
+| Structure, at the revision validated (`144d51b`, `3d9ad94`) | Yosys passes; strict lint fails, as it then did on every branch: 156 diagnostics (+3 against `ble-tx-pdu`: the table writes it ignores) | 159 (+6: the table writes, and bits the CORDIC computes but does not use) |
+| Lint closure, 2026-10-06 | lint passes (2 configurations), with the reviewed exceptions; the 270-case matrix 270/270 on the RTL and on the one-port model; 7/7 ROM mutants (`LINT_CLOSURE.md`) | lint passes (2 configurations); the same matrices; 11/11 CORDIC mutants |
 | Report | `docs/Validation/TX_ROM_VALIDATION.md` (on `ble-tx-rom`) | `docs/Validation/TX_CORDIC_VALIDATION.md` (on `ble-tx-cordic`) |
 
 ## 8. What each branch gives up
@@ -1169,8 +1200,10 @@ strict runner of the integrity audit like the branches above:
   Link Layer crossings) are counted in bits only.
 - **One stimulus set** for activity (example 0 of the Python model, seed 1,
   100 000 cycles per scenario).
-- **§§ 4.4 and 5.1 are the only figures of the audited RTL in §§ 3–5**: the
-  rest of §§ 3–5 describes the RTL before the product audit, and the activity of
+- **§§ 4.4 and 5.1, and the columns marked † in § 2, are the only figures of
+  the audited RTL in §§ 2–5**, and they are of the revisions before the lint
+  closure of 2026-10-06 (`LINT_CLOSURE.md`), which changed the RTL again and was
+  not measured: the rest of §§ 2–5 describes the RTL before the product audit, and the activity of
   §§ 6.1–6.5 has not been measured again (its coverage is open in
   `RF_INTERFACE_REVIEW.md`).
 - **The resolution of the method.** The same block, with the same RTL and the
