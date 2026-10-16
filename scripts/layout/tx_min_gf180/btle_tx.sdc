@@ -27,6 +27,12 @@ set_input_delay [expr 62.5 * 0.2] -clock [get_clocks clk]  $clk_inputs
 set_input_delay [expr 20.0 * 0.2] -clock [get_clocks clkb] $clkb_inputs
 set_output_delay [expr 62.5 * 0.2] -clock [get_clocks clk] [all_outputs]
 set_false_path -from $async_inputs
+# The eFuse blocks sense their fuses once after reset_n rises (the Liberty's reset_n -> ready/out arc,
+# 32 ns at ss) and hold them: out is static from then on (the clkb side reads it like the ROM) and
+# ready is a status output. Not a clock-cycle path.
+set efuse_reset_pins [get_pins -hierarchical *efuse_i/reset_n]
+if { [llength $efuse_reset_pins] != 6 } { error "expected the six efuse_i/reset_n pins, found [llength $efuse_reset_pins]" }
+set_false_path -through $efuse_reset_pins
 
 set_driving_cell -lib_cell [lindex [split $::env(SYNTH_DRIVING_CELL) "/"] 0] \
     -pin [lindex [split $::env(SYNTH_DRIVING_CELL) "/"] 1] [concat $clk_inputs [get_ports {pdu_octet_mem_* adv_address_otp_prog[*]}]]
