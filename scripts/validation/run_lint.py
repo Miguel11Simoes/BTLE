@@ -7,7 +7,7 @@ are accepted; no command-line warning suppression or automatic waiver generation
 import argparse, hashlib, itertools, json, os, re, subprocess, sys
 from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
-FLAGS = ('ENABLE_IQ_CAPTURE', 'LL_MINIMAL', 'GAUSS_TABLE', 'PDU_WRITE_STROBE')
+FLAGS = ('ENABLE_IQ_CAPTURE', 'LL_MINIMAL', 'GAUSS_TABLE', 'PDU_WRITE_STROBE', 'ADV_DATA_FLOPS')  # ble-tx-min: both AdvData stores
 
 def sources(root):
     files = sorted((root/'verilog').glob('*.v'))

@@ -243,7 +243,7 @@ always @ (posedge clk) begin
 
         if (bit_count == 8 && clk_count == 1) begin
           // the header's length, at most MAX_PAYLOAD_LENGTH (see above)
-          payload_length <= (octet > MAX_PAYLOAD_LENGTH) ? MAX_PAYLOAD_LENGTH : octet[5:0];
+          payload_length <= (octet > {2'b00, MAX_PAYLOAD_LENGTH}) ? MAX_PAYLOAD_LENGTH : octet[5:0];
         end
 
         if (bit_count == 9 && clk_count == 2) begin
@@ -436,7 +436,17 @@ wire read_adv_data = is_adv_data(read_address_w);
 wire write_adv_data = is_adv_data(write_address);
 // AdvA: byte 2 + k is adv_address[8k+7:8k]
 wire [47:0] adv_address;
-wire [7:0] adv_address_byte = adv_address >> {(read_address[2:0] - 3'd2), 3'b000};
+reg [7:0] adv_address_byte;
+always @(*) begin
+  case (read_address[2:0])
+    3'd3:    adv_address_byte = adv_address[15:8];
+    3'd4:    adv_address_byte = adv_address[23:16];
+    3'd5:    adv_address_byte = adv_address[31:24];
+    3'd6:    adv_address_byte = adv_address[39:32];
+    3'd7:    adv_address_byte = adv_address[47:40];
+    default: adv_address_byte = adv_address[7:0];   // byte 2 (0 and 1 are the header)
+  endcase
+end
 wire [7:0] adv_data_read;
 
 always @ (posedge clkb) begin
@@ -446,7 +456,7 @@ always @ (posedge clkb) begin
     ram_read_delay <= 0;
   end else begin
     request_sync <= {request_sync[1:0], request_toggle};
-    ram_read_delay <= read && read_adv_data && !ADV_DATA_FLOPS;
+    ram_read_delay <= read && read_adv_data && (ADV_DATA_FLOPS == 0);
   end
 
   if (write_address == 0) header0 <= write_data;
@@ -456,13 +466,13 @@ always @ (posedge clkb) begin
     read_data <= read_address[0] ? header1 : header0;
   end else if (read && !read_adv_data) begin
     read_data <= adv_address_byte;
-  end else if ((ADV_DATA_FLOPS && read) || ram_read_delay) begin
+  end else if (((ADV_DATA_FLOPS != 0) && read) || ram_read_delay) begin
     read_data <= adv_data_read;
   end
 end
 
 generate
-if (ADV_ADDRESS_OTP) begin : gen_adv_address_otp
+if (ADV_ADDRESS_OTP != 0) begin : gen_adv_address_otp
   // AdvA in six 8-bit eFuse blocks of the GF180MCU eFuse compiler (efuse_async_mem_1x8, a macro):
   // each senses its fuses into latches after reset_n rises (within 10 ns) and holds them;
   // prog[i] = 1 for 50 us blows fuse i (a blown fuse reads 1). The fuses are static after a
@@ -484,7 +494,7 @@ end else begin : gen_adv_address_rom
   wire unused_otp_prog = &{1'b0, otp_prog};
 end
 
-if (ADV_DATA_FLOPS) begin : gen_adv_data_flops
+if (ADV_DATA_FLOPS != 0) begin : gen_adv_data_flops
   // 31 bytes, index byte[4:0]: 8..31 and 0..6
   reg [7:0] adv_data [0:31];
   always @ (posedge clkb) begin

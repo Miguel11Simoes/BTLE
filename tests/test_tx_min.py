@@ -389,8 +389,8 @@ endmodule
 MUTANTS = [
     ("btle_tx.v", "the byte is asked at [clk_count] 113, before its address is set",
      [("localparam [3:0] PDU_READ_CLOCK = 4;", "localparam [3:0] PDU_READ_CLOCK = 1;")]),
-    ("btle_tx.v", "AdvA sent most significant byte first",
-     [("adv_address >> {(read_address[2:0] - 3'd2), 3'b000}", "adv_address >> {(3'd7 - read_address[2:0]), 3'b000}")]),
+    ("btle_tx.v", "AdvA byte 2 taken from the most significant byte",
+     [("default: adv_address_byte = adv_address[7:0];", "default: adv_address_byte = adv_address[47:40];")]),
     ("btle_tx.v", "header byte 1 read from the register of byte 0",
      [("read_data <= read_address[0] ? header1 : header0;", "read_data <= header0;")]),
     ("btle_tx.v", "the AdvData memory written in the clock that reads too",

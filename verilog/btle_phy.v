@@ -92,6 +92,8 @@ module btle_phy #
   output wire  [7:0] rx_pdu_octet_mem_data
 );
 
+wire unused_adv_address_otp_ready; // the OTP's ready, not used by this controller (see below)
+
 btle_tx # (
   .NUM_BIT_PAYLOAD_LENGTH(NUM_BIT_PAYLOAD_LENGTH),
   .CRC_STATE_BIT_WIDTH(CRC_STATE_BIT_WIDTH),
@@ -136,7 +138,7 @@ btle_tx # (
   // AdvA OTP (ADV_ADDRESS_OTP = 1): programmed in production through a chip-level test port,
   // which this controller does not have: tied off here.
   .adv_address_otp_prog(48'd0),
-  .adv_address_otp_ready(),
+  .adv_address_otp_ready(unused_adv_address_otp_ready),
 
   .i(tx_i_signal),
   .q(tx_q_signal),
