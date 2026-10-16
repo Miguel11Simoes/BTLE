@@ -6,6 +6,11 @@
 // (same outputs on every clock); the packet buffer is one memory of 2^NUM_BIT_PAYLOAD_LENGTH bytes
 // with one port, on clkb, plus a register for the last byte, read on request (module pdu_buffer).
 // See CHANGES.md.
+// Modified 2026-10-16 by Miguel Simões: a transmitter for Legacy Advertising PDUs only (at most
+// 39 bytes: 2 header bytes, AdvA, at most 31 bytes of AdvData). The header is two registers, AdvA
+// (the 6 bytes after the header) is fixed per chip (ADV_ADDRESS: a ROM here, an OTP in the ASIC)
+// and only AdvData is in memory, 32 x 8 (module adv_pdu_buffer); the counters are cut to 39 bytes.
+// See CHANGES.md.
 
 // iverilog -o btle_tx btle_tx.v sdpram_one_clk.v sdpram_two_clk.v crc24.v crc24_core.v scramble.v scramble_core.v gfsk_modulation.v bit_repeat_upsample.v gauss_filter.v vco.v 
 
@@ -25,7 +30,12 @@ module btle_tx #
   parameter integer SIN_COS_ADDR_BIT_WIDTH = 11,
   parameter integer IQ_BIT_WIDTH = 8,
   parameter integer GAUSS_FIR_OUT_AMP_SCALE_DOWN_NUM_BIT_SHIFT = 1,
-  parameter integer GAUSS_TABLE = 0 // passed to gauss_filter
+  parameter integer GAUSS_TABLE = 0, // passed to gauss_filter
+  // AdvA, the device address sent in PDU bytes 2..7, least significant byte first (byte 2 =
+  // ADV_ADDRESS[7:0]), as the Core spec sends it. A ROM: fixed per chip, the pair writes to bytes
+  // 2..7 are ignored. Default: the address of the project's advertising example, 01:02:03:04:05:06.
+  parameter [47:0] ADV_ADDRESS = 48'h010203040506,
+  parameter integer ADV_DATA_FLOPS = 0 // AdvData in flip-flops (1) instead of the 32 x 8 memory (0)
 ) (
   input wire clk, // for baseband processing, 16MHz
   input wire rst,
@@ -90,18 +100,28 @@ module btle_tx #
 //   - No reset and no clear in IDLE for octet (loaded at [clk_count] 0 before
 //     its first use) and for the preamble/access-address shift register (loaded
 //     at tx_start before its first use).
+// Legacy Advertising only (2026-10-16): a PDU has at most 39 bytes, 2 header
+// bytes and a payload of at most MAX_PAYLOAD_LENGTH = 37 (AdvA + 31 bytes of
+// AdvData), so the PDU bits are counted in 9 bits (at most 39 * 8 = 312), the
+// byte address is 6 bits (0..38) and payload_length 6 bits. A header with a
+// length above 37 is outside the contract: the PDU sent then stops after 37
+// payload bytes (its CRC covers the bytes sent; a receiver that trusts the
+// header's length rejects it). Within the contract the outputs are upstream's
+// on every clock.
 
 localparam [1:0] IDLE               = 0,
                  TX_PREAMBLE_ACCESS = 1,
                  TX_PDU             = 2,
                  WAIT_LAST_SAMPLE   = 3;
+localparam [5:0] MAX_PAYLOAD_LENGTH = 6'd37;     // 6 bytes of AdvA + 31 bytes of AdvData
+localparam integer PDU_BIT_COUNT_WIDTH = 9;     // (2 + 37) * 8 = 312 PDU bits
 
 `KEEP_FOR_DBG reg  [1:0] phy_tx_state;
-`KEEP_FOR_DBG wire [NUM_BIT_PAYLOAD_LENGTH:0] addr;
+`KEEP_FOR_DBG wire [5:0] addr;
 `KEEP_FOR_DBG wire [7:0] data;
 `KEEP_FOR_DBG reg  [7:0] octet;
-`KEEP_FOR_DBG reg  [7:0] payload_length;
-`KEEP_FOR_DBG reg  [(NUM_BIT_PAYLOAD_LENGTH+3):0] bit_count;
+`KEEP_FOR_DBG reg  [5:0] payload_length;
+`KEEP_FOR_DBG reg  [(PDU_BIT_COUNT_WIDTH-1):0] bit_count;
 
 `KEEP_FOR_DBG reg info_bit;
 `KEEP_FOR_DBG reg info_bit_valid;
@@ -118,7 +138,7 @@ localparam [1:0] IDLE               = 0,
 
 `KEEP_FOR_DBG reg [3:0] clk_count; // clocks within a bit (16 per bit); the octet phase is bit_count[2:0]
 
-assign addr = bit_count[(NUM_BIT_PAYLOAD_LENGTH+3):3];
+assign addr = bit_count[(PDU_BIT_COUNT_WIDTH-1):3];
 
 // The byte for octet is asked of the packet buffer at [clk_count] 116 of the
 // bit period before it: bit_count / 8 is then already the next byte's address
@@ -202,7 +222,8 @@ always @ (posedge clk) begin
 
           bit_count <= bit_count + 1;
 
-          if ({{(32-NUM_BIT_PAYLOAD_LENGTH-4){1'b0}}, bit_count} == (({{(32-8){1'b0}}, payload_length}+32'd2)*8 - 1)) begin
+          // the last PDU bit: bit_count == (payload_length + 2) * 8 - 1
+          if (bit_count == {payload_length + 6'd1, 3'b111}) begin
             info_bit_valid_last <= 1;
             phy_tx_state <= WAIT_LAST_SAMPLE;
           end
@@ -211,11 +232,12 @@ always @ (posedge clk) begin
         end
 
         if (bit_count == 8 && clk_count == 1) begin
-          payload_length <= octet;
+          // the header's length, at most MAX_PAYLOAD_LENGTH (see above)
+          payload_length <= (octet > MAX_PAYLOAD_LENGTH) ? MAX_PAYLOAD_LENGTH : octet[5:0];
         end
 
         if (bit_count == 9 && clk_count == 2) begin
-          $display("payload_length %d", payload_length);
+          $display("payload_length %d", {2'b00, payload_length});
         end
       end
 
@@ -228,8 +250,10 @@ always @ (posedge clk) begin
   end
 end
 
-pdu_buffer # (
-  .ADDRESS_WIDTH(NUM_BIT_PAYLOAD_LENGTH+1) // 2 header bytes + up to 2^NUM_BIT_PAYLOAD_LENGTH - 1 payload bytes
+adv_pdu_buffer # (
+  .WRITE_ADDRESS_WIDTH(NUM_BIT_PAYLOAD_LENGTH+1),
+  .ADV_ADDRESS(ADV_ADDRESS),
+  .ADV_DATA_FLOPS(ADV_DATA_FLOPS)
 ) btle_tx_pdu_buffer_i (
   .clkb(clkb),
   .write_address(pdu_octet_mem_addr),
@@ -321,49 +345,47 @@ gfsk_modulation # (
 
 endmodule
 
-// The packet buffer (2026-10-04). Upstream keeps it in a memory with two ports
-// and 2^ADDRESS_WIDTH words: the write port, on clkb (the AXI clock), writes
-// the pair (write_address, write_data), the processor's register, on EVERY
-// clkb clock; the read port, on clk, reads read_address on every clock, and
-// btle_tx uses one read per byte. The TX reads only bytes 0 to
-// 2^(ADDRESS_WIDTH-1): 2 header bytes and at most 2^(ADDRESS_WIDTH-1) - 1
-// payload bytes. Here:
-//   - one memory of 2^(ADDRESS_WIDTH-1) words with ONE port, on clkb, and a
-//     register for byte 2^(ADDRESS_WIDTH-1); writes to the addresses above it,
-//     which the TX never reads, are dropped;
-//   - the pair is still written on every clkb clock, except the one that reads;
-//   - btle_tx raises read_request for one clk clock, with read_address already
-//     stable, and keeps read_address until it takes the byte. The request
-//     toggles a flip-flop on clk; two flip-flops synchronize it to clkb; the
-//     next clkb clock reads, and the one after puts the byte in read_data
-//     (clkb domain). The byte is there 4 clkb clocks after the request at the
-//     latest: within the 12 clk clocks btle_tx leaves before it takes the byte
-//     when clkb runs at 8 MHz or faster.
-// The bytes sent are upstream's whenever the packet is written before tx_start,
-// as the upstream testbenches do (the repository's firmware does not
-// transmit). A byte rewritten while it is being read (between the request and
-// the clock in which btle_tx takes it) may differ: upstream reads it at the
-// last of those clocks.
+// The packet buffer of a Legacy Advertising transmitter (2026-10-16). The TX
+// reads PDU bytes 0 to L + 1, L <= 37: the 2 header bytes, AdvA (bytes 2..7)
+// and at most 31 bytes of AdvData (bytes 8..38). Only AdvData changes from one
+// advertising event to another, so only it is in memory:
+//   - bytes 0 and 1, the header: two registers, written by the pair;
+//   - bytes 2..7, AdvA: ADV_ADDRESS, fixed per chip (a ROM here, an OTP in the
+//     ASIC: programmed once); pairs to these addresses are dropped;
+//   - bytes 8..38, AdvData: a memory of 32 x 8 with one port, on clkb, word
+//     byte[4:0] (8..31 -> 8..31, 32..38 -> 0..6, so no subtractor); with
+//     ADV_DATA_FLOPS = 1, 31 bytes of flip-flops instead (no macro);
+//   - pairs to addresses 39 and above are dropped.
+// The pair is written on every clkb clock (as upstream), except, for the
+// memory, the clock that reads it. The read protocol is ble-tx-pdu's, unchanged:
+// btle_tx raises read_request for one clk clock with read_address stable and
+// keeps read_address until it takes the byte; the request toggles a flip-flop
+// on clk, two flip-flops synchronize it to clkb, the next clkb clock reads and
+// the one after puts the byte in read_data (clkb domain): at most 4 clkb clocks
+// after the request, within the 12 clk clocks btle_tx leaves when clkb runs at
+// 8 MHz or faster. The header, AdvA and the flip-flops are taken in the clock
+// that reads, the memory in the next one.
+// Contract: a Legacy Advertising PDU of at most 39 bytes, written before
+// tx_start; AdvA is the chip's. Within it the bytes sent are upstream's.
 // Bundled helper: preserve the existing single-file compilation interface.
 /* verilator lint_off DECLFILENAME */
-module pdu_buffer #
+module adv_pdu_buffer #
 /* verilator lint_on DECLFILENAME */
 (
-  parameter integer ADDRESS_WIDTH = 9
+  parameter integer WRITE_ADDRESS_WIDTH = 9,
+  parameter [47:0] ADV_ADDRESS = 48'h010203040506,
+  parameter integer ADV_DATA_FLOPS = 0
 ) (
   input  wire clkb,
-  input  wire [ADDRESS_WIDTH-1:0] write_address,
+  input  wire [WRITE_ADDRESS_WIDTH-1:0] write_address,
   input  wire [7:0] write_data,
 
   input  wire clk,
   input  wire rst,
   input  wire read_request,
-  input  wire [ADDRESS_WIDTH-1:0] read_address,
+  input  wire [5:0] read_address,
   output reg  [7:0] read_data
 );
-
-localparam integer RAM_ADDRESS_WIDTH = ADDRESS_WIDTH - 1;
-localparam [ADDRESS_WIDTH-1:0] TOP_ADDRESS = 1 << RAM_ADDRESS_WIDTH;
 
 // clk side: each request toggles request_toggle
 reg request_toggle;
@@ -375,17 +397,30 @@ always @ (posedge clk) begin
   end
 end
 
+// the part of the PDU an address falls in
+function is_header;   // bytes 0, 1
+  input [WRITE_ADDRESS_WIDTH-1:0] a;
+  is_header = (a < 2);
+endfunction
+function is_adv_data; // bytes 8..38
+  input [WRITE_ADDRESS_WIDTH-1:0] a;
+  is_adv_data = (a >= 8) && (a <= 38);
+endfunction
+
 // clkb side
 reg [1:0] rst_sync;     // rst, synchronized to clkb
 reg [2:0] request_sync; // two synchronizing flip-flops, then the value seen last
 reg ram_read_delay;
-reg [7:0] top_byte;     // byte TOP_ADDRESS
+reg [7:0] header0, header1; // PDU bytes 0 and 1
 wire clkb_rst = rst_sync[1];
 wire read = request_sync[2] ^ request_sync[1];
-wire read_top = read_address[ADDRESS_WIDTH-1]; // read_address is TOP_ADDRESS
-wire ram_read = read && !read_top;
-wire ram_write = !read && !write_address[ADDRESS_WIDTH-1];
-wire [7:0] ram_read_data;
+wire [WRITE_ADDRESS_WIDTH-1:0] read_address_w = {{(WRITE_ADDRESS_WIDTH-6){1'b0}}, read_address};
+wire read_header = is_header(read_address_w);
+wire read_adv_data = is_adv_data(read_address_w);
+wire write_adv_data = is_adv_data(write_address);
+// AdvA: byte 2 + k is ADV_ADDRESS[8k+7:8k]
+wire [7:0] adv_address_byte = ADV_ADDRESS >> {(read_address[2:0] - 3'd2), 3'b000};
+wire [7:0] adv_data_read;
 
 always @ (posedge clkb) begin
   rst_sync <= {rst_sync[0], rst};
@@ -394,35 +429,47 @@ always @ (posedge clkb) begin
     ram_read_delay <= 0;
   end else begin
     request_sync <= {request_sync[1:0], request_toggle};
-    ram_read_delay <= ram_read;
+    ram_read_delay <= read && read_adv_data && !ADV_DATA_FLOPS;
   end
 
-  if (write_address == TOP_ADDRESS) begin
-    top_byte <= write_data;
-  end
+  if (write_address == 0) header0 <= write_data;
+  if (write_address == 1) header1 <= write_data;
 
-  if (read && read_top) begin
-    read_data <= top_byte;
-  end else if (ram_read_delay) begin
-    read_data <= ram_read_data;
+  if (read && read_header) begin
+    read_data <= read_address[0] ? header1 : header0;
+  end else if (read && !read_adv_data) begin
+    read_data <= adv_address_byte;
+  end else if ((ADV_DATA_FLOPS && read) || ram_read_delay) begin
+    read_data <= adv_data_read;
   end
 end
 
-pdu_buffer_ram # (
-  .DATA_WIDTH(8),
-  .ADDRESS_WIDTH(RAM_ADDRESS_WIDTH)
-) pdu_buffer_ram_i (
-  .clk(clkb),
-  .rst(clkb_rst),
+generate
+if (ADV_DATA_FLOPS) begin : gen_adv_data_flops
+  // 31 bytes, index byte[4:0]: 8..31 and 0..6
+  reg [7:0] adv_data [0:31];
+  always @ (posedge clkb) begin
+    if (write_adv_data) adv_data[write_address[4:0]] <= write_data;
+  end
+  assign adv_data_read = adv_data[read_address[4:0]];
+end else begin : gen_adv_data_ram
+  pdu_buffer_ram # (
+    .DATA_WIDTH(8),
+    .ADDRESS_WIDTH(5)
+  ) pdu_buffer_ram_i (
+    .clk(clkb),
+    .rst(clkb_rst),
 
-  .write_address(write_address[RAM_ADDRESS_WIDTH-1:0]),
-  .write_data(write_data),
-  .write_enable(ram_write),
+    .write_address(write_address[4:0]),
+    .write_data(write_data),
+    .write_enable(write_adv_data && !read),
 
-  .read_address(read_address[RAM_ADDRESS_WIDTH-1:0]),
-  .read_enable(ram_read),
-  .read_data(ram_read_data)
-);
+    .read_address(read_address[4:0]),
+    .read_enable(read && read_adv_data),
+    .read_data(adv_data_read)
+  );
+end
+endgenerate
 
 endmodule
 

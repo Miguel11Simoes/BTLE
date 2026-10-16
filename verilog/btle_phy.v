@@ -2,6 +2,7 @@
 // SPDX-FileCopyrightText: 2024 Xianjun Jiao
 // SPDX-License-Identifier: Apache-2.0 license
 // Modified 2026-09-19 by Miguel Simões: GAUSS_TABLE parameter passed to btle_tx (default 0 = original). See CHANGES.md.
+// Modified 2026-10-16 by Miguel Simões: ADV_ADDRESS and ADV_DATA_FLOPS passed to btle_tx. See CHANGES.md.
 
 // iverilog -o btle_phy btle_phy.v btle_rx.v btle_rx_core_tb.v btle_rx_core.v gfsk_demodulation.v search_unique_bit_sequence.v scramble_core.v crc24_core.v serial_in_ram_out.v sdpram_two_clk.v sdpram_one_clk.v btle_tx.v crc24.v scramble.v gfsk_modulation.v bit_repeat_upsample.v gauss_filter.v vco.v 
 
@@ -21,7 +22,9 @@ module btle_phy #
   parameter integer GFSK_DEMODULATION_BIT_WIDTH = 16,
   parameter integer LEN_UNIQUE_BIT_SEQUENCE = 32,
   parameter integer NUM_BIT_PAYLOAD_LENGTH = 8, // 8 bit in the core spec 6.2
-  parameter integer GAUSS_TABLE = 0 // passed to btle_tx
+  parameter integer GAUSS_TABLE = 0, // passed to btle_tx
+  parameter [47:0] ADV_ADDRESS = 48'h010203040506, // passed to btle_tx: AdvA, fixed per chip
+  parameter integer ADV_DATA_FLOPS = 0 // passed to btle_tx
 ) (
   input wire clk,
   input wire rst,
@@ -95,6 +98,8 @@ btle_tx # (
   .SAMPLE_PER_SYMBOL(SAMPLE_PER_SYMBOL),
   .GAUSS_FILTER_BIT_WIDTH(GAUSS_FILTER_BIT_WIDTH),
   .GAUSS_TABLE(GAUSS_TABLE),
+  .ADV_ADDRESS(ADV_ADDRESS),
+  .ADV_DATA_FLOPS(ADV_DATA_FLOPS),
   .NUM_TAP_GAUSS_FILTER(NUM_TAP_GAUSS_FILTER),
   .VCO_BIT_WIDTH(VCO_BIT_WIDTH),
   .SIN_COS_ADDR_BIT_WIDTH(SIN_COS_ADDR_BIT_WIDTH),
