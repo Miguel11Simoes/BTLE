@@ -96,6 +96,32 @@ class MeasurementEvidenceTests(unittest.TestCase):
                 self.assertEqual(r.returncode==0,fault=='positive',r.stdout+r.stderr)
                 if fault=='positive':self.assertEqual(json.loads((root/'result.json').read_text())['status'],'COMPLETE')
                 if fault=='missing_net':self.assertEqual(json.loads((root/'result.json').read_text())['status'],'INCOMPLETE')
+    def test_activity_saif_names(self):
+        """Verilator's SAIF names: bits from 0 whatever the LSB, [0:0] without index, escaped names with brackets."""
+        if not (ROOT/'scripts/power/saif_activity.py').exists():self.skipTest('measurement tool absent on this branch')
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp);lib=root/'test.lib'
+            lib.write_text('capacitive_load_unit (1, ff); cell(BUF_X1) { pin(A) { direction : input; capacitance : 1.0; } pin(Z) { direction : output; } }')
+            for side,top in [('ref','btle_controller_ref'),('dut','btle_controller')]:
+                (root/(side+'.v')).write_text(f'module {top} (a);\n input a;\n wire [9:8] \\x.buf ;\n wire [0:0] st;\n wire [1:0] \\d[0] ;\n wire o;\n'
+                    ' BUF_X1 b8 (.A(a),.Z(\\x.buf [8]));\n BUF_X1 b9 (.A(a),.Z(\\x.buf [9]));\n BUF_X1 s (.A(\\x.buf [9]),.Z(st));\n'
+                    ' BUF_X1 u (.A(st),.Z(\\d[0] [0]));\n BUF_X1 v (.A(\\d[0] [0]),.Z(\\d[0] [1]));\n BUF_X1 w (.A(\\d[0] ),.Z(o));\nendmodule\n')
+            def saif(scale):
+                text='(INSTANCE tb_activity\n'
+                for side in ('ref','dut'):
+                    text+=f'(INSTANCE u_{side}\n(NET\n'
+                    for net,count in [('a',1),('x.buf\\[0\\]',2),('x.buf\\[1\\]',3),('st',4),('d[0]\\[0\\]',5),('d[0]\\[1\\]',6),('o',7)]:
+                        text+=f'({net} (T0 0) (T1 0) (TX 0) (TC {count*scale}))\n'
+                    text+=')\n)\n'
+                return text+')\n'
+            (root/'run.saif').write_text(saif(10));(root/'setup.saif').write_text(saif(0))
+            r=self.run_tool('scripts/power/saif_activity.py',root/'run.saif',root/'setup.saif',root/'ref.v',root/'dut.v',lib,'100','tx',root/'result.json')
+            self.assertEqual(r.returncode,0,r.stdout+r.stderr)
+            d=json.loads((root/'result.json').read_text())
+            self.assertEqual(d['status'],'COMPLETE')
+            # loads: a 2 (b8, b9), x.buf[9] 1, st 1, d[0][0] 2 (v, w), d[0][1] 1 (w); a wrong bit would change the sum
+            self.assertEqual(d['ref']['data_cap_tog'],10*2+30*1+40*1+50*2+60*1)
+            self.assertEqual(d['ref']['toggles'],10+20+30+40+50+60+70)
     def test_activity_summary_evidence(self):
         if not (ROOT/'scripts/power/summarize_activity.py').exists():self.skipTest('activity summary absent on this branch')
         for fault in ['positive','missing_status','missing_nets','negative','nonfinite','empty_cells','null_exit','wrong_window']:

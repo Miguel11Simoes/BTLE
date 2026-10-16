@@ -107,14 +107,23 @@ def expand(expr, widths):
     n = norm(expr)
     if n is None:
         raise ValueError(f"unsupported mapped-netlist connection: {expr}")
-    if '[' in n:
-        return [n]
-    w = widths.get(n)
+    w = widths.get(n)      # first: an escaped name may hold brackets ('\data_internal[0]', a vector)
     if w is None:
         return [n]
     hi, lo = w
     step = -1 if hi >= lo else 1
     return [f'{n}[{i}]' for i in range(hi, lo + step, step)]
+
+def saif_name(net, widths):
+    """Netlist bit -> the name Verilator's SAIF gives it: bits counted from 0 whatever the declared
+    LSB ('octet_buf' [31:8]: netlist bit 8 is SAIF bit 0), a [0:0] vector written without an index."""
+    m = re.match(r'^(.*)\[(\d+)\]$', net)
+    if not m or m.group(1) not in widths:
+        return net
+    hi, lo = widths[m.group(1)]
+    if hi == lo:
+        return m.group(1)
+    return f'{m.group(1)}[{int(m.group(2)) - min(hi, lo)}]'
 
 def parse_netlist(path):
     txt = open(path).read()
@@ -242,7 +251,7 @@ def analyse(design_scope, top_module, mods, lib, tc_run, tc_setup, window):
                 if d == 'input':
                     for b in expand(p, widths): driven.add(b)
         def win(net):
-            key = (path, net)
+            key = (path, saif_name(net, widths))
             if key not in tc_run or key not in tc_setup:
                 res['missing_nets'].append('/'.join(path) + '/' + net)
                 return None
