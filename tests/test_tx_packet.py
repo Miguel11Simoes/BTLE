@@ -34,9 +34,16 @@ def main():
         defaults=os.environ.get('DUT_DEFAULTS','')
         for spec in defaults.split():
             file,assignment=spec.split(':');param,value=assignment.split('=');f=rtl/file
-            text,n=re.subn(r'(parameter integer '+re.escape(param)+r' = )\d+',r'\g<1>'+str(int(value)),f.read_text())
+            if "'" in value:  # a sized parameter, e.g. ADV_ADDRESS=48'h010203040506
+                if not re.fullmatch(r"\d+'h[0-9a-fA-F_]+",value):raise RuntimeError('bad sized value: '+spec)
+                text,n=re.subn(r"(parameter \[\d+:0\] "+re.escape(param)+r" = )\d+'h[0-9a-fA-F_]+",lambda m:m.group(1)+value,f.read_text())
+            else:
+                text,n=re.subn(r'(parameter integer '+re.escape(param)+r' = )\d+',r'\g<1>'+str(int(value)),f.read_text())
             if n!=1:raise RuntimeError('parameter override not applied exactly once: '+spec)
             f.write_text(text)
+        # ble-tx-min: PDU bytes 2..7 are the chip's AdvA (ADV_ADDRESS of btle_tx.v, least significant byte first)
+        m=re.search(r"parameter \[47:0\] ADV_ADDRESS = 48'h([0-9a-fA-F_]+)",(rtl/'btle_tx.v').read_text())
+        adv=bytes.fromhex(m.group(1).replace('_','').rjust(12,'0'))[::-1] if m else b''
         files=[str(f) for f in rtl.glob('*.v') if not f.name.endswith('_tb.v') and f.name not in {'btle_controller_wrapper.v','sdpram_two_clk_xilinx.v'}]
         subprocess.run([str(cad/'iverilog'),'-s','btle_tx_tb','-o',str(work/'sim'),str(tb),*files],check=True,capture_output=True,timeout=60)
         if a.rtl_rx:
@@ -46,7 +53,7 @@ def main():
         taps=np.int8(np.round(128*gauss_fir_gen()));cos,sin=sin_cos_gen(64)
         for name,data in [('gauss_filter_tap',taps),('cos_table',cos),('sin_table',sin)]:np.savetxt(vectors/(name+'.txt'),data,fmt='%d')
         for ch,n,init in cases:
-            payload=rng.integers(0,256,n,dtype=np.uint8).tobytes()
+            payload=(adv+rng.integers(0,256,n,dtype=np.uint8).tobytes())[:n] if adv else rng.integers(0,256,n,dtype=np.uint8).tobytes()
             packet=bytes([0x42 if ch>=37 else 1,n])+payload
             pdu=hex_string_to_bit(packet.hex());crc=hex_string_to_bit(init);aa='D6BE898E' if ch>=37 else '1B0A8560'
             i,q,_,_=btle_tx(pdu,ch,crc,aa)

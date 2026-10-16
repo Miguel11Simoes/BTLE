@@ -85,7 +85,11 @@ reg  [31:0] wdata = 0;
 `CTL_WIRES(d)
 
 btle_controller_ref u_ref ( `CTL_PORTS(r) );
+`ifdef ADV  // ble-tx-min: the chip's AdvA, PDU bytes 2..7 of the packet of the example
+btle_controller #(.GAUSS_TABLE(1), .ADV_ADDRESS(`ADV)) u_dut ( `CTL_PORTS(d) );
+`else
 btle_controller #(.GAUSS_TABLE(1)) u_dut ( `CTL_PORTS(d) );
+`endif
 
 // ---------------- clock-by-clock comparison ----------------
 wire [159:0] r_vec = {r_ll_gpio, r_it0, r_it1, r_it3, r_it4, r_it5, r_it6, r_it7, r_tx_iq, r_tx_v, r_tx_vl,

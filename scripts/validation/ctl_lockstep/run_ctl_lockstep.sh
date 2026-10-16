@@ -54,8 +54,8 @@ sel() {  # design files of a verilog directory
 }
 ref_files=$(sel "$work/ref")
 
-build() {  # $1 = binary, $2 = dut verilog directory
-  iverilog -g2012 -o "$1" "$here/tb_ctl_lockstep.v" $ref_files $(sel "$2") 2> "$1.compile.log" \
+build() {  # $1 = binary, $2 = dut verilog directory, $3 = optional iverilog define (-DADV=...)
+  iverilog -g2012 ${3:-} -o "$1" "$here/tb_ctl_lockstep.v" $ref_files $(sel "$2") 2> "$1.compile.log" \
     || { cat "$1.compile.log" >&2; return 1; }
 }
 
@@ -106,14 +106,25 @@ mutate pdu_read_early btle_tx.v 's/localparam \[3:0\] PDU_READ_CLOCK = 4;/localp
 mutate capture_half_flag auxiliary_daemon.v 's/^assign bram_addr_b_half_flag = .*;/assign bram_addr_b_half_flag = (bram_addr_b == 0);/'
 
 # ---- 2. lockstep ----
-build "$work/sim" "$repo/verilog"
+# ble-tx-min: AdvA (PDU bytes 2..7) is fixed per chip, so each example runs on a DUT whose
+# ADV_ADDRESS is the AdvA of its packet (a chip programmed with it); a packet shorter than 8
+# bytes runs on the default.
+adv_define() {  # $1 = vector directory
+  local f=$1/btle_tx_test_input.txt
+  [ "$(grep -c . "$f")" -ge 8 ] || return 0
+  echo "-DADV=48'h$(sed -n '3,8p' "$f" | tac | tr -d '\n\r ')"
+}
+for ex in 0 1 2; do
+  echo "example $ex: dut $(adv_define "$work/vec$ex/verilog" || true)" >> "$out/provenance.txt"
+  build "$work/sim$ex" "$repo/verilog" "$(adv_define "$work/vec$ex/verilog")"
+done
 n_pass=0; n_fail=0
 printf 'example\tseed\tresult\tstatistics\n' > "$out/summary.tsv"
 for ex in 0 1 2; do
   for s in $(seq 1 "$seeds"); do
     log=$out/ex${ex}_seed$s.log
     sim_rc=0
-    (cd "$work/vec$ex/verilog" && vvp -n "$work/sim" +seed=$s +packets=$packets) > "$log" 2>&1 || sim_rc=$?
+    (cd "$work/vec$ex/verilog" && vvp -n "$work/sim$ex" +seed=$s +packets=$packets) > "$log" 2>&1 || sim_rc=$?
     if sim_pass "$sim_rc" "$log" 'CTL LOCKSTEP PASS'; then res=PASS; n_pass=$((n_pass+1)); else res=FAIL; n_fail=$((n_fail+1)); fi
     printf '%s\t%s\t%s\t%s\n' "$ex" "$s" "$res" "$(grep -m1 'ctl lockstep: cycles' "$log" | sed 's/ctl lockstep: //')" >> "$out/summary.tsv"
   done

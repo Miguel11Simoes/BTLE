@@ -3,8 +3,11 @@
 Usage: run_rx_regression.sh LABEL [REF_REV]
 Env: OSS_CAD, PY, DUT_DEFAULTS, REGRESSION_JOBS (default 4),
 REGRESSION_TIMEOUT (seconds, default 120), REGRESSION_SEED (default 1),
-REGRESSION_VECTORS (optional saved vector directory containing config folders).
-Exit 0: all 270 checks passed. Exit 1: failures/errors/differences. Exit 2:
+REGRESSION_VECTORS (optional saved vector directory containing config folders),
+REGRESSION_EXAMPLES (optional comma-separated example indices, default 0,1,2: the
+matrix of those examples only). DUT_DEFAULTS also takes sized parameters,
+file:PARAM=48'hXXXXXXXXXXXX (ble-tx-min: the chip's AdvA).
+Exit 0: every check of the matrix passed (270 with the three examples). Exit 1: failures/errors/differences. Exit 2:
 incomplete stimulus coverage without other failures. Every log and exit code is kept.
 """
 from concurrent.futures import ThreadPoolExecutor
@@ -154,7 +157,7 @@ def main():
         return subprocess.check_output(['git', '-C', str(repo), *args])
     provenance = dict(ref=git('rev-parse', a.ref_rev).decode().strip(),
                       dut=git('rev-parse', 'HEAD').decode().strip(),
-                      dut_defaults=os.environ.get('DUT_DEFAULTS', ''), seed=seed,
+                      dut_defaults=os.environ.get('DUT_DEFAULTS', ''), examples=os.environ.get('REGRESSION_EXAMPLES', '0,1,2'), seed=seed,
                       jobs=jobs, timeout=limit, python=sys.version,
                       simulator=vvp, compiler=iv,
                       dirty=git('status', '--porcelain', '--', 'verilog').decode(),
@@ -163,7 +166,10 @@ def main():
                       trace_changes='Only $dumpfile/$dumpvars removed from simulation copies',
                       controller_tb='Bundled controller bench: U9, strict counts, unknown checks and explicit rejection')
     (out / 'provenance.json').write_text(json.dumps(provenance, indent=2) + '\n')
-    configs = list(itertools.product((0, 1, 2), (20, 12, 8), (0, 20, 50), (0, 5)))
+    examples = tuple(int(x) for x in os.environ.get('REGRESSION_EXAMPLES', '0,1,2').split(','))
+    if not examples or any(x not in (0, 1, 2) for x in examples):
+        p.error('REGRESSION_EXAMPLES must list examples among 0, 1, 2')
+    configs = list(itertools.product(examples, (20, 12, 8), (0, 20, 50), (0, 5)))
     with tempfile.TemporaryDirectory(prefix='btle-strict-') as temp:
         work = Path(temp)
         for side in ('ref', 'dut'):
@@ -178,7 +184,12 @@ def main():
         for spec in os.environ.get('DUT_DEFAULTS', '').split():
             file, assignment = spec.split(':'); param, value = assignment.split('=')
             path = work / 'dut/verilog' / file
-            text, n = re.subn(r'(parameter integer ' + re.escape(param) + r' = )\d+', r'\g<1>' + str(int(value)), path.read_text())
+            if "'" in value:  # a sized parameter, e.g. ADV_ADDRESS=48'h010203040506
+                if not re.fullmatch(r"\d+'h[0-9a-fA-F_]+", value):
+                    raise RuntimeError('bad sized value: ' + spec)
+                text, n = re.subn(r"(parameter \[\d+:0\] " + re.escape(param) + r" = )\d+'h[0-9a-fA-F_]+", lambda m: m.group(1) + value, path.read_text())
+            else:
+                text, n = re.subn(r'(parameter integer ' + re.escape(param) + r' = )\d+', r'\g<1>' + str(int(value)), path.read_text())
             if not n:
                 raise RuntimeError('DUT_DEFAULTS not applied: ' + spec)
             path.write_text(text)
