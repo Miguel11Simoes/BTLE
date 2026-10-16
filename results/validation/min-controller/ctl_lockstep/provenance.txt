@@ -1,0 +1,10 @@
+label=min-controller
+date_utc=2026-10-16T14:38:50Z
+ref_rev=fca6ac64fb28cd57a496cb45af62cf9e0f9209d5 (fca6ac64fb28cd57a496cb45af62cf9e0f9209d5)
+dut=working tree at b723c06299267ba90ef745ded98bbb9caae162ea, dirty verilog files: 0
+dut configuration: GAUSS_TABLE=1 (nothing removed: every output and register compared)
+iverilog=Icarus Verilog version 14.0 (devel) (s20260301-411-gca6b8d376-dirty)
+seeds_per_example=2 packets_per_seed=6
+example 0: dut -DADV=48'h010203040506
+example 1: dut -DADV=48'h04500e0f0200
+example 2: dut 

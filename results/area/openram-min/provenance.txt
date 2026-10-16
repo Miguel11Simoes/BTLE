@@ -1,0 +1,7 @@
+label=openram-min
+date_utc=2026-10-16T14:17:59Z
+git_commit=66a775118b493f28c1ce399bb85d528fb5520b0f
+openram=1.2.48 (/home/msmiguel/venvs/openram/lib/python3.11/site-packages/openram)
+python=Python 3.11.14 numpy=1.24.4
+tech=freepdk45, nominal corner only, check_lvsdrc=False, analytical_delay=True, layout options default
+macros=sram_1rw_8x32 sram_1rw_8x64

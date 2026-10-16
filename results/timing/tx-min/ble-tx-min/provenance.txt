@@ -1,0 +1,9 @@
+label=tx-min/ble-tx-min
+date_utc=2026-10-16T14:39:35Z
+ref=fca6ac64fb28cd57a496cb45af62cf9e0f9209d5 (fca6ac64fb28cd57a496cb45af62cf9e0f9209d5), default parameters
+dut=HEAD (b723c06299267ba90ef745ded98bbb9caae162ea, verilog tree 5e2c93d5125d54ddf25e778a31fe1e660aed11b2), GAUSS_TABLE=1
+sta_set=full
+target_clock_ns=62.5
+yosys=Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+abc========= ABC command line "version"
+liberty=NangateOpenCellLibrary_typical.lib sha256=8d540a4d4cf6d09d27c87ad067857a9c0c2eeb023ab7a56e058cd3113db4e9b1

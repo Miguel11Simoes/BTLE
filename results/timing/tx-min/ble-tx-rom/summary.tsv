@@ -1,0 +1,7 @@
+design	unbuffered_ns	comb_path_ns	seq_overhead_ns	min_period_ns	slack_at_target_ns	fmax_MHz
+ref_controller	4.829	3.050	0.359	3.410	59.090	293.3
+dut_controller	6.575	1.658	0.359	2.017	60.483	495.7
+ref_btle_rx	4.462	1.644	0.347	1.991	60.509	502.1
+dut_btle_rx	6.048	1.628	0.347	1.975	60.525	506.4
+ref_gauss_filter	1.553	1.382	0.347	1.729	60.771	578.3
+dut_gauss_filter	0.598	0.497	0.347	0.844	61.656	1184.5

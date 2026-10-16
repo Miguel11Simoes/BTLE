@@ -1,0 +1,301 @@
+{
+ "scenario": "tx",
+ "window_cycles": 100000,
+ "ref": {
+  "nets": 59294,
+  "toggles": 31467643,
+  "clock_toggles": 700000,
+  "clk_cap_tog": 903069790.199975,
+  "data_cap_tog": 137400455.8869657,
+  "hot_nets": 759,
+  "blocks": {
+   "top glue": {
+    "nets": 643,
+    "toggles": 711818,
+    "data_cap_tog": 3028.5440000000044,
+    "clk_cap_tog": 0.0,
+    "hot_nets": 0,
+    "cells": 219
+   },
+   "auxiliary_daemon": {
+    "nets": 378,
+    "toggles": 507886,
+    "data_cap_tog": 1773290.4218959997,
+    "clk_cap_tog": 9116668.799999997,
+    "hot_nets": 15,
+    "cells": 298
+   },
+   "btle_ll": {
+    "nets": 12365,
+    "toggles": 2092223,
+    "data_cap_tog": 6662880.707670999,
+    "clk_cap_tog": 387028349.9999923,
+    "hot_nets": 45,
+    "cells": 9558
+   },
+   "btle_rx": {
+    "nets": 38974,
+    "toggles": 8128450,
+    "data_cap_tog": 63456064.69457087,
+    "clk_cap_tog": 392776480.79998213,
+    "hot_nets": 260,
+    "cells": 36842
+   },
+   "btle_tx (other)": {
+    "nets": 4222,
+    "toggles": 9665552,
+    "data_cap_tog": 29361228.66563289,
+    "clk_cap_tog": 70084391.40000053,
+    "hot_nets": 215,
+    "cells": 3829
+   },
+   "gauss_filter": {
+    "nets": 2464,
+    "toggles": 8058698,
+    "data_cap_tog": 33229009.734719995,
+    "clk_cap_tog": 33807646.800000064,
+    "hot_nets": 164,
+    "cells": 2286
+   },
+   "clock_domain_conversion": {
+    "nets": 248,
+    "toggles": 2303016,
+    "data_cap_tog": 2914953.118473999,
+    "clk_cap_tog": 10256252.399999999,
+    "hot_nets": 60,
+    "cells": 186
+   }
+  },
+  "mem_port_toggles": 2776130,
+  "mem_instances": 15,
+  "cells": 53218,
+  "missing": 0,
+  "top_nets": [
+   [
+    1.0,
+    "clock_domain_conversion",
+    "tb_activity/u_ref/clock_domain_conversion_iq_i/rx_sample_phase"
+   ],
+   [
+    1.0,
+    "clock_domain_conversion",
+    "tb_activity/u_ref/clock_domain_conversion_iq_i/rx_iq_valid"
+   ],
+   [
+    1.0,
+    "clock_domain_conversion",
+    "tb_activity/u_ref/clock_domain_conversion_iq_i/_50_"
+   ],
+   [
+    1.0,
+    "clock_domain_conversion",
+    "tb_activity/u_ref/clock_domain_conversion_iq_i/_183_"
+   ],
+   [
+    1.0,
+    "clock_domain_conversion",
+    "tb_activity/u_ref/clock_domain_conversion_iq_i/_173_"
+   ],
+   [
+    1.0,
+    "clock_domain_conversion",
+    "tb_activity/u_ref/clock_domain_conversion_iq_i/_165_"
+   ],
+   [
+    1.0,
+    "clock_domain_conversion",
+    "tb_activity/u_ref/clock_domain_conversion_iq_i/_104_"
+   ],
+   [
+    1.0,
+    "btle_rx",
+    "tb_activity/u_ref/btle_phy_i.btle_rx_i/_32365_"
+   ],
+   [
+    1.0,
+    "btle_ll",
+    "tb_activity/u_ref/btle_ll_i/ref_1pps_counter[0]"
+   ],
+   [
+    1.0,
+    "btle_ll",
+    "tb_activity/u_ref/btle_ll_i/clk_cross_bus_bb_to_s_axi_i.write_data[13]"
+   ],
+   [
+    1.0,
+    "btle_ll",
+    "tb_activity/u_ref/btle_ll_i/clk_cross_bus_bb_to_s_axi_i.read_data[13]"
+   ],
+   [
+    1.0,
+    "btle_ll",
+    "tb_activity/u_ref/btle_ll_i/_8653_[0]"
+   ],
+   [
+    1.0,
+    "btle_ll",
+    "tb_activity/u_ref/btle_ll_i/_8636_[0]"
+   ],
+   [
+    1.0,
+    "btle_ll",
+    "tb_activity/u_ref/btle_ll_i/_6903_"
+   ],
+   [
+    1.0,
+    "btle_ll",
+    "tb_activity/u_ref/btle_ll_i/_5817_"
+   ]
+  ],
+  "missing_nets": []
+ },
+ "dut": {
+  "nets": 54296,
+  "toggles": 28805091,
+  "clock_toggles": 700000,
+  "clk_cap_tog": 844571165.3999745,
+  "data_cap_tog": 131414881.22585788,
+  "hot_nets": 876,
+  "blocks": {
+   "top glue": {
+    "nets": 643,
+    "toggles": 711818,
+    "data_cap_tog": 3028.5440000000044,
+    "clk_cap_tog": 0.0,
+    "hot_nets": 0,
+    "cells": 219
+   },
+   "auxiliary_daemon": {
+    "nets": 379,
+    "toggles": 506712,
+    "data_cap_tog": 1774355.286948,
+    "clk_cap_tog": 9116668.799999997,
+    "hot_nets": 15,
+    "cells": 299
+   },
+   "btle_ll": {
+    "nets": 12286,
+    "toggles": 2092223,
+    "data_cap_tog": 6662309.600002995,
+    "clk_cap_tog": 387028349.9999923,
+    "hot_nets": 45,
+    "cells": 9479
+   },
+   "btle_rx": {
+    "nets": 38986,
+    "toggles": 8214513,
+    "data_cap_tog": 63117233.97158684,
+    "clk_cap_tog": 392776480.79998213,
+    "hot_nets": 257,
+    "cells": 36854
+   },
+   "btle_tx (other)": {
+    "nets": 1569,
+    "toggles": 12755933,
+    "data_cap_tog": 46310686.19945105,
+    "clk_cap_tog": 41214940.200000085,
+    "hot_nets": 449,
+    "cells": 1344
+   },
+   "gauss_filter": {
+    "nets": 185,
+    "toggles": 2220876,
+    "data_cap_tog": 10632314.505394999,
+    "clk_cap_tog": 4178473.2000000007,
+    "hot_nets": 50,
+    "cells": 163
+   },
+   "clock_domain_conversion": {
+    "nets": 248,
+    "toggles": 2303016,
+    "data_cap_tog": 2914953.118473999,
+    "clk_cap_tog": 10256252.399999999,
+    "hot_nets": 60,
+    "cells": 186
+   }
+  },
+  "mem_port_toggles": 2112911,
+  "mem_instances": 13,
+  "cells": 48544,
+  "missing": 0,
+  "top_nets": [
+   [
+    1.0,
+    "clock_domain_conversion",
+    "tb_activity/u_dut/clock_domain_conversion_iq_i/rx_sample_phase"
+   ],
+   [
+    1.0,
+    "clock_domain_conversion",
+    "tb_activity/u_dut/clock_domain_conversion_iq_i/rx_iq_valid"
+   ],
+   [
+    1.0,
+    "clock_domain_conversion",
+    "tb_activity/u_dut/clock_domain_conversion_iq_i/_50_"
+   ],
+   [
+    1.0,
+    "clock_domain_conversion",
+    "tb_activity/u_dut/clock_domain_conversion_iq_i/_183_"
+   ],
+   [
+    1.0,
+    "clock_domain_conversion",
+    "tb_activity/u_dut/clock_domain_conversion_iq_i/_173_"
+   ],
+   [
+    1.0,
+    "clock_domain_conversion",
+    "tb_activity/u_dut/clock_domain_conversion_iq_i/_165_"
+   ],
+   [
+    1.0,
+    "clock_domain_conversion",
+    "tb_activity/u_dut/clock_domain_conversion_iq_i/_104_"
+   ],
+   [
+    1.0,
+    "btle_rx",
+    "tb_activity/u_dut/btle_phy_i.btle_rx_i/_32375_"
+   ],
+   [
+    1.0,
+    "btle_ll",
+    "tb_activity/u_dut/btle_ll_i/ref_1pps_counter[0]"
+   ],
+   [
+    1.0,
+    "btle_ll",
+    "tb_activity/u_dut/btle_ll_i/clk_cross_bus_bb_to_s_axi_i.write_data[13]"
+   ],
+   [
+    1.0,
+    "btle_ll",
+    "tb_activity/u_dut/btle_ll_i/clk_cross_bus_bb_to_s_axi_i.read_data[13]"
+   ],
+   [
+    1.0,
+    "btle_ll",
+    "tb_activity/u_dut/btle_ll_i/_8574_[0]"
+   ],
+   [
+    1.0,
+    "btle_ll",
+    "tb_activity/u_dut/btle_ll_i/_8557_[0]"
+   ],
+   [
+    1.0,
+    "btle_ll",
+    "tb_activity/u_dut/btle_ll_i/_6823_"
+   ],
+   [
+    1.0,
+    "btle_ll",
+    "tb_activity/u_dut/btle_ll_i/_5740_"
+   ]
+  ],
+  "missing_nets": []
+ },
+ "status": "COMPLETE"
+}

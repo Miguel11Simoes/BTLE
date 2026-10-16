@@ -1,0 +1,334 @@
+#!/usr/bin/env python3
+"""The figures of open_btle_baseband_chip/, redone with the ble-tx-min RTL as the transmitter.
+
+Author: Miguel Simões
+
+Run from the repository root in WSL (Icarus in OSS_CAD, NumPy, Matplotlib):
+
+  python3 scripts/figures/tx_min_figures.py tx   OUT_DIR   # py-fig3 and py-fig4 with the RTL transmitter
+  python3 scripts/figures/tx_min_figures.py ber  OUT_DIR [--packets N]   # the BER curves, 50 and -30 ppm
+  python3 scripts/figures/tx_min_figures.py area OUT_DIR AREA_JSON       # the transmitter area per branch
+
+The transmitter is verilog/btle_tx.v with GAUSS_TABLE = 1 (as the branch is measured), run by the
+upstream testbench verilog/btle_tx_tb.v plus a monitor of the upsampled bit and the Gaussian filter
+output; everything after it (channel, receiver) is python/btlelib.py, as in the upstream figures.
+Each RTL waveform is also compared with python/btlelib.py's btle_tx: the figures print the number of
+differing samples (0 expected). The packets are Legacy Advertising PDUs (channel 37, the advertising
+access address and CRC init) with the chip's AdvA, ADV_ADDRESS of verilog/btle_tx.v.
+"""
+
+from __future__ import annotations
+
+import argparse
+from concurrent.futures import ProcessPoolExecutor
+import json
+import os
+from pathlib import Path
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
+
+import numpy as np
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+
+ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / "python"))
+import btlelib as bl  # noqa: E402
+
+CAD = Path(os.environ.get("OSS_CAD", str(Path.home() / "eda/oss-cad-suite-20260907"))) / "bin"
+CHANNEL, AA, CRC_INIT = 37, "D6BE898E", "555555"
+# AdvData of upstream's BER packet (test_btle_ber.py): AD local name "SDR/Bluetooth/Low/Energy" + 5 bytes
+ADV_DATA = bytes.fromhex("19095344522f426c7565746f6f74682f4c6f772f456e657267791234567890")
+
+TRACE = r"""
+`timescale 1ns/1ps
+module tx_trace;
+  integer fu, fg;
+  initial begin fu = $fopen("trace_upsample.txt", "w"); fg = $fopen("trace_gauss.txt", "w"); end
+  always @(posedge btle_tx_tb.clk) begin
+    if (btle_tx_tb.btle_tx_i.bit_upsample_valid) $fwrite(fu, "%0d\n", btle_tx_tb.btle_tx_i.bit_upsample);
+    if (btle_tx_tb.btle_tx_i.bit_upsample_gauss_filter_valid) $fwrite(fg, "%0d\n", btle_tx_tb.btle_tx_i.bit_upsample_gauss_filter);
+  end
+endmodule
+"""
+
+
+def adv_address() -> bytes:
+    """AdvA as sent, PDU bytes 2..7 (ADV_ADDRESS of btle_tx.v, least significant byte first)."""
+    text = (ROOT / "verilog/btle_tx.v").read_text()
+    m = re.search(r"parameter \[47:0\] ADV_ADDRESS = 48'h([0-9a-fA-F_]+)", text)
+    return bytes.fromhex(m.group(1).replace("_", "").rjust(12, "0"))[::-1]
+
+
+def adv_pdu(adv_data: bytes) -> bytes:
+    """ADV_NONCONN_IND (type 2, TxAdd 1): header, AdvA, AdvData; at most 39 bytes."""
+    payload = adv_address() + adv_data
+    assert len(payload) <= 37
+    return bytes([0x42, len(payload)]) + payload
+
+
+class RtlTx:
+    """verilog/btle_tx.v (GAUSS_TABLE = 1) under the upstream TX testbench, one packet per call."""
+
+    def __init__(self, work: Path):
+        self.work = work
+        rtl = work / "rtl"
+        shutil.copytree(ROOT / "verilog", rtl, ignore=shutil.ignore_patterns("*.txt", "*.vcd"))
+        f = rtl / "btle_tx.v"
+        text, n = re.subn(r"(parameter integer GAUSS_TABLE = )\d+", r"\g<1>1", f.read_text())
+        assert n == 1
+        f.write_text(text)
+        tb = rtl / "btle_tx_tb.v"
+        tb.write_text(re.sub(r"^\s*\$dump(?:file|vars)\b[^;]*;", "", tb.read_text(), flags=re.M))
+        (rtl / "tx_trace.v").write_text(TRACE)
+        files = [str(p) for p in rtl.glob("*.v") if not p.name.endswith("_tb.v")
+                 and p.name not in {"btle_controller_wrapper.v", "sdpram_two_clk_xilinx.v"}]
+        self.sim = work / "sim"
+        compile_result = subprocess.run(
+            [str(CAD / "iverilog"), "-s", "btle_tx_tb", "-s", "tx_trace", "-o", str(self.sim), str(tb), *files],
+            capture_output=True,
+            text=True,
+            timeout=120,
+        )
+        if compile_result.returncode:
+            raise RuntimeError(
+                f"Icarus compilation failed ({compile_result.returncode}):\n"
+                f"{compile_result.stdout}{compile_result.stderr}"
+            )
+        self.taps = np.int8(np.round(128 * bl.gauss_fir_gen()))
+        self.cos, self.sin = bl.sin_cos_gen(64)
+
+    def run(self, pdu: bytes, tag: str) -> dict:
+        d = self.work / f"run_{tag}"
+        d.mkdir()
+        for name, data in [("gauss_filter_tap", self.taps), ("cos_table", self.cos), ("sin_table", self.sin)]:
+            np.savetxt(d / (name + ".txt"), data, fmt="%d")
+        pdu_bit = bl.hex_string_to_bit(pdu.hex())
+        i, q, phy_bit, phy_bit_upsample = bl.btle_tx(pdu_bit, CHANNEL, bl.hex_string_to_bit(CRC_INIT), AA)
+        (d / "btle_config.txt").write_text(f"{len(pdu_bit):x}\n{CHANNEL:x}\n{CRC_INIT}\n{AA}\n")
+        (d / "btle_tx_test_input.txt").write_text("".join(f"{v:02x}\n" for v in pdu))
+        np.savetxt(d / "btle_tx_test_output_i_ref.txt", i, fmt="%d")
+        np.savetxt(d / "btle_tx_test_output_q_ref.txt", q, fmt="%d")
+        r = subprocess.run([str(CAD / "vvp"), "-n", str(self.sim)], cwd=d, capture_output=True, text=True, timeout=120)
+        if r.returncode or "output I Test PASS." not in r.stdout or "output Q Test PASS." not in r.stdout:
+            raise RuntimeError(f"RTL TX failed for {pdu.hex()}:\n{r.stdout[-2000:]}{r.stderr[-500:]}")
+        out = dict(pdu_bit=pdu_bit, py_i=i, py_q=q, py_upsample=phy_bit_upsample,
+                   i=np.loadtxt(d / "btle_tx_test_output_i.txt", dtype=int),
+                   q=np.loadtxt(d / "btle_tx_test_output_q.txt", dtype=int),
+                   upsample=np.loadtxt(d / "trace_upsample.txt", dtype=int),
+                   gauss=np.loadtxt(d / "trace_gauss.txt", dtype=int))
+        n = min(len(out["i"]), len(i))
+        out["differences"] = int(np.sum(out["i"][:n] != i[:n]) + np.sum(out["q"][:n] != q[:n]) + abs(len(out["i"]) - len(i)))
+        shutil.rmtree(d)
+        return out
+
+
+def style(ax, title):
+    ax.grid(True)
+    ax.legend(loc="upper right")
+    ax.set_title(title)
+
+
+def fig_tx(out_dir: Path) -> None:
+    with tempfile.TemporaryDirectory(prefix="tx-min-fig-") as t:
+        rtl = RtlTx(Path(t))
+        pdu = adv_pdu(ADV_DATA)
+        r = rtl.run(pdu, "fig")
+    i, q = r["i"].astype(float), r["q"].astype(float)
+    fo, _ = bl.check_realtime_fo(i, q)
+    note = f"RTL ble-tx-min, PDU {len(pdu)} bytes (ADV, AdvA from ROM); RTL vs Python: {r['differences']} samples differ"
+
+    # py-fig3: signals in the transmitter
+    plt.figure(0, figsize=(6.4, 4.8))
+    ax = plt.subplot(211)
+    ax.plot(2 * r["upsample"] - 1, "b", label="Upsampled phy bit")
+    ax.plot(r["gauss"][8:] / 128.0, "r", label="Guass filter out")
+    ax.plot(fo[6:], "k--", label="Normalized freq offset")
+    style(ax, "Signals in BTLE transmitter (ble-tx-min RTL)")
+    ax = plt.subplot(212)
+    ax.plot(i[8:], "b", label="I")
+    ax.plot(q[8:], "r", label="Q")
+    style(ax, "BTLE transmitter I and Q (ble-tx-min RTL)")
+    plt.figtext(0.5, 0.005, note, ha="center", fontsize=7)
+    plt.tight_layout(rect=(0, 0.03, 1, 1))
+    plt.savefig(out_dir / "tx_min_py_fig3.png", dpi=100)
+    plt.close()
+
+    # py-fig4: the receiver's decision signal, after the channel (20 dB, 20 ppm, as upstream's example)
+    rng_state = np.random.get_state()
+    np.random.seed(20261016)
+    i_err, q_err, _, _ = bl.add_freq_sampling_error(i, q, 20)
+    rx_i, rx_q = bl.add_noise(i_err, q_err, 20)
+    np.random.set_state(rng_state)
+    rx_pdu_bit, crc_ok, num_byte_payload, _, _, _, best = bl.btle_rx(rx_i, rx_q, CHANNEL, bl.hex_string_to_bit(CRC_INIT), AA)
+    plt.figure(1, figsize=(6.4, 4.8))
+    ax = plt.subplot(211)
+    ax.plot(2 * r["upsample"] - 1, "b", label="Upsampled phy bit")
+    ax.plot(r["gauss"][8:] / 128.0, "r", label="Guass filter out")
+    ax.plot(fo[6:], "k--", label="Normalized freq offset")
+    style(ax, "Signals in BTLE transmitter (ble-tx-min RTL)")
+    ax = plt.subplot(212)
+    ii, qq = np.int16(rx_i), np.int16(rx_q)
+    n_sig = round(len(ii) / bl.SAMPLE_PER_SYMBOL) - 1
+    sig = np.zeros(n_sig * bl.SAMPLE_PER_SYMBOL, dtype=np.int32)
+    idx = np.arange(len(sig))
+    for ph in range(bl.SAMPLE_PER_SYMBOL):
+        _, s = bl.gfsk_demodulation_fixed_point(ii[ph::bl.SAMPLE_PER_SYMBOL], qq[ph::bl.SAMPLE_PER_SYMBOL])
+        s = np.concatenate((s, [s[-1]] * (n_sig - len(s)))) if len(s) < n_sig else s[:n_sig]
+        sig[ph::bl.SAMPLE_PER_SYMBOL] = s
+    ax.plot(idx - 4, sig, "b", label="signal for decision")
+    ax.plot(idx[best::bl.SAMPLE_PER_SYMBOL] - 4, sig[best::bl.SAMPLE_PER_SYMBOL], "rs", label="best phase moment")
+    style(ax, "signal for decision in receiver")
+    ok = crc_ok and bl.bit_to_hex_string(rx_pdu_bit) == pdu.hex()
+    plt.figtext(0.5, 0.005, f"channel 20 dB SNR, 20 ppm; Python receiver: CRC {'OK' if crc_ok else 'FAIL'}, "
+                f"PDU {'equal to the one sent' if ok else 'DIFFERENT'} ({num_byte_payload} payload bytes)",
+                ha="center", fontsize=7)
+    plt.tight_layout(rect=(0, 0.03, 1, 1))
+    plt.savefig(out_dir / "tx_min_py_fig4.png", dpi=100)
+    plt.close()
+    summary = dict(pdu=pdu.hex(), rtl_vs_python_differences=r["differences"], samples=len(i),
+                   rx_crc_ok=bool(crc_ok), rx_pdu_equal=bool(ok), best_phase=int(best))
+    (out_dir / "tx_min_figures_tx.json").write_text(json.dumps(summary, indent=2) + "\n")
+    print(json.dumps(summary))
+
+
+# ---- BER: RTL transmitter vs Python transmitter, same channel noise ----
+# The channel and the receiver are upstream's python/btlelib.py (tag upstream-baseline), as in
+# open_btle_baseband_chip/: its btle_rx returns the demodulated PDU even when the CRC fails, so the
+# BER counts the bits that differ. (The audited btlelib.py returns no PDU on a CRC failure, which
+# would count a whole packet as wrong: a packet error rate, not a BER.)
+_UP = None
+
+
+def _upstream():
+    global _UP
+    if _UP is None:
+        import importlib.util
+        d = Path(os.environ["BTLE_UPSTREAM_PY"])
+        os.chdir(d)  # it writes its debug files to ../verilog
+        spec = importlib.util.spec_from_file_location("btlelib_upstream", d / "btlelib.py")
+        _UP = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(_UP)
+    return _UP
+
+
+def _rx_errors(args):
+    i, q, pdu_bit, ppm, snr, seed = args
+    up = _upstream()
+    np.random.seed(seed)
+    i_err, q_err, _, fo = up.add_freq_sampling_error(i, q, ppm)
+    rx_i, rx_q = up.add_noise(i_err, q_err, snr)
+    rx_pdu_bit, crc_ok, _, _, _, _, _ = up.btle_rx(rx_i, rx_q, CHANNEL)
+    if crc_ok:
+        return 0, len(pdu_bit)
+    if len(rx_pdu_bit) == 0:
+        return len(pdu_bit), len(pdu_bit)
+    m = min(len(pdu_bit), len(rx_pdu_bit))
+    return int(np.sum(pdu_bit[:m] != rx_pdu_bit[:m])), len(pdu_bit)
+
+
+def fig_ber(out_dir: Path, packets: int) -> None:
+    counts = [packets // 3, 2 * packets // 3, packets, packets]  # upstream's 100, 200, 300, 300
+    rng = np.random.default_rng(8675309)
+    with tempfile.TemporaryDirectory(prefix="tx-min-ber-") as t:
+        rtl = RtlTx(Path(t))
+        waves = []
+        for k in range(max(counts)):
+            pdu = adv_pdu(rng.integers(0, 256, 31, dtype=np.uint8).tobytes())  # random AdvData, the chip's AdvA
+            r = rtl.run(pdu, str(k))
+            if r["differences"]:
+                raise RuntimeError(f"packet {k}: RTL and Python transmitters differ")
+            waves.append((r["i"].astype(float), r["q"].astype(float), r["py_i"], r["py_q"], r["pdu_bit"]))
+    up_dir = Path(tempfile.mkdtemp(prefix="btle-upstream-py-"))
+    arc = subprocess.run(["git", "-C", str(ROOT), "archive", "upstream-baseline", "python"], stdout=subprocess.PIPE, check=True)
+    subprocess.run(["tar", "-x", "-C", str(up_dir)], input=arc.stdout, check=True)
+    (up_dir / "verilog").mkdir()
+    os.environ["BTLE_UPSTREAM_PY"] = str(up_dir / "python")
+    results = {}
+    for ppm in (50, -30):
+        ppm_abs = np.array([0, 10, 20, 25, 30, 35, 40, 45, 50])
+        max_snr = np.array([11, 12, 13, 14, 15, 17, 19, 21, 26])
+        snr0 = float(np.interp(abs(ppm), ppm_abs, max_snr))
+        snrs = [snr0 - 4, snr0 - 2.5, snr0 - 1, snr0]
+        curves = {"rtl": [], "python": []}
+        with ProcessPoolExecutor(max_workers=min(os.cpu_count() or 1, 8)) as pool:
+            for s_idx, snr in enumerate(snrs):
+                for side, (a, b) in (("rtl", (0, 1)), ("python", (2, 3))):
+                    jobs = [(waves[k][a], waves[k][b], waves[k][4], ppm, snr, 1000 * s_idx + k + (ppm + 100) * 100000)
+                            for k in range(counts[s_idx])]
+                    err = tot = 0
+                    for e, n in pool.map(_rx_errors, jobs, chunksize=8):
+                        err += e
+                        tot += n
+                    curves[side].append(dict(snr=snr, ber=err / tot, bits=tot, errors=err))
+                print(f"ppm {ppm} snr {snr}: rtl {curves['rtl'][-1]} python {curves['python'][-1]}", flush=True)
+        results[ppm] = curves
+        plt.figure(figsize=(6.4, 4.8))
+        plt.semilogy(snrs, [max(c["ber"], 1e-7) for c in curves["rtl"]], "b+-", markersize=10, label="TX: ble-tx-min RTL")
+        plt.semilogy(snrs, [max(c["ber"], 1e-7) for c in curves["python"]], "rx--", markersize=8, label="TX: Python model")
+        plt.title(f"BER (Bit Error Rate) with ppm {ppm}")
+        plt.xlabel("SNR(dB)")
+        plt.ylabel("BER")
+        plt.grid()
+        plt.legend(loc="upper right")
+        plt.figtext(0.5, 0.005, f"Legacy ADV PDUs of 39 bytes, random AdvData; {counts} packets per SNR; same noise for both; channel and receiver: upstream btlelib.py",
+                    ha="center", fontsize=7)
+        plt.tight_layout(rect=(0, 0.03, 1, 1))
+        plt.savefig(out_dir / f"tx_min_ber_ppm{ppm}.png", dpi=100)
+        plt.close()
+    (out_dir / "tx_min_figures_ber.json").write_text(json.dumps(results, indent=2) + "\n")
+
+
+# ---- the transmitter's area per branch ----
+def fig_area(out_dir: Path, area_json: Path) -> None:
+    rows = json.loads(area_json.read_text())  # [{"branch", "logic", "macros"}], measured
+    names = [r["branch"] for r in rows]
+    logic = np.array([r["logic"] for r in rows])
+    macros = np.array([r["macros"] for r in rows])
+    blue, orange = "#2a78d6", "#eb6834"
+    fig, axes = plt.subplots(1, 2, figsize=(11, 4.2), gridspec_kw=dict(width_ratios=[1.2, 1]))
+    for ax, sel, title in ((axes[0], range(len(rows)), "Transmitter area, every option measured"),
+                           (axes[1], [k for k, r in enumerate(rows) if r.get("zoom")], "The smallest, enlarged")):
+        sel = list(sel)
+        y = np.arange(len(sel))[::-1]
+        ax.barh(y, logic[sel], color=blue, height=0.6, label="logic (std cells)", edgecolor="#fcfcfb", linewidth=2)
+        ax.barh(y, macros[sel], left=logic[sel], color=orange, height=0.6, label="SRAM macros", edgecolor="#fcfcfb", linewidth=2)
+        for yy, k in zip(y, sel):
+            ax.text(logic[k] + macros[k], yy, f"  {logic[k] + macros[k]:,.0f}", va="center", fontsize=8, color="#0b0b0b")
+        ax.set_yticks(y)
+        ax.set_yticklabels([names[k] for k in sel], fontsize=8)
+        ax.set_xlabel("µm² (Nangate45 cells + OpenRAM FreePDK45 macros)")
+        ax.set_title(title, fontsize=10)
+        ax.set_xlim(0, (logic[sel] + macros[sel]).max() * 1.22)
+        ax.grid(axis="x", color="#e5e4e0")
+        ax.set_axisbelow(True)
+        for side in ("top", "right"):
+            ax.spines[side].set_visible(False)
+    axes[0].legend(loc="lower right", fontsize=8)
+    plt.tight_layout()
+    plt.savefig(out_dir / "tx_min_area.png", dpi=120)
+    plt.close()
+
+
+def main() -> None:
+    p = argparse.ArgumentParser(description=__doc__.split("\n")[0])
+    p.add_argument("figure", choices=("tx", "ber", "area"))
+    p.add_argument("out_dir", type=Path)
+    p.add_argument("area_json", type=Path, nargs="?")
+    p.add_argument("--packets", type=int, default=300)
+    a = p.parse_args()
+    a.out_dir.mkdir(parents=True, exist_ok=True)
+    if a.figure == "tx":
+        fig_tx(a.out_dir)
+    elif a.figure == "ber":
+        fig_ber(a.out_dir, a.packets)
+    else:
+        fig_area(a.out_dir, a.area_json)
+
+
+if __name__ == "__main__":
+    main()

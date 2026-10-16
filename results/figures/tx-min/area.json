@@ -1,0 +1,6 @@
+[
+  {"branch": "master (corrected, fca6ac6)", "logic": 8559.1, "macros": 162408.5},
+  {"branch": "ble-tx-rom", "logic": 2520.6, "macros": 6979.1},
+  {"branch": "ble-tx-min (AdvData in SRAM 32x8)", "logic": 2531.3, "macros": 2475.8, "zoom": true},
+  {"branch": "ble-tx-min (AdvData in flip-flops)", "logic": 4446.5, "macros": 0, "zoom": true}
+]

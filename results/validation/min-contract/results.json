@@ -1,0 +1,114 @@
+[
+  {
+    "variant": "baseline",
+    "mode": 0,
+    "phase_ps": 1250,
+    "exit": 0,
+    "result": "PASS",
+    "statistics": "CLOCK CONTRACT PASS mode 0 phase_ps 1250 checked 478 accepted 0 quiet 478"
+  },
+  {
+    "variant": "baseline",
+    "mode": 0,
+    "phase_ps": 3750,
+    "exit": 0,
+    "result": "PASS",
+    "statistics": "CLOCK CONTRACT PASS mode 0 phase_ps 3750 checked 478 accepted 0 quiet 478"
+  },
+  {
+    "variant": "baseline",
+    "mode": 0,
+    "phase_ps": 6250,
+    "exit": 0,
+    "result": "PASS",
+    "statistics": "CLOCK CONTRACT PASS mode 0 phase_ps 6250 checked 478 accepted 0 quiet 478"
+  },
+  {
+    "variant": "baseline",
+    "mode": 0,
+    "phase_ps": 8750,
+    "exit": 0,
+    "result": "PASS",
+    "statistics": "CLOCK CONTRACT PASS mode 0 phase_ps 8750 checked 478 accepted 0 quiet 478"
+  },
+  {
+    "variant": "baseline",
+    "mode": 1,
+    "phase_ps": 1250,
+    "exit": 0,
+    "result": "PASS",
+    "statistics": "CLOCK CONTRACT PASS mode 1 phase_ps 1250 checked 478 accepted 240 quiet 0"
+  },
+  {
+    "variant": "baseline",
+    "mode": 1,
+    "phase_ps": 3750,
+    "exit": 0,
+    "result": "PASS",
+    "statistics": "CLOCK CONTRACT PASS mode 1 phase_ps 3750 checked 478 accepted 240 quiet 0"
+  },
+  {
+    "variant": "baseline",
+    "mode": 1,
+    "phase_ps": 6250,
+    "exit": 0,
+    "result": "PASS",
+    "statistics": "CLOCK CONTRACT PASS mode 1 phase_ps 6250 checked 478 accepted 240 quiet 0"
+  },
+  {
+    "variant": "baseline",
+    "mode": 1,
+    "phase_ps": 8750,
+    "exit": 0,
+    "result": "PASS",
+    "statistics": "CLOCK CONTRACT PASS mode 1 phase_ps 8750 checked 478 accepted 240 quiet 0"
+  },
+  {
+    "variant": "baseline",
+    "mode": 2,
+    "phase_ps": 1250,
+    "exit": 0,
+    "result": "PASS",
+    "statistics": "CLOCK CONTRACT PASS mode 2 phase_ps 1250 checked 478 accepted 128 quiet 223"
+  },
+  {
+    "variant": "baseline",
+    "mode": 2,
+    "phase_ps": 3750,
+    "exit": 0,
+    "result": "PASS",
+    "statistics": "CLOCK CONTRACT PASS mode 2 phase_ps 3750 checked 478 accepted 128 quiet 223"
+  },
+  {
+    "variant": "baseline",
+    "mode": 2,
+    "phase_ps": 6250,
+    "exit": 0,
+    "result": "PASS",
+    "statistics": "CLOCK CONTRACT PASS mode 2 phase_ps 6250 checked 478 accepted 127 quiet 224"
+  },
+  {
+    "variant": "baseline",
+    "mode": 2,
+    "phase_ps": 8750,
+    "exit": 0,
+    "result": "PASS",
+    "statistics": "CLOCK CONTRACT PASS mode 2 phase_ps 8750 checked 478 accepted 127 quiet 224"
+  },
+  {
+    "variant": "ignore_valid",
+    "mode": 0,
+    "phase_ps": 1250,
+    "exit": 1,
+    "result": "DETECTED",
+    "witness": "FATAL: /home/msmiguel/btle-runs/min-camp/main/tests/clock_domain_contract_tb.v:34: RX valid contract: cycle 1 ext 0 got 1 expected 0"
+  },
+  {
+    "variant": "gate_feedback",
+    "mode": 2,
+    "phase_ps": 6250,
+    "exit": 1,
+    "result": "DETECTED",
+    "witness": "FATAL: /home/msmiguel/btle-runs/min-camp/main/tests/clock_domain_contract_tb.v:34: RX valid contract: cycle 2 ext 1 got 1 expected 0"
+  }
+]

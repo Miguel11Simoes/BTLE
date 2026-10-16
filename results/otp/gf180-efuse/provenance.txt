@@ -1,0 +1,5 @@
+compiler=https://github.com/egorxe/gf180_efuse_compiler e77f729373f28eda5d370d66764e81c3b109c31a
+pdk=https://github.com/wafer-space/gf180mcu ac7d8696de96a4d708e768b607ae37f02207a354 (gf180mcuD)
+command=./efuse.py 1 8 --async-efuse --digital-wrapper=async
+environment=nix-shell of the compiler (LibreLane 3.0.0.dev45, KLayout 0.30.4, Magic, Xyce) in docker nixos/nix
+date_utc=2026-10-16
