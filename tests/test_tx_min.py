@@ -39,10 +39,13 @@ the header as written, 37 payload bytes and the CRC (40 + 39 * 8 + 24 = 376
 PHY bits), and end in IDLE.
 
 The campaign runs every seed with clkb = clk and with clkb free at 100, 33.3,
-16.1, 10 and 8 MHz, on three DUT builds per AdvA: the repository's RAM model,
+16.1, 10 and 8 MHz, on four DUT builds per AdvA: the repository's RAM model,
 the one-port macro model of the AdvData memory (one address; the output
 changes only in a clock that reads; an ERROR line if a clock both writes and
-reads), and AdvData in flip-flops.
+reads), AdvData in flip-flops, and AdvA from the OTP (ADV_ADDRESS_OTP=1, the
+six eFuse blocks on tests/efuse_async_mem_1x8_model.v, ADV_ADDRESS set to 0):
+the unprogrammed chip must read 0, then AdvA is programmed once (51.25 us)
+and sensed after a reset, before the first packet.
 
   python3 tests/test_tx_min.py [--seeds N] [--packets N] [--jobs N] [--mutants]
   python3 tests/test_tx_min.py --write-one-port FILE
@@ -78,7 +81,7 @@ TX_FILES = ["btle_tx.v", "crc24.v", "crc24_core.v", "scramble.v", "scramble_core
 DUT_FILES = [f for f in TX_FILES if f != "sdpram_two_clk.v"]
 TAPS = [0, 0, 0, 1, 4, 9, 15, 22, 24]  # taps 0..8 of python/btlelib.py (BT = 0.5, 8 samples/symbol)
 CLKB_HALF_PS = [0, 5000, 15000, 31057, 50000, 62500]  # 0: clkb = clk; else 100, 33.3, 16.1, 10, 8 MHz
-MODELS = ("ram", "macro", "flops")
+MODELS = ("ram", "macro", "flops", "otp")
 PROJECT_ADV_ADDRESS = 0x010203040506
 
 # The one-port macro of the AdvData memory: one address (the write address in a
@@ -168,7 +171,11 @@ module tb_tx_min;
   `TX_WIRES(r)
   `TX_WIRES(d)
   btle_tx_ref ref_i (`TX_PORTS(r));
-  btle_tx #(.GAUSS_TABLE(1), .ADV_ADDRESS(ADV), .ADV_DATA_FLOPS(`FLOPS)) dut_i (`TX_PORTS(d));
+  // OTP builds: AdvA from the eFuse blocks, programmed below; ADV_ADDRESS 0 shows it is not used
+  reg [47:0] otp_prog = 0;
+  wire d_otp_ready;
+  btle_tx #(.GAUSS_TABLE(1), .ADV_ADDRESS(`OTP ? 48'h0 : ADV), .ADV_DATA_FLOPS(`FLOPS), .ADV_ADDRESS_OTP(`OTP))
+    dut_i (`TX_PORTS(d), .adv_address_otp_prog(otp_prog), .adv_address_otp_ready(d_otp_ready));
   wire [43:0] r_out = {r_i, r_q, r_iqv, r_iqvl, r_pb, r_pbv, r_pbvl, r_bu, r_buv, r_buvl, r_g, r_gv, r_gvl};
   wire [43:0] d_out = {d_i, d_q, d_iqv, d_iqvl, d_pb, d_pbv, d_pbvl, d_bu, d_buv, d_buvl, d_g, d_gv, d_gvl};
 
@@ -295,6 +302,17 @@ module tb_tx_min;
     rst <= 0;
     resets = resets + 1;
     load_taps;
+    if (`OTP) begin                                // an unprogrammed chip, then AdvA programmed once
+      if (dut_i.btle_tx_pdu_buffer_i.adv_address !== 48'h0 || d_otp_ready !== 1'b1) begin
+        $display("MISMATCH unprogrammed OTP: reads %h (ready %b), expected 0 (ready 1)", dut_i.btle_tx_pdu_buffer_i.adv_address, d_otp_ready);
+        $fatal(1, "otp");
+      end
+      otp_prog <= ADV;
+      repeat (820) @(posedge clk);               // 51.25 us >= Tprog (50 us)
+      otp_prog <= 0;
+      reset_clocks(2);                             // the fuses are sensed after a reset
+      if (d_otp_ready !== 1'b1) begin $display("MISMATCH OTP not ready after reset"); $fatal(1, "otp"); end
+    end
     for (k = 0; k < 2048; k = k + 1) begin         // as the upstream TX testbench: one entry per clock
       @(posedge clk);
       cos_address <= k; cos_data <= cos_t[k];
@@ -372,7 +390,7 @@ MUTANTS = [
     ("btle_tx.v", "the byte is asked at [clk_count] 113, before its address is set",
      [("localparam [3:0] PDU_READ_CLOCK = 4;", "localparam [3:0] PDU_READ_CLOCK = 1;")]),
     ("btle_tx.v", "AdvA sent most significant byte first",
-     [("ADV_ADDRESS >> {(read_address[2:0] - 3'd2), 3'b000}", "ADV_ADDRESS >> {(3'd7 - read_address[2:0]), 3'b000}")]),
+     [("adv_address >> {(read_address[2:0] - 3'd2), 3'b000}", "adv_address >> {(3'd7 - read_address[2:0]), 3'b000}")]),
     ("btle_tx.v", "header byte 1 read from the register of byte 0",
      [("read_data <= read_address[0] ? header1 : header0;", "read_data <= header0;")]),
     ("btle_tx.v", "the AdvData memory written in the clock that reads too",
@@ -399,6 +417,10 @@ MUTANTS = [
        "end else if (data_in_valid && data_in_count != 40) begin")]),
     ("gauss_filter.v", "the sum of the taps added instead of subtracted",
      [("assign table_sum = (half_sum <<< 1) - tap_total(0);", "assign table_sum = (half_sum <<< 1) + tap_total(0);")]),
+    ("btle_tx.v", "the OTP bytes in the wrong order",
+     [(".out(adv_address[8*b +: 8]),", ".out(adv_address[8*(5-b) +: 8]),")]),
+    ("btle_tx.v", "the OTP never sensed (reset_n held high)",
+     [(".reset_n(~rst),", ".reset_n(1'b1),")]),
 ]
 
 
@@ -441,10 +463,12 @@ def build(work: Path, name: str, texts: dict[str, str], model: str, adv: int, re
     if model == "macro":
         (d / "macros.v").write_text(PDU_MACRO)
         files.append(str(d / "macros.v"))
+    if model == "otp":
+        files.append(str(ROOT / "tests" / "efuse_async_mem_1x8_model.v"))
     out = d / "tb.vvp"
     result = subprocess.run(
         [os.environ.get("IVERILOG", "iverilog"), "-g2012", "-s", "tb_tx_min", "-o", str(out),
-         f"-DADV=48'h{adv:012x}", f"-DFLOPS={1 if model == 'flops' else 0}",
+         f"-DADV=48'h{adv:012x}", f"-DFLOPS={1 if model == 'flops' else 0}", f"-DOTP={1 if model == 'otp' else 0}",
          str(work / "tb_tx_min.v"), *map(str, refs), *files],
         cwd=d, capture_output=True, text=True)
     if result.returncode != 0:

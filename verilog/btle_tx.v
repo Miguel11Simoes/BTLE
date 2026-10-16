@@ -35,7 +35,11 @@ module btle_tx #
   // ADV_ADDRESS[7:0]), as the Core spec sends it. A ROM: fixed per chip, the pair writes to bytes
   // 2..7 are ignored. Default: the address of the project's advertising example, 01:02:03:04:05:06.
   parameter [47:0] ADV_ADDRESS = 48'h010203040506,
-  parameter integer ADV_DATA_FLOPS = 0 // AdvData in flip-flops (1) instead of the 32 x 8 memory (0)
+  parameter integer ADV_DATA_FLOPS = 0, // AdvData in flip-flops (1) instead of the 32 x 8 memory (0)
+  // AdvA from an OTP (1): six GF180MCU eFuse blocks (efuse_async_mem_1x8), programmed once per chip
+  // through adv_address_otp_prog and read into their latches after each reset; ADV_ADDRESS is then
+  // ignored. 0 (default): the ROM, ADV_ADDRESS.
+  parameter integer ADV_ADDRESS_OTP = 0
 ) (
   input wire clk, // for baseband processing, 16MHz
   input wire rst,
@@ -62,6 +66,12 @@ module btle_tx #
   `KEEP_FOR_DBG input  wire [NUM_BIT_PAYLOAD_LENGTH:0] pdu_octet_mem_addr,
 
   `KEEP_FOR_DBG input  wire tx_start,
+
+  // ADV_ADDRESS_OTP = 1 only: the production port that programs AdvA (bit k of ADV_ADDRESS's order)
+  // once per chip, a 1 blowing its fuse when held for at least 50 us out of reset; ready once
+  // the fuses are read after a reset. With the ROM: unused, and ready is 1.
+  input  wire [47:0] adv_address_otp_prog,
+  output wire adv_address_otp_ready,
 
   `KEEP_FOR_DBG output wire signed [(IQ_BIT_WIDTH-1) : 0] i,
   `KEEP_FOR_DBG output wire signed [(IQ_BIT_WIDTH-1) : 0] q,
@@ -253,9 +263,12 @@ end
 adv_pdu_buffer # (
   .WRITE_ADDRESS_WIDTH(NUM_BIT_PAYLOAD_LENGTH+1),
   .ADV_ADDRESS(ADV_ADDRESS),
-  .ADV_DATA_FLOPS(ADV_DATA_FLOPS)
+  .ADV_DATA_FLOPS(ADV_DATA_FLOPS),
+  .ADV_ADDRESS_OTP(ADV_ADDRESS_OTP)
 ) btle_tx_pdu_buffer_i (
   .clkb(clkb),
+  .otp_prog(adv_address_otp_prog),
+  .otp_ready(adv_address_otp_ready),
   .write_address(pdu_octet_mem_addr),
   .write_data(pdu_octet_mem_data),
 
@@ -374,9 +387,12 @@ module adv_pdu_buffer #
 (
   parameter integer WRITE_ADDRESS_WIDTH = 9,
   parameter [47:0] ADV_ADDRESS = 48'h010203040506,
-  parameter integer ADV_DATA_FLOPS = 0
+  parameter integer ADV_DATA_FLOPS = 0,
+  parameter integer ADV_ADDRESS_OTP = 0
 ) (
   input  wire clkb,
+  input  wire [47:0] otp_prog,
+  output wire otp_ready,
   input  wire [WRITE_ADDRESS_WIDTH-1:0] write_address,
   input  wire [7:0] write_data,
 
@@ -418,8 +434,9 @@ wire [WRITE_ADDRESS_WIDTH-1:0] read_address_w = {{(WRITE_ADDRESS_WIDTH-6){1'b0}}
 wire read_header = is_header(read_address_w);
 wire read_adv_data = is_adv_data(read_address_w);
 wire write_adv_data = is_adv_data(write_address);
-// AdvA: byte 2 + k is ADV_ADDRESS[8k+7:8k]
-wire [7:0] adv_address_byte = ADV_ADDRESS >> {(read_address[2:0] - 3'd2), 3'b000};
+// AdvA: byte 2 + k is adv_address[8k+7:8k]
+wire [47:0] adv_address;
+wire [7:0] adv_address_byte = adv_address >> {(read_address[2:0] - 3'd2), 3'b000};
 wire [7:0] adv_data_read;
 
 always @ (posedge clkb) begin
@@ -445,6 +462,28 @@ always @ (posedge clkb) begin
 end
 
 generate
+if (ADV_ADDRESS_OTP) begin : gen_adv_address_otp
+  // AdvA in six 8-bit eFuse blocks of the GF180MCU eFuse compiler (efuse_async_mem_1x8, a macro):
+  // each senses its fuses into latches after reset_n rises (within 10 ns) and holds them;
+  // prog[i] = 1 for 50 us blows fuse i (a blown fuse reads 1). The fuses are static after a
+  // reset, so the clkb side reads them like the ROM.
+  wire [5:0] byte_ready;
+  genvar b;
+  for (b=0; b<6; b=b+1) begin : otp_byte
+    efuse_async_mem_1x8 efuse_i (
+      .reset_n(~rst),
+      .prog(otp_prog[8*b +: 8]),
+      .out(adv_address[8*b +: 8]),
+      .ready(byte_ready[b])
+    );
+  end
+  assign otp_ready = &byte_ready;
+end else begin : gen_adv_address_rom
+  assign adv_address = ADV_ADDRESS;
+  assign otp_ready = 1'b1;
+  wire unused_otp_prog = &{1'b0, otp_prog};
+end
+
 if (ADV_DATA_FLOPS) begin : gen_adv_data_flops
   // 31 bytes, index byte[4:0]: 8..31 and 0..6
   reg [7:0] adv_data [0:31];

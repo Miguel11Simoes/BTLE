@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: 2024 Xianjun Jiao
 // SPDX-License-Identifier: Apache-2.0 license
 // Modified 2026-09-28 by Miguel Simões: GAUSS_TABLE parameter (default 0 = original). See CHANGES.md.
-// Modified 2026-10-16 by Miguel Simões: ADV_ADDRESS and ADV_DATA_FLOPS passed to btle_phy. See CHANGES.md.
+// Modified 2026-10-16 by Miguel Simões: ADV_ADDRESS, ADV_DATA_FLOPS and ADV_ADDRESS_OTP passed to btle_phy. See CHANGES.md.
 
 // btle_controller = btle_ll (link layer) + btle_phy (phy: btle_tx and btle_rx)
 
@@ -51,7 +51,8 @@ module btle_controller #
   // Legacy Advertising transmitter (branch ble-tx-min): AdvA fixed per chip (a ROM here, an OTP in
   // the ASIC) and AdvData in a 32 x 8 memory (or in flip-flops with ADV_DATA_FLOPS = 1)
   parameter [47:0] ADV_ADDRESS = 48'h010203040506,
-  parameter integer ADV_DATA_FLOPS = 0
+  parameter integer ADV_DATA_FLOPS = 0,
+  parameter integer ADV_ADDRESS_OTP = 0    // AdvA from six GF180MCU eFuse blocks instead of the ROM
 ) (
   input  wire rf_clk,
   input  wire rf_rst,
@@ -473,6 +474,7 @@ btle_phy #
   .GAUSS_TABLE(GAUSS_TABLE),
   .ADV_ADDRESS(ADV_ADDRESS),
   .ADV_DATA_FLOPS(ADV_DATA_FLOPS),
+  .ADV_ADDRESS_OTP(ADV_ADDRESS_OTP),
   .NUM_TAP_GAUSS_FILTER(NUM_TAP_GAUSS_FILTER),
   .VCO_BIT_WIDTH(VCO_BIT_WIDTH),
   .SIN_COS_ADDR_BIT_WIDTH(SIN_COS_ADDR_BIT_WIDTH),
