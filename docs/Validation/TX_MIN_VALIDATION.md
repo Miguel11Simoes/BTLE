@@ -103,7 +103,7 @@ AdvData memory), with the product audit's input archive (`product-evidence-20261
 | Controller lockstep through the registers, one DUT per example programmed with its packet's AdvA | **6/6 runs**, 369 606 cycles compared, 36 TX and 36 RX completions; **5/5 mutations** | `min-controller/` |
 | Product defects (`test_product_mutations.py`) | 2 baselines, **4/4** defects caught | `min-mutations/` |
 | Strict lint (`run_lint.py`, Verilator 5.020 as the audit; `ADV_DATA_FLOPS` 0 and 1) | **PASS 4/4** configurations, 14 reviewed exceptions | `min-lint/` |
-| Guards, measurement tools, RX model, Gaussian tail, upsampling, readback, suite | pass (suite: 34 tests, 2 skipped) | `min-evidence-20261016/` |
+| Guards, measurement tools, RX model, Gaussian tail, upsampling, readback, suite | pass (suite: 34 tests, 2 skipped; 35 on `fe9faf4`, with the SAIF-name case of § 6) | `min-evidence-20261016/` |
 
 Two runs failed first for reasons outside the RTL, both kept in `campaign.txt`: the lint ran with the
 OSS CAD Suite's Verilator, which the audit does not use (rerun with 5.020: PASS), and the guard tests
