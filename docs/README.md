@@ -29,7 +29,8 @@ Latest lint and documentation update: [LINT_CLOSURE.md](Validation/LINT_CLOSURE.
 | See the Gaussian table (B2) alone, its proofs and its saving | [Validation/TX_TABLE_VALIDATION.md](Validation/TX_TABLE_VALIDATION.md) |
 | See B2 and the {cos, sin} memory together: its checks, area and activity | [Validation/TX_OPT_VALIDATION.md](Validation/TX_OPT_VALIDATION.md) |
 | See the packet buffer with one port, with B2, the sine table of `ble-tx-sin2` and exact rewrites, the smallest transmitter with programmable VCO tables: its checks, area and activity | [Validation/TX_PDU_VALIDATION.md](Validation/TX_PDU_VALIDATION.md) |
-| See the VCO without memory, its tables fixed in a ROM of an eighth of the wave, the smallest transmitter measured: its checks, area, timing and SRAM energy | [Validation/TX_ROM_VALIDATION.md](Validation/TX_ROM_VALIDATION.md) |
+| See the VCO without memory, its tables fixed in a ROM of an eighth of the wave: its checks, area, timing and SRAM energy | [Validation/TX_ROM_VALIDATION.md](Validation/TX_ROM_VALIDATION.md) |
+| See the Legacy Advertising transmitter (header in registers, AdvA in ROM/OTP, AdvData in 32 x 8), the smallest transmitter measured: its checks, area, timing, activity, OTP and figures | [Validation/TX_MIN_VALIDATION.md](Validation/TX_MIN_VALIDATION.md) |
 | Compare every branch: area (the transmitter with its SRAM macros), timing, switching activity | [Validation/BRANCH_COMPARISON.md](Validation/BRANCH_COMPARISON.md) |
 | Choose where the Gaussian table lives (OTP, ROM, SRAM, REG) or a folded FIR, by TX area | [Design Decisions/GAUSS_FILTER_OPTIONS.md](Design%20Decisions/GAUSS_FILTER_OPTIONS.md) |
 | Choose the single-port memory of the VCO tables (OpenRAM sweep: 512×16, 512×8, 256×16, 128×32, 64×64) | [Design Decisions/VCO_MEMORY_SWEEP.md](Design%20Decisions/VCO_MEMORY_SWEEP.md) |
