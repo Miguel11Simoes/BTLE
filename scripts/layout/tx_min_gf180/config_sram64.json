@@ -55,7 +55,7 @@
     "gf180mcu_fd_sc_mcu7t5v0__aoi222_1",
     "gf180mcu_fd_sc_mcu7t5v0__buf_2"
   ],
-  "RUN_HEURISTIC_DIODE_INSERTION": true,
+  "RUN_HEURISTIC_DIODE_INSERTION": false,
   "GRT_ANTENNA_REPAIR_ITERS": 6,
   "GRT_ANTENNA_REPAIR_MARGIN": 15,
   "DESIGN_REPAIR_MAX_SLEW_PCT": 60,
