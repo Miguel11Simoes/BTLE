@@ -89,7 +89,7 @@ mkdir -p "$repo/results/figures/tx-min"; cp "$work"/${fig}_*.png "$repo/results/
 {
   echo "label=$label"
   echo "date_utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-  echo "rtl=$rev ($(cat "$work/rtl_commit.txt")), btle_tx, variant $variant: $(grep -o '"SYNTH_PARAMETERS": \[[^]]*\]' "$work/config.json")"
+  echo "rtl=$rev ($(cat "$work/rtl_commit.txt")), btle_tx, variant $variant: $(python3 -c 'import json,sys; print(" ".join(json.load(open(sys.argv[1]))["SYNTH_PARAMETERS"]))' "$work/config.json")"
   echo "harness=$(git -C "$repo" rev-parse HEAD), dirty files under scripts/layout: $(git -C "$repo" status --porcelain -- scripts/layout | wc -l)"
   echo "flow=LibreLane Classic, gf180mcuD, gf180mcu_fd_sc_mcu7t5v0, in the eFuse compiler's nix-shell ($(git -C "$EFUSE_DIR/gf180_efuse_compiler" rev-parse HEAD 2>/dev/null))"
   echo "run=$(basename "$R")"

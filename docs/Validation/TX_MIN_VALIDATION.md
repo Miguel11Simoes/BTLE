@@ -10,7 +10,8 @@ product audit's campaign (`PRODUCT_VALIDATION.md`), `tests/test_tx_min.py` and i
 lint; runs `tx-min` (area, static timing, switching activity of `master`, `ble-tx-rom` and the two
 AdvData stores of this branch, one run; the activity with the harness fix `4657113`), `openram-min`
 (the AdvData macro), the GF180MCU eFuse block (`results/otp/gf180-efuse/`) and `tx-min-gf180` (the
-transmitter's layout with the OTP, signoff clean, `7f2306c`); figures in `results/figures/tx-min/`.
+transmitter's layout with the OTP, signoff clean, `7f2306c`) and `tx-min-gf180-sram64` (the same with
+AdvData in the PDK's SRAM: header in registers, AdvA in OTP, AdvData in SRAM, § 7.1); figures in `results/figures/tx-min/`.
 Pre-layout digital campaigns and measurements, plus one open-PDK layout of the transmitter (§ 7):
 ASIC readiness is NOT READY, as on every branch (`ASIC_READINESS.md`).
 
@@ -287,6 +288,60 @@ What it took (each run kept only as the configuration's history; the final one i
 Not done: no pads or seal ring (a macro, not a chip), no parasitic-annotated simulation of the layout,
 the eFuse programming port goes to the macro's pins (no production test interface, § 2).
 
+### 7.1 The supervisor's architecture in layout: AdvData in an SRAM
+
+The run above keeps AdvData in flip-flops. Run `tx-min-gf180-sram64` (`run.sh <label> <rev> sram64`)
+lays out the architecture exactly as proposed — **header in registers, AdvA in OTP (the six eFuse
+blocks), AdvData in an SRAM** — with `ADV_DATA_FLOPS = 0`, `b723c06`'s RTL unchanged.
+
+**Which SRAM.** GF180MCU has no 32 × 8. The PDK's SRAMs (GlobalFoundries' `gf180mcu_fd_ip_sram`, 5 V,
+Liberty at tt 5.0 V, ss 4.5 V and ff 5.5 V) start at 64 × 8, so `pdu_buffer_ram_gf180.v` puts the
+AdvData memory on `gf180mcu_fd_ip_sram__sram64x8m8wm1` and uses 32 of its 64 words (A[5] = 0). A
+32 × 8 from OpenRAM was tried and is **not possible**: OpenRAM 1.2.48's `gf180mcu` technology holds
+only the bitcell and one decoder NAND (no flip-flop, sense amplifier, write driver or replica cells;
+the compiler stops at the first `dff`), and its periphery is 3.3 V with a 1.8 V nominal supply,
+which would not sit in the 5 V domain of the logic and the eFuse blocks anyway.
+
+**Equivalence with the macro's own model.** The PDK's copy of the SRAM's Verilog model is empty;
+GlobalFoundries' repository has it (`sim_sram64.sh` fetches it at a fixed commit). With it in place of
+the memory, `tests/test_tx_min.py` against `fca6ac6` gives **144/144 runs, no difference, 16/16
+mutants** (`results/validation/min-sram64-sim/`). The model samples its inputs 100 ps after the clock,
+so the simulation holds them 1 ns (the Liberty's hold is 0.5–1.1 ns, which the layout's hold repair
+gives them); a read puts the word on Q, a write leaves Q, and the buffer samples Q only in the clock
+after a read.
+
+| Signoff check (`results/layout/tx-min-gf180-sram64/`) | Result |
+|---|---|
+| DRC, KLayout (the foundry's GF180MCU deck, the whole GDS, the SRAM's inside included) | **0** |
+| DRC, Magic | 2 413, **all inside the GlobalFoundries SRAM** (`run.sh` fails if any lies outside it); Magic's deck does not accept the foundry's SRAM layout, nor its LEF abstract (a 0.11 µm Metal3 sliver of its VSS pin) |
+| LVS (Netgen) / antenna / routing DRC | **clean** / **0** / **0** |
+| Setup / hold, 9 corners | **met in all**: worst setup +7.495 ns (`pdu_octet_mem_addr` → the SRAM, `clkb`, max_ss), worst hold +0.190 ns |
+| Max slew / max capacitance, 9 corners | **0** / **0** |
+| IR drop / clock skew | 1.22 mV worst / 0.38 ns |
+
+The SRAM keeps its VDD/VSS on Metal3 and nothing above, so the core's Metal4 straps cross it and drop
+onto its Metal3 straps (`pdn_cfg.tcl`, a grid added to LibreLane's). It sits at the top of the die
+with its pins (Metal2, bottom edge) facing the logic, the eFuse row at the bottom
+(`tx_min_gf180_sram64_gds.png`). On the way: LibreLane's Magic streamout left the SRAM's spare cells
+as extra top cells (KLayout streamout instead), and the heuristic antenna diodes, inserted after the
+slew repair, pushed two nets over 3 ns at ss (left to the global router's antenna repair, which
+ends at 0); the PnR SDC (`btle_tx_pnr.sdc`) aims at 2 ns and fanout 8, signoff keeps the library's.
+
+| GF180MCU-D, µm² | AdvData in flip-flops (`tx-min-gf180`) | **AdvData in the SRAM 64 × 8** (`tx-min-gf180-sram64`) |
+|---|---:|---:|
+| eFuse blocks (AdvA) | 48 452.1 | 48 452.1 |
+| SRAM | — | **100 571.6** (431.86 × 232.88 µm) |
+| Logic (combinational, flip-flops, inverters, buffers) | 72 329.7 (501 flip-flops) | 52 164.5 (247 flip-flops) |
+| Timing-repair buffers / clock trees | 9 487.6 / 4 188.4 | 17 820.6 / 2 915.2 |
+| Taps, end caps, antenna diodes | 13 588.3, 1 861.5, 7 630.5 | 10 242.8, 2 423.5, 4.4 |
+| **Cells + macros** | **157 538.1** | **234 603.9** (+77 065.8, +48.9 %) |
+
+**In GF180MCU the flip-flops win clearly**: the 31 AdvData bytes cost 20 165 µm² of logic in
+flip-flops against 100 572 µm² for the smallest SRAM the PDK offers, of which half the words go
+unused. The SRAM's periphery is sized for a general-purpose macro; at 248 bits it dominates. In the
+45 nm comparison (§ 4) the gap is small (2 475.8 µm² of 32 × 8 SRAM against 1 915 µm² of flip-flops)
+because OpenRAM sizes the macro to 32 words; here no 32-word macro exists.
+
 ## 8. Figures (as in `open_btle_baseband_chip/`)
 
 `scripts/figures/tx_min_figures.py`, outputs in `results/figures/tx-min/`. The transmitter is the RTL of
@@ -301,6 +356,7 @@ model, 0 samples differ in every case.
 | `tx_min_area.png` | — | the transmitter's area (logic and macros) of `master`, `ble-tx-rom` and both stores of this branch |
 | `efuse_async_mem_1x8.png`, `efuse_xyce.png` | — | the eFuse block's layout (KLayout) and its Xyce programming and sensing waveforms |
 | `tx_min_gf180_gds.png` | `btle-top-openlane-detailed-placement-cts.png`, `btle_rx_core-openlane-GDSII.png` | the GDS of § 7 (KLayout, the PDK's layer colours): the logic above, the six eFuse blocks in a row at the bottom |
+| `tx_min_gf180_sram64_gds.png` | — | the GDS of § 7.1: the GlobalFoundries SRAM at the top, the logic, the eFuse row at the bottom |
 | `tx_min_gf180_efuse.png`, `tx_min_gf180_efuse_pdn.png` | — | two eFuse blocks (fuse array, sense amplifiers, wrapper), all layers and Metal4/Metal5 only: the Metal5 VDD/VSS pair that crosses every block, with its vias onto the block's straps |
 
 The BER uses upstream's `python/btlelib.py` (`upstream-baseline`) for the channel and the receiver, as
@@ -339,7 +395,9 @@ mkdir -p /tmp/vec && tar -xzf results/compare/tx-pdu-we/vectors.tar.gz -C /tmp/v
 DUT_REV=HEAD DUT_PARAMS="GAUSS_TABLE=1" VEC_DIR=/tmp/vec scripts/power/run_activity.sh <label> 100000 1 $REF
 scripts/area/run_openram.sh <label> sram_1rw_8x32
 # layout in GF180MCU-D with the OTP (needs the eFuse compiler and its macros, § 2)
-scripts/layout/tx_min_gf180/run.sh <label> HEAD
+scripts/layout/tx_min_gf180/run.sh <label> HEAD            # AdvData in flip-flops
+scripts/layout/tx_min_gf180/run.sh <label> HEAD sram64     # AdvData in the PDK's SRAM 64 x 8
+PY=python3 scripts/layout/tx_min_gf180/sim_sram64.sh $REF --mutants   # the SRAM's own model
 # figures
 python3 scripts/figures/tx_min_figures.py tx results/figures/<label>
 python3 scripts/figures/tx_min_figures.py ber results/figures/<label>

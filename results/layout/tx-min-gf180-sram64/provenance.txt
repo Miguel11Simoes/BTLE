@@ -1,0 +1,7 @@
+label=tx-min-gf180-sram64
+date_utc=2026-10-17T14:58:30Z
+rtl=b723c06299267ba90ef745ded98bbb9caae162ea (b723c06299267ba90ef745ded98bbb9caae162ea), btle_tx, variant sram64: GAUSS_TABLE=1 ADV_DATA_FLOPS=0 ADV_ADDRESS_OTP=1  (parameters added from config.json after the run: run.sh's grep missed them in an indented file, fixed)
+harness=ea6c5e89d06ec5bd4da41b6148a2f2ddd1c7ae80, dirty files under scripts/layout: 0
+flow=LibreLane Classic, gf180mcuD, gf180mcu_fd_sc_mcu7t5v0, in the eFuse compiler's nix-shell (e77f729373f28eda5d370d66764e81c3b109c31a)
+run=RUN_2026-10-17_14-53-09
+gds sha256=2abd1e8d0f8cbccebce8e70143f50bcf4cd1d9354030ebf005839830f0381fe1
