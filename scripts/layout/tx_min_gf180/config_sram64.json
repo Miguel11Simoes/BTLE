@@ -203,5 +203,7 @@
     ".*efuse_i VDD VSS VDD VSS",
     ".*sram_i VDD VSS VDD VSS"
   ],
-  "PDN_CFG": "dir::pdn_cfg.tcl"
+  "PDN_CFG": "dir::pdn_cfg.tcl",
+  "PRIMARY_GDSII_STREAMOUT_TOOL": "klayout",
+  "MAGIC_DRC_USE_GDS": false
 }
