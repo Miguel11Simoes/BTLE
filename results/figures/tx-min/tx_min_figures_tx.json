@@ -1,8 +1,28 @@
 {
-  "pdu": "422506050403020119095344522f426c7565746f6f74682f4c6f772f456e657267791234567890",
-  "rtl_vs_python_differences": 0,
-  "samples": 3024,
-  "rx_crc_ok": true,
-  "rx_pdu_equal": true,
-  "best_phase": 0
+  "example2": {
+    "pdu": "0100",
+    "channel": 10,
+    "access_address": "1B0A8511",
+    "crc_init": "123456",
+    "snr_db": 20,
+    "ppm": 0,
+    "rtl_vs_python_differences": 0,
+    "samples": 656,
+    "rx_crc_ok": true,
+    "rx_pdu_equal": true,
+    "best_phase": 0
+  },
+  "adv": {
+    "pdu": "422506050403020119095344522f426c7565746f6f74682f4c6f772f456e657267791234567890",
+    "channel": 37,
+    "access_address": "D6BE898E",
+    "crc_init": "555555",
+    "snr_db": 20,
+    "ppm": 20,
+    "rtl_vs_python_differences": 0,
+    "samples": 3024,
+    "rx_crc_ok": true,
+    "rx_pdu_equal": true,
+    "best_phase": 0
+  }
 }

@@ -13,8 +13,11 @@ The transmitter is verilog/btle_tx.v with GAUSS_TABLE = 1 (as the branch is meas
 upstream testbench verilog/btle_tx_tb.v plus a monitor of the upsampled bit and the Gaussian filter
 output; everything after it (channel, receiver) is python/btlelib.py, as in the upstream figures.
 Each RTL waveform is also compared with python/btlelib.py's btle_tx: the figures print the number of
-differing samples (0 expected). The packets are Legacy Advertising PDUs (channel 37, the advertising
-access address and CRC init) with the chip's AdvA, ADV_ADDRESS of verilog/btle_tx.v.
+differing samples (0 expected). py-fig3 and py-fig4 are drawn twice: for upstream's own packet
+(example 2 of test_vector_for_btle_verilog.py, the one in open_btle_baseband_chip/py-fig3.png and
+py-fig4.png, so both figures cover the same 640 samples) and for a Legacy Advertising PDU of 39 bytes
+(suffix _adv). The BER packets are Legacy Advertising PDUs (channel 37, the advertising access
+address and CRC init) with the chip's AdvA, ADV_ADDRESS of verilog/btle_tx.v.
 """
 
 from __future__ import annotations
@@ -43,6 +46,9 @@ CAD = Path(os.environ.get("OSS_CAD", str(Path.home() / "eda/oss-cad-suite-202609
 CHANNEL, AA, CRC_INIT = 37, "D6BE898E", "555555"
 # AdvData of upstream's BER packet (test_btle_ber.py): AD local name "SDR/Bluetooth/Low/Energy" + 5 bytes
 ADV_DATA = bytes.fromhex("19095344522f426c7565746f6f74682f4c6f772f456e657267791234567890")
+# Upstream's py-fig3/py-fig4: `python test_vector_for_btle_verilog.py 2` (20 dB, 0 ppm), a data packet
+# with an empty payload (LLID 1, length 0): 80 bits, 640 samples. Its 2 bytes never reach AdvA (bytes 2..7).
+EXAMPLE2 = dict(pdu=bytes.fromhex("0100"), channel=10, aa="1B0A8511", crc_init="123456", snr=20, ppm=0)
 
 TRACE = r"""
 `timescale 1ns/1ps
@@ -102,14 +108,14 @@ class RtlTx:
         self.taps = np.int8(np.round(128 * bl.gauss_fir_gen()))
         self.cos, self.sin = bl.sin_cos_gen(64)
 
-    def run(self, pdu: bytes, tag: str) -> dict:
+    def run(self, pdu: bytes, tag: str, channel: int = CHANNEL, aa: str = AA, crc_init: str = CRC_INIT) -> dict:
         d = self.work / f"run_{tag}"
         d.mkdir()
         for name, data in [("gauss_filter_tap", self.taps), ("cos_table", self.cos), ("sin_table", self.sin)]:
             np.savetxt(d / (name + ".txt"), data, fmt="%d")
         pdu_bit = bl.hex_string_to_bit(pdu.hex())
-        i, q, phy_bit, phy_bit_upsample = bl.btle_tx(pdu_bit, CHANNEL, bl.hex_string_to_bit(CRC_INIT), AA)
-        (d / "btle_config.txt").write_text(f"{len(pdu_bit):x}\n{CHANNEL:x}\n{CRC_INIT}\n{AA}\n")
+        i, q, phy_bit, phy_bit_upsample = bl.btle_tx(pdu_bit, channel, bl.hex_string_to_bit(crc_init), aa)
+        (d / "btle_config.txt").write_text(f"{len(pdu_bit):x}\n{channel:x}\n{crc_init}\n{aa}\n")
         (d / "btle_tx_test_input.txt").write_text("".join(f"{v:02x}\n" for v in pdu))
         np.savetxt(d / "btle_tx_test_output_i_ref.txt", i, fmt="%d")
         np.savetxt(d / "btle_tx_test_output_q_ref.txt", q, fmt="%d")
@@ -134,13 +140,25 @@ def style(ax, title):
 
 
 def fig_tx(out_dir: Path) -> None:
+    adv = dict(pdu=adv_pdu(ADV_DATA), channel=CHANNEL, aa=AA, crc_init=CRC_INIT, snr=20, ppm=20)
     with tempfile.TemporaryDirectory(prefix="tx-min-fig-") as t:
         rtl = RtlTx(Path(t))
-        pdu = adv_pdu(ADV_DATA)
-        r = rtl.run(pdu, "fig")
+        summary = {
+            "example2": _fig_pair(out_dir, rtl, EXAMPLE2, "",
+                                  f"upstream's example 2: PDU 0100 (data, empty payload), channel {EXAMPLE2['channel']}"),
+            "adv": _fig_pair(out_dir, rtl, adv, "_adv", f"PDU {len(adv['pdu'])} bytes (ADV, AdvA from ROM), channel {CHANNEL}"),
+        }
+    (out_dir / "tx_min_figures_tx.json").write_text(json.dumps(summary, indent=2) + "\n")
+    print(json.dumps(summary))
+
+
+def _fig_pair(out_dir: Path, rtl: RtlTx, pkt: dict, suffix: str, what: str) -> dict:
+    """py-fig3 and py-fig4 for one packet, the RTL as the transmitter."""
+    pdu, channel, aa, crc_init = pkt["pdu"], pkt["channel"], pkt["aa"], pkt["crc_init"]
+    r = rtl.run(pdu, "fig" + suffix, channel, aa, crc_init)
     i, q = r["i"].astype(float), r["q"].astype(float)
     fo, _ = bl.check_realtime_fo(i, q)
-    note = f"RTL ble-tx-min, PDU {len(pdu)} bytes (ADV, AdvA from ROM); RTL vs Python: {r['differences']} samples differ"
+    note = f"RTL ble-tx-min, {what}; RTL vs Python: {r['differences']} samples differ"
 
     # py-fig3: signals in the transmitter
     plt.figure(0, figsize=(6.4, 4.8))
@@ -155,16 +173,16 @@ def fig_tx(out_dir: Path) -> None:
     style(ax, "BTLE transmitter I and Q (ble-tx-min RTL)")
     plt.figtext(0.5, 0.005, note, ha="center", fontsize=7)
     plt.tight_layout(rect=(0, 0.03, 1, 1))
-    plt.savefig(out_dir / "tx_min_py_fig3.png", dpi=100)
+    plt.savefig(out_dir / f"tx_min_py_fig3{suffix}.png", dpi=100)
     plt.close()
 
-    # py-fig4: the receiver's decision signal, after the channel (20 dB, 20 ppm, as upstream's example)
+    # py-fig4: the receiver's decision signal, after the channel
     rng_state = np.random.get_state()
     np.random.seed(20261016)
-    i_err, q_err, _, _ = bl.add_freq_sampling_error(i, q, 20)
-    rx_i, rx_q = bl.add_noise(i_err, q_err, 20)
+    i_err, q_err, _, _ = bl.add_freq_sampling_error(i, q, pkt["ppm"])
+    rx_i, rx_q = bl.add_noise(i_err, q_err, pkt["snr"])
     np.random.set_state(rng_state)
-    rx_pdu_bit, crc_ok, num_byte_payload, _, _, _, best = bl.btle_rx(rx_i, rx_q, CHANNEL, bl.hex_string_to_bit(CRC_INIT), AA)
+    rx_pdu_bit, crc_ok, num_byte_payload, _, _, _, best = bl.btle_rx(rx_i, rx_q, channel, bl.hex_string_to_bit(crc_init), aa)
     plt.figure(1, figsize=(6.4, 4.8))
     ax = plt.subplot(211)
     ax.plot(2 * r["upsample"] - 1, "b", label="Upsampled phy bit")
@@ -184,16 +202,15 @@ def fig_tx(out_dir: Path) -> None:
     ax.plot(idx[best::bl.SAMPLE_PER_SYMBOL] - 4, sig[best::bl.SAMPLE_PER_SYMBOL], "rs", label="best phase moment")
     style(ax, "signal for decision in receiver")
     ok = crc_ok and bl.bit_to_hex_string(rx_pdu_bit) == pdu.hex()
-    plt.figtext(0.5, 0.005, f"channel 20 dB SNR, 20 ppm; Python receiver: CRC {'OK' if crc_ok else 'FAIL'}, "
+    plt.figtext(0.5, 0.005, f"channel {pkt['snr']} dB SNR, {pkt['ppm']} ppm; Python receiver: CRC {'OK' if crc_ok else 'FAIL'}, "
                 f"PDU {'equal to the one sent' if ok else 'DIFFERENT'} ({num_byte_payload} payload bytes)",
                 ha="center", fontsize=7)
     plt.tight_layout(rect=(0, 0.03, 1, 1))
-    plt.savefig(out_dir / "tx_min_py_fig4.png", dpi=100)
+    plt.savefig(out_dir / f"tx_min_py_fig4{suffix}.png", dpi=100)
     plt.close()
-    summary = dict(pdu=pdu.hex(), rtl_vs_python_differences=r["differences"], samples=len(i),
-                   rx_crc_ok=bool(crc_ok), rx_pdu_equal=bool(ok), best_phase=int(best))
-    (out_dir / "tx_min_figures_tx.json").write_text(json.dumps(summary, indent=2) + "\n")
-    print(json.dumps(summary))
+    return dict(pdu=pdu.hex(), channel=channel, access_address=aa, crc_init=crc_init, snr_db=pkt["snr"], ppm=pkt["ppm"],
+                rtl_vs_python_differences=r["differences"], samples=len(i),
+                rx_crc_ok=bool(crc_ok), rx_pdu_equal=bool(ok), best_phase=int(best))
 
 
 # ---- BER: RTL transmitter vs Python transmitter, same channel noise ----

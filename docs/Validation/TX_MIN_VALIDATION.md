@@ -350,8 +350,9 @@ model, 0 samples differ in every case.
 
 | Figure | Upstream's | What it shows |
 |---|---|---|
-| `tx_min_py_fig3.png` | `py-fig3.png` | a 39-byte ADV PDU (AdvA from the ROM, upstream's BER AdvData): upsampled bit, Gaussian filter output, normalized frequency offset; I and Q, all from the RTL |
-| `tx_min_py_fig4.png` | `py-fig4.png` | the same waveform after a 20 dB, 20 ppm channel, the receiver's decision signal and best phase: CRC OK, the PDU received equal to the one sent |
+| `tx_min_py_fig3.png` | `py-fig3.png` | upstream's own packet, example 2 (PDU `0100`, channel 10, 656 samples, the same axes as upstream's): upsampled bit, Gaussian filter output, normalized frequency offset; I and Q, all from the RTL |
+| `tx_min_py_fig4.png` | `py-fig4.png` | the same waveform after upstream's channel (20 dB, 0 ppm), the receiver's decision signal and best phase: CRC OK, the PDU received equal to the one sent |
+| `tx_min_py_fig3_adv.png`, `tx_min_py_fig4_adv.png` | — | the same two figures for a 39-byte ADV PDU (AdvA from the ROM, upstream's BER AdvData, channel 37, 3 024 samples), the channel 20 dB and 20 ppm: CRC OK, the PDU received equal to the one sent |
 | `tx_min_ber_ppm50.png`, `tx_min_ber_ppm-30.png` | `open_btle_baseband_chip_21_1.png`, `_23_1.png` | BER against SNR at 50 and −30 ppm, 39-byte ADV PDUs with random AdvData (100/200/300/300 packets per point), the transmitter the RTL and, with the same noise, the Python model: the two curves are identical; 0.1 % BER at about 24.5 dB (50 ppm) and 13.8 dB (−30 ppm), as upstream's |
 | `tx_min_area.png` | — | the transmitter's area (logic and macros) of `master`, `ble-tx-rom` and both stores of this branch |
 | `efuse_async_mem_1x8.png`, `efuse_xyce.png` | — | the eFuse block's layout (KLayout) and its Xyce programming and sensing waveforms |

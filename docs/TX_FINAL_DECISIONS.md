@@ -100,15 +100,21 @@ is used, and is ready in at most four AXI clocks): no stall, no new timing const
 | upstream (Python model) | `ble-tx-min` (RTL, Icarus) |
 |---|---|
 | ![upstream TX signals](../open_btle_baseband_chip/py-fig3.png) | ![ble-tx-min TX signals](../results/figures/tx-min/tx_min_py_fig3.png) |
-| example 2: a data packet of 2 bytes, channel 10 | a 39-byte ADV_NONCONN_IND (AdvA from the ROM, upstream's BER AdvData), channel 37 |
+| example 2: PDU `0100` (data, empty payload), channel 10 | the same packet: PDU `0100`, channel 10, AA 0x11850A1B, CRC init 0x123456 |
 
 Top: the upsampled PHY bit (±1), the Gaussian filter's output (red, normalized) and the normalized
-frequency deviation measured on the I/Q samples (dashed); bottom: I and Q. Upstream's figure is its
+frequency deviation measured on the I/Q samples (dashed); bottom: I and Q. Both figures are the same
+packet, upstream's example 2 (`test_vector_for_btle_verilog.py 2`): 80 bits, 656 samples, the same axes.
+Its 2 bytes never reach AdvA (bytes 2..7), so the ROM plays no part. Upstream's figure is its
 Python model; ours is the RTL's actual output, captured by the upstream testbench `btle_tx_tb.v` plus a
 monitor of the filter, and compared with the Python model on every sample: **0 samples differ**
 (`results/figures/tx-min/tx_min_figures_tx.json`). Since the samples are the Python model's, the
 frequency deviation is the one upstream checks against the Core spec's 185 kHz minimum (0.185
 normalized): the same tables, taps and modulation index 0.5.
+
+The packet this chip actually sends, a 39-byte ADV_NONCONN_IND (AdvA from the ROM, upstream's BER
+AdvData, channel 37), is 376 bits, 3 024 samples, also 0 samples differ:
+[`tx_min_py_fig3_adv.png`](../results/figures/tx-min/tx_min_py_fig3_adv.png).
 
 ### 3.2 The receiver's decision (upstream's `py-fig4.png`)
 
@@ -116,9 +122,11 @@ normalized): the same tables, taps and modulation index 0.5.
 |---|---|
 | ![upstream RX decision](../open_btle_baseband_chip/py-fig4.png) | ![ble-tx-min RX decision](../results/figures/tx-min/tx_min_py_fig4.png) |
 
-The same waveform after a channel of 20 dB SNR and 20 ppm clock error, demodulated by upstream's
-receiver (`sign(i0·q1 − i1·q0)` on the 8 sampling phases; red: the best phase). With the RTL transmitter:
-CRC OK, the PDU received equal to the one sent (37 payload bytes).
+The same waveform after the channel of upstream's run (20 dB SNR, 0 ppm), demodulated by upstream's
+receiver (`sign(i0·q1 − i1·q0)` on the 8 sampling phases; red: the best phase). The noise is another draw,
+so the small ripples differ. With the RTL transmitter: CRC OK, the PDU received equal to the one sent. The 39-byte
+ADV packet after 20 dB and 20 ppm, also CRC OK and equal to the one sent (37 payload bytes):
+[`tx_min_py_fig4_adv.png`](../results/figures/tx-min/tx_min_py_fig4_adv.png).
 
 ### 3.3 Bit error rate (upstream's `open_btle_baseband_chip_21_1.png`, `_23_1.png`)
 
