@@ -6,7 +6,10 @@
 # Layout of btle_tx (ble-tx-min, GAUSS_TABLE=1 ADV_DATA_FLOPS=1 ADV_ADDRESS_OTP=1) in GF180MCU-D with the
 # six eFuse blocks of AdvA, LibreLane Classic flow in the Nix environment of the GF180MCU eFuse compiler.
 #
-# Usage (WSL/Linux, repository root): scripts/layout/tx_min_gf180/run.sh <label> [rtl-rev]
+# Usage (WSL/Linux, repository root): scripts/layout/tx_min_gf180/run.sh <label> [rtl-rev] [flops|sram64]
+#   flops (default): AdvData in 31 bytes of flip-flops (ADV_DATA_FLOPS=1), config.json
+#   sram64: AdvData in the PDK's SRAM gf180mcu_fd_ip_sram__sram64x8m8wm1 (ADV_DATA_FLOPS=0, 32 of its
+#           64 words), config_sram64.json: pdu_buffer_ram of btle_tx.v replaced by pdu_buffer_ram_gf180.v
 # Needs: EFUSE_DIR (default ~/eda/efuse) with gf180_efuse_compiler/ (its nix-shell, the wafer.space PDK
 # in gf180mcu/) and out/macros/efuse_array_async_1x8/ from `./efuse.py 1 8 --async-efuse
 # --digital-wrapper=async` (results/otp/gf180-efuse/provenance.txt); docker with the nixstore volume.
@@ -14,6 +17,8 @@
 set -euo pipefail
 label=${1:?usage: run.sh <label> [rtl-rev]}
 rev=${2:-HEAD}
+variant=${3:-flops}
+case $variant in flops|sram64) ;; *) echo "variant: flops or sram64" >&2; exit 1;; esac
 EFUSE_DIR=${EFUSE_DIR:-$HOME/eda/efuse}
 repo=$(git rev-parse --show-toplevel)
 here=$repo/scripts/layout/tx_min_gf180
@@ -23,7 +28,15 @@ work=$EFUSE_DIR/out/$label
 mkdir -p "$work/src"
 git -C "$repo" archive "$rev" verilog | tar -x -C "$work/src" --strip-components=1
 git -C "$repo" rev-parse "$rev^{commit}" > "$work/rtl_commit.txt"
-cp "$here/config.json" "$here/btle_tx.sdc" "$here/render.py" "$work/"
+cp "$here/btle_tx.sdc" "$here/render.py" "$work/"
+if [ "$variant" = sram64 ]; then
+  cp "$here/config_sram64.json" "$work/config.json"; cp "$here/pdn_cfg.tcl" "$work/"
+  awk '/^module pdu_buffer_ram/{skip=1} !skip{print} skip&&/^endmodule/{skip=0}' "$work/src/btle_tx.v" > "$work/btle_tx.v"
+  mv "$work/btle_tx.v" "$work/src/btle_tx.v"; cp "$here/pdu_buffer_ram_gf180.v" "$work/src/"
+  grep -q "^module pdu_buffer_ram" "$work/src/btle_tx.v" && { echo "pdu_buffer_ram not removed" >&2; exit 1; }
+else
+  cp "$here/config.json" "$work/"
+fi
 
 # the compiler's nix-shell, as its own flow runs it (results/otp/gf180-efuse/provenance.txt)
 in_nix() {
@@ -58,7 +71,7 @@ mkdir -p "$repo/results/figures/tx-min"; cp "$work"/tx_min_gf180_*.png "$repo/re
 {
   echo "label=$label"
   echo "date_utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-  echo "rtl=$rev ($(cat "$work/rtl_commit.txt")), btle_tx, GAUSS_TABLE=1 ADV_DATA_FLOPS=1 ADV_ADDRESS_OTP=1"
+  echo "rtl=$rev ($(cat "$work/rtl_commit.txt")), btle_tx, variant $variant: $(grep -o '"SYNTH_PARAMETERS": \[[^]]*\]' "$work/config.json")"
   echo "harness=$(git -C "$repo" rev-parse HEAD), dirty files under scripts/layout: $(git -C "$repo" status --porcelain -- scripts/layout | wc -l)"
   echo "flow=LibreLane Classic, gf180mcuD, gf180mcu_fd_sc_mcu7t5v0, in the eFuse compiler's nix-shell ($(git -C "$EFUSE_DIR/gf180_efuse_compiler" rev-parse HEAD 2>/dev/null))"
   echo "run=$(basename "$R")"
