@@ -47,13 +47,31 @@ in_nix() {
     nix-shell --run 'export PATH=/src/.bin:\$PATH; $1'"
 }
 L=/src/gf180mcu/gf180mcuD/libs.tech/klayout/tech/gf180mcu.lyp
+fig=tx_min_gf180; [ "$variant" = sram64 ] && fig=tx_min_gf180_sram64
 in_nix "cd /out/$label && librelane --pdk-root /src/gf180mcu --pdk gf180mcuD --manual-pdk config.json > librelane.log 2>&1; echo \$? > librelane.exit
   G=\$(ls -d runs/RUN_*/final/gds | tail -1)/btle_tx.gds; export QT_QPA_PLATFORM=offscreen
-  python3 render.py \$G $L tx_min_gf180_gds.png 1600
-  python3 render.py \$G $L tx_min_gf180_efuse.png 1400 20 30 250 135
-  python3 render.py \$G $L tx_min_gf180_efuse_pdn.png 1400 20 30 250 135 Metal4,Metal5,Via4
+  python3 render.py \$G $L ${fig}_gds.png 1600
+  python3 render.py \$G $L ${fig}_efuse.png 1400 20 30 250 135
+  python3 render.py \$G $L ${fig}_efuse_pdn.png 1400 20 30 250 135 Metal4,Metal5,Via4
   chmod -R a+rwX /out/$label"
 [ "$(cat "$work/librelane.exit")" = 0 ] || { tail -40 "$work/librelane.log"; exit 1; }
+
+# sram64: Magic's deck flags the GlobalFoundries SRAM's own layout (ERROR_ON_MAGIC_DRC is off); the
+# foundry's KLayout deck is the signoff. Every Magic error must lie inside the SRAM, none elsewhere.
+if [ "$variant" = sram64 ]; then
+  python3 - "$work/config.json" "$(ls -d "$work"/runs/RUN_* | tail -1)" <<'PY'
+import glob, json, re, sys
+c = json.load(open(sys.argv[1]))
+(x, y), = [v['location'] for m in c['MACROS'].values() for k, v in m['instances'].items() if k.endswith('sram_i')]
+box = (x, y, x + 431.86, y + 232.88)          # gf180mcu_fd_ip_sram__sram64x8m8wm1, LEF SIZE
+rpt = open(glob.glob(sys.argv[2] + '/*-magic-drc/reports/drc.magic.rpt')[0]).read()
+rects = [tuple(map(float, r)) for r in re.findall(r'^\s*([-\d.]+)um ([-\d.]+)um ([-\d.]+)um ([-\d.]+)um', rpt, re.M)]
+out = [r for r in rects if not (box[0] <= r[0] and r[2] <= box[2] and box[1] <= r[1] and r[3] <= box[3])]
+k = re.search(r'COUNT: (\d+)', rpt)
+print(f"Magic DRC: {k.group(1) if k else '?'} errors, {len(rects)} located, {len(out)} outside the SRAM {box}")
+sys.exit(1 if out or not rects and k and int(k.group(1)) else 0)
+PY
+fi
 
 # keep the signoff evidence (not the whole run)
 R=$(ls -d "$work"/runs/RUN_* | tail -1)
@@ -67,7 +85,7 @@ cp "$work/librelane.log" "$R/warning.log" "$out/"
 gzip -9 -c "$R/final/gds/btle_tx.gds" > "$out/btle_tx.gds.gz"
 gzip -9 -c "$R/final/nl/btle_tx.nl.v" > "$out/btle_tx.nl.v.gz"
 gzip -9 "$out"/sta/*.rpt "$out"/librelane.log
-mkdir -p "$repo/results/figures/tx-min"; cp "$work"/tx_min_gf180_*.png "$repo/results/figures/tx-min/"
+mkdir -p "$repo/results/figures/tx-min"; cp "$work"/${fig}_*.png "$repo/results/figures/tx-min/"
 {
   echo "label=$label"
   echo "date_utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
