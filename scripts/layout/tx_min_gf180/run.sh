@@ -28,7 +28,7 @@ work=$EFUSE_DIR/out/$label
 mkdir -p "$work/src"
 git -C "$repo" archive "$rev" verilog | tar -x -C "$work/src" --strip-components=1
 git -C "$repo" rev-parse "$rev^{commit}" > "$work/rtl_commit.txt"
-cp "$here/btle_tx.sdc" "$here/render.py" "$work/"
+cp "$here/btle_tx.sdc" "$here/render.py" "$work/"; cat "$here/btle_tx.sdc" "$here/btle_tx_pnr_extra.sdc" > "$work/btle_tx_pnr.sdc"
 if [ "$variant" = sram64 ]; then
   cp "$here/config_sram64.json" "$work/config.json"; cp "$here/pdn_cfg.tcl" "$work/"
   awk '/^module pdu_buffer_ram/{skip=1} !skip{print} skip&&/^endmodule/{skip=0}' "$work/src/btle_tx.v" > "$work/btle_tx.v"
@@ -76,7 +76,7 @@ fi
 # keep the signoff evidence (not the whole run)
 R=$(ls -d "$work"/runs/RUN_* | tail -1)
 out=$repo/results/layout/$label; mkdir -p "$out/sta"
-cp "$work"/{config.json,btle_tx.sdc,rtl_commit.txt} "$R/resolved.json" "$R"/final/metrics.{json,csv} "$out/"
+cp "$work"/{config.json,btle_tx.sdc,btle_tx_pnr.sdc,rtl_commit.txt} "$R/resolved.json" "$R"/final/metrics.{json,csv} "$out/"
 cp "$R"/*-misc-reportmanufacturability/manufacturability.rpt "$R"/*-openroad-irdropreport/irdrop.rpt "$out/"
 for c in "$R"/*-openroad-stapostpnr/*/; do n=$(basename "$c"); cp "$c/summary.rpt" "$out/sta/$n.summary.rpt" 2>/dev/null || true
   cp "$c/checks.rpt" "$out/sta/$n.checks.rpt"; cp "$c/max.rpt" "$out/sta/$n.max.rpt"; cp "$c/min.rpt" "$out/sta/$n.min.rpt"; done

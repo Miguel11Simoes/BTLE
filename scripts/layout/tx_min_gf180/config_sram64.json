@@ -37,7 +37,7 @@
   ],
   "PL_TARGET_DENSITY_PCT": 50,
   "PDN_HOFFSET": 69.92,
-  "PNR_SDC_FILE": "dir::btle_tx.sdc",
+  "PNR_SDC_FILE": "dir::btle_tx_pnr.sdc",
   "SIGNOFF_SDC_FILE": "dir::btle_tx.sdc",
   "MAX_FANOUT_CONSTRAINT": 10,
   "RSZ_CORNERS": [
