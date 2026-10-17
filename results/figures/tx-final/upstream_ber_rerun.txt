@@ -1,0 +1,12 @@
+# python/test_btle_ber.py of upstream-baseline (8540186), unmodified, run with that commit's python/btlelib.py
+# (git archive upstream-baseline python; cd python; MPLBACKEND=Agg python3 test_btle_ber.py 50, then -30), 2026-10-16, WSL,
+# ~/venvs/btle (NumPy 2.4.6). The script does not seed its noise: each run is one realization (the published figures
+# open_btle_baseband_chip_21_1.png and _23_1.png are another).
+ppm  50.0  freq offset  122500.0 Hz snr  22.0 dB ber  0.022692307692307692  num_bit_total  31200  num_bit_err  708
+ppm  50.0  freq offset  122500.0 Hz snr  23.5 dB ber  0.011201923076923076  num_bit_total  62400  num_bit_err  699
+ppm  50.0  freq offset  122500.0 Hz snr  25.0 dB ber  0.00037393162393162396  num_bit_total  93600  num_bit_err  35
+ppm  50.0  freq offset  122500.0 Hz snr  26.0 dB ber  7.478632478632479e-05  num_bit_total  93600  num_bit_err  7
+ppm  -30.0  freq offset  -73500.0 Hz snr  11.0 dB ber  0.01891025641025641  num_bit_total  31200  num_bit_err  590
+ppm  -30.0  freq offset  -73500.0 Hz snr  12.5 dB ber  0.0027884615384615383  num_bit_total  62400  num_bit_err  174
+ppm  -30.0  freq offset  -73500.0 Hz snr  14.0 dB ber  0.0009081196581196581  num_bit_total  93600  num_bit_err  85
+ppm  -30.0  freq offset  -73500.0 Hz snr  15.0 dB ber  0.00021367521367521368  num_bit_total  93600  num_bit_err  20
