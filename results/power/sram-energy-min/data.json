@@ -1,0 +1,400 @@
+{
+ "window_cycles": 100000,
+ "seconds": 0.00625,
+ "char": "/tmp/sram-char-combined/char.json",
+ "configurations": {
+  "master": {
+   "rx": [
+    {
+     "memory": "packet buffer",
+     "path": "btle_phy_i.btle_tx_i.btle_tx_sdpram_two_clk_i",
+     "macro": "sram_1rw1r_8x512",
+     "writes": 100000,
+     "reads": 100000,
+     "deselected": null,
+     "clocks": 100000,
+     "energy_nJ": null,
+     "clock_uW": null,
+     "access_uW": null,
+     "dynamic_uW": null,
+     "leakage_uW": null
+    },
+    {
+     "memory": "VCO cos table",
+     "path": "btle_phy_i.btle_tx_i.gfsk_modulation_i.vco_i.cos_table_sdpram_one_clk_i",
+     "macro": "sram_1rw1r_8x2048",
+     "writes": 100000,
+     "reads": 100000,
+     "deselected": null,
+     "clocks": 100000,
+     "energy_nJ": null,
+     "clock_uW": null,
+     "access_uW": null,
+     "dynamic_uW": null,
+     "leakage_uW": null
+    },
+    {
+     "memory": "VCO sin table",
+     "path": "btle_phy_i.btle_tx_i.gfsk_modulation_i.vco_i.sin_table_sdpram_one_clk_i",
+     "macro": "sram_1rw1r_8x2048",
+     "writes": 100000,
+     "reads": 100000,
+     "deselected": null,
+     "clocks": 100000,
+     "energy_nJ": null,
+     "clock_uW": null,
+     "access_uW": null,
+     "dynamic_uW": null,
+     "leakage_uW": null
+    }
+   ],
+   "tx": [
+    {
+     "memory": "packet buffer",
+     "path": "btle_phy_i.btle_tx_i.btle_tx_sdpram_two_clk_i",
+     "macro": "sram_1rw1r_8x512",
+     "writes": 100000,
+     "reads": 100000,
+     "deselected": null,
+     "clocks": 100000,
+     "energy_nJ": null,
+     "clock_uW": null,
+     "access_uW": null,
+     "dynamic_uW": null,
+     "leakage_uW": null
+    },
+    {
+     "memory": "VCO cos table",
+     "path": "btle_phy_i.btle_tx_i.gfsk_modulation_i.vco_i.cos_table_sdpram_one_clk_i",
+     "macro": "sram_1rw1r_8x2048",
+     "writes": 100000,
+     "reads": 100000,
+     "deselected": null,
+     "clocks": 100000,
+     "energy_nJ": null,
+     "clock_uW": null,
+     "access_uW": null,
+     "dynamic_uW": null,
+     "leakage_uW": null
+    },
+    {
+     "memory": "VCO sin table",
+     "path": "btle_phy_i.btle_tx_i.gfsk_modulation_i.vco_i.sin_table_sdpram_one_clk_i",
+     "macro": "sram_1rw1r_8x2048",
+     "writes": 100000,
+     "reads": 100000,
+     "deselected": null,
+     "clocks": 100000,
+     "energy_nJ": null,
+     "clock_uW": null,
+     "access_uW": null,
+     "dynamic_uW": null,
+     "leakage_uW": null
+    }
+   ],
+   "mixed": [
+    {
+     "memory": "packet buffer",
+     "path": "btle_phy_i.btle_tx_i.btle_tx_sdpram_two_clk_i",
+     "macro": "sram_1rw1r_8x512",
+     "writes": 100000,
+     "reads": 100000,
+     "deselected": null,
+     "clocks": 100000,
+     "energy_nJ": null,
+     "clock_uW": null,
+     "access_uW": null,
+     "dynamic_uW": null,
+     "leakage_uW": null
+    },
+    {
+     "memory": "VCO cos table",
+     "path": "btle_phy_i.btle_tx_i.gfsk_modulation_i.vco_i.cos_table_sdpram_one_clk_i",
+     "macro": "sram_1rw1r_8x2048",
+     "writes": 100000,
+     "reads": 100000,
+     "deselected": null,
+     "clocks": 100000,
+     "energy_nJ": null,
+     "clock_uW": null,
+     "access_uW": null,
+     "dynamic_uW": null,
+     "leakage_uW": null
+    },
+    {
+     "memory": "VCO sin table",
+     "path": "btle_phy_i.btle_tx_i.gfsk_modulation_i.vco_i.sin_table_sdpram_one_clk_i",
+     "macro": "sram_1rw1r_8x2048",
+     "writes": 100000,
+     "reads": 100000,
+     "deselected": null,
+     "clocks": 100000,
+     "energy_nJ": null,
+     "clock_uW": null,
+     "access_uW": null,
+     "dynamic_uW": null,
+     "leakage_uW": null
+    }
+   ],
+   "idle": [
+    {
+     "memory": "packet buffer",
+     "path": "btle_phy_i.btle_tx_i.btle_tx_sdpram_two_clk_i",
+     "macro": "sram_1rw1r_8x512",
+     "writes": 100000,
+     "reads": 100000,
+     "deselected": null,
+     "clocks": 100000,
+     "energy_nJ": null,
+     "clock_uW": null,
+     "access_uW": null,
+     "dynamic_uW": null,
+     "leakage_uW": null
+    },
+    {
+     "memory": "VCO cos table",
+     "path": "btle_phy_i.btle_tx_i.gfsk_modulation_i.vco_i.cos_table_sdpram_one_clk_i",
+     "macro": "sram_1rw1r_8x2048",
+     "writes": 100000,
+     "reads": 100000,
+     "deselected": null,
+     "clocks": 100000,
+     "energy_nJ": null,
+     "clock_uW": null,
+     "access_uW": null,
+     "dynamic_uW": null,
+     "leakage_uW": null
+    },
+    {
+     "memory": "VCO sin table",
+     "path": "btle_phy_i.btle_tx_i.gfsk_modulation_i.vco_i.sin_table_sdpram_one_clk_i",
+     "macro": "sram_1rw1r_8x2048",
+     "writes": 100000,
+     "reads": 100000,
+     "deselected": null,
+     "clocks": 100000,
+     "energy_nJ": null,
+     "clock_uW": null,
+     "access_uW": null,
+     "dynamic_uW": null,
+     "leakage_uW": null
+    }
+   ],
+   "idle0": [
+    {
+     "memory": "packet buffer",
+     "path": "btle_phy_i.btle_tx_i.btle_tx_sdpram_two_clk_i",
+     "macro": "sram_1rw1r_8x512",
+     "writes": 100000,
+     "reads": 100000,
+     "deselected": null,
+     "clocks": 100000,
+     "energy_nJ": null,
+     "clock_uW": null,
+     "access_uW": null,
+     "dynamic_uW": null,
+     "leakage_uW": null
+    },
+    {
+     "memory": "VCO cos table",
+     "path": "btle_phy_i.btle_tx_i.gfsk_modulation_i.vco_i.cos_table_sdpram_one_clk_i",
+     "macro": "sram_1rw1r_8x2048",
+     "writes": 100000,
+     "reads": 100000,
+     "deselected": null,
+     "clocks": 100000,
+     "energy_nJ": null,
+     "clock_uW": null,
+     "access_uW": null,
+     "dynamic_uW": null,
+     "leakage_uW": null
+    },
+    {
+     "memory": "VCO sin table",
+     "path": "btle_phy_i.btle_tx_i.gfsk_modulation_i.vco_i.sin_table_sdpram_one_clk_i",
+     "macro": "sram_1rw1r_8x2048",
+     "writes": 100000,
+     "reads": 100000,
+     "deselected": null,
+     "clocks": 100000,
+     "energy_nJ": null,
+     "clock_uW": null,
+     "access_uW": null,
+     "dynamic_uW": null,
+     "leakage_uW": null
+    }
+   ]
+  },
+  "ble-tx-rom": {
+   "rx": [
+    {
+     "memory": "packet buffer",
+     "path": "btle_phy_i.btle_tx_i.btle_tx_pdu_buffer_i.pdu_buffer_ram_i",
+     "macro": "sram_1rw_8x256",
+     "writes": 100000,
+     "reads": 0,
+     "deselected": 0,
+     "clocks": 100000,
+     "energy_nJ": 121.23639999999999,
+     "clock_uW": 5.173903999999999,
+     "access_uW": 14.22392,
+     "dynamic_uW": 19.397824,
+     "leakage_uW": 15.024040000000001
+    }
+   ],
+   "tx": [
+    {
+     "memory": "packet buffer",
+     "path": "btle_phy_i.btle_tx_i.btle_tx_pdu_buffer_i.pdu_buffer_ram_i",
+     "macro": "sram_1rw_8x256",
+     "writes": 99405,
+     "reads": 595,
+     "deselected": 0,
+     "clocks": 100000,
+     "energy_nJ": 121.19590310999999,
+     "clock_uW": 5.173903999999999,
+     "access_uW": 14.217440497599998,
+     "dynamic_uW": 19.3913444976,
+     "leakage_uW": 15.024040000000001
+    }
+   ],
+   "mixed": [
+    {
+     "memory": "packet buffer",
+     "path": "btle_phy_i.btle_tx_i.btle_tx_pdu_buffer_i.pdu_buffer_ram_i",
+     "macro": "sram_1rw_8x256",
+     "writes": 99712,
+     "reads": 288,
+     "deselected": 0,
+     "clocks": 100000,
+     "energy_nJ": 121.216798144,
+     "clock_uW": 5.173903999999999,
+     "access_uW": 14.22078370304,
+     "dynamic_uW": 19.39468770304,
+     "leakage_uW": 15.024040000000001
+    }
+   ],
+   "idle": [
+    {
+     "memory": "packet buffer",
+     "path": "btle_phy_i.btle_tx_i.btle_tx_pdu_buffer_i.pdu_buffer_ram_i",
+     "macro": "sram_1rw_8x256",
+     "writes": 100000,
+     "reads": 0,
+     "deselected": 0,
+     "clocks": 100000,
+     "energy_nJ": 121.23639999999999,
+     "clock_uW": 5.173903999999999,
+     "access_uW": 14.22392,
+     "dynamic_uW": 19.397824,
+     "leakage_uW": 15.024040000000001
+    }
+   ],
+   "idle0": [
+    {
+     "memory": "packet buffer",
+     "path": "btle_phy_i.btle_tx_i.btle_tx_pdu_buffer_i.pdu_buffer_ram_i",
+     "macro": "sram_1rw_8x256",
+     "writes": 100000,
+     "reads": 0,
+     "deselected": 0,
+     "clocks": 100000,
+     "energy_nJ": 121.23639999999999,
+     "clock_uW": 5.173903999999999,
+     "access_uW": 14.22392,
+     "dynamic_uW": 19.397824,
+     "leakage_uW": 15.024040000000001
+    }
+   ]
+  },
+  "ble-tx-min": {
+   "rx": [
+    {
+     "memory": "packet buffer",
+     "path": "btle_phy_i.btle_tx_i.btle_tx_pdu_buffer_i.gen_adv_data_ram.pdu_buffer_ram_i",
+     "macro": "sram_1rw_8x32",
+     "writes": 0,
+     "reads": 0,
+     "deselected": 100000,
+     "clocks": 100000,
+     "energy_nJ": 18.2445,
+     "clock_uW": 2.9191199999999995,
+     "access_uW": 0.0,
+     "dynamic_uW": 2.9191199999999995,
+     "leakage_uW": 16.40538
+    }
+   ],
+   "tx": [
+    {
+     "memory": "packet buffer",
+     "path": "btle_phy_i.btle_tx_i.btle_tx_pdu_buffer_i.gen_adv_data_ram.pdu_buffer_ram_i",
+     "macro": "sram_1rw_8x32",
+     "writes": 98668,
+     "reads": 451,
+     "deselected": 881,
+     "clocks": 100000,
+     "energy_nJ": 65.68434975299999,
+     "clock_uW": 2.9191199999999995,
+     "access_uW": 7.590375960479999,
+     "dynamic_uW": 10.509495960479999,
+     "leakage_uW": 16.40538
+    }
+   ],
+   "mixed": [
+    {
+     "memory": "packet buffer",
+     "path": "btle_phy_i.btle_tx_i.btle_tx_pdu_buffer_i.gen_adv_data_ram.pdu_buffer_ram_i",
+     "macro": "sram_1rw_8x32",
+     "writes": 93520,
+     "reads": 216,
+     "deselected": 6264,
+     "clocks": 100000,
+     "energy_nJ": 63.134978616,
+     "clock_uW": 2.9191199999999995,
+     "access_uW": 7.182476578559999,
+     "dynamic_uW": 10.101596578559999,
+     "leakage_uW": 16.40538
+    }
+   ],
+   "idle": [
+    {
+     "memory": "packet buffer",
+     "path": "btle_phy_i.btle_tx_i.btle_tx_pdu_buffer_i.gen_adv_data_ram.pdu_buffer_ram_i",
+     "macro": "sram_1rw_8x32",
+     "writes": 0,
+     "reads": 0,
+     "deselected": 100000,
+     "clocks": 100000,
+     "energy_nJ": 18.2445,
+     "clock_uW": 2.9191199999999995,
+     "access_uW": 0.0,
+     "dynamic_uW": 2.9191199999999995,
+     "leakage_uW": 16.40538
+    }
+   ],
+   "idle0": [
+    {
+     "memory": "packet buffer",
+     "path": "btle_phy_i.btle_tx_i.btle_tx_pdu_buffer_i.gen_adv_data_ram.pdu_buffer_ram_i",
+     "macro": "sram_1rw_8x32",
+     "writes": 0,
+     "reads": 0,
+     "deselected": 100000,
+     "clocks": 100000,
+     "energy_nJ": 18.2445,
+     "clock_uW": 2.9191199999999995,
+     "access_uW": 0.0,
+     "dynamic_uW": 2.9191199999999995,
+     "leakage_uW": 16.40538
+    }
+   ]
+  }
+ },
+ "not_characterized": [
+  "sram_1rw1r_8x2048",
+  "sram_1rw1r_8x512"
+ ],
+ "problems": [
+  "incomplete energy characterization: sram_1rw1r_8x2048, sram_1rw1r_8x512"
+ ]
+}

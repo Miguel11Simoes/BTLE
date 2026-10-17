@@ -94,12 +94,14 @@ sed -E "s/^module ($COUNTED)\\b/module \\1_ref/" "$here/sram_count_models.v" > "
 cp "$here/sram_count_models.v" "$work/count_dut.v"
 
 declare -A rev params
+no_vco=""  # configurations whose vco.v instantiates no memory (fixed tables): their dut counts no VCO memory
 for n in "${names[@]}"; do
   rev[$n]=$(rev_of "$n")
   d=$work/dut_$n
   mkdir -p "$d"
   git -C "$repo" archive "${rev[$n]}" verilog | tar -x -C "$d" --strip-components=1
   params[$n]=$(bash "$repo/scripts/branch_config.sh" "$d")
+  grep -qE "^[[:space:]]*($COUNTED)[[:space:]]*(#|\()" "$d/vco.v" || no_vco="$no_vco $n"
   # the counting models replace the repository's definitions
   for f in "$d"/*.v; do sed -E -i "s/^module ($COUNTED)\\b/module \\1_unused/" "$f"; done
   # the testbench: no SAIF, the dut in its configuration, the window ends 1 ns after its last edge
@@ -136,6 +138,7 @@ done
   echo "window_cycles=$window (bb_clk = s00_axi_aclk = 16 MHz, rf_clk 8 MHz) seed=$seed scenarios=${scenarios[*]}"
   echo "vectors=${VEC_DIR:+VEC_DIR }$(sha256sum "$out/vectors.sha256" | cut -c1-16) (sha256 of vectors.sha256)"
   echo "iverilog=$(iverilog -V 2>&1 | head -1)"
+  echo "configurations whose vco.v instantiates no memory:${no_vco:- none}"
   echo "sram characterization=$char ($(sha256sum "$char/char.json" | cut -c1-16) sha256 of char.json)"
 } > "$out/provenance.txt"
 cat "$out/provenance.txt"
@@ -165,7 +168,7 @@ for n in "${names[@]}"; do
   done
 done
 
-"$PY" "$here/summarize_sram_energy.py" "$out" "$char/char.json" "$window" "${names[@]}" > "$out/summary.md" || status=1
+NO_VCO_MEMORY="$no_vco" "$PY" "$here/summarize_sram_energy.py" "$out" "$char/char.json" "$window" "${names[@]}" > "$out/summary.md" || status=1
 gzip -9 "$out"/*.log "$out"/*/*.log
 rm -rf "$work"
 echo "RESULT: $([ $status -eq 0 ] && echo PASS || echo FAIL)" | tee -a "$out/summary.md"

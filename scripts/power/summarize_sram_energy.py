@@ -34,9 +34,13 @@ exit status 1 when they fail: upstream's counts are the same in every
 configuration's runs; the memories outside the transmitter count the same in
 u_ref and u_dut (the same RTL and stimulus); the "master" configuration counts
 the same as upstream everywhere; every TX memory clock counts the window.
+Every simulation must count a VCO memory and a packet buffer on each side, except the
+configurations named in NO_VCO_MEMORY (run_sram_energy.sh: a vco.v that instantiates no
+memory, the fixed tables of ble-tx-rom, ble-tx-cordic and ble-tx-min), whose dut must count none.
 """
 import json
 import math
+import os
 import re
 import sys
 from pathlib import Path
@@ -47,7 +51,9 @@ LINE = re.compile(r"^SRAMCOUNT (\S+) (\w+) (\d+)x(\d+) clocks (\d+) writes (\d+)
 ONE_PORT = {"pdu_buffer_ram", "sin_table_ram"}
 
 
-def read_counts(path):
+def read_counts(path, dut_vco=True):
+    """dut_vco=False: the configuration's vco.v instantiates no memory (ble-tx-rom, ble-tx-cordic, ble-tx-min:
+    the tables are fixed); its dut must then count no VCO memory at all."""
     counts = {}
     for line in Path(path).read_text().splitlines():
         m = LINE.match(line)
@@ -67,7 +73,11 @@ def read_counts(path):
         raise SystemExit(f"{path}: empty SRAM counts")
     for which in ("ref", "dut"):
         paths=[side(i)[1] for i in counts if side(i)[0] == which]
-        if not any(".vco_i." in "."+i for i in paths):
+        has_vco = any(".vco_i." in "."+i for i in paths)
+        if which == "dut" and not dut_vco:
+            if has_vco:
+                raise SystemExit(f"{path}: dut VCO memory counted, but the configuration's vco.v instantiates none")
+        elif not has_vco:
             raise SystemExit(f"{path}: missing {which} VCO memory counts")
         if not any("btle_tx_sdpram_two_clk_i" in i or "btle_tx_pdu_buffer_i" in i for i in paths):
             raise SystemExit(f"{path}: missing {which} packet buffer counts")
@@ -145,9 +155,12 @@ def main():
     seconds = window / (BB_CLK_MHZ * 1e6)
     problems = []
     runs = {}  # name -> scenario -> window counts
+    no_vco = set(os.environ.get("NO_VCO_MEMORY", "").split())  # set by run_sram_energy.sh from each dut's vco.v
+    if "master" in no_vco:
+        raise SystemExit("master (upstream) has VCO memories")
     for n in names:
-        setup = read_counts(out / n / "counts_setup.txt")
-        runs[n] = {s: window_counts(read_counts(out / n / f"counts_{s}.txt"), setup) for s in SCENARIOS}
+        setup = read_counts(out / n / "counts_setup.txt", n not in no_vco)
+        runs[n] = {s: window_counts(read_counts(out / n / f"counts_{s}.txt", n not in no_vco), setup) for s in SCENARIOS}
 
     # checks
     first = names[0]

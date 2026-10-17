@@ -1,0 +1,17 @@
+label=xc7z020 (TX_FINAL_DECISIONS.md)
+date=2026-10-17
+tool=Vivado v2026.1 (64-bit), Windows; part xc7z020clg484-1 (the part of upstream's verilog/btle_controller.tcl)
+flow=scripts/fpga/xc7z020/impl.tcl (non-project: synth_design, opt_design, place_design, route_design, default strategies),
+     scripts/fpga/xc7z020/post.tcl (power by hierarchy, worst paths) on the routed checkpoints (not kept: about 10 MB each)
+configurations (name, git revision, commit, verilog/ tree, how):
+  up2024    fc5bc421 (upstream, 2024-05-13, the commit of open_btle_baseband_chip.md)  verilog tree cccb25e4  upstream's 2024 project: top btle_controller_wrapper, its btle_controller_wrapper.xdc (clk 62.5 ns), with IOs
+  upstream  upstream-baseline 85401861                                     verilog tree 4bacca32  top btle_controller, out of context, scripts/fpga/xc7z020/clocks.xdc, defaults
+  master    fca6ac64 (corrected master after the lint closure)            verilog tree 6e670a62  the same, defaults
+  rom       ble-tx-rom 66a77511                                            verilog tree 5c6bc01c  the same, GAUSS_TABLE=1 (default of btle_controller.v set to 1 in the copy)
+  min       ble-tx-min a6132269                                            verilog tree 5e2c93d5  the same, GAUSS_TABLE=1, ADV_DATA_FLOPS=0 (AdvData memory), ADV_ADDRESS_OTP=0 (ROM)
+  minflops  ble-tx-min a6132269                                            verilog tree 5e2c93d5  the same, GAUSS_TABLE=1, ADV_DATA_FLOPS=1
+clocks (out of context): bb_clk 62.5 ns and rf_clk 125 ns in one group (the documented 2:1 interface), s00_axi_aclk and bram_clk_a
+  10 ns (a Zynq FCLK of 100 MHz), each asynchronous; no IO constraints (no pins: out of context)
+power: report_power, vectorless (Vivado's default activity), 25 C ambient: an estimate, not a measurement
+note: upstream's btle_controller_wrapper.v no longer matches btle_controller after 2025 (ports clk, rst, clkb): every current
+      configuration runs out of context with btle_controller as top, as upstream-baseline's btle_controller.tcl names it

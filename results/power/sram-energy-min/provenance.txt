@@ -1,0 +1,13 @@
+label=sram-energy-min
+date_utc=2026-10-17T16:41:41Z
+harness=a613226912fdfc68ce8a532645e0ae066db4909a (branch ble-tx-min), dirty files under scripts/: 2
+ref=fca6ac64fb28cd57a496cb45af62cf9e0f9209d5 (fca6ac64fb28cd57a496cb45af62cf9e0f9209d5), default parameters, in every simulation
+configurations (name, measured revision, commit, verilog/ tree, parameters):
+  master	fca6ac64fb28cd57a496cb45af62cf9e0f9209d5	fca6ac64fb28cd57a496cb45af62cf9e0f9209d5	6e670a62d71aec276eb10e6012030875a05d1095	<none: defaults>
+  ble-tx-rom	ble-tx-rom	66a775118b493f28c1ce399bb85d528fb5520b0f	5c6bc01c224c10e943a8ededcf30c69bc65fb4da	GAUSS_TABLE=1
+  ble-tx-min	ble-tx-min	a613226912fdfc68ce8a532645e0ae066db4909a	5e2c93d5125d54ddf25e778a31fe1e660aed11b2	GAUSS_TABLE=1
+window_cycles=100000 (bb_clk = s00_axi_aclk = 16 MHz, rf_clk 8 MHz) seed=1 scenarios=rx tx mixed idle idle0
+vectors=VEC_DIR d53f2d49ed8db456 (sha256 of vectors.sha256)
+iverilog=Icarus Verilog version 14.0 (devel) (s20260301-411-gca6b8d376-dirty)
+configurations whose vco.v instantiates no memory: ble-tx-rom ble-tx-min
+sram characterization=/tmp/sram-char-combined (7520cb9f9601e6ec sha256 of char.json)

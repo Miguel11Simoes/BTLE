@@ -1,0 +1,75 @@
+Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2026 Advanced Micro Devices, Inc. All Rights Reserved.
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+| Tool Version : Vivado v.2026.1 (win64) Build 6511674 Tue Jun 16 11:02:23 MDT 2026
+| Date         : Sat Oct 17 17:37:25 2026
+| Host         : Simon running 64-bit major release  (build 9200)
+| Command      : report_timing -max_paths 1 -nworst 1 -group [get_clocks axi_clk] -file C:/Users/msmig/AppData/Local/Temp/claude/c--Users-msmig-Desktop-Tese-btle/175f8223-5eff-4b3a-a44c-a3fc6c7e1e7c/scratchpad/viv/minflops/worst_axi.rpt
+| Design       : btle_controller
+| Device       : 7z020-clg484
+| Speed File   : -1  PRODUCTION 1.12 2019-11-22
+| Design State : Routed
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Timing Report
+
+Slack (MET) :             2.920ns  (required time - arrival time)
+  Source:                 btle_phy_i/btle_rx_i/genblk1[3].serial_in_ram_out_i/serial_in_ram_out_sdpram_two_clk_i/memory_reg/CLKBWRCLK
+                            (rising edge-triggered cell RAMB18E1 clocked by axi_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            btle_ll_i/ll_s_axi_i/axi_rdata_reg[4]/D
+                            (rising edge-triggered cell FDRE clocked by axi_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             axi_clk
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            10.000ns  (axi_clk rise@10.000ns - axi_clk rise@0.000ns)
+  Data Path Delay:        7.109ns  (logic 3.847ns (54.115%)  route 3.262ns (45.885%))
+  Logic Levels:           6  (LUT5=1 LUT6=2 MUXF7=3)
+  Clock Path Skew:        -0.049ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    0.924ns = ( 10.924 - 10.000 ) 
+    Source Clock Delay      (SCD):    0.973ns
+    Clock Pessimism Removal (CPR):    0.000ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock axi_clk rise edge)    0.000     0.000 r  <hidden>
+                                                      0.000     0.000 r  s00_axi_aclk
+                         net (fo=2251, unset)         0.973     0.973    btle_phy_i/btle_rx_i/genblk1[3].serial_in_ram_out_i/serial_in_ram_out_sdpram_two_clk_i/clkb
+    RAMB18_X3Y6          RAMB18E1                                     r  btle_phy_i/btle_rx_i/genblk1[3].serial_in_ram_out_i/serial_in_ram_out_sdpram_two_clk_i/memory_reg/CLKBWRCLK
+  -------------------------------------------------------------------    -------------------
+    RAMB18_X3Y6          RAMB18E1 (Prop_ramb18e1_CLKBWRCLK_DOBDO[4])
+                                                      2.454     3.427 r  btle_phy_i/btle_rx_i/genblk1[3].serial_in_ram_out_i/serial_in_ram_out_sdpram_two_clk_i/memory_reg/DOBDO[4]
+                         net (fo=1, routed)           1.362     4.789    btle_phy_i/btle_rx_i/data_internal[3][4]
+    SLICE_X55Y26         LUT6 (Prop_lut6_I0_O)        0.124     4.913 r  btle_phy_i/btle_rx_i/pdu_octet_mem_data[4]_INST_0_i_1/O
+                         net (fo=1, routed)           0.000     4.913    btle_phy_i/btle_rx_i/pdu_octet_mem_data[4]_INST_0_i_1_n_0
+    SLICE_X55Y26         MUXF7 (Prop_muxf7_I0_O)      0.212     5.125 r  btle_phy_i/btle_rx_i/pdu_octet_mem_data[4]_INST_0/O
+                         net (fo=2, routed)           0.894     6.018    btle_ll_i/ll_s_axi_i/SLV_REG49[4]
+    SLICE_X52Y36         LUT5 (Prop_lut5_I4_O)        0.299     6.317 r  btle_ll_i/ll_s_axi_i/axi_rdata[4]_i_22/O
+                         net (fo=1, routed)           0.000     6.317    btle_ll_i/ll_s_axi_i/axi_rdata[4]_i_22_n_0
+    SLICE_X52Y36         MUXF7 (Prop_muxf7_I0_O)      0.212     6.529 r  btle_ll_i/ll_s_axi_i/axi_rdata_reg[4]_i_9/O
+                         net (fo=1, routed)           1.007     7.536    btle_ll_i/ll_s_axi_i/axi_rdata_reg[4]_i_9_n_0
+    SLICE_X58Y34         LUT6 (Prop_lut6_I1_O)        0.299     7.835 r  btle_ll_i/ll_s_axi_i/axi_rdata[4]_i_3/O
+                         net (fo=1, routed)           0.000     7.835    btle_ll_i/ll_s_axi_i/axi_rdata[4]_i_3_n_0
+    SLICE_X58Y34         MUXF7 (Prop_muxf7_I1_O)      0.247     8.082 r  btle_ll_i/ll_s_axi_i/axi_rdata_reg[4]_i_1/O
+                         net (fo=1, routed)           0.000     8.082    btle_ll_i/ll_s_axi_i/reg_data_out[4]
+    SLICE_X58Y34         FDRE                                         r  btle_ll_i/ll_s_axi_i/axi_rdata_reg[4]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock axi_clk rise edge)   10.000    10.000 r  <hidden>
+                                                      0.000    10.000 r  s00_axi_aclk
+                         net (fo=2251, unset)         0.924    10.924    btle_ll_i/ll_s_axi_i/S_AXI_ACLK
+    SLICE_X58Y34         FDRE                                         r  btle_ll_i/ll_s_axi_i/axi_rdata_reg[4]/C
+                         clock pessimism              0.000    10.924    <hidden>
+                         clock uncertainty           -0.035    10.889    <hidden>
+    SLICE_X58Y34         FDRE (Setup_fdre_C_D)        0.113    11.002    btle_ll_i/ll_s_axi_i/axi_rdata_reg[4]
+  -------------------------------------------------------------------
+                         required time                         11.002    <hidden>
+                         arrival time                          -8.082    <hidden>
+  -------------------------------------------------------------------
+                         slack                                  2.920    <hidden>
+
+
+
+

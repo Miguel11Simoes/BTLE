@@ -1,0 +1,36 @@
+Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2026 Advanced Micro Devices, Inc. All Rights Reserved.
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+| Tool Version : Vivado v.2026.1 (win64) Build 6511674 Tue Jun 16 11:02:23 MDT 2026
+| Date         : Sat Oct 17 17:33:45 2026
+| Host         : Simon running 64-bit major release  (build 9200)
+| Command      : report_utilization -hierarchical -hierarchical_depth 3 -file C:/Users/msmig/AppData/Local/Temp/claude/c--Users-msmig-Desktop-Tese-btle/175f8223-5eff-4b3a-a44c-a3fc6c7e1e7c/scratchpad/viv/up2024/impl_util_hier.rpt
+| Design       : btle_controller_wrapper
+| Device       : xc7z020clg484-1
+| Speed File   : -1
+| Design State : Routed
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Utilization Design Information
+
+Table of Contents
+-----------------
+1. Utilization by Hierarchy
+
+1. Utilization by Hierarchy
+---------------------------
+
++-----------------------------+-----------------+------------+------------+---------+------+------+--------+--------+------------+
+|           Instance          |      Module     | Total LUTs | Logic LUTs | LUTRAMs | SRLs |  FFs | RAMB36 | RAMB18 | DSP Blocks |
++-----------------------------+-----------------+------------+------------+---------+------+------+--------+--------+------------+
+| btle_controller_wrapper     |           (top) |       3568 |       2692 |     876 |    0 | 2307 |      0 |      0 |         48 |
+|   (btle_controller_wrapper) |           (top) |        137 |        137 |       0 |    0 |  213 |      0 |      0 |          0 |
+|   btle_controller_i         | btle_controller |       3432 |       2556 |     876 |    0 | 2094 |      0 |      0 |         48 |
+|     (btle_ll_i)             |         btle_ll |        223 |        223 |       0 |    0 |  124 |      0 |      0 |          0 |
+|     btle_phy_i              |        btle_phy |       3142 |       2266 |     876 |    0 | 1905 |      0 |      0 |         48 |
+|       (btle_phy_i)          |        btle_phy |         79 |         79 |       0 |    0 |    0 |      0 |      0 |          0 |
+|       btle_rx_i             |         btle_rx |       1544 |       1448 |      96 |    0 | 1494 |      0 |      0 |         48 |
+|       btle_tx_i             |         btle_tx |       1519 |        739 |     780 |    0 |  411 |      0 |      0 |          0 |
++-----------------------------+-----------------+------------+------------+---------+------+------+--------+--------+------------+
+* Note: The sum of lower-level cells may be larger than their parent cells total, due to cross-hierarchy LUT combining
+
+

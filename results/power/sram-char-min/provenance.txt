@@ -1,0 +1,9 @@
+label=sram-char-min
+date_utc=2026-10-17T16:35:06Z
+git_commit=a613226912fdfc68ce8a532645e0ae066db4909a
+openram=1.2.48 (/home/msmiguel/venvs/openram/lib/python3.11/site-packages/openram)
+simulator=ngspice (num_sim_threads=2); OpenRAM's conda has: ngspice compiled from ngspice revision 26; Xyce DEVELOPMENT-202312200606-(Public_Release-7.4.0-36-gb7bb12d8)-opensource
+tech=freepdk45, nominal corner only (TT, 1.0 V, 25 C), check_lvsdrc=False, netlist_only=True,
+     analytical_delay=False (SPICE), trim_netlist=False, load_scales=[1] slew_scales=[1],
+     period: the feasible one
+macros=sram_1rw_8x32

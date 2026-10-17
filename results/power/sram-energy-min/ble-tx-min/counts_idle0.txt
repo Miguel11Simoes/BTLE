@@ -1,0 +1,28 @@
+SRAMCOUNT tb_activity.u_ref.auxiliary_daemon_i.sdpram_two_clk_auxiliary_daemon_i sdpram_two_clk 32768x32 clocks 120571 writes 120571 reads 120571 both 0 read_clocks 120571
+SRAMCOUNT tb_activity.u_ref.btle_ll_i.rx_ram_i.sdpram_one_clk_for_rx_ram_i sdpram_one_clk 512x32 clocks 120571 writes 0 reads 120571 both 0
+SRAMCOUNT tb_activity.u_ref.btle_ll_i.clk_cross_bus_s_axi_to_bb_i.sdpram_two_clk_for_clk_cross_bus_i sdpram_two_clk 2x246 clocks 120571 writes 120571 reads 120571 both 0 read_clocks 120571
+SRAMCOUNT tb_activity.u_ref.btle_ll_i.clk_cross_bus_bb_to_s_axi_i.sdpram_two_clk_for_clk_cross_bus_i sdpram_two_clk 2x493 clocks 120571 writes 120571 reads 120571 both 0 read_clocks 120571
+SRAMCOUNT tb_activity.u_ref.btle_phy_i.btle_tx_i.btle_tx_sdpram_two_clk_i sdpram_two_clk 512x8 clocks 120571 writes 120571 reads 120571 both 0 read_clocks 120571
+SRAMCOUNT tb_activity.u_ref.btle_phy_i.btle_tx_i.gfsk_modulation_i.vco_i.cos_table_sdpram_one_clk_i sdpram_one_clk 2048x8 clocks 120571 writes 120571 reads 120571 both 120571
+SRAMCOUNT tb_activity.u_ref.btle_phy_i.btle_tx_i.gfsk_modulation_i.vco_i.sin_table_sdpram_one_clk_i sdpram_one_clk 2048x8 clocks 120571 writes 120571 reads 120571 both 120571
+SRAMCOUNT tb_activity.u_ref.btle_phy_i.btle_rx_i.genblk1[0].serial_in_ram_out_i.serial_in_ram_out_sdpram_two_clk_i sdpram_two_clk 512x8 clocks 120571 writes 120571 reads 120571 both 0 read_clocks 120571
+SRAMCOUNT tb_activity.u_ref.btle_phy_i.btle_rx_i.genblk1[1].serial_in_ram_out_i.serial_in_ram_out_sdpram_two_clk_i sdpram_two_clk 512x8 clocks 120571 writes 120571 reads 120571 both 0 read_clocks 120571
+SRAMCOUNT tb_activity.u_ref.btle_phy_i.btle_rx_i.genblk1[2].serial_in_ram_out_i.serial_in_ram_out_sdpram_two_clk_i sdpram_two_clk 512x8 clocks 120571 writes 120571 reads 120571 both 0 read_clocks 120571
+SRAMCOUNT tb_activity.u_ref.btle_phy_i.btle_rx_i.genblk1[3].serial_in_ram_out_i.serial_in_ram_out_sdpram_two_clk_i sdpram_two_clk 512x8 clocks 120571 writes 120571 reads 120571 both 0 read_clocks 120571
+SRAMCOUNT tb_activity.u_ref.btle_phy_i.btle_rx_i.genblk1[4].serial_in_ram_out_i.serial_in_ram_out_sdpram_two_clk_i sdpram_two_clk 512x8 clocks 120571 writes 120571 reads 120571 both 0 read_clocks 120571
+SRAMCOUNT tb_activity.u_ref.btle_phy_i.btle_rx_i.genblk1[5].serial_in_ram_out_i.serial_in_ram_out_sdpram_two_clk_i sdpram_two_clk 512x8 clocks 120571 writes 120571 reads 120571 both 0 read_clocks 120571
+SRAMCOUNT tb_activity.u_ref.btle_phy_i.btle_rx_i.genblk1[6].serial_in_ram_out_i.serial_in_ram_out_sdpram_two_clk_i sdpram_two_clk 512x8 clocks 120571 writes 120571 reads 120571 both 0 read_clocks 120571
+SRAMCOUNT tb_activity.u_ref.btle_phy_i.btle_rx_i.genblk1[7].serial_in_ram_out_i.serial_in_ram_out_sdpram_two_clk_i sdpram_two_clk 512x8 clocks 120571 writes 120571 reads 120571 both 0 read_clocks 120571
+SRAMCOUNT tb_activity.u_dut.auxiliary_daemon_i.sdpram_two_clk_auxiliary_daemon_i sdpram_two_clk 32768x32 clocks 120571 writes 120571 reads 120571 both 0 read_clocks 120571
+SRAMCOUNT tb_activity.u_dut.btle_ll_i.rx_ram_i.sdpram_one_clk_for_rx_ram_i sdpram_one_clk 512x32 clocks 120571 writes 0 reads 120571 both 0
+SRAMCOUNT tb_activity.u_dut.btle_ll_i.clk_cross_bus_s_axi_to_bb_i.sdpram_two_clk_for_clk_cross_bus_i sdpram_two_clk 2x246 clocks 120571 writes 120571 reads 120571 both 0 read_clocks 120571
+SRAMCOUNT tb_activity.u_dut.btle_ll_i.clk_cross_bus_bb_to_s_axi_i.sdpram_two_clk_for_clk_cross_bus_i sdpram_two_clk 2x493 clocks 120571 writes 120571 reads 120571 both 0 read_clocks 120571
+SRAMCOUNT tb_activity.u_dut.btle_phy_i.btle_tx_i.btle_tx_pdu_buffer_i.gen_adv_data_ram.pdu_buffer_ram_i pdu_buffer_ram 32x8 clocks 120571 writes 0 reads 0 both 0
+SRAMCOUNT tb_activity.u_dut.btle_phy_i.btle_rx_i.genblk1[0].serial_in_ram_out_i.serial_in_ram_out_sdpram_two_clk_i sdpram_two_clk 512x8 clocks 120571 writes 120571 reads 120571 both 0 read_clocks 120571
+SRAMCOUNT tb_activity.u_dut.btle_phy_i.btle_rx_i.genblk1[1].serial_in_ram_out_i.serial_in_ram_out_sdpram_two_clk_i sdpram_two_clk 512x8 clocks 120571 writes 120571 reads 120571 both 0 read_clocks 120571
+SRAMCOUNT tb_activity.u_dut.btle_phy_i.btle_rx_i.genblk1[2].serial_in_ram_out_i.serial_in_ram_out_sdpram_two_clk_i sdpram_two_clk 512x8 clocks 120571 writes 120571 reads 120571 both 0 read_clocks 120571
+SRAMCOUNT tb_activity.u_dut.btle_phy_i.btle_rx_i.genblk1[3].serial_in_ram_out_i.serial_in_ram_out_sdpram_two_clk_i sdpram_two_clk 512x8 clocks 120571 writes 120571 reads 120571 both 0 read_clocks 120571
+SRAMCOUNT tb_activity.u_dut.btle_phy_i.btle_rx_i.genblk1[4].serial_in_ram_out_i.serial_in_ram_out_sdpram_two_clk_i sdpram_two_clk 512x8 clocks 120571 writes 120571 reads 120571 both 0 read_clocks 120571
+SRAMCOUNT tb_activity.u_dut.btle_phy_i.btle_rx_i.genblk1[5].serial_in_ram_out_i.serial_in_ram_out_sdpram_two_clk_i sdpram_two_clk 512x8 clocks 120571 writes 120571 reads 120571 both 0 read_clocks 120571
+SRAMCOUNT tb_activity.u_dut.btle_phy_i.btle_rx_i.genblk1[6].serial_in_ram_out_i.serial_in_ram_out_sdpram_two_clk_i sdpram_two_clk 512x8 clocks 120571 writes 120571 reads 120571 both 0 read_clocks 120571
+SRAMCOUNT tb_activity.u_dut.btle_phy_i.btle_rx_i.genblk1[7].serial_in_ram_out_i.serial_in_ram_out_sdpram_two_clk_i sdpram_two_clk 512x8 clocks 120571 writes 120571 reads 120571 both 0 read_clocks 120571

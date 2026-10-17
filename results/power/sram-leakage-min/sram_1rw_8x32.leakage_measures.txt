@@ -1,0 +1,73 @@
+Warning: vclk0: no DC value, transient time 0 value used
+leak_5_10ns         =  1.338211e-04 from=  5.000000e-09 to=  1.078864e-08
+leak_0p5_1us        =  2.836110e-05 from=  5.000000e-07 to=  1.000789e-06
+leak_1_2us          =  1.774643e-05 from=  1.000000e-06 to=  2.000789e-06
+leak_2_3us          =  1.645678e-05 from=  2.000000e-06 to=  3.000789e-06
+leak_3_4us          =  1.639256e-05 from=  3.000000e-06 to=  4.000789e-06
+leak_4_4p5us        =  1.640570e-05 from=  4.000000e-06 to=  4.500789e-06
+leak_4p5_5us        =  1.640538e-05 from=  4.500000e-06 to=  5.000000e-06
+v_bl0_10ns          =  5.742610e-01
+v_sa0_10ns          =  5.743229e-01
+v_bl0_1000ns        =  3.276915e-01
+v_sa0_1000ns        =  3.284161e-01
+v_bl0_5000ns        =  3.110956e-01
+v_sa0_5000ns        =  3.123247e-01
+v_bl1_10ns          =  5.742610e-01
+v_sa1_10ns          =  5.743229e-01
+v_bl1_1000ns        =  3.276915e-01
+v_sa1_1000ns        =  3.284161e-01
+v_bl1_5000ns        =  3.110956e-01
+v_sa1_5000ns        =  3.123247e-01
+v_bl2_10ns          =  5.742610e-01
+v_sa2_10ns          =  5.743229e-01
+v_bl2_1000ns        =  3.276915e-01
+v_sa2_1000ns        =  3.284161e-01
+v_bl2_5000ns        =  3.110956e-01
+v_sa2_5000ns        =  3.123247e-01
+v_bl3_10ns          =  5.742610e-01
+v_sa3_10ns          =  5.743229e-01
+v_bl3_1000ns        =  3.276915e-01
+v_sa3_1000ns        =  3.284161e-01
+v_bl3_5000ns        =  3.110956e-01
+v_sa3_5000ns        =  3.123247e-01
+v_bl4_10ns          =  5.742610e-01
+v_sa4_10ns          =  5.743229e-01
+v_bl4_1000ns        =  3.276915e-01
+v_sa4_1000ns        =  3.284161e-01
+v_bl4_5000ns        =  3.110956e-01
+v_sa4_5000ns        =  3.123247e-01
+v_bl5_10ns          =  5.742610e-01
+v_sa5_10ns          =  5.743229e-01
+v_bl5_1000ns        =  3.276915e-01
+v_sa5_1000ns        =  3.284161e-01
+v_bl5_5000ns        =  3.110956e-01
+v_sa5_5000ns        =  3.123247e-01
+v_bl6_10ns          =  5.742610e-01
+v_sa6_10ns          =  5.743229e-01
+v_bl6_1000ns        =  3.276915e-01
+v_sa6_1000ns        =  3.284161e-01
+v_bl6_5000ns        =  3.110956e-01
+v_sa6_5000ns        =  3.123247e-01
+v_bl7_10ns          =  5.742610e-01
+v_sa7_10ns          =  5.743229e-01
+v_bl7_1000ns        =  3.276915e-01
+v_sa7_1000ns        =  3.284161e-01
+v_bl7_5000ns        =  3.110956e-01
+v_sa7_5000ns        =  3.123247e-01
+Total elapsed time: 58.171 seconds.
+Total DRAM available = 31808.136719 MB.
+Total ngspice program size = 12.850586 MB.
+Total iterations = 10335
+Transient iterations = 10335
+Circuit Equations = 14187
+Transient timepoints = 5077
+Accepted timepoints = 5069
+Rejected timepoints = 8
+Total analysis time = 58.136
+Transient analysis time = 57.36
+Transient load time = 32.696
+Transient sync time = 0
+Transient factor time = 10.144
+Transient solve time = 5.104
+Transient trunc time = 3.574
+Transient iters per point = 0
