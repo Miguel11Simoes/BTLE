@@ -2,7 +2,13 @@ label=xc7z020 (TX_FINAL_DECISIONS.md)
 date=2026-10-17
 tool=Vivado v2026.1 (64-bit), Windows; part xc7z020clg484-1 (the part of upstream's verilog/btle_controller.tcl)
 flow=scripts/fpga/xc7z020/impl.tcl (non-project: synth_design, opt_design, place_design, route_design, default strategies),
-     scripts/fpga/xc7z020/post.tcl (power by hierarchy, worst paths) on the routed checkpoints (not kept: about 10 MB each)
+     scripts/fpga/xc7z020/post.tcl (power by hierarchy, worst paths) on the routed checkpoints (not kept: 2.9 to 4.3 MB each)
+device view=<configuration>/device.png, device.txt for up2024, upstream, min: Vivado 2026.1 GUI on the same routed checkpoints
+     (scripts/fpga/xc7z020/device_view.ps1 runs device_view.tcl: btle_tx_i's primitives highlighted orange, default layout,
+     Device panel maximized, zoom to fit; the window captured; device_crop.py cuts the device out), Windows 11, screen
+     2560 x 1600 at 150 %: 1055 x 1043 px per device. Reproducible: the committed device_view.ps1 (which also clicks
+     Zoom Fit and parks the mouse on the title bar, after a capture spoiled by input from another window) gives the
+     same three images, pixel for pixel, as the earlier captures
 configurations (name, git revision, commit, verilog/ tree, how):
   up2024    fc5bc421 (upstream, 2024-05-13, the commit of open_btle_baseband_chip.md)  verilog tree cccb25e4  upstream's 2024 project: top btle_controller_wrapper, its btle_controller_wrapper.xdc (clk 62.5 ns), with IOs
   upstream  upstream-baseline 85401861                                     verilog tree 4bacca32  top btle_controller, out of context, scripts/fpga/xc7z020/clocks.xdc, defaults

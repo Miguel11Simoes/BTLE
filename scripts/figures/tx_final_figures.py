@@ -7,7 +7,8 @@ Author: Miguel Simões
 
 Every number comes from data.json, which names the evidence file of each one (no number is computed
 here but sums and percentages). Matplotlib only; the palette is the validated default of the
-project's chart guidelines (blue, orange, aqua, yellow, violet), in that fixed order.
+project's chart guidelines (blue, orange, aqua, yellow, violet), in that fixed order. The Device views
+of tx_final_fpga_device.png are Vivado's own pictures (data.json names them), shown as they are.
 """
 
 from __future__ import annotations
@@ -18,12 +19,15 @@ from pathlib import Path
 
 import matplotlib
 matplotlib.use("Agg")
+import matplotlib.patches
 import matplotlib.pyplot as plt
 import matplotlib.ticker
 import numpy as np
 
 BLUE, ORANGE, AQUA, YELLOW, VIOLET = "#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#6250d6"
 INK, INK2, GRID, SURFACE = "#0b0b0b", "#52514e", "#e5e4e0", "#fcfcfb"
+VIVADO_ORANGE, VIVADO_CYAN = "#ffc800", "#2ca2a3"   # as Vivado 2026.1 draws them in device.png
+REPO = Path(__file__).resolve().parents[2]
 
 plt.rcParams.update({
     "font.size": 9, "axes.edgecolor": INK2, "axes.labelcolor": INK, "xtick.color": INK2, "ytick.color": INK2,
@@ -111,6 +115,30 @@ def fig_fpga(d, out):
     plt.close(fig)
 
 
+def fig_fpga_device(d, out):
+    rows = d["fpga"]["tx"]
+    n = lambda v: f"{v:,}".replace(",", " ")
+    fig, axes = plt.subplots(2, 2, figsize=(11, 12.4))
+    for ax, p in zip(axes.flat, d["fpga"]["device"]["panels"]):
+        ax.imshow(plt.imread(REPO / p["image"]))
+        if p["tx"] is None:
+            note = "no highlight: every placed cell in Vivado's cyan"
+        else:
+            r = rows[p["tx"]]
+            note = (f"btle_tx: {n(r['luts'])} LUTs, {n(r['ffs'])} flip-flops, {r['ramb18']} RAMB18 "
+                    f"({n(p['primitives'][0])} of {n(p['primitives'][1])} primitives)")
+        ax.set_title(f"{p['name']}\n{note}", fontsize=9)
+        ax.axis("off")
+    handles = [matplotlib.patches.Patch(color=VIVADO_ORANGE, label="btle_tx (highlight_objects -color orange)"),
+               matplotlib.patches.Patch(color=VIVADO_CYAN, label="the rest of the controller (Vivado's placed cells)")]
+    fig.legend(handles=handles, loc="lower center", ncol=2, fontsize=9, frameon=False)
+    fig.suptitle("The xc7z020 routed: Vivado's Device view, upstream's image and this flow's",
+                 fontsize=10, fontweight="bold")
+    fig.subplots_adjust(left=0.01, right=0.99, top=0.92, bottom=0.04, wspace=0.04, hspace=0.14)
+    fig.savefig(out / "tx_final_fpga_device.png", dpi=150)
+    plt.close(fig)
+
+
 def fig_ber(d, out):
     fig, axes = plt.subplots(1, 2, figsize=(11, 4.0))
     for ax, ppm in zip(axes, ("50", "-30")):
@@ -163,6 +191,7 @@ def main():
     fig_area_45nm(data, out)
     fig_area_gf180(data, out)
     fig_fpga(data, out)
+    fig_fpga_device(data, out)
     fig_ber(data, out)
     fig_activity(data, out)
     print("figures written to", out)

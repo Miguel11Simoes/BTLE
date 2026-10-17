@@ -26,7 +26,16 @@
    {"name": "ble-tx-rom", "luts": 366, "ffs": 243, "ramb18": 1},
    {"name": "ble-tx-min, AdvData in SRAM 32x8", "luts": 387, "ffs": 254, "ramb18": 0},
    {"name": "ble-tx-min, AdvData in flip-flops", "luts": 377, "ffs": 245, "ramb18": 0}
-  ]
+  ],
+  "device": {
+   "source": "results/fpga/xc7z020/<configuration>/device.png and device.txt (Vivado 2026.1 GUI, Device view: scripts/fpga/xc7z020/device_view.ps1, device_crop.py); 'tx' indexes fpga.tx; the published image is open_btle_baseband_chip/btle_controller_xilinx_7z020.jpg",
+   "panels": [
+    {"name": "upstream 2024, published (Vivado 2021.1)", "image": "open_btle_baseband_chip/btle_controller_xilinx_7z020.jpg", "tx": null, "primitives": null},
+    {"name": "upstream 2024, reproduced (Vivado 2026.1)", "image": "results/fpga/xc7z020/up2024/device.png", "tx": 0, "primitives": [2417, 7377]},
+    {"name": "upstream (upstream-baseline), out of context", "image": "results/fpga/xc7z020/upstream/device.png", "tx": 1, "primitives": [1316, 12283]},
+    {"name": "ble-tx-min, out of context", "image": "results/fpga/xc7z020/min/device.png", "tx": 4, "primitives": [767, 11346]}
+   ]
+  }
  },
  "ber": {
   "source": "upstream: results/figures/tx-final/upstream_ber_rerun.txt (test_btle_ber.py of upstream-baseline, unmodified); ble-tx-min: results/figures/tx-min/tx_min_figures_ber.json ('rtl')",

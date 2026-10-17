@@ -300,6 +300,27 @@ port at 100 MHz, asynchronous to them.
   0.106 W of the 0.204 W is the device's static power; the IQ-capture RAM (32 RAMB36) is upstream's.
   Vivado's power is vectorless (default toggle rates) and rounds to 1 mW: an estimate.
 
+**Upstream's picture, side by side.** `btle_controller_xilinx_7z020.jpg` is Vivado's Device view of
+upstream's routed 2024 design. Vivado's batch mode cannot export that view, so the routed checkpoints
+were opened in Vivado 2026.1's GUI, `btle_tx`'s primitives highlighted in orange (`highlight_objects`),
+the Device panel maximized and fitted to the device, and the window captured
+(`scripts/fpga/xc7z020/device_view.ps1`, `device_view.tcl`, `device_crop.py`; each image and what it
+highlights in `results/fpga/xc7z020/<configuration>/device.png`, `device.txt`):
+
+![Vivado's Device view of the xc7z020: upstream's image and this flow's](../results/figures/tx-final/tx_final_fpga_device.png)
+
+- **The reproduced 2024 design lands where upstream's did**: the logic in the two bottom clock regions
+  (X0Y0, X1Y0), a tall block rising from X1Y0 into X1Y1 on the right, the IOs along the right edge, and
+  the Zynq's processing system (the black top-left corner) unused. In the reproduction that tall block
+  is the 2024 transmitter: 2 417 of the design's 7 377 primitives (33 %), 780 of its 1 519 LUTs used as
+  LUTRAM. The placement differs in detail, as the tool version does, and Vivado 2026.1 draws the device
+  on black where 2021.1 filled the clock regions in dark blue.
+- **Out of context, where the transmitter lands means nothing; how much of the device it takes does.**
+  With no pins the placer is free, so `btle_tx` in X1Y1 (upstream) or in X1Y0 (`ble-tx-min`) is an
+  accident of the run. What the pictures show is its share: upstream's 1 316 primitives (10.7 % of the
+  controller's), 3 RAMB18 among them, against `ble-tx-min`'s 767 (6.8 %, −42 %), LUTs and flip-flops
+  only. The rest of the controller, the same in both, fills everything else.
+
 ## 7. Power
 
 Four measures, from the most relative to the most absolute; none is a silicon measurement.
@@ -503,6 +524,7 @@ BT = 0.5, modulation index 0.5); rewriting a packet byte while it is sent; an AX
 | SRAM energy | `results/power/sram-char-min/`, `sram-leakage-min/`, `sram-energy-min/` | `scripts/power/run_sram_char.sh`, `run_sram_leakage.sh`, `run_sram_energy.sh <label> master ble-tx-rom ble-tx-min` (`REF_REV=fca6ac6`) |
 | Logic leakage | `results/power/tx-min-leakage/summary.md` | `python3 scripts/power/logic_leakage.py <liberty> <name>=<stat.json> ...` |
 | FPGA | `results/fpga/xc7z020/<configuration>/`, `provenance.txt` | `vivado -mode batch -source scripts/fpga/xc7z020/impl.tcl -tclargs <dir> <ooc|wrapper2024>`, then `post.tcl` |
+| FPGA Device view | `results/fpga/xc7z020/<configuration>/device.png`, `device.txt` | Windows, Vivado GUI: `powershell -ExecutionPolicy Bypass -File scripts/fpga/xc7z020/device_view.ps1 <dir>`, then `python3 scripts/fpga/xc7z020/device_crop.py <dir>/device_full.png <results dir>/device.png` |
 | Layout and OTP | `results/layout/tx-min-gf180*/`, `results/otp/gf180-efuse/` | `scripts/layout/tx_min_gf180/run.sh <label> HEAD [sram64]` (`TX_MIN_VALIDATION.md` § 10) |
 | Validation | `results/validation/min-*` | `TX_MIN_VALIDATION.md` § 10 |
 | Figures of §§ 3–8 | `results/figures/tx-min/`, `results/figures/tx-final/` (`data.json` names the source of every number) | `python3 scripts/figures/tx_min_figures.py tx|ber <dir>`; `python3 scripts/figures/tx_final_figures.py results/figures/tx-final/data.json <dir>` |
