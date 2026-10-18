@@ -5,7 +5,7 @@
 **Base:** tag `upstream-baseline` (`8540186`); reference of the measurements: corrected `master` (`fca6ac6`)  
 **Date:** 2026-10-18 (split from `BRANCH_COMPARISON.md`, whose receiver branch was `ble-rx-dm`; `ble-rx-dmult` and run `rx-dmult`)  
 **Author:** Miguel Simões  
-**Status:** executed: run `rx-dmult`, harness `scripts/compare/` at `11a602b` (on `ble-rx-dmult`),
+**Status:** executed: run `rx-dmult`, harness at `2cf1e17` (on `ble-rx-dmult`; its activity parser as on `ble-tx-min`, `4657113`),
 `REF_REV=master`, for corrected `master`, `ble-rx-dm` and `ble-rx-dmult` at their heads, on the
 RTL after the product audit and the lint closure, with the activity vectors of run `all-branches`;
 the demodulator alone in run `rx-dmult-demod`, `btle_rx` timed alone in run `rx-dmult-full`; the
@@ -66,7 +66,8 @@ How they relate:
 master  (corrected: upstream-baseline + the product audit + the lint closure, fca6ac6)
  └─ ble-rx-dm      B1 (aa8a014 … 88f2250 on the history of ble-opt), then the audit and the
      │             lint closure as on master: master + B1, 38755a0
-     └─ ble-rx-dmult  from 38755a0: one multiplier (f00bd9e); its harness (aa83311, 11a602b)
+     └─ ble-rx-dmult  from 38755a0: one multiplier (f00bd9e); its harness (aa83311 … 15fca3b),
+                      the activity parser of ble-tx-min (2cf1e17), results and documents
 ble-opt  B1 + B2 + A1 + A2 (TX_BRANCH_COMPARISON.md)
 ```
 
@@ -90,15 +91,15 @@ against `ble-rx-dm`.
 | Min period of the controller at 16 MHz (62.5 ns) | 3.410 ns | 3.374 ns | 3.357 ns |
 | Worst path of the controller | the Gaussian tail of the transmitter | the same | the same |
 | Min period of `btle_rx` alone (§ 4) | 1.991 ns | 1.849 ns | 1.972 ns [+0.123 ns] |
-| **Data + clock switched capacitance, `mixed`** | *running* | *running* | *running* |
-| … over the 5 scenarios | — | *running* | *running* |
-| Clock pins (load × toggles) | *running* | *running* | *running* |
-| Non-clock toggles / cycle, `mixed` | *running* | *running* | *running* |
-| Nets with activity > 10 %, `mixed` | *running* | *running* | *running* |
-| RAM-port toggles, `mixed` | *running* | *running* | *running* |
+| **Data + clock switched capacitance, `mixed`** | 1.30 × 10⁹ fF | −9.2 % | −2.7 % [+7.2 %] |
+| … over the 5 scenarios | — | −5.9 to −12.7 % | −1.9 to −4.6 % [+3.8 to +11.5 %] |
+| Clock pins (load × toggles) | 9.03 × 10⁸ fF | −13.7 % | −13.6 % |
+| Non-clock toggles / cycle, `mixed` | 1 041.3 | 1 059.7 (+1.8 %) | 1 205.1 (+15.7 %) |
+| Nets with activity > 10 %, `mixed` | 879 | 4 119 (×4.7) | 3 397 (×3.9) |
+| RAM-port toggles, `mixed` | 3 165 890 | unchanged | unchanged |
 | Functions removed | — | **none** | **none**; `btle_rx` takes at most one sample every two clocks, which is what the RF interface gives (§ 7) |
-| Gate-level outputs vs corrected `master`, 5 scenarios | — | *running* | *running* |
-| Validation (§ 6) | the reference | formal ≡ upstream (B1), lockstep, 270/270 | formal ≡ `ble-rx-dm`, lockstep 60/60, *running* |
+| Gate-level outputs vs corrected `master`, 5 scenarios | — | identical, every output, 5/5 | identical, every output, 5/5 |
+| Validation (§ 6) | the reference | formal ≡ upstream (B1), lockstep, 270/270 | formal ≡ `ble-rx-dm`, lockstep 60/60, 270/270 |
 
 ## 3. Area
 
@@ -204,7 +205,52 @@ tree, no internal energy, no leakage). Results in
 [`results/power/rx-dmult/`](../../results/power/rx-dmult/) and
 [`results/compare/rx-dmult/summary.md`](../../results/compare/rx-dmult/summary.md).
 
-*Running (2026-10-18): the activity of run `rx-dmult` is being measured; this section, the activity rows of § 2 and § 6, and § 9 are completed when it ends. The run's lockstep has already passed on `master` and `ble-rx-dm`, every output identical in the 5 scenarios.*
+| Scenario | `master` | `ble-rx-dm` | `ble-rx-dmult` | `ble-rx-dmult` / `ble-rx-dm` |
+|---|---:|---:|---:|---:|
+| `rx` | 1.26 × 10⁹ fF | −12.7 % | −2.7 % | **+11.5 %** |
+| `tx` | 1.04 × 10⁹ fF | −7.8 % | −4.3 % | +3.8 % |
+| `mixed` | 1.30 × 10⁹ fF | −9.2 % | −2.7 % | **+7.2 %** |
+| `idle` | 1.29 × 10⁹ fF | −5.9 % | −1.9 % | +4.3 % |
+| `idle0` | 0.97 × 10⁹ fF | −8.3 % | −4.6 % | +4.0 % |
+
+The measures of the TX comparison, scenario `mixed`:
+
+| Measure | `master` | `ble-rx-dm` | `ble-rx-dmult` |
+|---|---:|---:|---:|
+| Toggles / cycle, non-clock nets | 1 041.3 | 1 059.7 (+1.8 %) | 1 205.1 (+15.7 %) |
+| Nets with activity > 10 % | 879 | 4 119 (×4.7) | 3 397 (×3.9) |
+| `btle_rx` toggles / cycle | 839.8 | 859.2 (+2.3 %) | 1 004.7 (+19.6 %) |
+| `btle_ll` / Gaussian filter / rest of `btle_tx` toggles / cycle | 32.3 / 40.1 / 48.1 | 32.4 / 40.1 / 47.1 | 32.3 / 40.1 / 47.1 |
+| Clock network (CK-pin load × toggles) | 9.03 × 10⁸ | −13.7 % | −13.6 % |
+| Memory: toggles on RAM ports | 3 165 890 | unchanged | unchanged |
+| Data load × toggles | 3.99 × 10⁸ | +0.9 % | **+22.2 %** |
+| **Data + clock proxy** | 1.30 × 10⁹ | **−9.2 %** | **−2.7 %** |
+
+Every block but `btle_rx` stays within 0.2 % of `master` on both branches (`btle_tx` 2.1 %, the same
+on both: its netlist, § 3.1). Every scenario, every block and the most active nets:
+[`rx-dmult/summary.md`](../../results/compare/rx-dmult/summary.md).
+
+- **B1 on the audited RTL behaves as before the audit.** It removes 652 flip-flops, so the
+  clock-pin load falls 13.7 % in every scenario, and the proxy 5.9 to 12.7 % (−5.9 to −12.9 %
+  before, § 8). With real packets the receiver also switches less (`rx`: `btle_rx` −10.5 %); without
+  traffic it switches more (`btle_rx` +15.6 % in `idle` and +146 % in `tx`, receiver input zero):
+  the shared unit's valid and enable network toggles on every sample whatever the data.
+- **One multiplier costs activity that two did not.** `ble-rx-dmult` keeps the clock load of
+  `ble-rx-dm` (3 flip-flops more, −13.6 %) but its data switching rises: `btle_rx` switches 16.9 %
+  more than on `ble-rx-dm` in `mixed`, the data load of the controller is +22.2 % against `master`
+  where `ble-rx-dm`'s is +0.9 %, and the proxy is 3.8 to 11.5 % above `ble-rx-dm`'s, most with real
+  packets (`rx`). It stays 1.9 to 4.6 % below `master`'s. The data load of `btle_rx` rises by
+  3.6 × 10⁷ fF over `ble-rx-dm` with the receiver's input at zero (`idle0`), where the multiplier's
+  operands do not move: the select of the operand multiplexers and the enable of the decision
+  register, which change on every clock; and by up to 1.26 × 10⁸ fF with packets (`rx`): the
+  multiplier's operands now alternate on every clock between (i[n−8], q[n]) and (i[n], q[n−8]),
+  where each multiplier of `ble-rx-dm` saw one pair move to the next sample's.
+- **Holding the operands does not help.** Selecting the E1 operands only in the clock of a capture,
+  and holding those of E2 in every other clock (two lines, [`rx-dmult-hold`](../../results/power/rx-dmult-hold/README.txt)),
+  moves the proxy by −0.12 to −0.36 %, with every output identical: at 8 MS/s the two clocks of a
+  sample are all the clocks, so there is no idle clock whose operands could be held. It is not adopted.
+- **The proxy is not power**: it has no wires and no glitches (zero-delay simulation). A multiplier
+  array glitches in real gates, which the proxy does not count on either branch.
 
 ## 6. Evidence per branch
 
@@ -212,13 +258,13 @@ tree, no internal energy, no leakage). Results in
 |---|---|---|
 | Formal proof of the change | shared ≡ the 8 upstream demodulators, **unbounded at 16 bits**, 4/4 mutants rejected (`SHARED_DEMOD_VALIDATION.md`, before the audit) | time-shared ≡ the shared demodulator of `ble-rx-dm`, **unbounded at 16 bits** (every product a free value constrained to be one function of its operands) and with the real multipliers at 4 bits; 6/6 mutants rejected by both; without the contract the proof fails, as it must; the contract proved on `clock_domain_conversion_iq`, unbounded |
 | Lockstep of `btle_rx` | against upstream: 60/60, 25 367 270 clocks, 4/4 mutants (before the audit) | against corrected `master`, samples never in consecutive clocks: **60/60, 37 054 155 clocks, 17 558 142 samples, 7 521 packets with a correct CRC, 1 632 resets**; 6/6 mutants; samples in consecutive clocks caught |
-| The product audit's matrix, 270 cases | 270/270 (lint closure, reference `9d6c383`) | *running* |
-| TX waveforms | 167/167 | *running* |
+| The product audit's matrix, 270 cases | 270/270 (lint closure, reference `9d6c383`) | 270/270 |
+| TX waveforms (Python decoding; and through the RTL receiver) | 167/167 | 167/167, and 167/167 decoded by its RTL receiver |
 | Lint gate (Verilator 5.020, `--Wall`) | 1/1 configuration, 12 reviewed exceptions | 1/1 configuration, 12 reviewed exceptions |
 | Illegal-state recovery, lint negative controls | 3 checks, 10 controls | 3 checks, 12 controls |
-| Product defects, RF contract, Gaussian tail, bit repeat, register readback, Yosys structure | 4/4; pass; pass; pass; pass; pass | 4/4; 12/12 scenarios, 2/2 mutants; pass; pass; pass; *running* |
-| Harness tests | 23 passed | *running* |
-| Gate-level lockstep, run `rx-dmult` | *running* | *running* |
+| Product defects, RF contract, Gaussian tail, bit repeat, register readback, Yosys structure | 4/4; pass; pass; pass; pass; pass | 4/4; 12/12 scenarios, 2/2 mutants; pass; pass; pass; pass |
+| Harness tests | 23 passed | 21 of 23 passed, 2 skipped (they need `REGRESSION_VECTORS`) |
+| Gate-level lockstep, run `rx-dmult` | identical, every output, 5/5 | identical, every output, 5/5 |
 | Report | `docs/Validation/SHARED_DEMOD_VALIDATION.md`, `LINT_CLOSURE.md` | `docs/Validation/RX_DMULT_VALIDATION.md` (on `ble-rx-dmult`) |
 
 ## 7. What each branch gives up
@@ -270,7 +316,27 @@ of activity (`TX_BRANCH_COMPARISON.md` §§ 3.2, 6.4).
 
 ## 9. Conclusions
 
-*Completed with § 5. On what is measured so far: `ble-rx-dmult` removes one 16 × 16 multiplier (−1 612 cells, −31.9 %, of the shared demodulator; −1 240 cells, −4.9 %, of the controller against `ble-rx-dm`, −53.8 % against corrected `master`), keeps every output and every flip-flop, and costs 0.12 ns of the receiver's path, within the flow's noise, for one condition that the RF interface gives by construction: a sample never in two consecutive clocks.*
+1. **One multiplier is enough, and it is exact.** The receiver takes one sample every two clocks,
+   so the two products of a sample fit in two clocks of one multiplier. `ble-rx-dmult` has the
+   outputs of `ble-rx-dm`, and so of upstream's 8 demodulators, on every clock: proved unbounded at
+   16 bits, simulated in lockstep against corrected `master` (60/60, 37 million clocks), through the
+   product audit's 270 cases and the 167 packets decoded by its RTL receiver, and at gate level in the
+   five activity scenarios.
+2. **It removes one 16 × 16 multiplier**: 1 612 cells (−31.9 %) and 1 801.1 µm² (−25.6 %) of the
+   shared demodulator, 1 532 cells (−15.4 %) of `btle_rx` and 1 240 (−4.9 %) of the controller
+   against `ble-rx-dm`; −53.8 % of the controller's cells against corrected `master`. The flip-flops
+   stay (the first product replaces two operand registers), and no SRAM moves.
+3. **Its price is one condition and some activity.** `btle_rx` takes at most one sample every two
+   clocks, which the RF interface gives by construction (proved). And the one multiplier switches
+   more than the two did: the activity proxy is 3.8 to 11.5 % above `ble-rx-dm`'s, still 1.9 to 4.6 %
+   below `master`'s; B1 keeps most of its activity saving, from the clock pins of 652 flip-flops.
+4. **Timing does not separate them.** The controller's worst path is the transmitter's Gaussian tail
+   on all three (3.357–3.410 ns); in the receiver the multiplexer adds 0.12 ns on a path that no
+   sample takes, within the flow's noise, a factor of 31 at 16 MHz.
+5. **B1 is the receiver's change that matters; the shared multiplier refines it.** B1 removes 72.9 %
+   of `btle_rx` on the audited RTL, as before the audit; one multiplier takes another 15.4 % of what
+   is left, for area, at the cost of activity: the choice between `ble-rx-dm` and `ble-rx-dmult` is
+   area against switching.
 
 ## 10. What this does not claim
 
@@ -285,8 +351,8 @@ of activity (`TX_BRANCH_COMPARISON.md` §§ 3.2, 6.4).
   (`TX_BRANCH_COMPARISON.md` § 5); the 0.12 ns of § 4 is inside it.
 - **The 16-bit proof abstracts the products**: in both designs every 16 × 16 product is a free
   value constrained only to be one function of its operands, which the real products are; the
-  proof with the real 16 × 16 multipliers did not close (§ 6 and `RX_DMULT_VALIDATION.md`), and
-  with them it is proved at 4 bits. The equivalence with upstream's 8 demodulators follows from
+  proof with the real 16 × 16 multipliers did not close (1 h at k = 4 with bitwuzla, 90 min at k = 1
+  with bitwuzla and yices; `RX_DMULT_VALIDATION.md`), and with them it is proved at 4 bits. The equivalence with upstream's 8 demodulators follows from
   this proof and B1's (`SHARED_DEMOD_VALIDATION.md`), whose demodulator has not changed since.
 - **The contract is proved on the RF interface, and checked by simulation above it**: that
   `clock_domain_conversion_iq` never raises the sample valid in two consecutive clocks is proved;
