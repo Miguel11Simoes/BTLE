@@ -85,7 +85,7 @@ are left out. Results in
 (on `ble-tx-table`, `ble-tx-table-reg`, `ble-tx-table-sram` and `ble-tx-fir2`, and on
 `ble-tx-opt` and the branches cut from it). With those RAMs counted as SRAM macros, the
 transmitter is about 97 % memory and every option here moves its total by
-−1.8 to +11.9 %: `docs/Validation/BRANCH_COMPARISON.md` § 4. With
+−1.8 to +11.9 %: `docs/Validation/TX_BRANCH_COMPARISON.md` § 4. With
 `ble-tx-sin2` (40 293 µm², the one-port sine table; `ble-tx-1--8` is within
 0.2 % of it), the filter weighs more: B2 is estimated to take 7.4 % off it and
 the folded FIR 2.5 % (the same § 4.2). `ble-tx-pdu` builds B2, in its paired

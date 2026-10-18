@@ -19,7 +19,7 @@ the upstream design, so that its effect can be measured and proved on its own.
 This report records the evidence that B2 alone keeps every function of the
 transmitter (and leaves the rest of the design untouched), and the cells it
 saves. The comparison with the other branches is in
-[BRANCH_COMPARISON.md](BRANCH_COMPARISON.md).
+[TX_BRANCH_COMPARISON.md](TX_BRANCH_COMPARISON.md).
 
 ## 1. What is on this branch
 
@@ -146,7 +146,7 @@ The earlier table counted incomplete checks as successful. Corrected per-bench c
 
 The cross-branch comparison runs the **synthesised netlists** of upstream and
 of this branch side by side in five scenarios, every output compared on every
-clock, and finds no mismatch. See [BRANCH_COMPARISON.md](BRANCH_COMPARISON.md).
+clock, and finds no mismatch. See [TX_BRANCH_COMPARISON.md](TX_BRANCH_COMPARISON.md).
 
 ## 3. Area (measured)
 
@@ -179,7 +179,7 @@ by the 8 demodulators (62 % of the cells), which this branch keeps.
 ## 4. What is not claimed
 
 - No FPGA or board test.
-- Timing and switching activity are in [BRANCH_COMPARISON.md](BRANCH_COMPARISON.md),
+- Timing and switching activity are in [TX_BRANCH_COMPARISON.md](TX_BRANCH_COMPARISON.md),
   with the same limits as on `ble-opt` (pre-layout, ideal wires, a proxy and
   not power).
 - The table is exact for the taps it was built from. Runtime-programmable

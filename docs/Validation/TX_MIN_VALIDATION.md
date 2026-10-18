@@ -218,7 +218,7 @@ no wires, no clock tree, no internal or macro energy, no leakage.
 **A defect of the measurement harness, fixed here.** Every activity run against `master` `fca6ac6`
 failed: the incomplete-evidence guard of the product audit (`c574a4c`) found 34 nets of `btle_ll` and
 `btle_rx`, on both sides, that the netlist parser looked for under names the SAIF does not use (`ble-tx-rom`
-has no activity in `BRANCH_COMPARISON.md`; this run is its first). Three
+has no activity in `TX_BRANCH_COMPARISON.md`; this run is its first). Three
 mismatches between the Yosys netlist and Verilator's SAIF (`saif_activity.py`, `4657113`): an escaped
 name holding brackets (`\data_internal[0]`, a vector) taken as one bit; Verilator numbering a vector's
 bits from 0 whatever its LSB (`octet_buf [31:8]` written `[0..23]`), which also gave, silently, bits

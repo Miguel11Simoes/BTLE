@@ -102,7 +102,7 @@ from `ble-tx-pdu` are the evidence of that branch's RTL, not of this one.
 
 ## 4. Area
 
-Run `tx-vco` (`docs/Validation/BRANCH_COMPARISON.md` § 4.4): every branch on
+Run `tx-vco` (`docs/Validation/TX_BRANCH_COMPARISON.md` § 4.4): every branch on
 the audited RTL, Yosys + ABC, Nangate45, the SRAMs as OpenRAM macros (FreePDK45):
 
 | Branch | `vco` cells (µm²) | `btle_tx` cells (µm²) | Macros (µm²) | **Total (µm²)** | vs `master` |
@@ -134,7 +134,7 @@ the differences above.
 ## 5. Timing
 
 Run `tx-vco`, `scripts/timing/run_sta.sh` at 62.5 ns against corrected `master`
-(`BRANCH_COMPARISON.md` § 5.1). The ROM is not on the critical path: the
+(`TX_BRANCH_COMPARISON.md` § 5.1). The ROM is not on the critical path: the
 controller's worst path is a demodulator multiply (`genblk1[2]…i0[3]` →
 `…signal_for_decision[31]`), as on most branches, with 1.642 ns of logic and a
 minimum period of 2.002 ns (499.6 MHz, 60.5 ns of slack at 16 MHz), against 1.904
@@ -148,7 +148,7 @@ Gaussian tail with the runtime taps.
 The VCO has no memory: the transmitter's one SRAM is the packet buffer of
 `ble-tx-pdu`, with the same `btle_tx.v` and so the same accesses, written on every
 AXI clock but those that read it. Its figures are those of `ble-tx-pdu`'s buffer
-(`BRANCH_COMPARISON.md` § 6.6, run `sram-energy`): 19.40 µW of dynamic power and
+(`TX_BRANCH_COMPARISON.md` § 6.6, run `sram-energy`): 19.40 µW of dynamic power and
 15.0 µW of leakage once settled. The quarter sine table of `ble-tx-pdu`, read on
 every clock, took 23.03 µW of dynamic power (17.08 µW for the reads, 5.95 µW for
 its clocks) and 25.1 µW of leakage: they are gone. The logic that replaces it
@@ -212,4 +212,4 @@ python3 tests/test_tx_packet.py --quick
 The structural check runs the commands recorded in
 `results/validation/rom-structure-final/` (`elaborate.ys` with Yosys, and
 `lint_command` of `result.json` with Verilator). Area and timing: run `tx-vco`,
-`BRANCH_COMPARISON.md` § 11.
+`TX_BRANCH_COMPARISON.md` § 11.

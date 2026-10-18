@@ -11,7 +11,7 @@
 `ble-tx-sin8-1rw` (commit `176a79b`): 9 single-port macros requested, 8 generated. Measured
 before any RTL of the new branches; `ble-tx-sin128` was deleted after it (§ 4).
 `ble-tx-sin8-1rw` and `ble-tx-sin2` were then built and measured (run `tx-1rw`,
-`docs/Validation/BRANCH_COMPARISON.md`; their reports `TX_SIN8_1RW_COMPARISON.md` and
+`docs/Validation/TX_BRANCH_COMPARISON.md`; their reports `TX_SIN8_1RW_COMPARISON.md` and
 `TX_SIN2_COMPARISON.md`, at the root of each), and so was the 256 × 16 memory, as branch
 `ble-tx-1--8` (run `tx-1--8`; report `TX_1--8_COMPARISON.md`). `ble-tx-pdu` reuses the
 512 × 8 memory of `ble-tx-sin2` with B2 and a one-port packet buffer (run `tx-pdu`;
@@ -27,7 +27,7 @@ transmitter (run `tx-pdu-we`). `ble-tx-rom` and `ble-tx-cordic` then remove the 
 On `ble-tx-sin8` the VCO keeps the first quarter of the cosine and sine tables
 in one 512 × 16 memory with two ports, one read/write and one read (1RW1R):
 37 703.9 µm², 56 % of its transmitter and 59 % of the transmitter of
-`ble-tx-opt` (`docs/Validation/BRANCH_COMPARISON.md` § 4). Two levers are
+`ble-tx-opt` (`docs/Validation/TX_BRANCH_COMPARISON.md` § 4). Two levers are
 left on that memory: the number of ports, and its geometry (how many words of
 how many bits). Three branches were cut from `ble-tx-sin8` (`00ad076`), one per
 alternative, so that each can be built and measured on its own; the third was
@@ -132,7 +132,7 @@ energy per access nor different for an idle clock. (This table first read it
 as pJ per access, in the energy unit of the `.lib`; OpenRAM writes average
 power there, mW, from its model or, with SPICE, from its measurement. A SPICE
 characterization of the 512 × 8 one-port macro, and of the 256 × 8 packet
-buffer of `ble-tx-pdu`, is in `BRANCH_COMPARISON.md` § 6.6.)
+buffer of `ble-tx-pdu`, is in `TX_BRANCH_COMPARISON.md` § 6.6.)
 
 ## 3. Timing at 16 MHz
 
@@ -227,14 +227,14 @@ until it is built; on `ble-tx-sin8` the shared write port cost 597.7 µm².
 becomes the largest part of the transmitter: 51 % of it with
 `ble-tx-sin8-1rw`, 59 % with `ble-tx-sin2` or 256 × 16.
 
-**Built and measured** (run `tx-1rw`, `docs/Validation/BRANCH_COMPARISON.md`
+**Built and measured** (run `tx-1rw`, `docs/Validation/TX_BRANCH_COMPARISON.md`
 § 4.2): `ble-tx-sin8-1rw` measures **46 772.8 µm²** (Δ = −75.2 µm²: the waiting
 writes held in the table registers and a 16-bit held entry cost less than the
 queues of `ble-tx-sin8`), −72.1 % against `master` and −30.6 % against
 `ble-tx-sin8`; `ble-tx-sin2` measures **40 292.6 µm²** (Δ = −144.7 µm²),
 −76.0 % and −40.3 %. With these Δ, the column from `ble-tx-opt` becomes
 43 776.4 and 37 296.1 µm²; neither combination with B2 is built
-(`BRANCH_COMPARISON.md` § 4.2 estimates the second from `ble-tx-table`,
+(`TX_BRANCH_COMPARISON.md` § 4.2 estimates the second from `ble-tx-table`,
 37 295.3 µm²; the 0.8 µm² is the residual of `ble-tx-opt`).
 
 The 256 × 16 eighth wave, built as `ble-tx-1--8` (run `tx-1--8`), measures
@@ -251,7 +251,7 @@ packet buffer is the largest part of the transmitter. `ble-tx-pdu` keeps the
 memory of `ble-tx-sin2` and gives the buffer one port too, 256 words and a
 register for byte 256 (6 979.1 µm², run `openram-pdu`), with B2 and exact
 rewrites of the logic: the transmitter measures **20 098.5 µm²**, −88.0 %
-against `master` (run `tx-pdu`, `BRANCH_COMPARISON.md` § 4.2). `ble-tx-pdu-we`
+against `master` (run `tx-pdu`, `TX_BRANCH_COMPARISON.md` § 4.2). `ble-tx-pdu-we`
 keeps it and writes the buffer only when its pair is new; the VCO memory, read
 on every clock, then takes most of the transmitter's SRAM dynamic power (§ 6.6
 there).
@@ -260,7 +260,7 @@ there).
 `ble-tx-cordic` keep the transmitter of `ble-tx-pdu` and give the VCO the
 project's tables from the first eighth of the wave, as `ble-tx-1--8` stores
 them, but in logic: a ROM of 257 pairs, or an exact CORDIC. Measured on the
-audited RTL (run `tx-vco`, `BRANCH_COMPARISON.md` § 4.4), the ROM is 593.2 µm²,
+audited RTL (run `tx-vco`, `TX_BRANCH_COMPARISON.md` § 4.4), the ROM is 593.2 µm²,
 against 635.7 µm² of logic and 10 703.9 µm² of memory for the sine table of
 `ble-tx-pdu`, and the transmitter 9 488.5 µm², −53.1 % against `ble-tx-pdu`;
 the CORDIC is 2 317.9 µm², and its transmitter 11 121.3 µm². The tables are
@@ -278,7 +278,7 @@ then not programmable at all.
 - **Timing and power are OpenRAM's analytical model**, at the nominal corner
   only, not a SPICE characterisation. Its power does not tell a read from an
   idle clock, so it cannot rank `ble-tx-sin2`, which reads twice per sample,
-  against `ble-tx-1--8`, which reads once; § 6.6 of `BRANCH_COMPARISON.md`
+  against `ble-tx-1--8`, which reads once; § 6.6 of `TX_BRANCH_COMPARISON.md`
   measures the 512 × 8 macro with SPICE (1.07 pJ per read), not the
   256 × 16 one.
 - **No RTL yet.** The logic each alternative adds is estimated, not measured;

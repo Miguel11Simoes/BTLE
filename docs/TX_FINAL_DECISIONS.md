@@ -219,7 +219,7 @@ them.
    fixed taps take the Gaussian filter from 3 366.0 to 256.7 µm². The corrections of the product audit
    and the lint closure add 3 236.2 µm² to upstream's transmitter (8 559.1 against 5 322.9), most of it
    the Gaussian tail weighing the runtime taps; with fixed taps the audit added 35–150 µm²
-   (`BRANCH_COMPARISON.md` § 4.4).
+   (`TX_BRANCH_COMPARISON.md` § 4.4).
 3. **`ble-tx-min` is 33.5 times smaller than upstream's transmitter** (37.7 with flip-flops), and
    47.3 % smaller than `ble-tx-rom`.
 
@@ -375,7 +375,7 @@ at RTL in the same five scenarios against the reference (`results/power/sram-ene
 only its clock, 2.92 µW), where `ble-tx-rom`'s 256-byte buffer takes the pair on every clock. The
 32 × 8 leaks as much as the 256 × 8: at this size the periphery leaks, not the array. Upstream's macros
 could not be characterized: OpenRAM's ngspice did not finish the 2 048 × 8 two-port netlist in hours
-(`BRANCH_COMPARISON.md` § 6.6); its accesses are counted (a write and a read of all three memories on
+(`TX_BRANCH_COMPARISON.md` § 6.6); its accesses are counted (a write and a read of all three memories on
 every clock), not priced. The summarizer therefore reports `RESULT: FAIL` for incomplete
 characterization, as the original run does; every check on the counted configurations passes.
 
@@ -480,7 +480,7 @@ production test interface, which this controller does not have (it is tied off i
 | # | Block | upstream | Decision | Alternatives measured (µm², 45 nm unless stated) | Status |
 |---|---|---|---|---|---|
 | 10.1 | Gaussian filter | runtime FIR, 3 366.0 | **fixed taps, paired**, 256.7 | folded FIR (runtime taps) 2 311.5; constant tables 348.5; tables in SRAM 20 917.1, in flip-flops 23 221.5 (`GAUSS_FILTER_OPTIONS.md`) | decided |
-| 10.2 | VCO tables | 2 × 2 048 × 8 SRAM, 138 700.5 | **ROM of an eighth of the wave**, 597.4 of logic | quarter tables, 512 × 8 with one port, 10 703.9; eighth table 256 × 16, 10 424.9; exact CORDIC (15 iterations) 2 317.9 and the controller's worst path at 5.5 ns (`VCO_MEMORY_SWEEP.md`, `BRANCH_COMPARISON.md` § 4.4) | decided |
+| 10.2 | VCO tables | 2 × 2 048 × 8 SRAM, 138 700.5 | **ROM of an eighth of the wave**, 597.4 of logic | quarter tables, 512 × 8 with one port, 10 703.9; eighth table 256 × 16, 10 424.9; exact CORDIC (15 iterations) 2 317.9 and the controller's worst path at 5.5 ns (`VCO_MEMORY_SWEEP.md`, `TX_BRANCH_COMPARISON.md` § 4.4) | decided |
 | 10.3 | Packet scope | any PDU ≤ 257 B, 512 × 8, two ports, 23 708.0 | **Legacy Advertising ≤ 39 B**: header in registers, AdvA fixed per chip, AdvData ≤ 31 B | one port 256 × 8 + 1 byte, 6 979.1; 64 × 8, 3 135.5; 128 × 16 with a byte mask, 6 652.0 | decided (supervisor) |
 | 10.4 | AdvA | written by software with the packet | **OTP**, programmed once per chip (a ROM in the RTL) | ROM: no area, one address for every chip; registers written by software: not built (a changeable address, e.g. a random private address) | decided (supervisor) |
 | 10.5 | AdvData store | — | **depends on the process** (below) | SRAM 32 × 8: TX 5 007.1, 67.98 µW static; flip-flops: TX 4 446.5, 88.32 µW static; GF180: SRAM 234 603.9 against flip-flops 157 538.1 | open: a recommendation |
@@ -539,5 +539,5 @@ BT = 0.5, modulation index 0.5); rewriting a packet byte while it is sent; an AX
 | Upstream's BER, rerun | `results/figures/tx-final/upstream_ber_rerun.txt` | `git archive upstream-baseline python \| tar -x; cd python; python3 test_btle_ber.py 50` (and `-30`) |
 
 Related reports: `docs/Validation/TX_MIN_VALIDATION.md` (this branch in full), `TX_ROM_VALIDATION.md`,
-`TX_PDU_VALIDATION.md`, `docs/Validation/BRANCH_COMPARISON.md` (every branch),
+`TX_PDU_VALIDATION.md`, `docs/Validation/TX_BRANCH_COMPARISON.md` and `RX_BRANCH_COMPARISON.md` (every branch),
 `docs/Design Decisions/GAUSS_FILTER_OPTIONS.md` and `VCO_MEMORY_SWEEP.md` (the alternatives of § 10).

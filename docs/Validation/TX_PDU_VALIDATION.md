@@ -13,7 +13,7 @@ runner of the integrity audit); run `tx-pdu` of `scripts/validation/ctl_lockstep
 `scripts/validation/formal_gauss/run_formal_gauss.sh` and
 `scripts/validation/equiv_defaults/run_equiv_defaults.sh`; run `openram-pdu` of
 `scripts/area/run_openram.sh`; run `tx-pdu` of `scripts/compare/run_compare.sh` (area, static
-timing, gate-level lockstep and switching activity; `docs/Validation/BRANCH_COMPARISON.md`).
+timing, gate-level lockstep and switching activity; `docs/Validation/TX_BRANCH_COMPARISON.md`).
 Every run was made at commit `b773316`; the commits after it change one comment of `btle_tx.v`
 (`0731119`) and the documents.
 
@@ -22,7 +22,7 @@ Every run was made at commit `b773316`; the commits after it change one comment 
 ## Purpose
 
 With B2 and the one-port sine table of `ble-tx-sin2`, the transmitter was
-estimated at 37 295 µm² (`BRANCH_COMPARISON.md` § 4.2), and 64 % of that is the
+estimated at 37 295 µm² (`TX_BRANCH_COMPARISON.md` § 4.2), and 64 % of that is the
 packet buffer, the one memory no branch had changed: 512 × 8 with two ports
 and two clocks (23 708.0 µm²), although the transmitter reads one byte every
 128 clocks and only bytes 0 to 256. This branch gives the buffer one port and
@@ -134,7 +134,7 @@ fewer than 8 192 bits.
 | Controller through the registers (`ctl_lockstep`, run `tx-pdu`) | the whole controller against upstream, the tables and the packets written through the AXI registers, one after the other | **15/15 runs, 923 385 cycles compared, every output and every register read identical**; 90 packets sent, 90 received; **5/5 mutants** (a table tap, the pairing, the sign of the tap sum, the packet buffer's request, the IQ-capture half flag) |
 | Upstream testbenches, strict (run `tx-pdu`, `GAUSS_TABLE=1`) | the 5 upstream testbenches over the 54 saved conditions of the integrity audit, against upstream | **FAIL, as on every branch**: 118 PASS, 20 BOTH_FAIL, 18 NO_STIMULUS, 114 ERROR, **0 DIFFERENT**; each of the 270 verdicts, with its reference and DUT status, equal to `master`'s strict run, and the 252 simulated checks give the same output files as upstream |
 | The same on one-port macro models (run `tx-pdu-one-port`) | the same, with the buffer's and the VCO's memories on one-port macro models | **the same 270 verdicts, 0 DIFFERENT** |
-| Gate-level lockstep (run `tx-pdu`, `BRANCH_COMPARISON.md` § 6.1) | both synthesised controllers, this branch and upstream, every output on every clock, 5 scenarios | **5/5 scenarios, no mismatch**; 25 packets transmitted and 27 sent to the receiver, the tables and the packets written through the registers |
+| Gate-level lockstep (run `tx-pdu`, `TX_BRANCH_COMPARISON.md` § 6.1) | both synthesised controllers, this branch and upstream, every output on every clock, 5 scenarios | **5/5 scenarios, no mismatch**; 25 packets transmitted and 27 sent to the receiver, the tables and the packets written through the registers |
 | Integrity tests (`tests/test_validation*.py`) | the verdict guards of the integrity audit | 21 tests: 20 pass, 1 skipped (not applicable to this branch) |
 
 The strict regression's FAIL is the upstream matrix of the integrity audit
@@ -199,7 +199,7 @@ port. The rest of the drop in `btle_tx` is the rewrites.
 ## 6. Timing and switching activity
 
 Run `tx-pdu`, the whole controller against upstream
-(`BRANCH_COMPARISON.md` §§ 5 and 6):
+(`TX_BRANCH_COMPARISON.md` §§ 5 and 6):
 
 - **Timing:** minimum period 1.919 ns at the 62.5 ns (16 MHz) target, against
   1.991 ns upstream. The worst path is still the multiply of one of the 8
@@ -222,7 +222,7 @@ Run `tx-pdu`, the whole controller against upstream
   power, 0.42 mW with every gate at 100 MHz, the same for any cycle, not an
   energy per access. The buffer of this branch is written on every AXI clock;
   `ble-tx-pdu-we` writes it only when its pair is new, and measures the energy
-  of both with SPICE, `BRANCH_COMPARISON.md` § 6.6.)
+  of both with SPICE, `TX_BRANCH_COMPARISON.md` § 6.6.)
 
 ## 7. What the branch gives up
 

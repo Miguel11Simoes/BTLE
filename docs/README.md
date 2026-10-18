@@ -32,7 +32,8 @@ Latest lint and documentation update: [LINT_CLOSURE.md](Validation/LINT_CLOSURE.
 | See the VCO without memory, its tables fixed in a ROM of an eighth of the wave: its checks, area, timing and SRAM energy | [Validation/TX_ROM_VALIDATION.md](Validation/TX_ROM_VALIDATION.md) |
 | See the Legacy Advertising transmitter (header in registers, AdvA in ROM/OTP, AdvData in 32 x 8), the smallest transmitter measured: its checks, area, timing, activity, OTP and figures | [Validation/TX_MIN_VALIDATION.md](Validation/TX_MIN_VALIDATION.md) |
 | Compare the final transmitter with upstream, every result side by side (signals, BER, area, timing, FPGA, power, layout, OTP), and read the decisions | [TX_FINAL_DECISIONS.md](TX_FINAL_DECISIONS.md) |
-| Compare every branch: area (the transmitter with its SRAM macros), timing, switching activity | [Validation/BRANCH_COMPARISON.md](Validation/BRANCH_COMPARISON.md) |
+| Compare the transmitter branches and `ble-opt`: area (the transmitter with its SRAM macros), timing, switching activity | [Validation/TX_BRANCH_COMPARISON.md](Validation/TX_BRANCH_COMPARISON.md) |
+| Compare the receiver branches (`ble-rx-dm`, `ble-rx-dmult`): area, timing, switching activity | [Validation/RX_BRANCH_COMPARISON.md](Validation/RX_BRANCH_COMPARISON.md) |
 | Choose where the Gaussian table lives (OTP, ROM, SRAM, REG) or a folded FIR, by TX area | [Design Decisions/GAUSS_FILTER_OPTIONS.md](Design%20Decisions/GAUSS_FILTER_OPTIONS.md) |
 | Choose the single-port memory of the VCO tables (OpenRAM sweep: 512×16, 512×8, 256×16, 128×32, 64×64) | [Design Decisions/VCO_MEMORY_SWEEP.md](Design%20Decisions/VCO_MEMORY_SWEEP.md) |
 | Reproduce the upstream results | [Guides/REPRODUCE_UPSTREAM.md](Guides/REPRODUCE_UPSTREAM.md) |

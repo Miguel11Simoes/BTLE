@@ -10,7 +10,7 @@
 **Status:** executed: `tests/test_vco_sin8.py`, runs `tx-opt` of
 `scripts/validation/run_rx_regression.sh` and `scripts/validation/ctl_lockstep/run_ctl_lockstep.sh`,
 and run `tx-opt` of `scripts/compare/run_compare.sh` (area, static timing, gate-level lockstep
-and switching activity; `docs/Validation/BRANCH_COMPARISON.md`).
+and switching activity; `docs/Validation/TX_BRANCH_COMPARISON.md`).
 
 ---
 
@@ -53,7 +53,7 @@ lockstep against `ble-tx-sin4`, 7/7 mutants). Together, on this branch:
 | Upstream testbenches (`scripts/validation/run_rx_regression.sh`, table on through `DUT_DEFAULTS="gauss_filter.v:GAUSS_TABLE=1"`) | the 5 upstream testbenches (demodulator, RX core, RX, TX, controller) over 54 conditions: 3 packets × 3 SNR × 3 clock errors × 2 delays, every output file byte for byte against upstream | **FAIL: 118 PASS, 20 BOTH_FAIL, 18 NO_STIMULUS, 114 ERROR; 0 DIFFERENT**; see integrity audit |
 | Controller through the registers (`scripts/validation/ctl_lockstep/run_ctl_lockstep.sh`) | the whole controller against upstream, clock by clock, the COS and SIN tables written through the AXI registers one after the other as the firmware does, packets of the Python model sent and received | **15/15 runs, 923 385 cycles, every output and every register read identical**; 90 packets sent and 90 received; 4/4 mutants caught (a wrong table tap, a group index off by one, a wrong sign, the IQ-capture half flag) |
 | The VCO (`tests/test_vco_sin8.py`) | the sweep against the `master` VCO; 4 × 1 000 000 clocks against the `ble-tx-sin4` VCO with random table writes | **3 072 clocks and 2 919 121 comparisons, no mismatch** |
-| Gate-level lockstep (run `tx-opt`, `BRANCH_COMPARISON.md` § 6.1) | both synthesised netlists, this branch and upstream, on every output and every clock, in 5 scenarios | **5/5 scenarios, no mismatch**; 25 packets transmitted, 27 sent to the receiver |
+| Gate-level lockstep (run `tx-opt`, `TX_BRANCH_COMPARISON.md` § 6.1) | both synthesised netlists, this branch and upstream, on every output and every clock, in 5 scenarios | **5/5 scenarios, no mismatch**; 25 packets transmitted, 27 sent to the receiver |
 
 The upstream TX testbenches write the COS and SIN tables at the same address
 on every clock, so the memory of this branch writes both halves in one write;
@@ -91,7 +91,7 @@ upstream Gaussian filter alone (3 028.9 against 3 366.0 µm²).
 
 On the whole controller the flip-flops add up exactly (4 578 − 156 + 78 =
 4 500) and the cells to within 89 (0.2 %), the flow noise that
-`BRANCH_COMPARISON.md` § 3.1 records (the receiver alone, the same RTL, moves
+`TX_BRANCH_COMPARISON.md` § 3.1 records (the receiver alone, the same RTL, moves
 by up to 116 cells from one netlist to another).
 
 **The transmitter with its SRAM macros** (OpenRAM, FreePDK45; runs
@@ -107,7 +107,7 @@ RTL needs):
 | vs `master` | — | −1.8 % | −59.8 % | **−61.6 %** |
 | Total with single-port macros (µm²) | 79 667.6 | 76 670.3 | 33 844.0 | 30 847.5 (−61.3 %) |
 
-`BRANCH_COMPARISON.md` had estimated this combination at 64 440.0 µm² from the
+`TX_BRANCH_COMPARISON.md` had estimated this combination at 64 440.0 µm² from the
 two branches apart; built, it measures 64 440.8. The memories are now 95 % of
 the transmitter, so what is left to gain is in the macros (the packet buffer,
 23 708 µm², and the {cos, sin} memory), not in the logic.
@@ -115,7 +115,7 @@ the transmitter, so what is left to gain is in the macros (the packet buffer,
 ## 4. Timing and switching activity
 
 Run `tx-opt`, the whole controller against upstream
-(`docs/Validation/BRANCH_COMPARISON.md` §§ 5 and 6):
+(`docs/Validation/TX_BRANCH_COMPARISON.md` §§ 5 and 6):
 
 - **Timing:** minimum period 1.917 ns at the 62.5 ns (16 MHz) target, against
   1.991 ns upstream. The worst path is still the multiply of one of the 8

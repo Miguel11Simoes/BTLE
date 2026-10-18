@@ -8,7 +8,8 @@
 **Status:** baseline measured. On branch `ble-tx-table`, **B2 alone** is
 implemented, measured and validated (2026-09-28); B1, A1 and A2 are not on this
 branch (see [../Validation/TX_TABLE_VALIDATION.md](../Validation/TX_TABLE_VALIDATION.md)
-and [../Validation/BRANCH_COMPARISON.md](../Validation/BRANCH_COMPARISON.md)).
+and [../Validation/TX_BRANCH_COMPARISON.md](../Validation/TX_BRANCH_COMPARISON.md),
+[../Validation/RX_BRANCH_COMPARISON.md](../Validation/RX_BRANCH_COMPARISON.md)).
 Every saving below is marked either *measured* or *estimate*.
 
 ---
