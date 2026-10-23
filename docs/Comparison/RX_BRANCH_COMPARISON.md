@@ -15,8 +15,8 @@ run `rx-shared` (§ 13), the flows of run `rx-aa`, the same reference and vector
 run `rx-adv` (§ 14), the flows of run `rx-shared`, the same reference and vectors, and OpenRAM macros, on
 `ble-rx-adv`. `ble-rx-min`: run `rx-min` (§ 15), the flows of run `rx-adv`, the same reference and vectors, on
 `ble-rx-min`. `ble-rx-best`: run `rx-best` (§ 16), the flows of run `rx-min`, the same reference and
-vectors, on `ble-rx-best`. `ble-rx-micro`: run `micro` (§ 17), the area flow of run `rx-best` and the
-packet-error-rate harness `rx_per`; no timing or activity. Pre-layout
+vectors, on `ble-rx-best`. `ble-rx-micro`: run `micro` (§ 17), the flows of run `rx-best` (area, timing, the activity
+vectors) and the packet-error-rate harness `rx_per`, its lockstep and formal checks. Pre-layout
 area and static timing, and gate-level switching activity, which is a proxy and **not power**.
 
 ---
@@ -1327,7 +1327,7 @@ Run `micro`, on `ble-rx-micro`: the RTL of `745e4bba`, the area flow of run `rx-
 packet-error-rate harness of `ble-rx-best` (`scripts/validation/rx_per/`, `docs/Validation/RX_PER.md` on
 `ble-rx-best` and `ble-rx-micro`). Unlike every branch above, **`ble-rx-micro` is not equivalent to the one
 it was cut from**: it decodes less, by design, and its cost is measured in packets, not proved away. It
-does not receive data-channel packets (§ 7). No timing and no switching activity were measured.
+does not receive data-channel packets (§ 7).
 
 ### 17.1 What changes
 
@@ -1362,9 +1362,13 @@ Differences against corrected `master`, and, in brackets, against `ble-rx-best`.
 | Std cells, `btle_controller` | 52 357 | 22 983 | 19 671 (−62.4 %) |
 | Cell area, `btle_controller` (µm²) | 74 684.8 | 38 700.1 | 33 226.1 |
 | SRAM macros, controller | 15 | 8 | 7 |
-| Timing, activity | § 4, § 5 | § 16.4 | **not measured** |
-| Functions removed | — | every Access Address but `0x8E89BED6`; packets of more than 42 octets | the same, and **about 2 dB of sensitivity** (§ 17.4) |
-| Validation (§ 17.5) | the reference | § 16.5 | `rx_per`: RTL ≡ its model packet by packet, 3 configurations; lint 64/64; the matrix |
+| Min period of `btle_rx` alone / of the controller | 1.991 / 3.410 ns | 1.997 / 3.334 ns | **1.459 / 3.340 ns** |
+| **Data + clock switched capacitance, `mixed`** | 1.30 × 10⁹ fF | +9.6 % | **−31.8 %** |
+| … over the 5 scenarios (`rx`, `tx`, `mixed`, `idle`, `idle0`) | — | +10.0, +11.7, +9.6, +10.4, +12.3 % | −31.8, −21.2, −31.8, −32.8, −22.7 % |
+| Clock pins (load × toggles), `mixed` | 9.03 × 10⁸ fF | −14.7 % | −26.9 % |
+| Functions removed | — | every Access Address but `0x8E89BED6`; packets of more than 42 octets | the same, and **about 2 dB of sensitivity** (§ 17.5) |
+| Gate-level outputs vs corrected `master` | — | identical but the raw packet-RAM read port | **different by design** (the receiver's), counted (`RX_DIFFERS`); the gate-level netlist ≡ its model on 9 600 packets |
+| Validation (§ 17.6) | the reference | § 16.5 | `RX_ONE_PHASE=0` ≡ `ble-rx-best` (unbounded); the width (unbounded at 4/8 bits, bounded at 8/16); one phase (lockstep 10/10, bounded proofs); `rx_per` RTL and gate level ≡ the model; lint 64/64; the matrix |
 
 ### 17.3 Area
 
@@ -1375,7 +1379,19 @@ flip-flops in it. Of the 12 780.0 + 8 116.5 µm² of `ble-rx-best`, the macro an
 history halve in width. `btle_tx` is the same RTL (8 742.1 µm² against 8 698.5 in run `rx-best`: the
 flow's noise of §§ 3.1, 12.3, 15.3).
 
-### 17.4 The cost
+### 17.4 Timing and activity
+
+Timing ([`results/timing/micro/`](../../results/timing/micro/ble-rx-micro/summary.txt)): `btle_rx`
+1.459 ns, the shortest of every branch (the one decoder and no 8-way selection), the controller 3.340 ns,
+its worst path the transmitter's Gaussian tail. No macro is left untimed: the packet is in registers.
+
+Activity ([`results/power/micro/`](../../results/power/micro/ble-rx-micro/summary.md), the vectors of
+run `all-branches`): the receiver's outputs are not `master`'s by design, so `run_activity.sh
+RX_DIFFERS=1` counts them instead of stopping; every scenario ran. The proxy falls **31.8 %** against
+`master` in `mixed` (`ble-rx-best`: +9.6 %): 584 flip-flops fewer than `ble-rx-best` in the receiver,
+the clock load −26.9 %, and one decoder switching instead of eight.
+
+### 17.5 The cost
 
 Packets lost, %, on the same samples (`rx_per`, seed 1, 400 packets per point; RTL):
 
@@ -1393,30 +1409,37 @@ The 8 bits cost little at this scale (2 640 packets lost of 9 600, against 2 604
 costs about 2 dB. With a strong signal (14 dB and more up to 10 ppm, 16 dB up to 20 ppm) neither loses a
 packet, or almost none.
 
-### 17.5 Evidence
+### 17.6 Evidence
 
 | | `ble-rx-micro` |
 |---|---|
 | Both levers against the model `centre1` at 8 bits | **9 600/9 600 packets the same**, 0 wrong PDUs, mutants 4/4 |
 | The width alone (`RX_ONE_PHASE = 0`) against `best8` at 8 bits | **9 600/9 600** |
 | `RX_ONE_PHASE = 0` at 16 bits against `best8` | **9 600/9 600**, the losses of `ble-rx-best`; mutants 3/3 |
+| `RX_ONE_PHASE = 0`, 16 bits ≡ `ble-rx-best`'s `btle_rx` (yosys `equiv`) | **unbounded**, 4 549 equivalences proven |
+| The width: saturation; the demodulator narrowed ≡ wide on samples that fit | saturation proved; **unbounded** at 4/8 bits, **bounded** (BMC 12) at 8/16 bits |
+| One stored phase against the 8 decoders on the same bits | lockstep **10/10** (2 000 packets, 78 233 octets, 48 184 packet words), 6/6 mutants (the window one phase short among them); BMC at 4 phases (120 clocks) and 2 phases (200 clocks: a whole packet) |
+| Gate level: the Nangate45 netlist of `btle_rx` on the 9 600 packets | **the same packets as the model** |
+| The front end's scale: a 12-bit ADC's (`RX_IQ_SHIFT = 4`), the AGC 12, 6 dB low and 6 dB high | 27 packets more lost of 9 600 at the ADC's scale; holds 12 dB below; saturates 6 dB above |
+| Formal mutants | 9/9 |
 | Lint gate (Verilator 5.020, `--Wall`) | **64/64 configurations** (with `RX_ONE_PHASE`), 12 reviewed exceptions, none new |
-| The product audit's matrix | 214 PASS, 56 ERROR: the 50 data-channel cases, and 3 advertising packets at the threshold that one stored phase loses (§ 17.4) |
-| Not done | formal proof, lockstep, gate-level simulation, timing, activity |
+| The product audit's matrix | 214 PASS, 56 ERROR: the 50 data-channel cases, and 3 advertising packets at the threshold that one stored phase loses (§ 17.5) |
+| Not done | an unbounded proof of the one stored phase (bounded only); the width unbounded at 8/16 bits; a real front end |
 | Report | `docs/Validation/RX_MICRO_VALIDATION.md` (on `ble-rx-micro`) |
 
-### 17.6 Conclusions for `ble-rx-micro`
+### 17.7 Conclusions for `ble-rx-micro`
 
 - **The receiver of Legacy Advertising is 6 993.7 µm², with no SRAM macro: −97.1 % against `master`,
   −66.5 % against `ble-rx-best`.** The largest single step since B1, and the first one paid in function.
+- **It also switches 32 % less than `master`** and has the shortest receiver path of every branch.
 - **The price is about 2 dB**, measured packet by packet and reproduced by the RTL exactly: the choice of
   the phase at the Access Address loses the packets that only another phase would have decoded. The 8-bit
-  demodulator costs almost nothing at the scale of the matrix; at another front end's scale it needs
-  `RX_IQ_SHIFT`.
+  demodulator costs almost nothing at the scale of the matrix, and 27 packets in 9 600 at a 12-bit ADC's
+  with `RX_IQ_SHIFT = 4`, as long as the AGC keeps the peak within the ADC's scale.
 - **Whether to take it is a requirement, not a measurement**: for devices heard with a strong signal it
   loses nothing; for the weakest it is `ble-rx-best`.
 
-### 17.7 Reproducing
+### 17.8 Reproducing
 
 From WSL, at the root of `ble-rx-micro`:
 
@@ -1425,4 +1448,10 @@ QBITS=8 QSHIFT=0 scripts/validation/rx_per/run_rx_per.sh micro 400 centre1
 QBITS=8 QSHIFT=0 DUT_PARAMS='RX_ONE_PHASE=0' scripts/validation/rx_per/run_rx_per.sh micro 400 best8
 DUT_PARAMS='RX_ONE_PHASE=0 RX_IQ_BITS=16' scripts/validation/rx_per/run_rx_per.sh micro 400 best8
 scripts/area/run_area.sh micro/ble-rx-micro
+DUT_PARAMS= scripts/timing/run_sta.sh micro/ble-rx-micro 62.5 fca6ac6
+DUT_PARAMS= PDU_CONTRACT=1 RX_DIFFERS=1 VEC_DIR=/tmp/vec scripts/power/run_activity.sh micro/ble-rx-micro 100000 1 fca6ac6
+QBITS=8 GATE=1 scripts/validation/rx_per/run_rx_per.sh micro-gate 400 centre1
+LEVEL_DB=24 QBITS=8 QSHIFT=4 DUT_PARAMS='RX_IQ_SHIFT=4' MUTANTS=0 scripts/validation/rx_per/run_rx_per.sh micro-scale 400 centre1
+scripts/validation/rx_micro_lockstep/run_rx_micro_lockstep.sh micro2 200
+scripts/validation/formal_micro/run_formal_micro.sh micro2 7b2ebdc5
 ```
