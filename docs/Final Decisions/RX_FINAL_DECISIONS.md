@@ -346,7 +346,7 @@ the single-port RAM's clock-domain logic (132 flip-flops on the AXI clock) toggl
 (−14.7 %), the data rises (+64.6 %). **`ble-rx-micro` switches a third less**: one decoder instead of
 eight, 584 flip-flops fewer, an 8-bit datapath (clock −26.9 %, data −42.9 % in `mixed`).
 
-**7.2 The SRAMs' energy (SPICE).** **`ble-rx-best`'s 336 × 8 macro could not be characterized**: OpenRAM's flow probes the address of all ones, which a 336-word macro lacks; `openram_char.py` now probes its last word, and then the measurement at a 5 ns period fails (ngspice: "Couldn't run a simulation", `results/power/sram-char-rx-final-5ns/`), and the search for a feasible period did not end within the 6 h limit (`results/power/sram-char-rx-final/`). **Upstream's 512 × 8 two-port macro** (eight in its receiver) did not finish in 6 h in run `sram-char` and is **pending**: running again without that limit. For reference, the one-port 512 × 8 of `ble-rx-min` (the same column width, more words on each bitline) costs 1.161 pJ per write, 1.068 pJ per read and 25.11 µW of settled leakage (`RX_BRANCH_COMPARISON.md` § 15.4): a bound from above for `ble-rx-best`'s macro. `ble-rx-micro` has no SRAM.
+**7.2 The SRAMs' energy (SPICE).** **`ble-rx-best`'s 336 × 8 macro could not be characterized**: OpenRAM's flow probes the address of all ones, which a 336-word macro lacks; `openram_char.py` now probes its last word, and then the measurement at a 5 ns period fails (ngspice: "Couldn't run a simulation", `results/power/sram-char-rx-final-5ns/`), and the search for a feasible period did not end within the 6 h limit (`results/power/sram-char-rx-final/`). **Upstream's 512 × 8 two-port macro** (eight in its receiver) could not be characterized either: it did not finish in 6 h in run `sram-char`, and run again without that limit it ended after 14.4 h with OpenRAM's "Sense amp enable timing error" at the 5 ns period (`results/power/sram-char-rx-final-upstream/`): the macro as generated does not read at that period, and its energy stays unknown. For reference, the one-port 512 × 8 of `ble-rx-min` (the same column width, more words on each bitline) costs 1.161 pJ per write, 1.068 pJ per read and 25.11 µW of settled leakage (`RX_BRANCH_COMPARISON.md` § 15.4): a bound from above for `ble-rx-best`'s macro. `ble-rx-micro` has no SRAM.
 
 **7.3 Leakage of the receiver's logic** (`scripts/power/logic_leakage.py`, the Nangate45 liberty's
 `cell_leakage_power` of every cell, 1.10 V typical; `results/power/rx-final-leakage/summary.md`):
@@ -470,7 +470,7 @@ packet (the words of the packet are exact); **for `ble-rx-micro`, 1.6–2.1 dB o
 - The GF180MCU layouts are `btle_rx` as a macro (no pads, no seal ring, no chip-level integration, no
   parasitic-annotated simulation); `ble-rx-best`'s SRAM limits its read clock to 18 MHz; their power is
   vectorless.
-- Upstream's SRAMs are not priced in energy unless § 7.2 says so; its leakage is then a lower bound.
+- No receiver SRAM is priced in energy (§ 7.2): upstream's and `ble-rx-best`'s leakage are lower bounds.
 - `py-fig0.png` and `py-fig1.png` (the SDR C program) are not repeated (§ 3.4).
 
 ## 11. Evidence and reproduction
@@ -481,7 +481,7 @@ packet (the words of the packet are exact); **for `ble-rx-micro`, 1.6–2.1 dB o
 | Timing, 45 nm | `results/timing/rx-final/<configuration>/summary.txt` | `DUT_REV=<rev> DUT_PARAMS= scripts/timing/run_sta.sh rx-final/<configuration> 62.5 fca6ac6` |
 | Activity | `results/power/rx-final/<configuration>/` | `DUT_REV=<rev> DUT_PARAMS= [PDU_CONTRACT=1] [RX_DIFFERS=1] VEC_DIR=<d53f2d49 vectors> scripts/power/run_activity.sh rx-final/<configuration> 100000 1 fca6ac6` |
 | Logic leakage | `results/power/rx-final-leakage/summary.md` | `python3 scripts/power/logic_leakage.py <liberty> <name>=<stat.json> ...` |
-| SRAM energy | `results/power/sram-char-rx-final-5ns/`, `sram-char-rx-final/` (336 × 8: not characterized); upstream's 512 × 8 two-port: pending | `PERIOD_NS=5 scripts/power/run_sram_char.sh <label> <macro>`, `scripts/power/run_sram_leakage.sh <label> <macro>` |
+| SRAM energy | `results/power/sram-char-rx-final-5ns/`, `sram-char-rx-final/` (336 × 8: not characterized); `sram-char-rx-final-upstream/` (512 × 8 two-port: not characterized) | `PERIOD_NS=5 scripts/power/run_sram_char.sh <label> <macro>`, `scripts/power/run_sram_leakage.sh <label> <macro>` |
 | BER and PER | `results/validation/rx-final/rx_ber_exact/`, `rx_ber_random/` (`report.txt`, `points.tsv`) | `POINTS="<ppm:snr ...>" TIMING=exact\|random CHUNK=50 scripts/validation/rx_ber/run_rx_ber.sh rx-final 1000 upstream=upstream-baseline best=3d92ea80 micro=745e4bba` |
 | The receiver's decision | `results/figures/rx-final/rx_final_py_fig4.png`, `rx_final_decision.json` | `python3 scripts/figures/rx_final_figures.py decision results/figures/rx-final` |
 | FPGA | `results/fpga/xc7z020-rx/<configuration>/`, `provenance.txt` | Windows: `vivado -mode batch -source scripts/fpga/xc7z020/impl.tcl -tclargs <dir> <ooc\|wrapper2024>`, then `post.tcl <root> up2024 upstream best micro` |
