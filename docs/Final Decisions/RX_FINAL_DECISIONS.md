@@ -318,7 +318,22 @@ muxes and DSPs identical: `TX_FINAL_DECISIONS.md` § 6). The current designs run
 - Vivado's power is vectorless (default toggle rates) and rounds to 1 mW: an estimate; 0.106 W of every
   total is the device's static power.
 
-**The Device view (upstream's `btle_controller_xilinx_7z020.jpg`).** **Pending.** Vivado's Device view of the four routed designs, with `btle_rx`'s primitives in orange, is captured from the GUI (`device_view.ps1`, which drives the screen and the mouse); a first capture was spoiled by input from another window and discarded. The counts are known (`device.txt`): `btle_rx` is 3 735 of the 2024 design's 7 377 primitives, 5 526 of upstream's 12 283, 2 465 of `ble-rx-best`'s 9 718 and 1 076 of `ble-rx-micro`'s 8 329; the images will be added in a later commit (`rx_final_fpga_device.png`).
+**The Device view (upstream's `btle_controller_xilinx_7z020.jpg`).** Vivado's Device view of the
+routed designs, as in `TX_FINAL_DECISIONS.md` § 6: the checkpoints opened in Vivado 2026.1's GUI,
+`btle_rx`'s primitives highlighted in orange (`device_view.ps1` with `btle_rx_i`, `device_view.tcl`,
+`device_crop.py`; each image and what it highlights in `results/fpga/xc7z020-rx/<configuration>/device.png`,
+`device.txt`):
+
+![Vivado's Device view of the xc7z020: upstream's image and this flow's](../../results/figures/rx-final/rx_final_fpga_device.png)
+
+- **In upstream's 2024 design the receiver is half the device's logic**: 3 735 of 7 377 primitives
+  (50.6 %), in the bottom clock regions (X0Y0, X1Y0), the transmitter's tall block (orange in
+  `TX_FINAL_DECISIONS.md`) to its right.
+- **Out of context, where the receiver lands means nothing; how much of the device it takes does.** The
+  receiver is 5 526 of upstream's 12 283 primitives (45.0 %), with 8 RAMB18 and 48 DSP48 among them;
+  2 465 of `ble-rx-best`'s 9 718 (25.4 %, −55.4 %), and 1 076 of `ble-rx-micro`'s 8 329 (12.9 %,
+  −80.5 %), LUTs and flip-flops only. The rest of each controller (the IQ-capture RAM's 32 RAMB36, the
+  link layer, corrected master's transmitter in the two branches) fills everything else.
 
 ## 7. Power
 
