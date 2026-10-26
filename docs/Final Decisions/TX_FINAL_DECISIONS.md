@@ -3,7 +3,7 @@
 **Project:** BTLE — reconfigurable RISC-V baseband  
 **Branch:** `ble-tx-min` (`a613226` and the runs of this document)  
 **Base:** tag `upstream-baseline` (`8540186`), forked from github.com/JiaoXianjun/BTLE  
-**Reference results:** [`open_btle_baseband_chip/`](../open_btle_baseband_chip/open_btle_baseband_chip.md), upstream's own report (2024-05-13)  
+**Reference results:** [`open_btle_baseband_chip/`](../../open_btle_baseband_chip/open_btle_baseband_chip.md), upstream's own report (2024-05-13)  
 **Date:** 2026-10-17  
 **Author:** Miguel Simões  
 **Status:** every number below is measured and its evidence is committed (§ 12). Pre-layout
@@ -99,7 +99,7 @@ is used, and is ready in at most four AXI clocks): no stall, no new timing const
 
 | upstream (Python model) | `ble-tx-min` (RTL, Icarus) |
 |---|---|
-| ![upstream TX signals](../open_btle_baseband_chip/py-fig3.png) | ![ble-tx-min TX signals](../results/figures/tx-min/tx_min_py_fig3.png) |
+| ![upstream TX signals](../../open_btle_baseband_chip/py-fig3.png) | ![ble-tx-min TX signals](../../results/figures/tx-min/tx_min_py_fig3.png) |
 | example 2: PDU `0100` (data, empty payload), channel 10 | the same packet: PDU `0100`, channel 10, AA 0x11850A1B, CRC init 0x123456 |
 
 Top: the upsampled PHY bit (±1), the Gaussian filter's output (red, normalized) and the normalized
@@ -114,28 +114,28 @@ normalized): the same tables, taps and modulation index 0.5.
 
 The packet this chip actually sends, a 39-byte ADV_NONCONN_IND (AdvA from the ROM, upstream's BER
 AdvData, channel 37), is 376 bits, 3 024 samples, also 0 samples differ:
-[`tx_min_py_fig3_adv.png`](../results/figures/tx-min/tx_min_py_fig3_adv.png).
+[`tx_min_py_fig3_adv.png`](../../results/figures/tx-min/tx_min_py_fig3_adv.png).
 
 ### 3.2 The receiver's decision (upstream's `py-fig4.png`)
 
 | upstream | `ble-tx-min` |
 |---|---|
-| ![upstream RX decision](../open_btle_baseband_chip/py-fig4.png) | ![ble-tx-min RX decision](../results/figures/tx-min/tx_min_py_fig4.png) |
+| ![upstream RX decision](../../open_btle_baseband_chip/py-fig4.png) | ![ble-tx-min RX decision](../../results/figures/tx-min/tx_min_py_fig4.png) |
 
 The same waveform after the channel of upstream's run (20 dB SNR, 0 ppm), demodulated by upstream's
 receiver (`sign(i0·q1 − i1·q0)` on the 8 sampling phases; red: the best phase). The noise is another draw,
 so the small ripples differ. With the RTL transmitter: CRC OK, the PDU received equal to the one sent. The 39-byte
 ADV packet after 20 dB and 20 ppm, also CRC OK and equal to the one sent (37 payload bytes):
-[`tx_min_py_fig4_adv.png`](../results/figures/tx-min/tx_min_py_fig4_adv.png).
+[`tx_min_py_fig4_adv.png`](../../results/figures/tx-min/tx_min_py_fig4_adv.png).
 
 ### 3.3 Bit error rate (upstream's `open_btle_baseband_chip_21_1.png`, `_23_1.png`)
 
 | | upstream (published) | `ble-tx-min` (RTL transmitter) |
 |---|---|---|
-| 50 ppm | ![upstream BER 50 ppm](../open_btle_baseband_chip/open_btle_baseband_chip_21_1.png) | ![ble-tx-min BER 50 ppm](../results/figures/tx-min/tx_min_ber_ppm50.png) |
-| −30 ppm | ![upstream BER -30 ppm](../open_btle_baseband_chip/open_btle_baseband_chip_23_1.png) | ![ble-tx-min BER -30 ppm](../results/figures/tx-min/tx_min_ber_ppm-30.png) |
+| 50 ppm | ![upstream BER 50 ppm](../../open_btle_baseband_chip/open_btle_baseband_chip_21_1.png) | ![ble-tx-min BER 50 ppm](../../results/figures/tx-min/tx_min_ber_ppm50.png) |
+| −30 ppm | ![upstream BER -30 ppm](../../open_btle_baseband_chip/open_btle_baseband_chip_23_1.png) | ![ble-tx-min BER -30 ppm](../../results/figures/tx-min/tx_min_ber_ppm-30.png) |
 
-![BER overlay](../results/figures/tx-final/tx_final_ber.png)
+![BER overlay](../../results/figures/tx-final/tx_final_ber.png)
 
 Method, as upstream's `test_btle_ber.py`: 39-byte ADV PDUs with a random payload (here: the chip's AdvA
 and 31 random bytes of AdvData), 100/200/300/300 packets at the four SNR points (31 200 to 93 600 bits),
@@ -195,7 +195,7 @@ Yosys + ABC with the Nangate45 library, every configuration in one run (`results
 SRAMs as OpenRAM macros in FreePDK45, the process behind Nangate45, sized exactly as the RTL needs
 them.
 
-![Transmitter area, 45 nm](../results/figures/tx-final/tx_final_area_45nm.png)
+![Transmitter area, 45 nm](../../results/figures/tx-final/tx_final_area_45nm.png)
 
 | `btle_tx` | cells | flip-flops | logic (µm²) | SRAM macros | macros (µm²) | **TX total (µm²)** | vs upstream | vs corrected master |
 |---|---:|---:|---:|---|---:|---:|---:|---:|
@@ -287,7 +287,7 @@ out of context with `btle_controller` as top (as upstream's current `btle_contro
 `bb_clk` at 16 MHz and `rf_clk` at 8 MHz (the documented 2:1 interface), the AXI and the IQ-capture
 port at 100 MHz, asynchronous to them.
 
-![The transmitter on the xc7z020](../results/figures/tx-final/tx_final_fpga.png)
+![The transmitter on the xc7z020](../../results/figures/tx-final/tx_final_fpga.png)
 
 | Routed, xc7z020 | upstream | corrected master | `ble-tx-rom` | **`ble-tx-min`** | flip-flops |
 |---|---:|---:|---:|---:|---:|
@@ -315,7 +315,7 @@ the Device panel maximized and fitted to the device, and the window captured
 (`scripts/fpga/xc7z020/device_view.ps1`, `device_view.tcl`, `device_crop.py`; each image and what it
 highlights in `results/fpga/xc7z020/<configuration>/device.png`, `device.txt`):
 
-![Vivado's Device view of the xc7z020: upstream's image and this flow's](../results/figures/tx-final/tx_final_fpga_device.png)
+![Vivado's Device view of the xc7z020: upstream's image and this flow's](../../results/figures/tx-final/tx_final_fpga_device.png)
 
 - **The reproduced 2024 design lands where upstream's did**: the logic in the two bottom clock regions
   (X0Y0, X1Y0), a tall block rising from X1Y0 into X1Y1 on the right, the IOs along the right edge, and
@@ -339,7 +339,7 @@ mismatches), 100 000 baseband clocks: Σ toggles × pin capacitance of data pins
 (`results/power/tx-min/`). Scenarios: `rx` (packets received), `tx` (packets sent), `mixed`, `idle`
 (noise at the input), `idle0` (no input).
 
-![Switching activity](../results/figures/tx-final/tx_final_activity.png)
+![Switching activity](../../results/figures/tx-final/tx_final_activity.png)
 
 | Data + clock switched capacitance against corrected master | `rx` | `tx` | `mixed` | `idle` | `idle0` |
 |---|---:|---:|---:|---:|---:|
@@ -404,7 +404,7 @@ Upstream ran OpenLane2 with sky130 on two blocks, and neither closed:
 
 | upstream (sky130, OpenLane2) | |
 |---|---|
-| ![upstream RX core GDSII](../open_btle_baseband_chip/btle_rx_core-openlane-GDSII.png) | ![upstream top placement](../open_btle_baseband_chip/btle-top-openlane-detailed-placement-cts.png) |
+| ![upstream RX core GDSII](../../open_btle_baseband_chip/btle_rx_core-openlane-GDSII.png) | ![upstream top placement](../../open_btle_baseband_chip/btle-top-openlane-detailed-placement-cts.png) |
 | `btle_rx_core`: GDSII; "Static Timing Analysis (Post-PnR) failed" | the whole controller: detailed placement and CTS; "Global Routing failed" |
 
 The thesis laid out `ble-tx-min`'s transmitter with LibreLane (OpenLane2's successor) in **GF180MCU-D**,
@@ -415,7 +415,7 @@ side) at 50 MHz, 9 corners (ss 125 °C 4.5 V, tt 25 °C 5 V, ff −40 °C 5.5 V 
 
 | `ble-tx-min`, AdvData in flip-flops | `ble-tx-min`, AdvData in the PDK's SRAM 64 × 8 |
 |---|---|
-| ![GF180 layout, flip-flops](../results/figures/tx-min/tx_min_gf180_gds.png) | ![GF180 layout, SRAM](../results/figures/tx-min/tx_min_gf180_sram64_gds.png) |
+| ![GF180 layout, flip-flops](../../results/figures/tx-min/tx_min_gf180_gds.png) | ![GF180 layout, SRAM](../../results/figures/tx-min/tx_min_gf180_sram64_gds.png) |
 | logic above, the six eFuse blocks (AdvA) in a row at the bottom | the GlobalFoundries SRAM at the top, logic, the eFuse row at the bottom |
 
 | Signoff | flip-flops (`tx-min-gf180`) | **SRAM 64 × 8 (`tx-min-gf180-sram64`)** |
@@ -428,7 +428,7 @@ side) at 50 MHz, 9 corners (ss 125 °C 4.5 V, tt 25 °C 5 V, ff −40 °C 5.5 V 
 | Max slew / max capacitance violations | 0 / 0 | 0 / 0 |
 | IR drop (worst) / clock skew | 1.43 mV / 0.32 ns | 1.22 mV / 0.38 ns |
 
-![GF180 area](../results/figures/tx-final/tx_final_area_gf180.png)
+![GF180 area](../../results/figures/tx-final/tx_final_area_gf180.png)
 
 | GF180MCU-D (µm²) | flip-flops | **SRAM 64 × 8** |
 |---|---:|---:|
@@ -456,7 +456,7 @@ Neither FreePDK45 nor OpenRAM has an OTP; the open GF180MCU eFuse compiler (gith
 gf180_efuse_compiler, Apache-2.0) generates one: `./efuse.py 1 8 --async-efuse --digital-wrapper=async`
 gives `efuse_async_mem_1x8`, eight fuses with their sense amplifiers and latches, read once after reset.
 
-| ![eFuse block layout](../results/figures/tx-min/efuse_async_mem_1x8.png) | ![eFuse programming and sensing, Xyce](../results/figures/tx-min/efuse_xyce.png) |
+| ![eFuse block layout](../../results/figures/tx-min/efuse_async_mem_1x8.png) | ![eFuse programming and sensing, Xyce](../../results/figures/tx-min/efuse_xyce.png) |
 |---|---|
 | the block, 97.27 × 83.02 µm (KLayout) | Xyce on its extracted netlist: programming (≈ 17 mA per fuse while it blows), then sensing after reset |
 
