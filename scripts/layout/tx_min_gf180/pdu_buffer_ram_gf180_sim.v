@@ -7,7 +7,6 @@ module pdu_buffer_ram #
   parameter integer ADDRESS_WIDTH = 5
 ) (
   input wire clk,
-  input wire rst,
   input wire [ADDRESS_WIDTH-1:0] write_address,
   input wire [DATA_WIDTH-1:0] write_data,
   input wire write_enable,
@@ -22,5 +21,4 @@ wire [DATA_WIDTH-1:0] #1 wen_n = {DATA_WIDTH{!write_enable}};
 wire [5:0] #1 a_d = {{(6-ADDRESS_WIDTH){1'b0}}, address};
 wire [DATA_WIDTH-1:0] #1 d_d = write_data;
 gf180mcu_fd_ip_sram__sram64x8m8wm1 sram_i (.CLK(clk), .CEN(cen_n), .GWEN(gwen_n), .WEN(wen_n), .A(a_d), .D(d_d), .Q(read_data));
-wire unused_rst = rst;
 endmodule

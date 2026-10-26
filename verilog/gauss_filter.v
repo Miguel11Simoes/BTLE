@@ -134,7 +134,10 @@ end else begin : gen_no_table
 end
 endgenerate
 
-// Populate input tap index and value to internal taps
+// Populate input tap index and value to internal taps: registers with the runtime FIR
+// (GAUSS_TABLE = 0); with the table they are not read (table_sum), constants
+generate
+if (GAUSS_TABLE == 0) begin : gen_runtime_taps
 always @ (posedge clk) begin
   if (rst) begin
     gauss_filter_tap0 <= 0;
@@ -160,6 +163,21 @@ always @ (posedge clk) begin
     endcase
   end
 end
+end else begin : gen_table_taps
+always @(*) begin
+    gauss_filter_tap0 = 0;
+    gauss_filter_tap1 = 0;
+    gauss_filter_tap2 = 0;
+    gauss_filter_tap3 = 0;
+    gauss_filter_tap4 = 0;
+    gauss_filter_tap5 = 0;
+    gauss_filter_tap6 = 0;
+    gauss_filter_tap7 = 0;
+    gauss_filter_tap8 = 0;
+end
+wire unused_runtime_taps = &{1'b0, tap_index, tap_value};
+end
+endgenerate
 
 
 always @ (posedge clk) begin

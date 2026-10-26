@@ -18,7 +18,6 @@ module pdu_buffer_ram #
   parameter integer ADDRESS_WIDTH = 5
 ) (
   input wire clk,
-  input wire rst,
 
   input wire [ADDRESS_WIDTH-1:0] write_address,
   input wire [DATA_WIDTH-1:0] write_data,
@@ -40,7 +39,5 @@ gf180mcu_fd_ip_sram__sram64x8m8wm1 sram_i (
   .D(write_data),
   .Q(read_data)
 );
-
-wire unused_rst = rst;
 
 endmodule

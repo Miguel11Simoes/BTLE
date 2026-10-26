@@ -13,7 +13,6 @@ module sdpram_two_clk #
   parameter integer ADDRESS_WIDTH = 11
 ) (
   input wire clk,
-  input wire rst,
 
   input wire [ADDRESS_WIDTH-1:0] write_address,
   input wire [DATA_WIDTH-1:0] write_data,
@@ -38,9 +37,5 @@ always @ (posedge clkb) begin
   read_data <= memory[read_address];
 end
 
-
-// Intentionally unused compatibility/debug fields. No functional fanout is added.
-wire unused_interface_fields = &{1'b0,
-  rst};
 
 endmodule

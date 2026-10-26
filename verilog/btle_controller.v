@@ -295,7 +295,7 @@ clock_domain_conversion_iq #
 
   // rx path
   .rf_gpio(rf_gpio),
-  .rx_iq_signal_ext(rx_iq_signal_ext),
+  .rx_iq_signal_ext(rx_iq_signal_ext[(2*RF_I_OR_Q_BIT_WIDTH-1) : 0]),
   .rx_iq_valid_ext(rx_iq_valid_ext),
 
   .rx_i_signal(rx_i_signal),
@@ -345,11 +345,11 @@ auxiliary_daemon #
   .bram_addr_b(bram_addr_b),
   .bram_addr_a(bram_addr_a),
   .bram_clk_a(bram_clk_a),
-  .bram_wrdata_a(bram_wrdata_a),
-  .bram_rddata_a(bram_rddata_a),
-  .bram_en_a(bram_en_a),
-  .bram_rst_a(bram_rst_a),
-  .bram_we_a(bram_we_a)
+  .bram_rddata_a(bram_rddata_a)
+`ifdef XILINX_XPM
+  ,
+  .bram_rst_a(bram_rst_a)
+`endif
 );
 
 btle_ll #
@@ -429,14 +429,8 @@ btle_ll #
   .ll_itrpt6(ll_itrpt6),
   .ll_itrpt7(ll_itrpt7),
 
-  .rx_i_signal(rx_i_signal),
-  .rx_q_signal(rx_q_signal),
-  .rx_iq_valid(rx_iq_valid),
-
-  .i_abs_add_q_abs(i_abs_add_q_abs),
   .agc_lock_change(agc_lock_change),
   .agc_lock_state(agc_lock_state),
-  .rf_gain(rf_gain),
 
   .simulation_en(1'b0), //disable simulation mode
   .simulation_rx_ram_read_en(1'b0), //disable simulation mode
@@ -445,7 +439,6 @@ btle_ll #
   .axi_aclk(s00_axi_aclk),
   .axi_aresetn(s00_axi_aresetn),
   .axi_awaddr(s00_axi_awaddr),
-  .axi_awprot(s00_axi_awprot),
   .axi_awvalid(s00_axi_awvalid),
   .axi_awready(s00_axi_awready),
   .axi_wdata(s00_axi_wdata),
@@ -456,7 +449,6 @@ btle_ll #
   .axi_bvalid(s00_axi_bvalid),
   .axi_bready(s00_axi_bready),
   .axi_araddr(s00_axi_araddr),
-  .axi_arprot(s00_axi_arprot),
   .axi_arvalid(s00_axi_arvalid),
   .axi_arready(s00_axi_arready),
   .axi_rdata(s00_axi_rdata),
@@ -552,6 +544,13 @@ btle_phy #
 
 // Intentionally unused compatibility/debug fields. No functional fanout is added.
 wire unused_interface_fields = &{1'b0,
-  gpio[7:1]};
+  gpio[7:1],
+  // the interface's inputs no block reads: the AXI's protection, the PS's BRAM write side (the PS only
+  // reads the IQ capture), the RF IQ bits above I and Q, and the AGC's outputs (no AGC uses them)
+  s00_axi_awprot, s00_axi_arprot, bram_wrdata_a, bram_we_a, bram_en_a,
+`ifndef XILINX_XPM
+  bram_rst_a,
+`endif
+  rx_iq_signal_ext[(RF_IQ_BIT_WIDTH-1) : (2*RF_I_OR_Q_BIT_WIDTH)], rf_gain, i_abs_add_q_abs};
 
 endmodule

@@ -18,12 +18,6 @@ module vco #
   input wire clk,
   input wire rst,
 
-  // kept for the interface; the tables are fixed, these writes are ignored
-  input  wire [(SIN_COS_ADDR_BIT_WIDTH-1) : 0] cos_table_write_address,
-  input  wire signed [(IQ_BIT_WIDTH-1) : 0] cos_table_write_data,
-  input  wire [(SIN_COS_ADDR_BIT_WIDTH-1) : 0] sin_table_write_address,
-  input  wire signed [(IQ_BIT_WIDTH-1) : 0] sin_table_write_data,
-
   input wire signed [(VCO_BIT_WIDTH-1) : 0] voltage_signal,
   input wire voltage_signal_valid,
   input wire voltage_signal_valid_last,
@@ -361,8 +355,6 @@ always @ (posedge clk) begin
   sin_out <= sin_negative ? -$signed({1'b0, sin_magnitude}) : $signed({1'b0, sin_magnitude});
 end
 
-// Fixed tables deliberately ignore programming ports. Rounding keeps bits [14:8].
-wire unused_fixed_table_interface = &{1'b0, cos_table_write_address, cos_table_write_data,
-  sin_table_write_address, sin_table_write_data};
+// The tables are fixed (a ROM): no programming port. Rounding keeps bits [14:8].
 
 endmodule

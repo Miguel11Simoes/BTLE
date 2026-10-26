@@ -36,7 +36,6 @@ sdpram_two_clk # (
   .ADDRESS_WIDTH(ADDRESS_WIDTH)
 ) serial_in_ram_out_sdpram_two_clk_i (
   .clk(clk),
-  .rst(rst),
 
   .write_address(addr_internal),
   .write_data(data_in),

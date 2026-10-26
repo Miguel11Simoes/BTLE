@@ -63,7 +63,7 @@ localparam [0:0] IDLE                     = 0,
 // reg  [5:0] addr_internal [0 : (SAMPLE_PER_SYMBOL-1)];
 `KEEP_FOR_DBG wire [7:0] data_internal [0 : (SAMPLE_PER_SYMBOL-1)];
 
-`KEEP_FOR_DBG reg  [(NUM_BIT_PAYLOAD_LENGTH-1):0] payload_length_store [0 : (SAMPLE_PER_SYMBOL-1)];
+(* mem2reg *) `KEEP_FOR_DBG reg  [(NUM_BIT_PAYLOAD_LENGTH-1):0] payload_length_store [0 : (SAMPLE_PER_SYMBOL-1)];
 `KEEP_FOR_DBG reg  [(SAMPLE_PER_SYMBOL-1) : 0] crc_ok_store;
 `KEEP_FOR_DBG reg  [(SAMPLE_PER_SYMBOL-1) : 0] decode_end_store;
 `KEEP_FOR_DBG reg  [(SAMPLE_PER_SYMBOL-1) : 0] decode_end_store_effective; // for those sub-decoders never hit, they should be treated as decode end already

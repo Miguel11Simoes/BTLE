@@ -333,10 +333,6 @@ gfsk_modulation # (
   .gauss_filter_tap_index(gauss_filter_tap_index), // only need to set 0~8, 9~16 will be mirror of 0~7
   .gauss_filter_tap_value(gauss_filter_tap_value),
   
-  .cos_table_write_address(cos_table_write_address),
-  .cos_table_write_data(cos_table_write_data),
-  .sin_table_write_address(sin_table_write_address),
-  .sin_table_write_data(sin_table_write_data),
 
   .phy_bit(phy_bit),
   .bit_valid(phy_bit_valid),
@@ -355,6 +351,10 @@ gfsk_modulation # (
   .bit_upsample_gauss_filter_valid(bit_upsample_gauss_filter_valid),
   .bit_upsample_gauss_filter_valid_last(bit_upsample_gauss_filter_valid_last)
 );
+
+// The VCO's table writes: the tables are a ROM (vco.v); the ports are kept for the interface.
+wire unused_vco_table_writes = &{1'b0, cos_table_write_address, cos_table_write_data,
+  sin_table_write_address, sin_table_write_data};
 
 endmodule
 
@@ -507,7 +507,6 @@ end else begin : gen_adv_data_ram
     .ADDRESS_WIDTH(5)
   ) pdu_buffer_ram_i (
     .clk(clkb),
-    .rst(clkb_rst),
 
     .write_address(write_address[4:0]),
     .write_data(write_data),
@@ -538,7 +537,6 @@ module pdu_buffer_ram #
   parameter integer ADDRESS_WIDTH = 8
 ) (
   input wire clk,
-  input wire rst,
 
   input wire [ADDRESS_WIDTH-1:0] write_address,
   input wire [DATA_WIDTH-1:0] write_data,
@@ -556,7 +554,6 @@ sdpram_one_clk # (
   .ADDRESS_WIDTH(ADDRESS_WIDTH)
 ) sdpram_one_clk_i (
   .clk(clk),
-  .rst(rst),
 
   .write_address(address),
   .write_data(write_data),

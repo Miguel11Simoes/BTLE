@@ -21,10 +21,6 @@ module gfsk_modulation #
   input wire [3:0] gauss_filter_tap_index, // only need to set 0~8, 9~16 will be mirror of 0~7
   input wire signed [(GAUSS_FILTER_BIT_WIDTH-1) : 0] gauss_filter_tap_value,
   
-  input  wire [(SIN_COS_ADDR_BIT_WIDTH-1) : 0] cos_table_write_address,
-  input  wire signed [(IQ_BIT_WIDTH-1) : 0] cos_table_write_data,
-  input  wire [(SIN_COS_ADDR_BIT_WIDTH-1) : 0] sin_table_write_address,
-  input  wire signed [(IQ_BIT_WIDTH-1) : 0] sin_table_write_data,
 
   input wire phy_bit,
   input wire bit_valid,
@@ -117,11 +113,6 @@ vco # (
   .clk(clk),
   .rst(rst),
 
-  .cos_table_write_address(cos_table_write_address),
-  .cos_table_write_data(cos_table_write_data),
-  .sin_table_write_address(sin_table_write_address),
-  .sin_table_write_data(sin_table_write_data),
-
   .voltage_signal({{GAUSS_FIR_OUT_AMP_SCALE_DOWN_NUM_BIT_SHIFT{1'b1}}, bit_upsample_gauss_filter[(GAUSS_FILTER_BIT_WIDTH-1) : GAUSS_FIR_OUT_AMP_SCALE_DOWN_NUM_BIT_SHIFT]}),
   .voltage_signal_valid(bit_upsample_gauss_filter_valid),
   .voltage_signal_valid_last(bit_upsample_gauss_filter_valid_last),
@@ -184,16 +175,32 @@ module btle_gauss_tail #(
       end
     end
   end
-  integer k;
+  // the runtime taps: registers with FIXED_TAPS = 0 only (with fixed taps next_correction reads TAPS)
+  generate
+  if (FIXED_TAPS == 0) begin : gen_runtime_taps
+    integer k;
+    always @(posedge clk) begin
+      if (rst) begin
+        for (k=0;k<9;k=k+1) taps[k] <= 0;
+      end else begin
+        if (tap_index < 9) taps[tap_index] <= tap_value;
+      end
+    end
+  end else begin : gen_fixed_taps
+    integer k;
+    always @(*) begin
+      for (k=0;k<9;k=k+1) taps[k] = 0;
+    end
+    wire unused_runtime_taps = &{1'b0, tap_index, tap_value};
+  end
+  endgenerate
   always @(posedge clk) begin
     if (rst) begin
       remaining <= 0;
       padding <= 0;
       wait_cycle <= 0;
       correction <= 0;
-      for (k=0;k<9;k=k+1) taps[k] <= 0;
     end else begin
-      if (tap_index < 9) taps[tap_index] <= tap_value;
       // Capture the same tap epoch as the one-cycle FIR, including a tap write
       // on this edge. The old register value contributes to both terms.
       if (filter_valid) correction <= next_correction;

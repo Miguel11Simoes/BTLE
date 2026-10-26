@@ -23,7 +23,7 @@ module clock_domain_conversion_iq #
 
   // rx path
   input wire [7:0]                     rf_gpio,
-  input wire [(RF_IQ_BIT_WIDTH-1) : 0] rx_iq_signal_ext, // ad9361 8MHz rf clock
+  input wire [(2*RF_I_OR_Q_BIT_WIDTH-1) : 0] rx_iq_signal_ext, // ad9361 8MHz rf clock: I and Q, the bits read
   input wire                           rx_iq_valid_ext,
 
   output reg signed [(GFSK_DEMODULATION_BIT_WIDTH-1) : 0] rx_i_signal, // bb 16MHz clock
@@ -91,10 +91,6 @@ always @ (posedge rf_clk) begin
   end
 end
 
-
-// Intentionally unused compatibility/debug fields. No functional fanout is added.
-wire unused_interface_fields = &{1'b0,
-  rx_iq_signal_ext[63:32]};
 
 endmodule
 

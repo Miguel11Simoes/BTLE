@@ -98,14 +98,9 @@ module btle_ll # (
   output wire ll_itrpt6,
   output wire ll_itrpt7,
 
-  input wire signed [(GFSK_DEMODULATION_BIT_WIDTH-1) : 0] rx_i_signal,
-  input wire signed [(GFSK_DEMODULATION_BIT_WIDTH-1) : 0] rx_q_signal,
-  input wire rx_iq_valid,
 
-  input wire [RF_I_OR_Q_BIT_WIDTH : 0] i_abs_add_q_abs,
   input wire agc_lock_change,
   input wire agc_lock_state,
-  input wire [6:0] rf_gain,
 
   input  wire simulation_en,
   input  wire simulation_rx_ram_read_en,
@@ -114,7 +109,6 @@ module btle_ll # (
   input  wire axi_aclk,
   input  wire axi_aresetn,
   input  wire [C_S00_AXI_ADDR_WIDTH-1 : 0] axi_awaddr,
-  input  wire [2 : 0] axi_awprot,
   input  wire axi_awvalid,
   output wire axi_awready,
   input  wire [C_S00_AXI_DATA_WIDTH-1 : 0] axi_wdata,
@@ -125,7 +119,6 @@ module btle_ll # (
   output wire axi_bvalid,
   input  wire axi_bready,
   input  wire [C_S00_AXI_ADDR_WIDTH-1 : 0] axi_araddr,
-  input  wire [2 : 0] axi_arprot,
   input  wire axi_arvalid,
   output wire axi_arready,
   output wire [C_S00_AXI_DATA_WIDTH-1 : 0] axi_rdata,
@@ -225,8 +218,6 @@ wire rx_done;
 wire frame_error;
 
 // tx
-wire frame_en;
-wire [FRAME_WD-1:0] data_frame;
 wire tx_done;
 
 // ===============link layer state machine================
@@ -358,8 +349,6 @@ assign rx_crc_state_init_bit_axi      = slv_reg12[(CRC_STATE_BIT_WIDTH-1) : 0];
 
 // assign rx_pdu_octet_mem_addr          = slv_reg13[5 : 0];
 
-assign data_frame                     = slv_reg47[(FRAME_WD-1) : 0];
-assign frame_en                       = slv_reg47[FRAME_WD];
 
 assign slv_reg48 = {31'd0, tx_iq_valid_last_axi};
 assign slv_reg49 = {12'd0, rx_hit_flag_axi, rx_decode_run_axi, rx_decode_end_axi, rx_crc_ok_axi_lock, 
@@ -442,15 +431,9 @@ rx_ram #
   .NUM_BIT_PAYLOAD_LENGTH(NUM_BIT_PAYLOAD_LENGTH),
   .RD_DATA_AXI_REG_IDX(40) // MUST be aligned with .rd_data_axi(slv_regXX)
 ) rx_ram_i (
-  .bb_clk(bb_clk),
-  .bb_rst(bb_rst),
-
   .axi_aclk(axi_aclk),
   .axi_aresetn(axi_aresetn),
 
-  .rx_unique_bit_sequence_axi(rx_unique_bit_sequence_axi),
-  .rx_channel_number_axi(rx_channel_number_axi),
-  .rx_crc_state_init_bit_axi(rx_crc_state_init_bit_axi),
 
   .rx_hit_flag_axi(rx_hit_flag_axi),
   .rx_decode_run_axi(rx_decode_run_axi),
@@ -883,7 +866,6 @@ ll_s_axi # (
   .S_AXI_ACLK(axi_aclk),
   .S_AXI_ARESETN(axi_aresetn),
   .S_AXI_AWADDR(axi_awaddr),
-  .S_AXI_AWPROT(axi_awprot),
   .S_AXI_AWVALID(axi_awvalid),
   .S_AXI_AWREADY(axi_awready),
   .S_AXI_WDATA(axi_wdata),
@@ -894,7 +876,6 @@ ll_s_axi # (
   .S_AXI_BVALID(axi_bvalid),
   .S_AXI_BREADY(axi_bready),
   .S_AXI_ARADDR(axi_araddr),
-  .S_AXI_ARPROT(axi_arprot),
   .S_AXI_ARVALID(axi_arvalid),
   .S_AXI_ARREADY(axi_arready),
   .S_AXI_RDATA(axi_rdata),
@@ -975,19 +956,12 @@ ll_s_axi # (
   .SLV_REG63(slv_reg63)
 );
 
-uart_frame_tx #(
-  .CLK_FREQUENCE(CLK_FREQUENCE),
-  .BAUD_RATE(BAUD_RATE),
-  .PARITY(PARITY),
-  .FRAME_WD(FRAME_WD)
-) uart_frame_tx_i (
-  .clk(axi_aclk),
-  .rst_n(axi_aresetn),
-  .frame_en(frame_en),
-  .data_frame(data_frame),
-  .tx_done(tx_done),
-  .uart_tx(uart_tx)
-);
+// The TX UART: its frame and enable are slv_reg47, tied to 0, so after reset uart_frame_tx never
+// leaves IDLE: uart_tx holds 1 (the line idle) and tx_done 0. Its outputs, not the dead UART.
+reg uart_tx_idle;
+always @ (posedge axi_aclk) uart_tx_idle <= 1'b1;
+assign uart_tx = uart_tx_idle;
+assign tx_done = 1'b0;
 
 uart_frame_rx #(
   .CLK_FREQUENCE(CLK_FREQUENCE),
@@ -1006,8 +980,9 @@ uart_frame_rx #(
 
 // Intentionally unused compatibility/debug fields. No functional fanout is added.
 wire unused_interface_fields = &{1'b0,
-  axi_araddr_core_bb, event0_counter_delay3, event0_event5_unequal, i_abs_add_q_abs, rf_gain,
-  rx_i_signal, rx_iq_valid, rx_q_signal, slv_reg0[31:16], slv_reg1[31:20],
+  axi_araddr_core_bb, event0_counter_delay3, event0_event5_unequal,
+  GFSK_DEMODULATION_BIT_WIDTH, RF_I_OR_Q_BIT_WIDTH,
+  slv_reg0[31:16], slv_reg1[31:20],
   slv_reg11[31:6], slv_reg12[31:24], slv_reg13, slv_reg14, slv_reg15,
   slv_reg16, slv_reg17, slv_reg18, slv_reg19, slv_reg2[31:27], slv_reg2[15:8],
   slv_reg20, slv_reg21, slv_reg22, slv_reg23, slv_reg24,
@@ -1032,15 +1007,8 @@ module rx_ram #
   parameter integer NUM_BIT_PAYLOAD_LENGTH = 8, // 8 bit in the core spec 6.2
   parameter integer RD_DATA_AXI_REG_IDX = 40
 ) (
-  input wire bb_clk,
-  input wire bb_rst,
-
   input wire axi_aclk,
   input wire axi_aresetn,
-
-  input wire [(LEN_UNIQUE_BIT_SEQUENCE-1)  : 0] rx_unique_bit_sequence_axi,
-  input wire [(CHANNEL_NUMBER_BIT_WIDTH-1) : 0] rx_channel_number_axi,
-  input wire [(CRC_STATE_BIT_WIDTH-1) : 0]      rx_crc_state_init_bit_axi,
 
   `KEEP_FOR_DBG input wire rx_hit_flag_axi,
   `KEEP_FOR_DBG input wire rx_decode_run_axi,
@@ -1181,7 +1149,6 @@ sdpram_one_clk #
   .ADDRESS_WIDTH(ADDR_WIDTH_DPRAM)
 ) sdpram_one_clk_for_rx_ram_i (
   .clk(axi_aclk),
-  .rst(~axi_aresetn),
 
   .write_address(write_address),
   .write_data(write_data),
@@ -1194,8 +1161,8 @@ sdpram_one_clk #
 
 // Intentionally unused compatibility/debug fields. No functional fanout is added.
 wire unused_interface_fields = &{1'b0,
-  bb_clk, bb_rst, rx_channel_number_axi, rx_crc_ok_axi_lock, rx_crc_state_init_bit_axi,
-  rx_decode_run_axi, rx_hit_flag_axi, rx_unique_bit_sequence_axi};
+  rx_crc_ok_axi_lock, rx_decode_run_axi, rx_hit_flag_axi,
+  LEN_UNIQUE_BIT_SEQUENCE, CHANNEL_NUMBER_BIT_WIDTH, CRC_STATE_BIT_WIDTH};
 
 endmodule
 
@@ -1401,7 +1368,6 @@ module ll_s_axi #
   // Write channel Protection type. This signal indicates the
   // privilege and security level of the transaction, and whether
   // the transaction is a data access or an instruction access.
-  input wire [2 : 0] S_AXI_AWPROT,
   // Write address valid. This signal indicates that the master signaling
   // valid write address and control information.
   input wire  S_AXI_AWVALID,
@@ -1434,7 +1400,6 @@ module ll_s_axi #
   // Protection type. This signal indicates the privilege
   // and security level of the transaction, and whether the
   // transaction is a data access or an instruction access.
-  input wire [2 : 0] S_AXI_ARPROT,
   // Read address valid. This signal indicates that the channel
   // is signaling valid read address and control information.
   input wire  S_AXI_ARVALID,
@@ -2238,7 +2203,7 @@ end
 
 // Intentionally unused compatibility/debug fields. No functional fanout is added.
 wire unused_interface_fields = &{1'b0,
-  S_AXI_ARPROT, S_AXI_AWPROT, axi_araddr[1:0], axi_awaddr[1:0]};
+  axi_araddr[1:0], axi_awaddr[1:0]};
 
 endmodule
 
@@ -2847,7 +2812,6 @@ sdpram_two_clk #
   .ADDRESS_WIDTH(1)
 ) sdpram_two_clk_for_clk_cross_bus_i (
   .clk(write_clk),
-  .rst(rst),
 
   .write_address(1'd0),
   .write_data(write_data),
@@ -2978,6 +2942,12 @@ xpm_fifo_async_clk_cross_inst (
                                  // to the FIFO. Must be held active-low when rst or wr_rst_busy is active high.
 );
 
+`endif
+
+`ifndef XILINX_XPM
+// Intentionally unused compatibility/debug fields. No functional fanout is added.
+wire unused_interface_fields = &{1'b0,
+  rst};  // the vendor FIFO's reset (XILINX_XPM only)
 `endif
 
 endmodule

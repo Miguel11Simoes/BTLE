@@ -37,11 +37,11 @@ module auxiliary_daemon #
   `KEEP_FOR_DBG output reg  [BRAM_ADDR_WIDTH-1 : 0] bram_addr_b,
   `KEEP_FOR_DBG input  wire [BRAM_ADDR_WIDTH_IN_BYTE-1 : 0] bram_addr_a,
   input  wire bram_clk_a,
-  input  wire [BRAM_DATA_WIDTH-1 : 0] bram_wrdata_a,
-  `KEEP_FOR_DBG output wire [BRAM_DATA_WIDTH-1 : 0] bram_rddata_a,
-  input  wire bram_en_a,
-  input  wire bram_rst_a,
-  input  wire bram_we_a
+  `KEEP_FOR_DBG output wire [BRAM_DATA_WIDTH-1 : 0] bram_rddata_a
+`ifdef XILINX_XPM
+  ,
+  input  wire bram_rst_a  // the vendor macro's port-B reset (sdpram_two_clk_xilinx)
+`endif
 );
 
 reg [(RF_I_OR_Q_BIT_WIDTH-1) : 0] i_abs;
@@ -108,7 +108,6 @@ sdpram_two_clk #
   .ADDRESS_WIDTH(BRAM_ADDR_WIDTH)
 ) sdpram_two_clk_auxiliary_daemon_i (
   .clk(bb_clk),
-  .rst(bb_rst),
 
   .write_address(bram_addr_b),
   .write_data({rx_q_signal, rx_i_signal}),
@@ -123,7 +122,6 @@ sdpram_two_clk #
 
 // Intentionally unused compatibility/debug fields. No functional fanout is added.
 wire unused_interface_fields = &{1'b0,
-  GFSK_DEMODULATION_BIT_WIDTH, IQ_BIT_WIDTH, bram_addr_a[1:0], bram_en_a, bram_rst_a,
-  bram_we_a, bram_wrdata_a};
+  GFSK_DEMODULATION_BIT_WIDTH, IQ_BIT_WIDTH, bram_addr_a[1:0]};
 
 endmodule
