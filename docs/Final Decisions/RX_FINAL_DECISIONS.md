@@ -1,15 +1,17 @@
 # The final receiver: upstream against `ble-rx-best` and `ble-rx-micro`, every result side by side
 
 **Project:** BTLE — reconfigurable RISC-V baseband  
-**Branch:** `ble-rx-micro` (the runs of this document, run `rx-final`; the RTL of `ble-rx-best` at `3d92ea80`, of `ble-rx-micro` at `745e4bba`)  
+**Branch:** `ble-rx-micro` (the runs of this document, runs `rx-final` and `rx-clean`; the RTL of `ble-rx-best` at `18de7f5f`, of `ble-rx-micro` at `ef209ed7`, the same circuits as `3d92ea80` and `745e4bba`, proved: § 8.1)  
 **Base:** tag `upstream-baseline` (`8540186`), forked from github.com/JiaoXianjun/BTLE  
 **Reference results:** [`open_btle_baseband_chip/`](../../open_btle_baseband_chip/open_btle_baseband_chip.md), upstream's own report (2024-05-13)  
 **Companion:** [TX_FINAL_DECISIONS.md](TX_FINAL_DECISIONS.md) (the transmitter)  
-**Date:** 2026-10-23  
+**Date:** 2026-10-26 (first version 2026-10-23)  
 **Author:** Miguel Simões  
 **Status:** every number below is measured and its evidence is committed on `ble-rx-micro` (§ 11). Pre-layout
 results in 45 nm, a routed FPGA implementation, and signoff-clean layouts of the two receivers in an open
-180 nm PDK; not a tape-out (`docs/Validation/ASIC_READINESS.md`: NOT READY, as on every branch).
+180 nm PDK; **the synthesis (Vivado, Yosys) and the layout (LibreLane) of both receivers end with no warning
+that is not a reviewed exception** (§ 8.1); not a tape-out (`docs/Validation/ASIC_READINESS.md`: NOT READY,
+as on every branch).
 
 ---
 
@@ -38,11 +40,15 @@ The configurations:
 | **upstream 2024** | the design `open_btle_baseband_chip.md` describes and measured: its FPGA table and its figures | commit `fc5bc42` (2024-05-13) |
 | **upstream** | the upstream design this repository forked: the 2024 design plus a RISC-V-ready Link Layer, a 1 Mbit IQ-capture RAM and an 8-bit payload length; its receiver is the 2024 one | `upstream-baseline` (`8540186`) |
 | **corrected master** | upstream with the product audit's corrections and the lint closure: **the reference every branch is validated against**, and of the switching activity (§ 7.1) | `master` (`fca6ac6`) |
-| **`ble-rx-best`** | the final equivalent receiver, its defaults (`RX_BRANCH_COMPARISON.md` § 16) | `3d92ea80` |
-| **`ble-rx-micro`** | the final reduced receiver, its defaults (§ 17) | `745e4bba` |
+| **`ble-rx-best`** | the final equivalent receiver, its defaults (`RX_BRANCH_COMPARISON.md` § 16) | `18de7f5f` (≡ `3d92ea80`, § 8.1) |
+| **`ble-rx-micro`** | the final reduced receiver, its defaults (§ 17) | `ef209ed7` (≡ `745e4bba`, § 8.1) |
 
 The controllers of `ble-rx-best` and `ble-rx-micro` carry corrected master's transmitter (the receiver
-branches change only the receiver); `TX_FINAL_DECISIONS.md` is the transmitter's account.
+branches change only the receiver); `TX_FINAL_DECISIONS.md` is the transmitter's account. The two branches'
+RTL was cleaned of every synthesis warning that came from it after the first version of this document
+(§ 8.1): the same circuits, proved; the measures of synthesis and layout are those of the cleaned RTL, the
+packet error rates and the receiver's decisions (§ 3) those of `3d92ea80` and `745e4bba`, which the proof
+carries over.
 
 ## 1. Summary
 
@@ -52,13 +58,14 @@ branches change only the receiver); `TX_FINAL_DECISIONS.md` is the transmitter's
 | Sampling phases decoded / chosen by | 8 / the CRC | 8 / the CRC | **1 / the Access Address** | § 2 |
 | Same packets as upstream (advertising) | — | **yes**: proved (unbounded), 60/60 lockstep runs, 0 of 32 000 packets different | **no, by design**: ≡ its own model on 9 600/9 600 packets | § 3 |
 | **SNR at PER 10 %**, 0 / 20 / −30 / 50 ppm (RTL, 1 000 packets per point) | 9.34 / 12.01 / 14.44 / 25.05 dB | **the same** | 10.98 / 13.65 / 16.15 / 27.17 dB (**+1.6 to +2.1 dB**) | § 3.3 |
-| **RX area, 45 nm** (cells + SRAM macros, µm²) | 238 488.1 | **20 896.5 (−91.2 %)** | **6 993.7 (−97.1 %)** | § 4 |
+| **RX area, 45 nm** (cells + SRAM macros, µm²) | 238 488.1 | **20 896.7 (−91.2 %)** | **6 976.1 (−97.1 %)** | § 4 |
 | SRAM bits in the RX | 32 768 (8 × 512 × 8, two ports) | 2 688 (336 × 8, one port) | **0** | § 4 |
-| RX on the xc7z020: LUTs / flip-flops / RAMB18 / DSP48 | 2 243 / 2 572 / 8 / 48 | **914 / 1 181 / 1 / 2** | **482 / 435 / 0 / 0** | § 6 |
-| `btle_rx` min period, 45 nm (target 62.5 ns) | 1.862 ns | 1.997 ns | **1.459 ns** | § 5 |
-| Switching activity of the controller, `mixed`, against corrected master | −2.9 % | +9.6 % | **−31.8 %** | § 7 |
-| RX logic leakage, 45 nm | 1 063.4 µW | 263.5 µW | **139.0 µW** | § 7 |
-| Open-PDK layout | sky130: STA failed (one RX core); global routing failed (whole chip) | **GF180MCU, signoff clean**, with the PDK's SRAM: 513 211 µm² | **GF180MCU, signoff clean**: 152 189 µm² | § 8 |
+| RX on the xc7z020: LUTs / flip-flops / RAMB18 / DSP48 | 2 247 / 2 572 / 8 / 48 | **911 / 1 181 / 1 / 2** | **482 / 435 / 0 / 0** | § 6 |
+| `btle_rx` min period, 45 nm (target 62.5 ns) | 1.862 ns | 2.092 ns | **1.461 ns** | § 5 |
+| Switching activity of the controller, `mixed`, against corrected master | −2.9 % | +8.8 % | **−32.4 %** | § 7 |
+| RX logic leakage, 45 nm | 1 063.4 µW | 263.2 µW | **138.5 µW** | § 7 |
+| Open-PDK layout | sky130: STA failed (one RX core); global routing failed (whole chip) | **GF180MCU, signoff clean**, with the PDK's SRAM: 513 642 µm² | **GF180MCU, signoff clean**: 144 817 µm² | § 8 |
+| Warnings of synthesis (Vivado, Yosys) and layout (LibreLane) | Vivado: 207 in synthesis, none reviewed | **0 unreviewed** (the gate: Vivado 150, Yosys 0, LibreLane 25, all reviewed exceptions) | **0 unreviewed** (Vivado 150, Yosys 0, LibreLane 16) | § 8.1 |
 
 **In one sentence:** `ble-rx-best` receives every Legacy Advertising packet upstream receives, the same
 packets at every SNR and clock error, in 8.8 % of upstream's receiver area (45 nm), and `ble-rx-micro`
@@ -221,7 +228,8 @@ clock-by-clock lockstep against the step before and against corrected master
 
 ## 4. Area in 45 nm (Nangate45 cells + OpenRAM macros, FreePDK45)
 
-Yosys + ABC with the Nangate45 library, the three receivers in one run (`results/area/rx-final/`); the
+Yosys + ABC with the Nangate45 library (`results/area/rx-final/upstream/`, and the two branches after the
+cleanup, `results/area/rx-clean/`); the
 SRAMs as OpenRAM macros in FreePDK45, sized exactly as the RTL needs them (upstream's 512 × 8 two-port,
 `openram-rx-adv`; `ble-rx-best`'s 336 × 8 one-port, `openram-rx-best`, layout only: OpenRAM cannot
 characterize a macro whose words are not a power of two, `RX_BEST_VALIDATION.md` § 1).
@@ -231,8 +239,8 @@ characterize a macro whose words are not a power of two, `RX_BEST_VALIDATION.md`
 | `btle_rx` | cells | flip-flops | logic (µm²) | SRAM macros | macros (µm²) | **RX total (µm²)** | vs upstream |
 |---|---:|---:|---:|---|---:|---:|---:|
 | upstream | 36 864 | 2 068 | 48 824.3 | 8 × 512 × 8, two ports | 189 663.8 | **238 488.1** | — |
-| **`ble-rx-best`** | 7 281 | 1 371 | 12 780.0 | **336 × 8, one port** | **8 116.5** | **20 896.5** | **−91.2 %** (11.4 × smaller) |
-| **`ble-rx-micro`** | 3 668 | 787 | 6 993.7 | **none** | **0** | **6 993.7** | **−97.1 %** (34.1 × smaller) |
+| **`ble-rx-best`** | 7 255 | 1 371 | 12 780.2 | **336 × 8, one port** | **8 116.5** | **20 896.7** | **−91.2 %** (11.4 × smaller) |
+| **`ble-rx-micro`** | 3 624 | 787 | 6 976.1 | **none** | **0** | **6 976.1** | **−97.1 %** (34.2 × smaller) |
 
 | Inside `btle_rx` (µm²) | upstream | `ble-rx-best` | `ble-rx-micro` |
 |---|---:|---:|---:|
@@ -243,10 +251,10 @@ characterize a macro whose words are not a power of two, `RX_BEST_VALIDATION.md`
 1. **Upstream's receiver is 80 % memory.** Its eight two-port 512 × 8 RAMs are 189 663.8 µm² of
    238 488.1; `ble-rx-best` keeps one single-port macro of 336 words (2 688 of the 32 768 bits),
    `ble-rx-micro` none.
-2. **The logic falls by 74 % and 86 %** (48 824.3 → 12 780.0 → 6 993.7 µm²): eight demodulators of two
+2. **The logic falls by 74 % and 86 %** (48 824.3 → 12 780.2 → 6 976.1 µm²): eight demodulators of two
    16-bit multipliers each become one with one multiplier; eight AA correlators, one automaton; eight
    decoders, one.
-3. **`ble-rx-micro` is a third of `ble-rx-best`** (−66.5 %): the macro and its single-port logic go, the
+3. **`ble-rx-micro` is a third of `ble-rx-best`** (−66.6 %): the macro and its single-port logic go, the
    decoder keeps one phase of eight, and the multiplier and its history halve in width.
 
 The whole controller (the transmitter of corrected master, the link layer and the IQ-capture RAM
@@ -255,8 +263,8 @@ included, untouched):
 | `btle_controller` | cells | flip-flops | cell area (µm²) | SRAM macros / bits |
 |---|---:|---:|---:|---:|
 | upstream | 50 295 | 4 578 | 71 706.4 | 15 / 1 136 070 |
-| `ble-rx-best` | 22 983 | 4 025 | 38 700.1 | 8 / 1 105 990 |
-| `ble-rx-micro` | 19 671 | 3 441 | 33 226.1 | 7 / 1 103 302 |
+| `ble-rx-best` | 23 119 | 4 003 | 38 680.9 | 8 / 1 105 990 |
+| `ble-rx-micro` | 19 525 | 3 419 | 32 988.5 | 7 / 1 103 302 |
 
 ## 5. Timing
 
@@ -267,22 +275,22 @@ clock-to-Q + setup (Nangate45 typical, no wires); target 62.5 ns (the 16 MHz bas
 
 | | upstream | `ble-rx-best` | `ble-rx-micro` |
 |---|---:|---:|---:|
-| `btle_rx` alone: logic path / **min period** / Fmax | 1.515 / **1.862 ns** / 537 MHz | 1.650 / **1.997 ns** / 501 MHz | 1.112 / **1.459 ns** / 686 MHz |
+| `btle_rx` alone: logic path / **min period** / Fmax | 1.515 / **1.862 ns** / 537 MHz | 1.745 / **2.092 ns** / 478 MHz | 1.114 / **1.461 ns** / 684 MHz |
 | `btle_rx`'s worst path | a demodulator's multiply (`i0 → signal_for_decision`) | the history read into the one multiplier | the same, 8 bits |
-| Controller: min period / worst path | 1.991 ns, an RX demodulator | 3.334 ns, corrected master's TX Gaussian tail | 3.340 ns, the same |
+| Controller: min period / worst path | 1.991 ns, an RX demodulator | 3.376 ns, corrected master's TX Gaussian tail | 3.417 ns, the same |
 
 The one multiplier of `ble-rx-best` takes its operands through a multiplexer in the clock of the history
-read (+0.14 ns); `ble-rx-micro`'s 8-bit one is the shortest receiver of every branch. The controllers of
+read (+0.23 ns; ABC's mapping moves it by about 0.1 ns from run to run); `ble-rx-micro`'s 8-bit one is the shortest receiver of every branch. The controllers of
 the two branches time at the transmitter of corrected master (the audit's Gaussian tail,
 `TX_FINAL_DECISIONS.md` § 5.1); at 16 MHz none of it matters (slack > 59 ns). `ble-rx-best`'s macro and
 its address are not timed here (no timing model; § 8 times the GF180 SRAM).
 
 ### 5.2 In the FPGA and in GF180MCU
 
-On the xc7z020 (§ 6) the baseband clock meets 62.5 ns with 47.3–47.5 ns of slack in every configuration;
-the AXI clock (10 ns) has its worst path **from the packet RAM to the AXI read register**: +2.778 ns
-(upstream's two-port RAMs), **+1.077 ns** (`ble-rx-best`'s single-port RAM, read on the AXI clock through
-its output multiplexer), +3.401 ns (`ble-rx-micro`: no RAM; its worst AXI path is in the link layer). In
+On the xc7z020 (§ 6) the baseband clock meets 62.5 ns with 42.1–47.6 ns of slack in every configuration;
+the AXI clock (10 ns) has its worst path **from the packet RAM to the AXI read register**: +2.858 ns
+(upstream's two-port RAMs), **+1.434 ns** (`ble-rx-best`'s single-port RAM, read on the AXI clock through
+its output multiplexer), +3.652 ns (`ble-rx-micro`: no RAM; its worst AXI path is in the link layer). In
 the GF180MCU layouts every corner meets setup and hold (§ 8).
 
 ## 6. FPGA: the xc7z020 of upstream's report
@@ -291,20 +299,24 @@ Upstream implemented its 2024 design on the xc7z020 with Vivado 2021.1; the same
 `TX_FINAL_DECISIONS.md` § 6 (Vivado 2026.1, `xc7z020clg484-1`, default strategies; `scripts/fpga/xc7z020/`,
 `results/fpga/xc7z020-rx/`), which reproduces upstream's published table (LUTs within 0.2 %, registers,
 muxes and DSPs identical: `TX_FINAL_DECISIONS.md` § 6). The current designs run out of context with
-`btle_controller` as top, `bb_clk` at 16 MHz, the AXI and IQ-capture clocks at 100 MHz.
+`btle_controller` as top, `bb_clk` at 16 MHz, the AXI and IQ-capture clocks at 100 MHz, in mode `ooc_hd`:
+the out-of-context constraints that Vivado otherwise warns about (each clock's source, the ports' partition
+pins, the resets deasserted in the power analysis; § 8.1), the same for the three
+(`results/fpga/xc7z020-rx-clean/`; the 2024 design: `results/fpga/xc7z020-rx/up2024/`).
 
 ![The receiver on the xc7z020](../../results/figures/rx-final/rx_final_fpga.png)
 
 | Routed, xc7z020 | upstream 2024 (wrapper) | upstream | **`ble-rx-best`** | **`ble-rx-micro`** |
 |---|---:|---:|---:|---:|
-| **`btle_rx`**: LUTs (of which LUTRAM) | 1 544 (96) | 2 243 (0) | **914 (0)** | **482 (12)** |
+| **`btle_rx`**: LUTs (of which LUTRAM) | 1 544 (96) | 2 247 (0) | **911 (0)** | **482 (12)** |
 | **`btle_rx`**: flip-flops | 1 494 | 2 572 | **1 181** | **435** |
 | **`btle_rx`**: RAMB18 / DSP48 | 0 / 48 | 8 / 48 | **1 / 2** | **0 / 0** |
-| **`btle_rx`**: dynamic power (vectorless) | 9 mW | 15 mW | **4 mW** | **1 mW** |
-| Controller: LUTs / flip-flops | 3 568 / 2 307 | 4 457 / 5 756 | 3 418 / 4 509 | 2 988 / 3 763 |
+| **`btle_rx`**: dynamic power (vectorless) | 9 mW | 20 mW | **4 mW** | **1 mW** |
+| Controller: LUTs / flip-flops | 3 568 / 2 307 | 4 458 / 5 756 | 3 411 / 4 509 | 2 985 / 3 763 |
 | Controller: block RAM tiles / DSPs | 0 / 48 | 38 / 48 | 34.5 / 2 | 34 / 0 |
-| WNS `bb_clk` (62.5 ns) / AXI (10 ns) | 29.278 ns (`clk`) | 47.450 / 2.778 ns | 47.331 / 1.077 ns | 47.322 / 3.401 ns |
-| Total on-chip power (vectorless) | 0.119 W | 0.206 W | 0.196 W | 0.192 W |
+| WNS `bb_clk` (62.5 ns) / AXI (10 ns) | 29.278 ns (`clk`) | 42.058 / 2.858 ns | 47.438 / 1.434 ns | 47.558 / 3.652 ns |
+| Total on-chip power (vectorless) | 0.119 W | 0.211 W | 0.196 W | 0.192 W |
+| Synthesis warnings (Vivado's count) / unreviewed (§ 8.1) | 12 / — | 207 / 207 | **73 / 0** | **73 / 0** |
 
 - **The DSPs were the receiver's**: all 48 DSP48 of upstream's controller are in its receiver, the
   8 demodulators' multipliers; `ble-rx-best` keeps 2 (its one multiplier), `ble-rx-micro` none (Vivado
@@ -312,14 +324,15 @@ muxes and DSPs identical: `TX_FINAL_DECISIONS.md` § 6). The current designs run
 - **The block RAM**: upstream's receiver takes 8 RAMB18 (its 8 packet RAMs), `ble-rx-best` one,
   `ble-rx-micro` none (its 42 octets in 12 LUTs of distributed RAM and flip-flops). The 32 RAMB36 of every
   current configuration are the IQ-capture RAM, upstream's.
-- **The receiver goes from 2 243 LUTs to 914 and 482** (−59 % and −79 %), its flip-flops from 2 572 to
+- **The receiver goes from 2 247 LUTs to 911 and 482** (−59 % and −79 %), its flip-flops from 2 572 to
   1 181 and 435. The 2024 receiver (1 544 LUTs, its packet RAMs in 96 LUTRAM) is the published flow's,
   with IOs; it is the calibration of the flow, not a configuration compared.
 - Vivado's power is vectorless (default toggle rates) and rounds to 1 mW: an estimate; 0.106 W of every
   total is the device's static power.
 
 **The Device view (upstream's `btle_controller_xilinx_7z020.jpg`).** Vivado's Device view of the
-routed designs, as in `TX_FINAL_DECISIONS.md` § 6: the checkpoints opened in Vivado 2026.1's GUI,
+routed designs, as in `TX_FINAL_DECISIONS.md` § 6 (the implementations before the cleanup of § 8.1, mode
+`ooc`, RTL `3d92ea80` and `745e4bba`: the same circuits, placed by another run): the checkpoints opened in Vivado 2026.1's GUI,
 `btle_rx`'s primitives highlighted in orange (`device_view.ps1` with `btle_rx_i`, `device_view.tcl`,
 `device_crop.py`; each image and what it highlights in `results/fpga/xc7z020-rx/<configuration>/device.png`,
 `device.txt`):
@@ -341,7 +354,8 @@ Four measures, from the most relative to the most absolute; none is a silicon me
 
 **7.1 Switching activity of the controller.** Gate-level netlists (Nangate45) of each configuration and
 of corrected master, in one Verilator simulation per scenario, 100 000 baseband clocks, the vectors of run
-`all-branches`: Σ toggles × pin capacitance of data pins and flip-flop clock pins (`results/power/rx-final/`).
+`all-branches`: Σ toggles × pin capacitance of data pins and flip-flop clock pins (`results/power/rx-final/upstream/`,
+`results/power/rx-clean/` for the two branches).
 Scenarios: `rx` (packets received), `tx` (packets sent), `mixed`, `idle` (noise at the input), `idle0`
 (no input).
 
@@ -351,33 +365,34 @@ Scenarios: `rx` (packets received), `tx` (packets sent), `mixed`, `idle` (noise 
 |---|---:|---:|---:|---:|---:|
 | corrected master (fF·toggles) | 1.258 × 10⁹ | 1.040 × 10⁹ | 1.302 × 10⁹ | 1.290 × 10⁹ | 0.975 × 10⁹ |
 | upstream | −2.4 % | −4.0 % | −2.9 % | −2.5 % | −2.7 % |
-| **`ble-rx-best`** | +10.0 % | +11.7 % | +9.6 % | +10.4 % | +12.3 % |
-| **`ble-rx-micro`** | **−31.8 %** | **−21.2 %** | **−31.8 %** | **−32.8 %** | **−22.7 %** |
+| **`ble-rx-best`** | +9.2 % | +10.8 % | +8.8 % | +9.7 % | +11.9 % |
+| **`ble-rx-micro`** | **−32.3 %** | **−21.8 %** | **−32.4 %** | **−33.3 %** | **−23.2 %** |
 
 Upstream's outputs are corrected master's on all five scenarios (0 mismatches): on this traffic the
 audit's corrections change no output, and add 2–4 % of switching (the most in `tx`). **`ble-rx-best` switches
 more than upstream**: one multiplier computes two products in two clocks, its operands' multiplexers and
 the single-port RAM's clock-domain logic (132 flip-flops on the AXI clock) toggle; the clock load falls
-(−14.7 %), the data rises (+64.6 %). **`ble-rx-micro` switches a third less**: one decoder instead of
-eight, 584 flip-flops fewer, an 8-bit datapath (clock −26.9 %, data −42.9 % in `mixed`).
+(−15.1 %), the data rises (+62.9 %). **`ble-rx-micro` switches a third less**: one decoder instead of
+eight, 584 flip-flops fewer, an 8-bit datapath (clock −27.4 %, data −43.7 % in `mixed`). The cleanup of
+§ 8.1 removes no logic that toggles but the link layer's dead TX UART: −0.8 and −0.6 points.
 
 **7.2 The SRAMs' energy (SPICE).** **`ble-rx-best`'s 336 × 8 macro could not be characterized**: OpenRAM's flow probes the address of all ones, which a 336-word macro lacks; `openram_char.py` now probes its last word, and then the measurement at a 5 ns period fails (ngspice: "Couldn't run a simulation", `results/power/sram-char-rx-final-5ns/`), and the search for a feasible period did not end within the 6 h limit (`results/power/sram-char-rx-final/`). **Upstream's 512 × 8 two-port macro** (eight in its receiver) could not be characterized either: it did not finish in 6 h in run `sram-char`, and run again without that limit it ended after 14.4 h with OpenRAM's "Sense amp enable timing error" at the 5 ns period (`results/power/sram-char-rx-final-upstream/`): the macro as generated does not read at that period, and its energy stays unknown. For reference, the one-port 512 × 8 of `ble-rx-min` (the same column width, more words on each bitline) costs 1.161 pJ per write, 1.068 pJ per read and 25.11 µW of settled leakage (`RX_BRANCH_COMPARISON.md` § 15.4): a bound from above for `ble-rx-best`'s macro. `ble-rx-micro` has no SRAM.
 
 **7.3 Leakage of the receiver's logic** (`scripts/power/logic_leakage.py`, the Nangate45 liberty's
-`cell_leakage_power` of every cell, 1.10 V typical; `results/power/rx-final-leakage/summary.md`):
+`cell_leakage_power` of every cell, 1.10 V typical; `results/power/rx-clean-leakage/summary.md`):
 
 | | `btle_rx` logic leakage | of which flip-flops | controller logic leakage |
 |---|---:|---:|---:|
 | upstream | 1 063.38 µW | 163.60 µW | 1 529.29 µW |
-| `ble-rx-best` | 263.45 µW | 108.46 µW | 795.90 µW |
-| **`ble-rx-micro`** | **138.95 µW** | 62.26 µW | 679.88 µW |
+| `ble-rx-best` | 263.20 µW | 108.46 µW | 796.08 µW |
+| **`ble-rx-micro`** | **138.51 µW** | 62.26 µW | 675.53 µW |
 
 The macros are not included (§ 7.2). In this 45 nm library (predictive, leaky) the logic dominates:
 upstream's receiver leaks 7.7 times `ble-rx-micro`'s.
 
 **7.4 In GF180MCU** (§ 8), OpenSTA's vectorless estimate at 5 V, the default activity of every net:
-68.47 mW for `ble-rx-best` (its SRAM's internal power included) and 22.49 mW for `ble-rx-micro`; leakage
-4.6 and 2.3 µW. An estimate of the order of magnitude, not of the difference.
+67.54 mW for `ble-rx-best` (its SRAM's internal power included) and 23.51 mW for `ble-rx-micro`; leakage
+4.6 and 2.0 µW. An estimate of the order of magnitude, not of the difference.
 
 ## 8. Layout in an open PDK (upstream's OpenLane images)
 
@@ -403,38 +418,109 @@ The thesis laid out the two final receivers, `btle_rx` alone, with LibreLane (Op
 | ![GF180 layout, ble-rx-best](../../results/figures/rx-final/rx_final_gf180_best_gds.png) | ![GF180 layout, ble-rx-micro](../../results/figures/rx-final/rx_final_gf180_micro_gds.png) |
 | the GlobalFoundries SRAM at the top left, the logic around it | logic only |
 
-| Signoff | `ble-rx-best` (`rx-final-gf180-best`) | `ble-rx-micro` (`rx-final-gf180-micro`) |
+| Signoff | `ble-rx-best` (`rx-clean-gf180-best`) | `ble-rx-micro` (`rx-clean-gf180-micro`) |
 |---|---|---|
 | DRC, KLayout (the foundry's deck, whole GDS) | **0** (the SRAM's inside included) | **0** |
-| DRC, Magic | 2 603, all inside the GlobalFoundries SRAM (as the transmitter's SRAM 64 × 8; the run fails if one lies outside it) | 0 |
+| DRC, Magic | 2 516, **all inside the GlobalFoundries SRAM** (`magic_drc_sram.txt`: 0 outside it), whose own layout Magic's deck rejects | 0 |
 | LVS (Netgen) / antenna / routing DRC | clean / 0 / 0 | clean / 0 / 0 |
-| Worst setup slack: ss / tt / ff | +11.354 / +34.784 / +41.696 ns | +1.875 / +8.368 / +11.200 ns (`clkb` at 20 ns) |
-| Worst hold slack (9 corners) | +0.075 ns | +0.087 ns |
+| Worst setup slack: ss / tt / ff | +13.934 / +36.258 / +42.954 ns | +2.266 / +8.463 / +11.202 ns (`clkb` at 20 ns) |
+| Worst hold slack (9 corners) | +0.157 ns | +0.124 ns |
 | Max slew / max capacitance violations | 0 / 0 | 0 / 0 |
-| Max fanout warnings (limit 10, a design rule of the flow) | 103 | 274 (the transmitter's layout: 174) |
-| IR drop (worst) / clock skew | 0.57 mV / 0.43 ns | 0.68 mV / 0.38 ns |
+| Max fanout (10, LibreLane's for the PDK; the liberty sets none) | every data net within it; 7 clock-tree buffers at 11–13 | every data net within it; 1 clock-tree buffer at 11 |
+| IR drop (worst) / clock skew | 0.55 mV / 0.39 ns | 0.67 mV / 0.47 ns |
+| Flow warnings / unreviewed (§ 8.1) | 25 / **0** | 16 / **0** |
 
 ![GF180 area](../../results/figures/rx-final/rx_final_area_gf180.png)
 
 | GF180MCU-D (µm²) | `ble-rx-best` | **`ble-rx-micro`** |
 |---|---:|---:|
 | SRAM (431.86 × 484.88 µm) | 209 400.0 | — |
-| Logic: combinational, flip-flops, inverters | 212 679.7 (1 371 flip-flops) | 108 341.9 (787 flip-flops) |
-| Timing-repair buffers + clock trees | 57 856.7 | 16 411.3 |
-| Taps, end caps, antenna diodes | 33 274.8 | 27 435.7 |
-| **Placed cells + macros** | **513 211.2** | **152 189.0** (−70.3 %) |
+| Logic: combinational, flip-flops, inverters | 213 724.7 (1 371 flip-flops) | 108 008.2 (787 flip-flops) |
+| Timing-repair buffers + clock trees | 57 242.1 | 19 576.7 |
+| Taps, end caps, antenna diodes | 33 274.8 | 17 232.3 |
+| **Placed cells + macros** | **513 641.6** | **144 817.2** (−71.8 %) |
 
-- **In GF180MCU the gap widens**: `ble-rx-micro` is 29.7 % of `ble-rx-best` (33.5 % in 45 nm), because
+- **In GF180MCU the gap widens**: `ble-rx-micro` is 28.2 % of `ble-rx-best` (33.4 % in 45 nm), because
   the PDK's smallest SRAM that holds 336 words is a 512 × 8 of 209 400 µm², sized for its periphery.
-- Two settings differ between the runs, both recorded in `run.sh`: `ble-rx-best` places and routes with
-  tighter targets (max transition 2.0 ns, max fanout 8, signoff with the library's: without them 11 pins
-  of one net end 0.03 ns over the max slew at ss, as the transmitter's layout needed); `ble-rx-micro`
-  closes without them (with them its ss setup ends at −1.38 ns). Yosys's check before synthesis reports
-  the loop indices of two modules (`integer k`, no fanout) as registers driven by constants; the flow does
-  not stop on them, and `run.sh` checks that they are the only ones.
+- The settings of the two runs, all recorded in `run.sh` (§ 8.1): `ble-rx-best` places and routes with
+  tighter targets (max transition 2.0 ns, max fanout 8, signoff with the library's: without them pins of
+  one net end 0.03 ns over the max slew at ss), its SRAM at x = 70 µm (at 60 a strap of the power grid
+  ends on the edge of one of its VSS rails); `ble-rx-micro` closes without them (with them its ss setup
+  ends at −1.38 ns). The clock tree's sink clustering, the I/O cells left out, the heuristic diodes off:
+  § 8.1.
 - **Upstream's receiver has no GF180MCU layout to set beside these**: its eight packet RAMs write on the
   baseband clock and read on the AXI clock in the same cycle (two ports, two clocks), and the PDK's SRAMs
   have one port and one clock; as flip-flops they would be 32 768 of them.
+
+### 8.1 Synthesis and layout without unreviewed warnings
+
+After the first version of this document, the RTL of the two branches was cleaned of every warning its
+synthesis gave, and the flows of the warnings that came from them; what is left is a short list of
+**reviewed exceptions**, each with its reason (`scripts/validation/synth_warning_exceptions.tsv`), and a
+gate (`scripts/validation/synth_warning_gate.py`) that fails on any other warning, of Vivado (synthesis and
+implementation), of Yosys (every top of the area flow) and of LibreLane (the whole layout flow, and its
+signoff metrics: DRC, LVS, antenna, setup, hold, slew, capacitance, fanout).
+
+**The RTL** (`ble-rx-best` `18de7f5f`, `ble-rx-micro` `ef209ed7`; the interface of `btle_controller` kept):
+
+- unused ports of internal modules removed, so that they end at `btle_controller`'s interface:
+  `auxiliary_daemon` (the BRAM's port-A write side), `btle_ll` (the IQ samples, the AGC's outputs, the AXI
+  `PROT`), `ll_s_axi` (`PROT`), `rx_ram` (the RX configuration, `bb_clk`, `bb_rst`),
+  `clock_domain_conversion_iq` (the RF IQ bits above I and Q); the RAM models' `rst`, which they never read;
+- the link layer's TX UART, whose frame and enable (`slv_reg47`) the lint closure tied to 0, replaced by
+  its outputs after reset (`uart_tx` = 1, `tx_done` = 0);
+- `rx_pdu_ram_1rw`'s `lost_q`, read only by the testbenches and the proof, not synthesized;
+- the arrays synthesis turns into registers marked `(* mem2reg *)`; the clocked loops that shared their
+  index with combinational ones given their own (`k_seq`);
+- the lint closure's lists of intentionally unused fields following: lint 32/32 and 64/64, 12 reviewed
+  exceptions, none new.
+
+**The same circuits** (`scripts/validation/equiv_cleanup/run_equiv_cleanup.sh`, `results/validation/best-clean/`
+on `ble-rx-best`, `micro-clean/`): Yosys equivalence of each branch's `btle_rx` and `btle_controller`
+against the RTL before the cleanup, the RAM models as blackboxes — **`ble-rx-best` 3 228 and 15 541
+equivalence points, `ble-rx-micro` 1 808 and 14 121, all proven, none unproven** — and the replaced UART by
+its own proof (SBY, k-induction: from reset with `frame_en` = 0, `uart_tx` = 1, `tx_done` = 0 and the state
+IDLE on every clock). Every earlier result of the two branches (proofs, lockstep, PER) holds for the
+cleaned RTL; the product audit's matrix again: 220 + 50 and 214 + 56, as before; the switching activity
+again: every output the same (§ 7.1).
+
+**The flows**: Vivado mode `ooc_hd` (each clock's `HD.CLK_SRC`, the ports' partition-pin ranges, the
+resets deasserted in the power analysis; § 6); LibreLane (`scripts/layout/rx_final_gf180/run.sh`): the PDK's
+I/O cells not loaded (a macro has no pads), the clock tree's sink clustering limited (`ble-rx-best` 9
+flip-flops over 300 µm, `ble-rx-micro` 7 over 150 µm, the settings of those tried with the fewest buffers
+above the max fanout), no heuristic diodes (each is a load and pushed nets over the max fanout; the antenna
+repair leaves no violation), the long-wire check run, the SRAM timed by its liberty, and the SRAM moved to
+x = 70 µm (§ 8).
+
+| Warnings | upstream | `ble-rx-best` | `ble-rx-micro` |
+|---|---:|---:|---:|
+| Vivado synthesis (its count) | 207 | 238 → **73** | 238 → **73** |
+| Vivado implementation (mode `ooc_hd`) | 4 | 4, reviewed | 4, reviewed |
+| Yosys, every top of the area flow | 919 | 178 → **0** | 143 → **0** |
+| LibreLane (`warning.log`) | — | 186 → **25** | 160 → **16** |
+| **Unreviewed, after the gate** | 415 (Vivado; Yosys 919) | **0** | **0** |
+
+The reviewed exceptions:
+
+| Tool | Warning | Why it stays |
+|---|---|---|
+| Vivado | `Synth 8-7129` on `btle_controller`'s `s00_axi_arprot`, `s00_axi_awprot` | the interface (kept): an AXI4-Lite slave without protection levels ignores them |
+| Vivado | `Synth 8-7129` on `btle_controller`'s `bram_en_a`, `bram_rst_a`, `bram_we_a`, `bram_wrdata_a` | the interface (kept): the PS only reads the IQ-capture BRAM |
+| Vivado | `Synth 8-7129` on `search_unique_bit_sequence_shared`'s `unique_bit_sequence` | a configuration's port: with `RX_ADV_AA_ONLY` = 1 (the defaults) the automaton searches the advertising AA; `RX_ADV_AA_ONLY` = 0 reads it |
+| Vivado | `DRC 23-814` (× 3) | out of context, the DRCs that need the device's IOs do not run |
+| Vivado | `Constraints 18-8777` | the tool's installation lacks device files for splitting tiles |
+| LibreLane | `DRT-0349` (× 8) | a LEF58 rule of the PDK's technology LEF the router does not support (the foundry's deck checks it: 0) |
+| LibreLane | `STA-1140` (× 6, × 12) | the PDK has 3 liberties for the 9 signoff corners: STA reads one again for another corner |
+| LibreLane | `VSRC_LOC_FILES` not given | a macro, not a chip (the flow's own advice) |
+| LibreLane | input pins without antenna gate information: `btle_rx`; the SRAM | a macro's ports; the PDK's LEF of the SRAM (the antenna check is clean) |
+| LibreLane | no parasitics for the SRAM's netlist; `N Magic DRC errors found` (`ble-rx-best`) | the PDK ships no SPEF for the SRAM (timed by its liberty); Magic's deck rejects GlobalFoundries' layout of the SRAM |
+| signoff metric | Magic's DRC count (`ble-rx-best`: 2 516) | accepted only when every error lies inside the SRAM and the foundry's deck gives 0 on the whole GDS |
+| signoff metric | max fanout (`ble-rx-best`: 7, `ble-rx-micro`: 1) | accepted only when every violator is a clock-tree buffer: the 10 is LibreLane's setting (the liberty sets none), every data net meets it, and every transition and capacitance is within the liberty's limits |
+
+Two things the cleanup found that were not warnings: at x = 60 µm a strap of `ble-rx-best`'s power grid
+ended on the edge of an SRAM VSS rail (`PDN-0110`, and a Metal3 sliver 0.17 µm wide that the first
+version's Magic count hid among the SRAM's own errors), now gone; and the heuristic antenna diodes were the
+loads that pushed `ble-rx-micro`'s nets over the max fanout (214 of its 277 violations).
 
 ## 9. The decisions
 
@@ -452,11 +538,12 @@ decode:
 | | `ble-rx-best` | `ble-rx-micro` | Better |
 |---|---|---|---|
 | Packets received | upstream's, every one | 1.6–2.1 dB more SNR for the same PER | `ble-rx-best` |
-| 45 nm area (RX, cells + macros) | 20 896.5 µm² | 6 993.7 µm² (−66.5 %) | `ble-rx-micro` |
-| GF180MCU area (layout) | 513 211.2 µm² | 152 189.0 µm² (−70.3 %) | **`ble-rx-micro`, clearly** |
-| Switching activity (controller, `mixed`) | +9.6 % | −31.8 % | `ble-rx-micro` |
-| Logic leakage (45 nm) | 263.5 µW (+ the SRAM's) | 139.0 µW | `ble-rx-micro` |
-| FPGA (`btle_rx`) | 914 LUTs, 1 RAMB18, 2 DSP48 | 482 LUTs, no RAMB18, no DSP48 | `ble-rx-micro` |
+| 45 nm area (RX, cells + macros) | 20 896.7 µm² | 6 976.1 µm² (−66.6 %) | `ble-rx-micro` |
+| GF180MCU area (layout) | 513 641.6 µm² | 144 817.2 µm² (−71.8 %) | **`ble-rx-micro`, clearly** |
+| Switching activity (controller, `mixed`) | +8.8 % | −32.4 % | `ble-rx-micro` |
+| Logic leakage (45 nm) | 263.2 µW (+ the SRAM's) | 138.5 µW | `ble-rx-micro` |
+| FPGA (`btle_rx`) | 911 LUTs, 1 RAMB18, 2 DSP48 | 482 LUTs, no RAMB18, no DSP48 | `ble-rx-micro` |
+| Warnings of synthesis and layout | 0 unreviewed; Magic's errors inside the PDK's SRAM, 7 clock buffers above the max fanout | 0 unreviewed; 1 clock buffer above the max fanout | `ble-rx-micro`, slightly |
 | SRAM macro needed | 336 × 8, one port (GF180: a 512 × 8 at 16 MHz) | none | `ble-rx-micro` |
 | Equivalence | proved to upstream's | its own model, measured | `ble-rx-best` |
 
@@ -481,7 +568,10 @@ packet (the words of the packet are exact); **for `ble-rx-micro`, 1.6–2.1 dB o
   academic PDK; `ble-rx-best`'s 336 × 8 macro is a layout without characterization by OpenRAM's own flow.
 - The BER is upstream's Python receiver's (§ 3.2); the RTL receivers are compared by PER, in simulation,
   on upstream's channel model (AWGN and a clock error), not a real radio.
-- The FPGA results are out of context (no pins), with Vivado 2026.1 and vectorless power.
+- The FPGA results are out of context (no pins), with Vivado 2026.1 and vectorless power; the Device
+  views are of the implementation before the cleanup of § 8.1.
+- "No warning" means none outside the reviewed exceptions of § 8.1, which a gate enforces; it is not the
+  absence of every message of the tools.
 - The GF180MCU layouts are `btle_rx` as a macro (no pads, no seal ring, no chip-level integration, no
   parasitic-annotated simulation); `ble-rx-best`'s SRAM limits its read clock to 18 MHz; their power is
   vectorless.
@@ -492,16 +582,17 @@ packet (the words of the packet are exact); **for `ble-rx-micro`, 1.6–2.1 dB o
 
 | Result | Evidence (on `ble-rx-micro`) | Command (WSL, at the root of `ble-rx-micro`) |
 |---|---|---|
-| Area, 45 nm | `results/area/rx-final/<configuration>/summary.md`, `results/area/openram-rx-adv/`, `openram-rx-best/` | `RTL_REV=<rev> scripts/area/run_area.sh rx-final/<configuration> [tops]` |
-| Timing, 45 nm | `results/timing/rx-final/<configuration>/summary.txt` | `DUT_REV=<rev> DUT_PARAMS= scripts/timing/run_sta.sh rx-final/<configuration> 62.5 fca6ac6` |
-| Activity | `results/power/rx-final/<configuration>/` | `DUT_REV=<rev> DUT_PARAMS= [PDU_CONTRACT=1] [RX_DIFFERS=1] VEC_DIR=<d53f2d49 vectors> scripts/power/run_activity.sh rx-final/<configuration> 100000 1 fca6ac6` |
-| Logic leakage | `results/power/rx-final-leakage/summary.md` | `python3 scripts/power/logic_leakage.py <liberty> <name>=<stat.json> ...` |
+| Area, 45 nm | `results/area/rx-final/upstream/summary.md`, `results/area/rx-clean/<branch>/summary.md`, `results/area/openram-rx-adv/`, `openram-rx-best/` | `RTL_REV=<rev> scripts/area/run_area.sh rx-clean/<branch> [tops]` |
+| Timing, 45 nm | `results/timing/rx-final/upstream/`, `results/timing/rx-clean/<branch>/summary.txt` | `DUT_REV=<rev> DUT_PARAMS= scripts/timing/run_sta.sh rx-clean/<branch> 62.5 fca6ac6` |
+| Activity | `results/power/rx-final/upstream/`, `results/power/rx-clean/<branch>/` | `DUT_REV=<rev> DUT_PARAMS= [PDU_CONTRACT=1] [RX_DIFFERS=1] VEC_DIR=<d53f2d49 vectors> scripts/power/run_activity.sh rx-clean/<branch> 100000 1 fca6ac6` |
+| Logic leakage | `results/power/rx-clean-leakage/summary.md` | `python3 scripts/power/logic_leakage.py <liberty> <name>=<stat.json> ...` |
 | SRAM energy | `results/power/sram-char-rx-final-5ns/`, `sram-char-rx-final/` (336 × 8: not characterized); `sram-char-rx-final-upstream/` (512 × 8 two-port: not characterized) | `PERIOD_NS=5 scripts/power/run_sram_char.sh <label> <macro>`, `scripts/power/run_sram_leakage.sh <label> <macro>` |
 | BER and PER | `results/validation/rx-final/rx_ber_exact/`, `rx_ber_random/` (`report.txt`, `points.tsv`) | `POINTS="<ppm:snr ...>" TIMING=exact\|random CHUNK=50 scripts/validation/rx_ber/run_rx_ber.sh rx-final 1000 upstream=upstream-baseline best=3d92ea80 micro=745e4bba` |
 | The receiver's decision | `results/figures/rx-final/rx_final_py_fig4.png`, `rx_final_decision.json` | `python3 scripts/figures/rx_final_figures.py decision results/figures/rx-final` |
-| FPGA | `results/fpga/xc7z020-rx/<configuration>/`, `provenance.txt` | Windows: `vivado -mode batch -source scripts/fpga/xc7z020/impl.tcl -tclargs <dir> <ooc\|wrapper2024>`, then `post.tcl <root> up2024 upstream best micro` |
+| FPGA | `results/fpga/xc7z020-rx-clean/<configuration>/` (and its `warning_gate.txt`), `results/fpga/xc7z020-rx/up2024/`, `provenance.txt` | Windows: `vivado -mode batch -source scripts/fpga/xc7z020/impl.tcl -tclargs <dir> <ooc_hd\|wrapper2024>`, then `post.tcl <root> upstream best micro` |
 | FPGA Device view | `results/fpga/xc7z020-rx/<configuration>/device.png`, `device.txt` | Windows, Vivado GUI: `powershell -ExecutionPolicy Bypass -File scripts/fpga/xc7z020/device_view.ps1 <dir> <vivado.bat> btle_rx_i`, then `device_crop.py` |
-| Layout | `results/layout/rx-final-gf180-best/`, `rx-final-gf180-micro/`; the SRAM's simulation `rx-final-gf180-sram512-sim/` | `scripts/layout/rx_final_gf180/run.sh <label> <rev> best\|micro`; `scripts/layout/rx_final_gf180/sim_sram512.sh <label> 3d92ea80 200` |
+| Layout | `results/layout/rx-clean-gf180-best/`, `rx-clean-gf180-micro/` (the first version's: `rx-final-gf180-*`); the SRAM's simulation `rx-final-gf180-sram512-sim/` | `scripts/layout/rx_final_gf180/run.sh <label> <rev> best\|micro`; `scripts/layout/rx_final_gf180/sim_sram512.sh <label> 3d92ea80 200` |
+| The cleanup: equivalence, warning gate | `results/validation/best-clean/equiv_cleanup/` (on `ble-rx-best`), `micro-clean/equiv_cleanup/`; `results/validation/rx-clean-warning-gate.txt` | `scripts/validation/equiv_cleanup/run_equiv_cleanup.sh <label> <rev before>`; `scripts/validation/synth_warning_gate.py --vivado <log> --yosys <area dir> --librelane <layout dir>` |
 | Validation | `results/validation/best*`, `micro*` | `RX_BEST_VALIDATION.md` § 4, `RX_MICRO_VALIDATION.md` |
 | Figures | `results/figures/rx-final/` (`data.json` names the source of every number) | `python3 scripts/figures/rx_final_figures.py data results/figures/rx-final/data.json results/figures/rx-final` |
 
