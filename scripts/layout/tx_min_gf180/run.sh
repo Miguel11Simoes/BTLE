@@ -14,6 +14,15 @@
 # in gf180mcu/) and out/macros/efuse_array_async_1x8/ from `./efuse.py 1 8 --async-efuse
 # --digital-wrapper=async` (results/otp/gf180-efuse/provenance.txt); docker with the nixstore volume.
 # Output: $EFUSE_DIR/out/<label>/ (the LibreLane run), then copied to results/layout/<label>/.
+# The settings of both configurations, for a flow without unreviewed warnings (the receiver's layout,
+# scripts/layout/rx_final_gf180 of ble-rx-micro; scripts/validation/synth_warning_gate.py --librelane):
+#   PAD_* empty and LIB the standard cells only: btle_tx is a macro, without pads, so the PDK's I/O
+#     cells (which the PDK's configuration adds) are not loaded and the flow does not warn about them;
+#   RUN_HEURISTIC_DIODE_INSERTION false: each heuristic diode is a load that pushes its net over the
+#     max fanout; the antenna repair after global routing (GRT_ANTENNA_REPAIR_*) leaves no violation;
+#   WIRE_LENGTH_THRESHOLD: the long-wire check runs; GPL_CELL_PADDING: a site around each cell;
+#   STA_MACRO_PRIORITIZE_NL false: the macros (eFuse blocks, SRAM) are timed by their liberties, as
+#     no parasitics come with their netlists.
 set -euo pipefail
 label=${1:?usage: run.sh <label> [rtl-rev]}
 rev=${2:-HEAD}
@@ -68,7 +77,9 @@ rpt = open(glob.glob(sys.argv[2] + '/*-magic-drc/reports/drc.magic.rpt')[0]).rea
 rects = [tuple(map(float, r)) for r in re.findall(r'^\s*([-\d.]+)um ([-\d.]+)um ([-\d.]+)um ([-\d.]+)um', rpt, re.M)]
 out = [r for r in rects if not (box[0] <= r[0] and r[2] <= box[2] and box[1] <= r[1] and r[3] <= box[3])]
 k = re.search(r'COUNT: (\d+)', rpt)
-print(f"Magic DRC: {k.group(1) if k else '?'} errors, {len(rects)} located, {len(out)} outside the SRAM {box}")
+msg = f"Magic DRC: {k.group(1) if k else '?'} errors, {len(rects)} located, {len(out)} outside the SRAM {box}"
+print(msg)
+open(sys.argv[2] + '/../../magic_drc_sram.txt', 'w').write(msg + chr(10))
 sys.exit(1 if out or not rects and k and int(k.group(1)) else 0)
 PY
 fi
@@ -77,6 +88,7 @@ fi
 R=$(ls -d "$work"/runs/RUN_* | tail -1)
 out=$repo/results/layout/$label; mkdir -p "$out/sta"
 cp "$work"/{config.json,btle_tx.sdc,btle_tx_pnr.sdc,rtl_commit.txt} "$R/resolved.json" "$R"/final/metrics.{json,csv} "$out/"
+[ -e "$work/magic_drc_sram.txt" ] && cp "$work/magic_drc_sram.txt" "$out/"
 cp "$R"/*-misc-reportmanufacturability/manufacturability.rpt "$R"/*-openroad-irdropreport/irdrop.rpt "$out/"
 for c in "$R"/*-openroad-stapostpnr/*/; do n=$(basename "$c"); cp "$c/summary.rpt" "$out/sta/$n.summary.rpt" 2>/dev/null || true
   cp "$c/checks.rpt" "$out/sta/$n.checks.rpt"; cp "$c/max.rpt" "$out/sta/$n.max.rpt"; cp "$c/min.rpt" "$out/sta/$n.min.rpt"; done

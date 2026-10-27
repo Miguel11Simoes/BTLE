@@ -87,6 +87,7 @@ PROJECT_ADV_ADDRESS = 0x010203040506
 # The one-port macro of the AdvData memory: one address (the write address in a
 # clock with a write, the read address in a clock with a read), the output
 # changed only by a read.
+# No reset, as pdu_buffer_ram (the RAM model and the GF180 SRAM have none).
 PDU_MACRO = r"""
 `timescale 1ns/1ps
 module pdu_buffer_macro #
@@ -95,7 +96,6 @@ module pdu_buffer_macro #
   parameter integer ADDRESS_WIDTH = 8
 ) (
   input wire clk,
-  input wire rst,
   input wire [ADDRESS_WIDTH-1:0] write_address,
   input wire [DATA_WIDTH-1:0] write_data,
   input wire write_enable,
