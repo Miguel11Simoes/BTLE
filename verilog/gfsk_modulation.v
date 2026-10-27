@@ -149,7 +149,7 @@ module btle_gauss_tail #(
 );
   reg [4:0] remaining, padding;
   reg wait_cycle;
-  reg signed [WIDTH-1:0] taps [0:8];
+  (* mem2reg *) reg signed [WIDTH-1:0] taps [0:8];
   reg signed [WIDTH-1:0] correction, next_correction;
   integer j, index;
   wire emit_padding = (remaining != 0) && !wait_cycle;
