@@ -1,34 +1,34 @@
 {
  "about": "Numbers of the figures of docs/TX_FINAL_DECISIONS.md, each copied from the evidence named in 'source' (scripts/figures/tx_final_figures.py only adds them up).",
  "area_45nm": {
-  "source": "results/area/tx-min/<configuration>/summary.md (btle_tx, Yosys + ABC, Nangate45, one run); macros: BRANCH_COMPARISON.md 4.1 (openram-tx: 2 x sram_1rw1r_8x2048 + sram_1rw1r_8x512 = 162 408.5), results/area/openram-pdu (sram_1rw_8x256 6 979.1), results/area/openram-min (sram_1rw_8x32 2 475.8)",
+  "source": "results/area/tx-min/<configuration>/summary.md (btle_tx, Yosys + ABC, Nangate45) and, for ble-tx-min after the synthesis-warning cleanup (b81bf288), results/area/tx-clean/<configuration>/summary.md; macros: BRANCH_COMPARISON.md 4.1 (openram-tx: 2 x sram_1rw1r_8x2048 + sram_1rw1r_8x512 = 162 408.5), results/area/openram-pdu (sram_1rw_8x256 6 979.1), results/area/openram-min (sram_1rw_8x32 2 475.8)",
   "rows": [
    {"name": "upstream (upstream-baseline 8540186)", "logic": 5322.9, "macros": 162408.5},
    {"name": "corrected master (fca6ac6)", "logic": 8559.1, "macros": 162408.5},
    {"name": "ble-tx-rom", "logic": 2520.6, "macros": 6979.1, "zoom": true},
-   {"name": "ble-tx-min, AdvData in SRAM 32x8", "logic": 2531.3, "macros": 2475.8, "zoom": true},
-   {"name": "ble-tx-min, AdvData in flip-flops", "logic": 4446.5, "macros": 0, "zoom": true}
+   {"name": "ble-tx-min, AdvData in SRAM 32x8", "logic": 2542.7, "macros": 2475.8, "zoom": true},
+   {"name": "ble-tx-min, AdvData in flip-flops", "logic": 4420.4, "macros": 0, "zoom": true}
   ]
  },
  "area_gf180": {
-  "source": "results/layout/tx-min-gf180*/metrics.json (design__instance__area__class:*), the macros' LEF sizes (eFuse block 97.27 x 83.02 um, SRAM 431.86 x 232.88 um)",
+  "source": "results/layout/tx-clean-gf180*/metrics.json (design__instance__area__class:*), the macros' LEF sizes (eFuse block 97.27 x 83.02 um, SRAM 431.86 x 232.88 um)",
   "columns": [
-   {"name": "AdvData in flip-flops (tx-min-gf180)", "efuse": 48452.1, "sram": 0, "logic": 72329.66, "repair_clock": 13676.09, "physical": 23080.35},
-   {"name": "AdvData in SRAM 64x8 (tx-min-gf180-sram64)", "efuse": 48452.1, "sram": 100571.6, "logic": 52164.51, "repair_clock": 20735.83, "physical": 12679.47}
+   {"name": "AdvData in flip-flops (tx-clean-gf180)", "efuse": 48452.1, "sram": 0, "logic": 74685.1, "repair_clock": 21719.3, "physical": 15928.4},
+   {"name": "AdvData in SRAM 64x8 (tx-clean-gf180-sram64)", "efuse": 48452.1, "sram": 100571.6, "logic": 50204.2, "repair_clock": 21565.7, "physical": 13215.1}
   ]
  },
  "fpga": {
-  "source": "results/fpga/xc7z020/<configuration>/impl_util_hier.rpt (btle_tx_i row: Total LUTs, FFs, RAMB18)",
+  "source": "results/fpga/xc7z020-clean/<configuration>/impl_util_hier.rpt (btle_tx_i row: Total LUTs, FFs, RAMB18; impl.tcl mode ooc_hd; ble-tx-min at b81bf288); upstream 2024: results/fpga/xc7z020/up2024/ (its own project, with IOs)",
   "tx": [
    {"name": "upstream 2024 (fc5bc42, published flow)", "luts": 1519, "ffs": 411, "ramb18": 0},
    {"name": "upstream (upstream-baseline)", "luts": 680, "ffs": 401, "ramb18": 3},
-   {"name": "corrected master (fca6ac6)", "luts": 986, "ffs": 544, "ramb18": 3},
+   {"name": "corrected master (fca6ac6)", "luts": 987, "ffs": 544, "ramb18": 3},
    {"name": "ble-tx-rom", "luts": 366, "ffs": 243, "ramb18": 1},
    {"name": "ble-tx-min, AdvData in SRAM 32x8", "luts": 387, "ffs": 254, "ramb18": 0},
    {"name": "ble-tx-min, AdvData in flip-flops", "luts": 377, "ffs": 245, "ramb18": 0}
   ],
   "device": {
-   "source": "results/fpga/xc7z020/<configuration>/device.png and device.txt (Vivado 2026.1 GUI, Device view: scripts/fpga/xc7z020/device_view.ps1, device_crop.py); 'tx' indexes fpga.tx; the published image is open_btle_baseband_chip/btle_controller_xilinx_7z020.jpg",
+   "source": "results/fpga/xc7z020/<configuration>/device.png and device.txt (Vivado 2026.1 GUI, Device view: scripts/fpga/xc7z020/device_view.ps1, device_crop.py); 'tx' indexes fpga.tx; the published image is open_btle_baseband_chip/btle_controller_xilinx_7z020.jpg; the images are of the implementation before the synthesis-warning cleanup (mode ooc, RTL a613226)",
    "panels": [
     {"name": "upstream 2024, published (Vivado 2021.1)", "image": "open_btle_baseband_chip/btle_controller_xilinx_7z020.jpg", "tx": null, "primitives": null},
     {"name": "upstream 2024, reproduced (Vivado 2026.1)", "image": "results/fpga/xc7z020/up2024/device.png", "tx": 0, "primitives": [2417, 7377]},
@@ -39,21 +39,21 @@
  },
  "ber": {
   "source": "upstream: results/figures/tx-final/upstream_ber_rerun.txt (test_btle_ber.py of upstream-baseline, unmodified); ble-tx-min: results/figures/tx-min/tx_min_figures_ber.json ('rtl')",
-  "50": {"snr": [22.0, 23.5, 25.0, 26.0],
-         "upstream": [0.022692307692307692, 0.011201923076923076, 0.00037393162393162396, 7.478632478632479e-05],
-         "min_rtl": [0.04451923076923077, 0.011426282051282051, 0.0003205128205128205, 7.478632478632479e-05]},
-  "-30": {"snr": [11.0, 12.5, 14.0, 15.0],
-          "upstream": [0.01891025641025641, 0.0027884615384615383, 0.0009081196581196581, 0.00021367521367521368],
-          "min_rtl": [0.049166666666666664, 0.003173076923076923, 0.0008012820512820513, 0.00018162393162393162]}
+  "50": {
+   "snr": [22.0, 23.5, 25.0, 26.0],
+   "upstream": [0.022692307692307692, 0.011201923076923076, 0.00037393162393162396, 7.478632478632479e-05],
+   "min_rtl": [0.04451923076923077, 0.011426282051282051, 0.0003205128205128205, 7.478632478632479e-05]
+  },
+  "-30": {
+   "snr": [11.0, 12.5, 14.0, 15.0],
+   "upstream": [0.01891025641025641, 0.0027884615384615383, 0.0009081196581196581, 0.00021367521367521368],
+   "min_rtl": [0.049166666666666664, 0.003173076923076923, 0.0008012820512820513, 0.00018162393162393162]
+  }
  },
  "activity": {
-  "source": "results/power/tx-min/<configuration>/<scenario>.json: (dut clk_cap_tog + data_cap_tog) / (ref ...) - 1, ref = corrected master fca6ac6",
+  "source": "results/power/tx-min/ble-tx-rom/<scenario>.json and results/power/tx-clean/<configuration>/<scenario>.json (ble-tx-min, b81bf288): (dut clk_cap_tog + data_cap_tog) / (ref ...) - 1, ref = corrected master fca6ac6",
   "scenarios": ["rx", "tx", "mixed", "idle", "idle0"],
   "order": ["ble-tx-rom", "ble-tx-min, AdvData in SRAM 32x8", "ble-tx-min, AdvData in flip-flops"],
-  "delta_pct": {
-   "ble-tx-rom": [-4.70, -6.23, -4.75, -4.61, -6.08],
-   "ble-tx-min, AdvData in SRAM 32x8": [-4.73, -6.20, -4.79, -4.61, -6.04],
-   "ble-tx-min, AdvData in flip-flops": [-0.98, -1.74, -1.18, -0.94, -1.23]
-  }
+  "delta_pct": {"ble-tx-rom": [-4.7, -6.23, -4.75, -4.61, -6.08], "ble-tx-min, AdvData in SRAM 32x8": [-5.15, -6.55, -5.15, -5.04, -6.51], "ble-tx-min, AdvData in flip-flops": [-1.4, -2.15, -1.58, -1.37, -1.69]}
  }
 }

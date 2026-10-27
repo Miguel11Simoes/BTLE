@@ -1,0 +1,6 @@
+cell          clk->Q (ns)   setup (ns)
+DFFR_X1            0.2586       0.1008
+DFFS_X1            0.2501       0.1005
+DFF_X1             0.2466       0.1005
+WORST              0.2586       0.1008
+sequential_overhead_ns 0.3594

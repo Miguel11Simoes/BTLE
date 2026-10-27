@@ -1,0 +1,16 @@
+label=xc7z020-clean (TX_FINAL_DECISIONS.md, after the synthesis-warning cleanup)
+date=2026-10-26
+tool=Vivado v2026.1 (64-bit), Windows; part xc7z020clg484-1
+flow=scripts/fpga/xc7z020/impl.tcl mode ooc_hd (ooc + ooc_hd.xdc: HD.CLK_SRC per clock; HD.PARTPIN_RANGE on the ports that
+     reach a cell; resets deasserted in the power analysis; every message printed), then post.tcl <root> upstream master rom min minflops
+configurations (name, revision, commit, verilog tree, defaults set in btle_controller.v of the copy):
+  upstream upstream-baseline 85401861e8f4b04b90cbaa0394c0f9d45ed02f18 tree 4bacca327f4a7112a66bca5915160ebacfffb28e 
+  master fca6ac6 fca6ac64fb28cd57a496cb45af62cf9e0f9209d5 tree 6e670a62d71aec276eb10e6012030875a05d1095 
+  rom 66a77511 66a775118b493f28c1ce399bb85d528fb5520b0f tree 5c6bc01c224c10e943a8ededcf30c69bc65fb4da GAUSS_TABLE=1
+  min b81bf288 b81bf28888d4fb1b382c6da41b7586583b6f257b tree 8346936e2dd905a17b95677dae2756b6fd0ed37e GAUSS_TABLE=1
+  minflops b81bf288 b81bf28888d4fb1b382c6da41b7586583b6f257b tree 8346936e2dd905a17b95677dae2756b6fd0ed37e GAUSS_TABLE=1 ADV_DATA_FLOPS=1
+warning gate: scripts/validation/synth_warning_gate.py --vivado <vivado.log> (warning_gate.txt per configuration; the gate is for
+     ble-tx-min, min and minflops; upstream, master and rom are shown for comparison)
+power: report_power, vectorless with the resets deasserted, 25 C ambient: an estimate, not a measurement
+before the cleanup: min-before, minflops-before = ble-tx-min a359b08a (tree 5e2c93d5125d54ddf25e778a31fe1e660aed11b2) with the defaults of min and minflops, the same
+     flow; only their vivado.log and warning_gate.txt are kept (the counts before the cleanup, TX_FINAL_DECISIONS.md section 8.1)

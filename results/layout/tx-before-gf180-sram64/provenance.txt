@@ -1,0 +1,7 @@
+label=tx-before-gf180-sram64
+date_utc=2026-10-27T18:12:37Z
+rtl=HEAD (a359b08af95b44783a900807079ef9931c804b98), btle_tx, variant sram64: GAUSS_TABLE=1 ADV_DATA_FLOPS=0 ADV_ADDRESS_OTP=1
+harness=a359b08af95b44783a900807079ef9931c804b98, dirty files under scripts/layout: 0
+flow=LibreLane Classic, gf180mcuD, gf180mcu_fd_sc_mcu7t5v0, in the eFuse compiler's nix-shell (e77f729373f28eda5d370d66764e81c3b109c31a)
+run=RUN_2026-10-27_18-05-36
+gds sha256=3da0f09de95616b9632bb9a4c457bec4a2c45987e832bb8b904771cb650460c6

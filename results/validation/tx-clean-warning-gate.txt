@@ -1,0 +1,37 @@
+== vivado /mnt/c/btle-fpga/tx-clean/min/vivado.log: 243 warnings, 243 reviewed, 0 unreviewed, 0 errors
+   reviewed (exception line 3) x 12: btle_controller's interface (kept): the AXI4-Lite protection signals, which this slave ignores, as every AXI4-Lite slave without protection levels
+   reviewed (exception line 4) x 70: btle_controller's interface (kept): the PS side of the IQ-capture BRAM, of which the PS only reads (its write, enable and reset are unused)
+   reviewed (exception line 5) x 40: a configuration's port: with GAUSS_TABLE = 1 (the final transmitter) the Gaussian taps are constants and these writes are not read; GAUSS_TABLE = 0 (the branch's default, upstream's runtime FIR) reads them
+   reviewed (exception line 6) x 20: the same configuration's port, one level up: gfsk_modulation passes the tap writes to gauss_filter and btle_gauss_tail, which read them with GAUSS_TABLE = 0 only
+   reviewed (exception line 7) x 96: a configuration's port: with ADV_ADDRESS_OTP = 0 (the ROM: the FPGA and the 45 nm runs) AdvA is the parameter ADV_ADDRESS; with ADV_ADDRESS_OTP = 1 (the ASIC) it programs the six eFuse blocks
+   reviewed (exception line 8) x 1: the memory's port (AdvData in the memory): the GF180MCU SRAM's wrapper drives the macro's CEN with it (scripts/layout/tx_min_gf180/pdu_buffer_ram_gf180.v); the RTL's model reads in every clock, and adv_pdu_buffer samples its data only in the clock after a read
+   reviewed (exception line 9) x 3: the tool, out of context: the DRCs that need the device's IOs do not run; inherent to an out-of-context implementation (no pins)
+   reviewed (exception line 10) x 1: the tool's installation: the router lacks device data files for splitting tiles (Vivado 2026.1 on this machine); not the design
+== vivado /mnt/c/btle-fpga/tx-clean/minflops/vivado.log: 242 warnings, 242 reviewed, 0 unreviewed, 0 errors
+   reviewed (exception line 3) x 12: btle_controller's interface (kept): the AXI4-Lite protection signals, which this slave ignores, as every AXI4-Lite slave without protection levels
+   reviewed (exception line 4) x 70: btle_controller's interface (kept): the PS side of the IQ-capture BRAM, of which the PS only reads (its write, enable and reset are unused)
+   reviewed (exception line 5) x 40: a configuration's port: with GAUSS_TABLE = 1 (the final transmitter) the Gaussian taps are constants and these writes are not read; GAUSS_TABLE = 0 (the branch's default, upstream's runtime FIR) reads them
+   reviewed (exception line 6) x 20: the same configuration's port, one level up: gfsk_modulation passes the tap writes to gauss_filter and btle_gauss_tail, which read them with GAUSS_TABLE = 0 only
+   reviewed (exception line 7) x 96: a configuration's port: with ADV_ADDRESS_OTP = 0 (the ROM: the FPGA and the 45 nm runs) AdvA is the parameter ADV_ADDRESS; with ADV_ADDRESS_OTP = 1 (the ASIC) it programs the six eFuse blocks
+   reviewed (exception line 9) x 3: the tool, out of context: the DRCs that need the device's IOs do not run; inherent to an out-of-context implementation (no pins)
+   reviewed (exception line 10) x 1: the tool's installation: the router lacks device data files for splitting tiles (Vivado 2026.1 on this machine); not the design
+== yosys results/area/tx-clean/ble-tx-min: 0 warnings, 0 reviewed, 0 unreviewed, 0 errors
+== yosys results/area/tx-clean/ble-tx-min-flops: 0 warnings, 0 reviewed, 0 unreviewed, 0 errors
+== librelane results/layout/tx-clean-gf180: 29 warnings, 29 reviewed, 0 unreviewed, 0 errors
+   reviewed (exception line 11) x 8: the PDK's technology LEF: a LEF58 enclosure rule the detailed router does not support (it skips it; the foundry's DRC deck checks the enclosures, 0 errors)
+   reviewed (exception line 12) x 6: the PDK: 3 liberties (ss, tt, ff) for the 9 signoff corners (each with 3 RC extractions), so STA reads a library a second time for another corner
+   reviewed (exception line 13) x 12: the eFuse compiler: its liberties of efuse_async_mem_1x8, one per corner, all name the library efuse_async_mem_1x8, so STA reads the name again for each corner
+   reviewed (exception line 14) x 1: btle_tx is a macro, not a chip: its supplies come from the chip's grid (the flow's own advice: ignore it then); the IR drop is reported from the macro's pins
+   reviewed (exception line 15) x 1: btle_tx is a macro: its input ports drive gates through its own cells; the antenna information of its abstract is the chip's to check, at chip level
+   reviewed (exception line 16) x 1: the macros come with their liberties and no parasitics for their netlists (the eFuse compiler's blocks, GlobalFoundries' SRAM): they are timed by their liberties (STA_MACRO_PRIORITIZE_NL off)
+   reviewed signoff metric (exception line 19): design__max_fanout_violation__count = 4: clock-tree buffers clkbuf_2_1__f_clkb/Z (12), clkbuf_2_2__f_clkb/Z (12), clkbuf_2_3__f_clk/Z (11), clkbuf_2_3__f_clkb/Z (11); clock-tree buffers only: the max fanout of 10 is LibreLane's setting for the PDK (the liberty sets none); every data net meets it, and CTS's sink clustering (7 flip-flops over 150 um) leaves a few tree buffers above it, with every transition and capacitance within the liberty's limits
+== librelane results/layout/tx-clean-gf180-sram64: 37 warnings, 37 reviewed, 0 unreviewed, 0 errors
+   reviewed (exception line 11) x 8: the PDK's technology LEF: a LEF58 enclosure rule the detailed router does not support (it skips it; the foundry's DRC deck checks the enclosures, 0 errors)
+   reviewed (exception line 12) x 12: the PDK: 3 liberties (ss, tt, ff) for the 9 signoff corners (each with 3 RC extractions), so STA reads a library a second time for another corner
+   reviewed (exception line 13) x 12: the eFuse compiler: its liberties of efuse_async_mem_1x8, one per corner, all name the library efuse_async_mem_1x8, so STA reads the name again for each corner
+   reviewed (exception line 14) x 1: btle_tx is a macro, not a chip: its supplies come from the chip's grid (the flow's own advice: ignore it then); the IR drop is reported from the macro's pins
+   reviewed (exception line 15) x 1: btle_tx is a macro: its input ports drive gates through its own cells; the antenna information of its abstract is the chip's to check, at chip level
+   reviewed (exception line 16) x 2: the macros come with their liberties and no parasitics for their netlists (the eFuse compiler's blocks, GlobalFoundries' SRAM): they are timed by their liberties (STA_MACRO_PRIORITIZE_NL off)
+   reviewed (exception line 17) x 1: AdvData in the SRAM: Magic's deck rejects GlobalFoundries' own layout of the SRAM; every error lies inside it (run.sh's check, magic_drc_sram.txt) and the foundry's KLayout deck gives 0
+   reviewed signoff metric (exception line 18): magic__drc_error__count = 2353: Magic DRC: 2353 errors, 2353 located, 0 outside the SRAM (124.6, 480, 556.46, 712.88); as the line above: the errors inside the GlobalFoundries SRAM only, the foundry's KLayout deck 0 on the whole GDS
+RESULT: PASS

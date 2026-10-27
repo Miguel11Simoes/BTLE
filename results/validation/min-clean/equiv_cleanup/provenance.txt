@@ -1,0 +1,3 @@
+label=min-clean base=a359b08a (a359b08af95b44783a900807079ef9931c804b98) gate=working tree at b81bf28888d4fb1b382c6da41b7586583b6f257b, dirty verilog files: 0
+date_utc=2026-10-27T18:43:39Z
+yosys=Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)

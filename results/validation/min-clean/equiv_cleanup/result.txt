@@ -1,0 +1,10 @@
+btle_tx, defaults (the defaults): EQUIVALENT (Found 1662 $equiv cells; Of those cells 1662 are proven and 0 are unproven)
+btle_controller, defaults (the defaults): EQUIVALENT (Found 18923 $equiv cells; Of those cells 18923 are proven and 0 are unproven)
+btle_tx, table (GAUSS_TABLE=1): EQUIVALENT (Found 1263 $equiv cells; Of those cells 1263 are proven and 0 are unproven)
+btle_controller, table (GAUSS_TABLE=1): EQUIVALENT (Found 18404 $equiv cells; Of those cells 18404 are proven and 0 are unproven)
+btle_tx, flops (GAUSS_TABLE=1,ADV_DATA_FLOPS=1): EQUIVALENT (Found 1485 $equiv cells; Of those cells 1485 are proven and 0 are unproven)
+btle_controller, flops (GAUSS_TABLE=1,ADV_DATA_FLOPS=1): EQUIVALENT (Found 18626 $equiv cells; Of those cells 18626 are proven and 0 are unproven)
+btle_tx, otp (GAUSS_TABLE=1,ADV_ADDRESS_OTP=1): EQUIVALENT (Found 1268 $equiv cells; Of those cells 1268 are proven and 0 are unproven)
+btle_controller, otp (GAUSS_TABLE=1,ADV_ADDRESS_OTP=1): EQUIVALENT (Found 18406 $equiv cells; Of those cells 18406 are proven and 0 are unproven)
+uart_frame_tx, frame_en = 0 from reset: PASS (uart_tx = 1, tx_done = 0, cstate = IDLE on every clock; k-induction)
+RESULT: PASS

@@ -1,0 +1,301 @@
+{
+ "scenario": "rx",
+ "window_cycles": 100000,
+ "ref": {
+  "nets": 59294,
+  "toggles": 92299972,
+  "clock_toggles": 700000,
+  "clk_cap_tog": 903069790.199975,
+  "data_cap_tog": 354808288.166523,
+  "hot_nets": 501,
+  "blocks": {
+   "top glue": {
+    "nets": 643,
+    "toggles": 1111784,
+    "data_cap_tog": 1379.8803599999999,
+    "clk_cap_tog": 0.0,
+    "hot_nets": 14,
+    "cells": 219
+   },
+   "auxiliary_daemon": {
+    "nets": 378,
+    "toggles": 2890097,
+    "data_cap_tog": 8718866.865586994,
+    "clk_cap_tog": 9116668.799999997,
+    "hot_nets": 114,
+    "cells": 298
+   },
+   "btle_ll": {
+    "nets": 12365,
+    "toggles": 3260709,
+    "data_cap_tog": 9484965.62505397,
+    "clk_cap_tog": 387028349.9999923,
+    "hot_nets": 67,
+    "cells": 9558
+   },
+   "btle_rx": {
+    "nets": 38974,
+    "toggles": 82704214,
+    "data_cap_tog": 334029234.4981424,
+    "clk_cap_tog": 392776480.79998213,
+    "hot_nets": 243,
+    "cells": 36842
+   },
+   "btle_tx (other)": {
+    "nets": 4222,
+    "toggles": 0,
+    "data_cap_tog": 0.0,
+    "clk_cap_tog": 70084391.40000053,
+    "hot_nets": 0,
+    "cells": 3829
+   },
+   "gauss_filter": {
+    "nets": 2464,
+    "toggles": 0,
+    "data_cap_tog": 0.0,
+    "clk_cap_tog": 33807646.800000064,
+    "hot_nets": 0,
+    "cells": 2286
+   },
+   "clock_domain_conversion": {
+    "nets": 248,
+    "toggles": 2333168,
+    "data_cap_tog": 2573841.297380001,
+    "clk_cap_tog": 10256252.399999999,
+    "hot_nets": 63,
+    "cells": 186
+   }
+  },
+  "mem_port_toggles": 2839726,
+  "mem_instances": 15,
+  "cells": 53218,
+  "missing": 0,
+  "top_nets": [
+   [
+    1.0,
+    "clock_domain_conversion",
+    "tb_activity/u_ref/clock_domain_conversion_iq_i/rx_sample_phase"
+   ],
+   [
+    1.0,
+    "clock_domain_conversion",
+    "tb_activity/u_ref/clock_domain_conversion_iq_i/rx_iq_valid"
+   ],
+   [
+    1.0,
+    "clock_domain_conversion",
+    "tb_activity/u_ref/clock_domain_conversion_iq_i/_50_"
+   ],
+   [
+    1.0,
+    "clock_domain_conversion",
+    "tb_activity/u_ref/clock_domain_conversion_iq_i/_183_"
+   ],
+   [
+    1.0,
+    "clock_domain_conversion",
+    "tb_activity/u_ref/clock_domain_conversion_iq_i/_173_"
+   ],
+   [
+    1.0,
+    "clock_domain_conversion",
+    "tb_activity/u_ref/clock_domain_conversion_iq_i/_165_"
+   ],
+   [
+    1.0,
+    "clock_domain_conversion",
+    "tb_activity/u_ref/clock_domain_conversion_iq_i/_104_"
+   ],
+   [
+    1.0,
+    "btle_rx",
+    "tb_activity/u_ref/btle_phy_i.btle_rx_i/_32365_"
+   ],
+   [
+    1.0,
+    "btle_ll",
+    "tb_activity/u_ref/btle_ll_i/ref_1pps_counter[0]"
+   ],
+   [
+    1.0,
+    "btle_ll",
+    "tb_activity/u_ref/btle_ll_i/clk_cross_bus_bb_to_s_axi_i.write_data[13]"
+   ],
+   [
+    1.0,
+    "btle_ll",
+    "tb_activity/u_ref/btle_ll_i/clk_cross_bus_bb_to_s_axi_i.read_data[13]"
+   ],
+   [
+    1.0,
+    "btle_ll",
+    "tb_activity/u_ref/btle_ll_i/_8653_[0]"
+   ],
+   [
+    1.0,
+    "btle_ll",
+    "tb_activity/u_ref/btle_ll_i/_8636_[0]"
+   ],
+   [
+    1.0,
+    "btle_ll",
+    "tb_activity/u_ref/btle_ll_i/_6903_"
+   ],
+   [
+    1.0,
+    "btle_ll",
+    "tb_activity/u_ref/btle_ll_i/_5817_"
+   ]
+  ],
+  "missing_nets": []
+ },
+ "dut": {
+  "nets": 54977,
+  "toggles": 92098853,
+  "clock_toggles": 700000,
+  "clk_cap_tog": 887189239.7999753,
+  "data_cap_tog": 353069712.64148754,
+  "hot_nets": 503,
+  "blocks": {
+   "top glue": {
+    "nets": 643,
+    "toggles": 1111784,
+    "data_cap_tog": 1379.8803599999999,
+    "clk_cap_tog": 0.0,
+    "hot_nets": 14,
+    "cells": 219
+   },
+   "auxiliary_daemon": {
+    "nets": 379,
+    "toggles": 2889887,
+    "data_cap_tog": 8761252.58594999,
+    "clk_cap_tog": 9116668.799999997,
+    "hot_nets": 114,
+    "cells": 299
+   },
+   "btle_ll": {
+    "nets": 12175,
+    "toggles": 3261771,
+    "data_cap_tog": 9051173.600069972,
+    "clk_cap_tog": 382733566.1999928,
+    "hot_nets": 67,
+    "cells": 9390
+   },
+   "btle_rx": {
+    "nets": 38831,
+    "toggles": 82502243,
+    "data_cap_tog": 332682065.2777266,
+    "clk_cap_tog": 392776480.79998213,
+    "hot_nets": 245,
+    "cells": 36699
+   },
+   "btle_tx (other)": {
+    "nets": 2513,
+    "toggles": 0,
+    "data_cap_tog": 0.0,
+    "clk_cap_tog": 88127798.4000004,
+    "hot_nets": 0,
+    "cells": 2049
+   },
+   "gauss_filter": {
+    "nets": 188,
+    "toggles": 0,
+    "data_cap_tog": 0.0,
+    "clk_cap_tog": 4178473.2000000007,
+    "hot_nets": 0,
+    "cells": 166
+   },
+   "clock_domain_conversion": {
+    "nets": 248,
+    "toggles": 2333168,
+    "data_cap_tog": 2573841.29738,
+    "clk_cap_tog": 10256252.399999999,
+    "hot_nets": 63,
+    "cells": 186
+   }
+  },
+  "mem_port_toggles": 2439546,
+  "mem_instances": 12,
+  "cells": 49008,
+  "missing": 0,
+  "top_nets": [
+   [
+    1.0,
+    "clock_domain_conversion",
+    "tb_activity/u_dut/clock_domain_conversion_iq_i/rx_sample_phase"
+   ],
+   [
+    1.0,
+    "clock_domain_conversion",
+    "tb_activity/u_dut/clock_domain_conversion_iq_i/rx_iq_valid"
+   ],
+   [
+    1.0,
+    "clock_domain_conversion",
+    "tb_activity/u_dut/clock_domain_conversion_iq_i/_56_"
+   ],
+   [
+    1.0,
+    "clock_domain_conversion",
+    "tb_activity/u_dut/clock_domain_conversion_iq_i/_184_"
+   ],
+   [
+    1.0,
+    "clock_domain_conversion",
+    "tb_activity/u_dut/clock_domain_conversion_iq_i/_179_"
+   ],
+   [
+    1.0,
+    "clock_domain_conversion",
+    "tb_activity/u_dut/clock_domain_conversion_iq_i/_173_"
+   ],
+   [
+    1.0,
+    "clock_domain_conversion",
+    "tb_activity/u_dut/clock_domain_conversion_iq_i/_112_"
+   ],
+   [
+    1.0,
+    "btle_rx",
+    "tb_activity/u_dut/btle_phy_i.btle_rx_i/_32230_"
+   ],
+   [
+    1.0,
+    "btle_ll",
+    "tb_activity/u_dut/btle_ll_i/ref_1pps_counter[0]"
+   ],
+   [
+    1.0,
+    "btle_ll",
+    "tb_activity/u_dut/btle_ll_i/clk_cross_bus_bb_to_s_axi_i.write_data[13]"
+   ],
+   [
+    1.0,
+    "btle_ll",
+    "tb_activity/u_dut/btle_ll_i/clk_cross_bus_bb_to_s_axi_i.read_data[13]"
+   ],
+   [
+    1.0,
+    "btle_ll",
+    "tb_activity/u_dut/btle_ll_i/_8546_[0]"
+   ],
+   [
+    1.0,
+    "btle_ll",
+    "tb_activity/u_dut/btle_ll_i/_8529_[0]"
+   ],
+   [
+    1.0,
+    "btle_ll",
+    "tb_activity/u_dut/btle_ll_i/_5961_"
+   ],
+   [
+    1.0,
+    "btle_ll",
+    "tb_activity/u_dut/btle_ll_i/_5047_"
+   ]
+  ],
+  "missing_nets": []
+ },
+ "status": "COMPLETE"
+}

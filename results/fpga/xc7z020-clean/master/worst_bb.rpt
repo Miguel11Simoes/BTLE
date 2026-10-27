@@ -1,0 +1,93 @@
+Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2026 Advanced Micro Devices, Inc. All Rights Reserved.
+---------------------------------------------------------------------------------------------------------------------------------------------
+| Tool Version : Vivado v.2026.1 (win64) Build 6511674 Tue Jun 16 11:02:23 MDT 2026
+| Date         : Mon Oct 26 23:38:48 2026
+| Host         : Simon running 64-bit major release  (build 9200)
+| Command      : report_timing -max_paths 1 -nworst 1 -group [get_clocks bb_clk] -file C:/btle-fpga/tx-clean/master/worst_bb.rpt
+| Design       : btle_controller
+| Device       : 7z020-clg484
+| Speed File   : -1  PRODUCTION 1.12 2019-11-22
+| Design State : Routed
+---------------------------------------------------------------------------------------------------------------------------------------------
+
+Timing Report
+
+Slack (MET) :             47.895ns  (required time - arrival time)
+  Source:                 btle_phy_i/btle_tx_i/gfsk_modulation_i/tail_i/remaining_reg[0]/C
+                            (rising edge-triggered cell FDRE clocked by bb_clk  {rise@0.000ns fall@31.250ns period=62.500ns})
+  Destination:            btle_phy_i/btle_tx_i/gfsk_modulation_i/tail_i/correction_reg[13]/D
+                            (rising edge-triggered cell FDRE clocked by bb_clk  {rise@0.000ns fall@31.250ns period=62.500ns})
+  Path Group:             bb_clk
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            62.500ns  (bb_clk rise@62.500ns - bb_clk rise@0.000ns)
+  Data Path Delay:        14.602ns  (logic 4.401ns (30.140%)  route 10.201ns (69.860%))
+  Logic Levels:           13  (CARRY4=5 LUT3=1 LUT4=1 LUT5=3 LUT6=3)
+  Clock Path Skew:        -0.030ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    1.470ns = ( 63.970 - 62.500 ) 
+    Source Clock Delay      (SCD):    1.647ns
+    Clock Pessimism Removal (CPR):    0.147ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock bb_clk rise edge)     0.000     0.000 r  <hidden>
+                                                      0.000     0.000 r  bb_clk
+                         net (fo=4425, unset)         1.647     1.647    btle_phy_i/btle_tx_i/gfsk_modulation_i/tail_i/clk
+    SLICE_X40Y62         FDRE                                         r  btle_phy_i/btle_tx_i/gfsk_modulation_i/tail_i/remaining_reg[0]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X40Y62         FDRE (Prop_fdre_C_Q)         0.456     2.103 r  btle_phy_i/btle_tx_i/gfsk_modulation_i/tail_i/remaining_reg[0]/Q
+                         net (fo=95, routed)          3.039     5.142    btle_phy_i/btle_tx_i/gfsk_modulation_i/tail_i/remaining_reg_n_0_[0]
+    SLICE_X39Y70         LUT5 (Prop_lut5_I4_O)        0.124     5.266 r  btle_phy_i/btle_tx_i/gfsk_modulation_i/tail_i/next_correction0__46_carry_i_10/O
+                         net (fo=31, routed)          1.706     6.971    btle_phy_i/btle_tx_i/gfsk_modulation_i/tail_i/next_correction124_out__7
+    SLICE_X37Y64         LUT6 (Prop_lut6_I4_O)        0.124     7.095 r  btle_phy_i/btle_tx_i/gfsk_modulation_i/tail_i/next_correction0__46_carry_i_1/O
+                         net (fo=2, routed)           1.019     8.115    btle_phy_i/btle_tx_i/gfsk_modulation_i/tail_i/next_correction0__46_carry_i_1_n_0
+    SLICE_X37Y66         LUT6 (Prop_lut6_I0_O)        0.124     8.239 r  btle_phy_i/btle_tx_i/gfsk_modulation_i/tail_i/next_correction0__46_carry_i_4/O
+                         net (fo=1, routed)           0.000     8.239    btle_phy_i/btle_tx_i/gfsk_modulation_i/tail_i/next_correction0__46_carry_i_4_n_0
+    SLICE_X37Y66         CARRY4 (Prop_carry4_S[3]_CO[3])
+                                                      0.401     8.640 r  btle_phy_i/btle_tx_i/gfsk_modulation_i/tail_i/next_correction0__46_carry/CO[3]
+                         net (fo=1, routed)           0.000     8.640    btle_phy_i/btle_tx_i/gfsk_modulation_i/tail_i/next_correction0__46_carry_n_0
+    SLICE_X37Y67         CARRY4 (Prop_carry4_CI_O[0])
+                                                      0.222     8.862 r  btle_phy_i/btle_tx_i/gfsk_modulation_i/tail_i/next_correction0__46_carry__0/O[0]
+                         net (fo=2, routed)           1.002     9.864    btle_phy_i/btle_tx_i/gfsk_modulation_i/tail_i/next_correction0__46_carry__0_n_7
+    SLICE_X34Y66         LUT4 (Prop_lut4_I2_O)        0.325    10.189 r  btle_phy_i/btle_tx_i/gfsk_modulation_i/tail_i/next_correction0__230_carry__0_i_3/O
+                         net (fo=2, routed)           0.857    11.045    btle_phy_i/btle_tx_i/gfsk_modulation_i/tail_i/next_correction0__230_carry__0_i_3_n_0
+    SLICE_X34Y66         LUT5 (Prop_lut5_I4_O)        0.328    11.373 r  btle_phy_i/btle_tx_i/gfsk_modulation_i/tail_i/next_correction0__230_carry__0_i_7/O
+                         net (fo=1, routed)           0.000    11.373    btle_phy_i/btle_tx_i/gfsk_modulation_i/tail_i/next_correction0__230_carry__0_i_7_n_0
+    SLICE_X34Y66         CARRY4 (Prop_carry4_S[1]_O[3])
+                                                      0.643    12.016 r  btle_phy_i/btle_tx_i/gfsk_modulation_i/tail_i/next_correction0__230_carry__0/O[3]
+                         net (fo=3, routed)           0.927    12.943    btle_phy_i/btle_tx_i/gfsk_modulation_i/tail_i/next_correction0__230_carry__0_n_4
+    SLICE_X39Y66         LUT3 (Prop_lut3_I1_O)        0.307    13.250 r  btle_phy_i/btle_tx_i/gfsk_modulation_i/tail_i/next_correction0__278_carry__0_i_12/O
+                         net (fo=2, routed)           0.823    14.073    btle_phy_i/btle_tx_i/gfsk_modulation_i/tail_i/next_correction0__278_carry__0_i_12_n_0
+    SLICE_X39Y65         LUT5 (Prop_lut5_I4_O)        0.149    14.222 r  btle_phy_i/btle_tx_i/gfsk_modulation_i/tail_i/next_correction0__278_carry__1_i_4/O
+                         net (fo=2, routed)           0.829    15.051    btle_phy_i/btle_tx_i/gfsk_modulation_i/tail_i/next_correction0__278_carry__1_i_4_n_0
+    SLICE_X40Y66         LUT6 (Prop_lut6_I0_O)        0.332    15.383 r  btle_phy_i/btle_tx_i/gfsk_modulation_i/tail_i/next_correction0__278_carry__1_i_8/O
+                         net (fo=1, routed)           0.000    15.383    btle_phy_i/btle_tx_i/gfsk_modulation_i/tail_i/next_correction0__278_carry__1_i_8_n_0
+    SLICE_X40Y66         CARRY4 (Prop_carry4_S[0]_CO[3])
+                                                      0.532    15.915 r  btle_phy_i/btle_tx_i/gfsk_modulation_i/tail_i/next_correction0__278_carry__1/CO[3]
+                         net (fo=1, routed)           0.000    15.915    btle_phy_i/btle_tx_i/gfsk_modulation_i/tail_i/next_correction0__278_carry__1_n_0
+    SLICE_X40Y67         CARRY4 (Prop_carry4_CI_O[1])
+                                                      0.334    16.249 r  btle_phy_i/btle_tx_i/gfsk_modulation_i/tail_i/next_correction0__278_carry__2/O[1]
+                         net (fo=1, routed)           0.000    16.249    btle_phy_i/btle_tx_i/gfsk_modulation_i/tail_i/next_correction[13]
+    SLICE_X40Y67         FDRE                                         r  btle_phy_i/btle_tx_i/gfsk_modulation_i/tail_i/correction_reg[13]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock bb_clk rise edge)    62.500    62.500 r  <hidden>
+                                                      0.000    62.500 r  bb_clk
+                         net (fo=4425, unset)         1.470    63.970    btle_phy_i/btle_tx_i/gfsk_modulation_i/tail_i/clk
+    SLICE_X40Y67         FDRE                                         r  btle_phy_i/btle_tx_i/gfsk_modulation_i/tail_i/correction_reg[13]/C
+                         clock pessimism              0.147    64.117    <hidden>
+                         clock uncertainty           -0.035    64.082    <hidden>
+    SLICE_X40Y67         FDRE (Setup_fdre_C_D)        0.062    64.144    btle_phy_i/btle_tx_i/gfsk_modulation_i/tail_i/correction_reg[13]
+  -------------------------------------------------------------------
+                         required time                         64.144    <hidden>
+                         arrival time                         -16.249    <hidden>
+  -------------------------------------------------------------------
+                         slack                                 47.895    <hidden>
+
+
+
+

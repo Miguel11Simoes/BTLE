@@ -1,0 +1,57 @@
+Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2026 Advanced Micro Devices, Inc. All Rights Reserved.
+---------------------------------------------------------------------------------------------------------------------------------------------
+| Tool Version : Vivado v.2026.1 (win64) Build 6511674 Tue Jun 16 11:02:23 MDT 2026
+| Date         : Mon Oct 26 23:37:04 2026
+| Host         : Simon running 64-bit major release  (build 9200)
+| Command      : report_utilization -hierarchical -hierarchical_depth 3 -file C:/btle-fpga/tx-clean/upstream/impl_util_hier.rpt
+| Design       : btle_controller
+| Device       : xc7z020clg484-1
+| Speed File   : -1
+| Design State : Routed
+---------------------------------------------------------------------------------------------------------------------------------------------
+
+Utilization Design Information
+
+Table of Contents
+-----------------
+1. Utilization by Hierarchy
+
+1. Utilization by Hierarchy
+---------------------------
+
++------------------------------------------+-------------------------------------+------------+------------+---------+------+------+--------+--------+------------+
+|                 Instance                 |                Module               | Total LUTs | Logic LUTs | LUTRAMs | SRLs |  FFs | RAMB36 | RAMB18 | DSP Blocks |
++------------------------------------------+-------------------------------------+------------+------------+---------+------+------+--------+--------+------------+
+| btle_controller                          |                               (top) |       4458 |       4072 |     386 |    0 | 5756 |     32 |     12 |         48 |
+|   (btle_controller)                      |                               (top) |        127 |        127 |       0 |    0 |    0 |      0 |      0 |          0 |
+|   btle_ll_i                              |                             btle_ll |       1397 |       1011 |     386 |    0 | 2713 |      0 |      1 |          0 |
+|     (btle_ll_i)                          |                             btle_ll |        104 |        104 |       0 |    0 |  418 |      0 |      0 |          0 |
+|     clk_cross_bus_bb_to_s_axi_i          |       clk_cross_bus__parameterized0 |        255 |          9 |     246 |    0 |  365 |      0 |      0 |          0 |
+|       sdpram_two_clk_for_clk_cross_bus_i |      sdpram_two_clk__parameterized1 |        246 |          0 |     246 |    0 |  365 |      0 |      0 |          0 |
+|     clk_cross_bus_s_axi_to_bb_i          |                       clk_cross_bus |        140 |          0 |     140 |    0 |  207 |      0 |      0 |          0 |
+|       sdpram_two_clk_for_clk_cross_bus_i |      sdpram_two_clk__parameterized0 |        140 |          0 |     140 |    0 |  207 |      0 |      0 |          0 |
+|     event_counter_pulse_timestamp_i      | event_counter_pulse__parameterized0 |          1 |          1 |       0 |    0 |   64 |      0 |      0 |          0 |
+|     ll_s_axi_i                           |                            ll_s_axi |        712 |        712 |       0 |    0 | 1338 |      0 |      0 |          0 |
+|     rx_ram_i                             |                              rx_ram |        147 |        147 |       0 |    0 |  122 |      0 |      1 |          0 |
+|       (rx_ram_i)                         |                              rx_ram |        122 |        122 |       0 |    0 |   65 |      0 |      0 |          0 |
+|       octet_to_word_for_rx_ram_i         |                       octet_to_word |         25 |         25 |       0 |    0 |   57 |      0 |      0 |          0 |
+|   btle_phy_i                             |                            btle_phy |       2927 |       2927 |       0 |    0 | 2973 |      0 |     11 |         48 |
+|     btle_rx_i                            |                             btle_rx |       2247 |       2247 |       0 |    0 | 2572 |      0 |      8 |         48 |
+|       (btle_rx_i)                        |                             btle_rx |        348 |        348 |       0 |    0 |  380 |      0 |      0 |          0 |
+|       genblk1[0].btle_rx_core_i          |                     btle_rx_core__1 |        236 |        236 |       0 |    0 |  265 |      0 |      0 |          6 |
+|       genblk1[1].btle_rx_core_i          |                     btle_rx_core__2 |        238 |        238 |       0 |    0 |  265 |      0 |      0 |          6 |
+|       genblk1[2].btle_rx_core_i          |                     btle_rx_core__3 |        237 |        237 |       0 |    0 |  265 |      0 |      0 |          6 |
+|       genblk1[3].btle_rx_core_i          |                     btle_rx_core__4 |        236 |        236 |       0 |    0 |  265 |      0 |      0 |          6 |
+|       genblk1[4].btle_rx_core_i          |                     btle_rx_core__5 |        236 |        236 |       0 |    0 |  265 |      0 |      0 |          6 |
+|       genblk1[5].btle_rx_core_i          |                     btle_rx_core__6 |        238 |        238 |       0 |    0 |  265 |      0 |      0 |          6 |
+|       genblk1[6].btle_rx_core_i          |                     btle_rx_core__7 |        238 |        238 |       0 |    0 |  265 |      0 |      0 |          6 |
+|       genblk1[7].btle_rx_core_i          |                        btle_rx_core |        234 |        234 |       0 |    0 |  265 |      0 |      0 |          6 |
+|     btle_tx_i                            |                             btle_tx |        680 |        680 |       0 |    0 |  401 |      0 |      3 |          0 |
+|       (btle_tx_i)                        |                             btle_tx |        142 |        142 |       0 |    0 |   96 |      0 |      0 |          0 |
+|       crc24_i                            |                               crc24 |         66 |         66 |       0 |    0 |   51 |      0 |      0 |          0 |
+|       gfsk_modulation_i                  |                     gfsk_modulation |        451 |        451 |       0 |    0 |  229 |      0 |      2 |          0 |
+|   clock_domain_conversion_iq_i           |          clock_domain_conversion_iq |          3 |          3 |       0 |    0 |   54 |      0 |      0 |          0 |
++------------------------------------------+-------------------------------------+------------+------------+---------+------+------+--------+--------+------------+
+* Note: The sum of lower-level cells may be larger than their parent cells total, due to cross-hierarchy LUT combining
+
+
