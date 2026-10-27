@@ -23,9 +23,9 @@
   "RUN_HEURISTIC_DIODE_INSERTION": false,
   "GRT_ANTENNA_REPAIR_ITERS": 6,
   "GRT_ANTENNA_REPAIR_MARGIN": 15,
-  "DESIGN_REPAIR_MAX_SLEW_PCT": 40,
+  "DESIGN_REPAIR_MAX_SLEW_PCT": 60,
   "DESIGN_REPAIR_MAX_CAP_PCT": 30,
-  "GRT_DESIGN_REPAIR_MAX_SLEW_PCT": 40,
+  "GRT_DESIGN_REPAIR_MAX_SLEW_PCT": 60,
   "GRT_DESIGN_REPAIR_MAX_CAP_PCT": 30,
   "PAD_LEFS": [], "PAD_GDS": [], "PAD_VERILOG_MODELS": [], "PAD_SPICE_MODELS": [], "PAD_CDLS": [],
   "LIB": {
@@ -34,6 +34,8 @@
           "*_ff_n40C_5v50": ["/src/gf180mcu/gf180mcuD/libs.ref/gf180mcu_fd_sc_mcu7t5v0/lib/gf180mcu_fd_sc_mcu7t5v0__ff_n40C_5v50.lib"]},
   "WIRE_LENGTH_THRESHOLD": 1500,
   "GPL_CELL_PADDING": 1,
+  "CTS_SINK_CLUSTERING_SIZE": 7,
+  "CTS_SINK_CLUSTERING_MAX_DIAMETER": 150,
   "STA_MACRO_PRIORITIZE_NL": false,
   "MACROS": {
     "efuse_async_mem_1x8": {
@@ -52,11 +54,11 @@
               "max_ff_n40C_5v50": ["/out/macros/efuse_array_async_1x8/efuse_async_mem_1x8/max_ff_n40C_5v50/efuse_async_mem_1x8__max_ff_n40C_5v50.lib"]},
       "instances": {
         "btle_tx_pdu_buffer_i.gen_adv_address_otp.otp_byte[0].efuse_i": {"location": [28, 40], "orientation": "N"},
-        "btle_tx_pdu_buffer_i.gen_adv_address_otp.otp_byte[1].efuse_i": {"location": [146, 40], "orientation": "N"},
+        "btle_tx_pdu_buffer_i.gen_adv_address_otp.otp_byte[1].efuse_i": {"location": [141.56, 40], "orientation": "N"},
         "btle_tx_pdu_buffer_i.gen_adv_address_otp.otp_byte[2].efuse_i": {"location": [264, 40], "orientation": "N"},
         "btle_tx_pdu_buffer_i.gen_adv_address_otp.otp_byte[3].efuse_i": {"location": [382, 40], "orientation": "N"},
         "btle_tx_pdu_buffer_i.gen_adv_address_otp.otp_byte[4].efuse_i": {"location": [500, 40], "orientation": "N"},
-        "btle_tx_pdu_buffer_i.gen_adv_address_otp.otp_byte[5].efuse_i": {"location": [618, 40], "orientation": "N"}
+        "btle_tx_pdu_buffer_i.gen_adv_address_otp.otp_byte[5].efuse_i": {"location": [622.36, 40], "orientation": "N"}
       }
     }
   },

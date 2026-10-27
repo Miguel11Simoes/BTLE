@@ -23,6 +23,20 @@
 #   WIRE_LENGTH_THRESHOLD: the long-wire check runs; GPL_CELL_PADDING: a site around each cell;
 #   STA_MACRO_PRIORITIZE_NL false: the macros (eFuse blocks, SRAM) are timed by their liberties, as
 #     no parasitics come with their netlists.
+# And of this transmitter (the experiments of TX_FINAL_DECISIONS.md section 8.1):
+#   eFuse blocks 1 and 5 at x = 141.56 and 622.36 (were 146, 618): the core's straps (VDD, then VSS
+#     3.3 um apart) on the block's own Metal4 pins (VDD at 14.28 + 20k um, VSS 3.3 um after); between
+#     them a strap of one net met a pin of the other, was cut, and its end overlapped the block's
+#     ring by less than a via (PDN-0110);
+#   the SRAM at (124.6, 480) (was 164, 500): no vertical strap crosses its 0.11 um high VSS rail on
+#     Metal3 (x 118.4-207.0 um of the macro, its LEF) or ends on the edge of one of its shapes (PDN-0110),
+#     with room above it for the buffers of the top edge's pins;
+#   IO_EXCLUDE_PIN_REGION bottom:* (SRAM): the eFuse row is along the bottom edge; with pins there the
+#     logic that reads them is placed in the strip below the row, and a net of the AdvA multiplexer
+#     detoured there over the max slew at ss (the flip-flops' placement does not; their setup slack
+#     falls to 0.2 ns with it);
+#   DESIGN_REPAIR_MAX_SLEW_PCT 60 (both; the SRAM's already): the repair's margin on the max slew;
+#   CTS_SINK_CLUSTERING 7 flip-flops over 150 um: the fewest clock-tree buffers above the max fanout.
 set -euo pipefail
 label=${1:?usage: run.sh <label> [rtl-rev]}
 rev=${2:-HEAD}
@@ -45,6 +59,20 @@ if [ "$variant" = sram64 ]; then
   grep -q "^module pdu_buffer_ram" "$work/src/btle_tx.v" && { echo "pdu_buffer_ram not removed" >&2; exit 1; }
 else
   cp "$here/config.json" "$work/"
+fi
+
+# CONFIG_OVERRIDES (optional): a JSON object merged into config.json (objects key by key, the rest replaced),
+# to try a setting without editing the configuration; recorded in provenance.txt
+if [ -n "${CONFIG_OVERRIDES:-}" ]; then
+  python3 - "$work/config.json" <<'PY'
+import json, os, sys
+def merge(a, b):
+    for k, v in b.items():
+        a[k] = merge(a.get(k, {}), v) if isinstance(v, dict) and isinstance(a.get(k), dict) else v
+    return a
+c = json.load(open(sys.argv[1]))
+json.dump(merge(c, json.loads(os.environ['CONFIG_OVERRIDES'])), open(sys.argv[1], 'w'), indent=2)
+PY
 fi
 
 # the compiler's nix-shell, as its own flow runs it (results/otp/gf180-efuse/provenance.txt)
@@ -105,6 +133,7 @@ mkdir -p "$repo/results/figures/tx-min"; cp "$work"/${fig}_*.png "$repo/results/
   echo "harness=$(git -C "$repo" rev-parse HEAD), dirty files under scripts/layout: $(git -C "$repo" status --porcelain -- scripts/layout | wc -l)"
   echo "flow=LibreLane Classic, gf180mcuD, gf180mcu_fd_sc_mcu7t5v0, in the eFuse compiler's nix-shell ($(git -C "$EFUSE_DIR/gf180_efuse_compiler" rev-parse HEAD 2>/dev/null))"
   echo "run=$(basename "$R")"
+  echo "config_overrides=${CONFIG_OVERRIDES:-none}"
   echo "gds sha256=$(sha256sum "$R/final/gds/btle_tx.gds" | cut -d' ' -f1)"
 } > "$out/provenance.txt"
 cat "$out/manufacturability.rpt"
