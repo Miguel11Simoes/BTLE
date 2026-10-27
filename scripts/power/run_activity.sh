@@ -85,11 +85,17 @@ sha256sum "$work/ref_gl.v" "$work/dut_gl.v" | sed "s|$work/||" > "$out/netlists.
 # 2. cell models
 yosys -q -p "read_liberty -ignore_miss_func $LIBERTY; write_verilog -noattr $work/nangate_cells.v"
 
-# 3. simulator
+# 3. simulator. The RAM models of the working tree, with an rst input when they have none: the
+# reference's netlist (an earlier RTL) connects it; the models never read it
+mkdir -p "$work/models"
+for m in sdpram_one_clk sdpram_two_clk; do
+  if grep -q '^  input wire rst,$' "$repo/verilog/$m.v"; then cp "$repo/verilog/$m.v" "$work/models/"
+  else awk '{print} /^  input wire clk,$/ {print "  input wire rst,"}' "$repo/verilog/$m.v" > "$work/models/$m.v"; fi
+done
 verilator --binary --timing --trace-saif --trace-underscore -Wno-fatal -Wno-lint -Wno-style $tb_define \
   --top tb_activity -O2 --x-assign fast --x-initial fast -j "$(nproc)" --Mdir "$work/obj" -o sim \
   "$here/tb_activity.v" "$work/ref_gl.v" "$work/dut_gl.v" "$work/nangate_cells.v" \
-  "$repo/verilog/sdpram_one_clk.v" "$repo/verilog/sdpram_two_clk.v" > "$work/verilator.log" 2>&1 \
+  "$work/models/sdpram_one_clk.v" "$work/models/sdpram_two_clk.v" > "$work/verilator.log" 2>&1 \
   || { tail -30 "$work/verilator.log"; exit 1; }
 
 # vectors: example 0 of the Python model (ADV packet, channel 37), 20 dB, 20 ppm
