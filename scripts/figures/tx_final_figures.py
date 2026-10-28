@@ -143,17 +143,25 @@ def fig_ber(d, out):
     fig, axes = plt.subplots(1, 2, figsize=(11, 4.0))
     for ax, ppm in zip(axes, ("50", "-30")):
         b = d["ber"][ppm]
-        ax.semilogy(b["snr"], b["upstream"], "+-", color=BLUE, markersize=10, linewidth=2,
-                    label="upstream: Python TX (test_btle_ber.py, unmodified)")
+        # the comparison: the same packets and the same noise for both transmitters (draw 0)
+        ax.fill_between(b["snr"], b["band_min"], b["band_max"], color=GRID, linewidth=0,
+                        label=f"{b['band_count']} noise draws, min-max (RTL = Python in each)")
+        ax.semilogy(b["snr"], b["upstream_same_noise"], "+-", color=BLUE, markersize=10, linewidth=2,
+                    label="upstream: Python TX, same packets and noise")
         ax.semilogy(b["snr"], b["min_rtl"], "x--", color=ORANGE, markersize=8, linewidth=2,
-                    label="ble-tx-min: RTL TX (Icarus)")
+                    label="ble-tx-min: RTL TX (Icarus), same packets and noise")
+        # other noise draws and packets, upstream's script: where they fall, not a comparison
+        ax.semilogy(b["snr"], b["upstream_rerun"], "o", color=INK2, markersize=5, markerfacecolor="none",
+                    label="upstream's script rerun (other draw)")
+        ax.semilogy(b["snr"], b["upstream_published"], "s", color=INK2, markersize=5, markerfacecolor="none",
+                    label="upstream's published figure (other draw)")
         ax.axhline(1e-3, color=INK2, linewidth=1, linestyle=":")
         ax.text(b["snr"][0], 1.15e-3, "BER 0.1 % (Core spec, -70 dBm)", fontsize=7, color=INK2)
         ax.set_title(f"BER, clock error {ppm} ppm")
         ax.set_xlabel("SNR (dB)")
         ax.set_ylabel("BER")
         tidy(ax, "both")
-        ax.legend(loc="upper right", fontsize=7.5, frameon=False)
+        ax.legend(loc="upper right", fontsize=6.5, frameon=False)
     fig.suptitle("39-byte ADV PDUs, upstream's channel and receiver (python/btlelib.py of upstream-baseline)", fontsize=9)
     fig.tight_layout()
     fig.savefig(out / "tx_final_ber.png", dpi=130)

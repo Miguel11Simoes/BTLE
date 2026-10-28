@@ -6,7 +6,7 @@ Author: Miguel Simões
 Run from the repository root in WSL (Icarus in OSS_CAD, NumPy, Matplotlib):
 
   python3 scripts/figures/tx_min_figures.py tx   OUT_DIR   # py-fig3 and py-fig4 with the RTL transmitter
-  python3 scripts/figures/tx_min_figures.py ber  OUT_DIR [--packets N]   # the BER curves, 50 and -30 ppm
+  python3 scripts/figures/tx_min_figures.py ber  OUT_DIR [--packets N] [--realizations R]   # the BER curves, 50 and -30 ppm
   python3 scripts/figures/tx_min_figures.py area OUT_DIR AREA_JSON       # the transmitter area per branch
 
 The transmitter is verilog/btle_tx.v with GAUSS_TABLE = 1 (as the branch is measured), run by the
@@ -248,7 +248,18 @@ def _rx_errors(args):
     return int(np.sum(pdu_bit[:m] != rx_pdu_bit[:m])), len(pdu_bit)
 
 
-def fig_ber(out_dir: Path, packets: int) -> None:
+def _seed(realization: int, ppm: int, s_idx: int, k: int) -> int:
+    """The noise seed of packet k; realization 0 is the one first published (2026-10-16)."""
+    return 10_000_000 * realization + 1000 * s_idx + k + (ppm + 100) * 100000
+
+
+def fig_ber(out_dir: Path, packets: int, realizations: int) -> None:
+    """The same packets and, in each realization, the same noise for the RTL and the Python transmitter.
+
+    Realization 0 is the comparison of the figures; the others only show how much the BER of these
+    packet counts moves from one noise draw to another (upstream's script draws a new one at every
+    run), drawn as the band between the lowest and the highest realization of the RTL.
+    """
     counts = [packets // 3, 2 * packets // 3, packets, packets]  # upstream's 100, 200, 300, 300
     rng = np.random.default_rng(8675309)
     with tempfile.TemporaryDirectory(prefix="tx-min-ber-") as t:
@@ -260,41 +271,58 @@ def fig_ber(out_dir: Path, packets: int) -> None:
             if r["differences"]:
                 raise RuntimeError(f"packet {k}: RTL and Python transmitters differ")
             waves.append((r["i"].astype(float), r["q"].astype(float), r["py_i"], r["py_q"], r["pdu_bit"]))
-    up_dir = Path(tempfile.mkdtemp(prefix="btle-upstream-py-"))
-    arc = subprocess.run(["git", "-C", str(ROOT), "archive", "upstream-baseline", "python"], stdout=subprocess.PIPE, check=True)
-    subprocess.run(["tar", "-x", "-C", str(up_dir)], input=arc.stdout, check=True)
-    (up_dir / "verilog").mkdir()
-    os.environ["BTLE_UPSTREAM_PY"] = str(up_dir / "python")
+    # BTLE_UPSTREAM_PY, if set: the python/ of upstream-baseline already extracted (and a sibling
+    # verilog/), for a worktree whose git does not run here (a Windows worktree under WSL)
+    if "BTLE_UPSTREAM_PY" not in os.environ:
+        up_dir = Path(tempfile.mkdtemp(prefix="btle-upstream-py-"))
+        arc = subprocess.run(["git", "-C", str(ROOT), "archive", "upstream-baseline", "python"], stdout=subprocess.PIPE, check=True)
+        subprocess.run(["tar", "-x", "-C", str(up_dir)], input=arc.stdout, check=True)
+        (up_dir / "verilog").mkdir()
+        os.environ["BTLE_UPSTREAM_PY"] = str(up_dir / "python")
     results = {}
     for ppm in (50, -30):
         ppm_abs = np.array([0, 10, 20, 25, 30, 35, 40, 45, 50])
         max_snr = np.array([11, 12, 13, 14, 15, 17, 19, 21, 26])
         snr0 = float(np.interp(abs(ppm), ppm_abs, max_snr))
         snrs = [snr0 - 4, snr0 - 2.5, snr0 - 1, snr0]
-        curves = {"rtl": [], "python": []}
-        with ProcessPoolExecutor(max_workers=min(os.cpu_count() or 1, 8)) as pool:
-            for s_idx, snr in enumerate(snrs):
-                for side, (a, b) in (("rtl", (0, 1)), ("python", (2, 3))):
-                    jobs = [(waves[k][a], waves[k][b], waves[k][4], ppm, snr, 1000 * s_idx + k + (ppm + 100) * 100000)
-                            for k in range(counts[s_idx])]
-                    err = tot = 0
-                    for e, n in pool.map(_rx_errors, jobs, chunksize=8):
-                        err += e
-                        tot += n
-                    curves[side].append(dict(snr=snr, ber=err / tot, bits=tot, errors=err))
-                print(f"ppm {ppm} snr {snr}: rtl {curves['rtl'][-1]} python {curves['python'][-1]}", flush=True)
-        results[ppm] = curves
+        runs = []  # runs[r] = {"rtl": [...], "python": [...]}, one entry per SNR
+        with ProcessPoolExecutor(max_workers=min(os.cpu_count() or 1, 16)) as pool:
+            for r in range(realizations):
+                curves = {"rtl": [], "python": []}
+                for s_idx, snr in enumerate(snrs):
+                    for side, (a, b) in (("rtl", (0, 1)), ("python", (2, 3))):
+                        jobs = [(waves[k][a], waves[k][b], waves[k][4], ppm, snr, _seed(r, ppm, s_idx, k))
+                                for k in range(counts[s_idx])]
+                        err = tot = 0
+                        for e, n in pool.map(_rx_errors, jobs, chunksize=8):
+                            err += e
+                            tot += n
+                        curves[side].append(dict(snr=snr, ber=err / tot, bits=tot, errors=err))
+                    if curves["rtl"][-1] != curves["python"][-1]:
+                        raise RuntimeError(f"ppm {ppm} snr {snr} realization {r}: RTL and Python BER differ")
+                print(f"ppm {ppm} realization {r}: errors {[c['errors'] for c in curves['rtl']]} (RTL = Python)", flush=True)
+                runs.append(curves)
+        ber = np.array([[c["ber"] for c in run["rtl"]] for run in runs])  # realizations x SNR
+        results[ppm] = dict(runs[0], realizations=dict(
+            count=realizations, seed="10000000 * realization + 1000 * snr_index + packet + (ppm + 100) * 100000",
+            rtl_equals_python_in_every_realization=True,
+            errors=[[c["errors"] for c in run["rtl"]] for run in runs],
+            ber_min=ber.min(axis=0).tolist(), ber_median=np.median(ber, axis=0).tolist(), ber_max=ber.max(axis=0).tolist()))
         plt.figure(figsize=(6.4, 4.8))
-        plt.semilogy(snrs, [max(c["ber"], 1e-7) for c in curves["rtl"]], "b+-", markersize=10, label="TX: ble-tx-min RTL")
-        plt.semilogy(snrs, [max(c["ber"], 1e-7) for c in curves["python"]], "rx--", markersize=8, label="TX: Python model")
+        if realizations > 1:
+            plt.fill_between(snrs, np.maximum(ber.min(axis=0), 1e-7), ber.max(axis=0), color="0.85",
+                             label=f"{realizations} noise draws (min-max)")
+        plt.semilogy(snrs, [max(c["ber"], 1e-7) for c in runs[0]["rtl"]], "b+-", markersize=10, label="TX: ble-tx-min RTL")
+        plt.semilogy(snrs, [max(c["ber"], 1e-7) for c in runs[0]["python"]], "rx--", markersize=8, label="TX: upstream's Python model")
         plt.title(f"BER (Bit Error Rate) with ppm {ppm}")
         plt.xlabel("SNR(dB)")
         plt.ylabel("BER")
         plt.grid()
         plt.legend(loc="upper right")
-        plt.figtext(0.5, 0.005, f"Legacy ADV PDUs of 39 bytes, random AdvData; {counts} packets per SNR; same noise for both; channel and receiver: upstream btlelib.py",
+        plt.figtext(0.5, 0.005, f"39-byte ADV PDUs, random AdvData, {counts} packets per SNR\n"
+                    f"the two lines: the same packets and noise (draw 0); RTL = Python in all {realizations} draws",
                     ha="center", fontsize=7)
-        plt.tight_layout(rect=(0, 0.03, 1, 1))
+        plt.tight_layout(rect=(0, 0.05, 1, 1))
         plt.savefig(out_dir / f"tx_min_ber_ppm{ppm}.png", dpi=100)
         plt.close()
     (out_dir / "tx_min_figures_ber.json").write_text(json.dumps(results, indent=2) + "\n")
@@ -337,12 +365,13 @@ def main() -> None:
     p.add_argument("out_dir", type=Path)
     p.add_argument("area_json", type=Path, nargs="?")
     p.add_argument("--packets", type=int, default=300)
+    p.add_argument("--realizations", type=int, default=20, help="noise draws for the BER (draw 0 is the first published one)")
     a = p.parse_args()
     a.out_dir.mkdir(parents=True, exist_ok=True)
     if a.figure == "tx":
         fig_tx(a.out_dir)
     elif a.figure == "ber":
-        fig_ber(a.out_dir, a.packets)
+        fig_ber(a.out_dir, a.packets, a.realizations)
     else:
         fig_area(a.out_dir, a.area_json)
 

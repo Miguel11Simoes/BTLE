@@ -54,7 +54,7 @@ rate and the SRAMs' energy (§§ 3, 7.2) those of `a613226`, which the proof car
 | Worst path | RX demodulator | TX Gaussian tail | **RX demodulator** | RX demodulator | § 5 |
 | Switching activity of the controller, `mixed` | — | reference | **−5.15 %** | −1.58 % | § 7 |
 | TX leakage, 45 nm: logic + SRAM (µW) | 112.61 + not characterized | 182.58 + not characterized | **51.71 + 16.41 = 68.12** | 87.84 + 0 = 87.84 | § 7 |
-| BER 0.1 % at 50 ppm / −30 ppm | ≈ 24.5 / ≈ 13.5 dB (published) | — | **24.5 / 13.8 dB** (RTL) | the same TX bits | § 3.3 |
+| BER 0.1 % at 50 ppm / −30 ppm | ≈ 24.5 / ≈ 13.5 dB (published); 24.5 / 13.8 dB with the same noise as the RTL | — | **24.5 / 13.8 dB** (RTL; the same errors as upstream's TX in 20 noise draws) | the same TX bits | § 3.3 |
 | Open-PDK layout | sky130: global routing failed (whole chip); STA failed (RX core) | — | **GF180MCU, signoff clean**, with the AdvA OTP: 234 009.0 µm² | 160 784.9 µm² | § 8 |
 | Warnings of synthesis (Vivado, Yosys) and layout (LibreLane) | Vivado: 207 in synthesis, none reviewed | Vivado: 206 | **0 unreviewed** (Vivado 109 in synthesis, Yosys 0, LibreLane 37, all reviewed exceptions) | **0 unreviewed** (109, 0, 29) | § 8.1 |
 
@@ -143,31 +143,61 @@ ADV packet after 20 dB and 20 ppm, also CRC OK and equal to the one sent (37 pay
 | 50 ppm | ![upstream BER 50 ppm](../../open_btle_baseband_chip/open_btle_baseband_chip_21_1.png) | ![ble-tx-min BER 50 ppm](../../results/figures/tx-min/tx_min_ber_ppm50.png) |
 | −30 ppm | ![upstream BER -30 ppm](../../open_btle_baseband_chip/open_btle_baseband_chip_23_1.png) | ![ble-tx-min BER -30 ppm](../../results/figures/tx-min/tx_min_ber_ppm-30.png) |
 
+**The two columns are not a comparison.** The left one is upstream's published picture: its script draws
+new packets and new noise at every run (it sets no seed), so its draw is not known and cannot be repeated.
+It stands here for the form of the result (axes, SNR points, where the curve crosses 0.1 %). The
+comparison is inside the right column: the same packets and the same noise through the `ble-tx-min` RTL
+(blue) and upstream's Python transmitter (red, `btle_tx` of `python/btlelib.py`, whose transmitter is
+upstream's to the bit: the thesis changed only where it writes its debug files). The two lines are one.
+The grey band is how far the BER of these packet counts moves from one noise draw to another (20 draws).
+
 ![BER overlay](../../results/figures/tx-final/tx_final_ber.png)
 
 Method, as upstream's `test_btle_ber.py`: 39-byte ADV PDUs with a random payload (here: the chip's AdvA
 and 31 random bytes of AdvData), 100/200/300/300 packets at the four SNR points (31 200 to 93 600 bits),
 a clock error that also shifts the carrier (50 ppm = 122.5 kHz at 2.45 GHz), AWGN, upstream's receiver.
-For `ble-tx-min` the transmitter is the RTL: 300 packets simulated, each compared with the Python model
-(0 samples differ), then the same channel noise applied to both, which gives two identical curves
-(`results/figures/tx-min/tx_min_figures_ber.json`). Upstream's curve is its script run again,
-unmodified (`results/figures/tx-final/upstream_ber_rerun.txt`).
+The transmitter is the RTL: 300 packets simulated, each compared with the Python model (0 samples
+differ). Each packet then goes through the channel once per noise draw, with a fixed seed, and the same
+seed for the RTL's waveform and the Python model's: **in all 20 draws, at every point, the two give the
+same errors** (`results/figures/tx-min/tx_min_figures_ber.json`; draw 0 is the one of the first version of
+this document, reproduced exactly). Upstream's script run again unmodified
+(`results/figures/tx-final/upstream_ber_rerun.txt`) and its published figure (read off the PNG, about
+±2 %) are two more draws, with their own packets: they are placed against the band, not against a line.
 
-| SNR (dB) | upstream, rerun | `ble-tx-min`, RTL | | SNR (dB) | upstream, rerun | `ble-tx-min`, RTL |
-|---:|---:|---:|---|---:|---:|---:|
-| **50 ppm** | | | | **−30 ppm** | | |
-| 22.0 | 2.27 × 10⁻² | 4.45 × 10⁻² | | 11.0 | 1.89 × 10⁻² | 4.92 × 10⁻² |
-| 23.5 | 1.12 × 10⁻² | 1.14 × 10⁻² | | 12.5 | 2.79 × 10⁻³ | 3.17 × 10⁻³ |
-| 25.0 | 3.74 × 10⁻⁴ | 3.21 × 10⁻⁴ | | 14.0 | 9.08 × 10⁻⁴ | 8.01 × 10⁻⁴ |
-| 26.0 | 7.48 × 10⁻⁵ | 7.48 × 10⁻⁵ | | 15.0 | 2.14 × 10⁻⁴ | 1.82 × 10⁻⁴ |
-| **BER 0.1 % at** (log-linear interpolation) | **24.6 dB** | **24.5 dB** | | | **13.9 dB** | **13.8 dB** |
+| SNR (dB) | upstream TX, same noise | **`ble-tx-min` RTL, same noise** | 20 draws: min – median – max | upstream rerun | upstream published |
+|---:|---:|---:|---:|---:|---:|
+| **50 ppm** | | | | | |
+| 22.0 | 4.45 × 10⁻² | **4.45 × 10⁻²** | 1.4 × 10⁻² – 4.4 × 10⁻² – 9.5 × 10⁻² | 2.27 × 10⁻² | ≈ 5.4 × 10⁻² |
+| 23.5 | 1.14 × 10⁻² | **1.14 × 10⁻²** | 1.3 × 10⁻³ – 1.1 × 10⁻² – 2.7 × 10⁻² | 1.12 × 10⁻² | ≈ 2.7 × 10⁻² |
+| 25.0 | 3.21 × 10⁻⁴ | **3.21 × 10⁻⁴** | 2.2 × 10⁻⁴ – 3.4 × 10⁻⁴ – 3.8 × 10⁻³ | 3.74 × 10⁻⁴ | ≈ 2.5 × 10⁻⁴ |
+| 26.0 | 7.48 × 10⁻⁵ | **7.48 × 10⁻⁵** | 3.2 × 10⁻⁵ – 7.5 × 10⁻⁵ – 3.4 × 10⁻³ | 7.48 × 10⁻⁵ | ≈ 1.1 × 10⁻⁴ |
+| BER 0.1 % at | 24.5 dB | **24.5 dB** | median: 24.5 dB | 24.6 dB | 24.6 dB |
+| **−30 ppm** | | | | | |
+| 11.0 | 4.92 × 10⁻² | **4.92 × 10⁻²** | 7.7 × 10⁻³ – 2.0 × 10⁻² – 5.0 × 10⁻² | 1.89 × 10⁻² | ≈ 3.9 × 10⁻² |
+| 12.5 | 3.17 × 10⁻³ | **3.17 × 10⁻³** | 3.2 × 10⁻³ – 4.1 × 10⁻³ – 1.4 × 10⁻² | 2.79 × 10⁻³ | ≈ 3.0 × 10⁻³ |
+| 14.0 | 8.01 × 10⁻⁴ | **8.01 × 10⁻⁴** | 6.0 × 10⁻⁴ – 8.2 × 10⁻⁴ – 4.0 × 10⁻³ | 9.08 × 10⁻⁴ | ≈ 8.4 × 10⁻⁴ |
+| 15.0 | 1.82 × 10⁻⁴ | **1.82 × 10⁻⁴** | 7.5 × 10⁻⁵ – 1.9 × 10⁻⁴ – 3.7 × 10⁻⁴ | 2.14 × 10⁻⁴ | ≈ 1.8 × 10⁻⁴ |
+| BER 0.1 % at | 13.8 dB | **13.8 dB** | median: 13.8 dB | 13.9 dB | 13.8 dB |
 
-Upstream's report gives 24.5 dB at 50 ppm and about 13.5 dB at −30 ppm. The three agree to within
-0.4 dB. The points of lowest SNR differ by a factor of about two between runs: there a few packets
-whose access address is not found count all their bits as wrong, so 100 packets give a coarse estimate
-(upstream's published point at 22 dB, about 5 × 10⁻², is above its own rerun, 2.3 × 10⁻²; ours,
-4.5 × 10⁻², is between). The transmitter is not the cause: with the same noise, the RTL and the Python
-transmitter give the same errors at every point.
+(0.1 % by log-linear interpolation between the points.) What the table shows:
+
+- **The transmitter changes nothing**: with the same packets and noise, upstream's transmitter and the RTL
+  give the same errors, at every point of every draw.
+- **The noise draw changes a lot at low SNR**: at 22 dB the 20 draws span 1.4 × 10⁻² to 9.5 × 10⁻², a
+  factor of 7. A packet whose access address is not found counts all its 312 bits as wrong, so at 100
+  packets each lost packet adds 1 × 10⁻² to the BER; at 25–26 dB one lost packet in 300 lifts the point
+  by about 3 × 10⁻³ (the band's top). The median, not one draw, is the estimate.
+- **Upstream's two runs fall where another draw falls**: 14 of their 16 points lie inside the band. The
+  exceptions, −30 ppm at 12.5 dB (rerun 2.79 × 10⁻³, published ≈ 3.0 × 10⁻³, band from 3.17 × 10⁻³), are
+  within 12 % of the band's edge, and their packets are not ours (fully random payloads, against the
+  chip's AdvA plus random AdvData); 20 draws of one set of packets do not cover every set.
+- **The 0.1 % point**: 24.5–24.6 dB at 50 ppm and 13.8–13.9 dB at −30 ppm in every curve (upstream's report
+  writes "about 13.5" for the latter, read off its figure). The Core spec's sensitivity is met at the
+  same SNR.
+
+In the first version of this document the table and the overlay set one draw of the RTL against the
+rerun, another draw, and the RTL looked worse at the lowest SNR (4.45 against 2.27 × 10⁻² at 22 dB). That
+gap was the noise: the same-noise comparison, the one above, was in the data but not in the figure.
 
 **Which receiver.** The BER uses upstream's receiver model (`python/btlelib.py` of `upstream-baseline`),
 as the published figures do. The audited model returns no PDU when the CRC fails, which would count a
@@ -642,7 +672,7 @@ BT = 0.5, modulation index 0.5); rewriting a packet byte while it is sent; an AX
 | Layout and OTP | `results/layout/tx-clean-gf180*/` (the first version: `tx-min-gf180*`, again at `a359b08a`: `tx-before-gf180*`), `results/otp/gf180-efuse/` | `scripts/layout/tx_min_gf180/run.sh <label> <rev> [sram64]` (`TX_MIN_VALIDATION.md` § 10) |
 | The cleanup: equivalence, validation, warning gate | `results/validation/min-clean/equiv_cleanup/`, `min-clean-*/`; `results/validation/tx-clean-warning-gate.txt` | `scripts/validation/equiv_cleanup/run_equiv_cleanup.sh <label> a359b08a`; `scripts/validation/synth_warning_gate.py --vivado <log> --yosys <area dir> --librelane <layout dir>` |
 | Validation | `results/validation/min-*` | `TX_MIN_VALIDATION.md` § 10 |
-| Figures of §§ 3–8 | `results/figures/tx-min/`, `results/figures/tx-final/` (`data.json` names the source of every number) | `python3 scripts/figures/tx_min_figures.py tx|ber <dir>`; `python3 scripts/figures/tx_final_figures.py results/figures/tx-final/data.json <dir>` |
+| Figures of §§ 3–8 | `results/figures/tx-min/`, `results/figures/tx-final/` (`data.json` names the source of every number) | `python3 scripts/figures/tx_min_figures.py tx|ber <dir>` (`ber`: `--realizations 20`, the default; in a Windows worktree under WSL, `BTLE_UPSTREAM_PY=<upstream-baseline's python/, extracted>`); `python3 scripts/figures/tx_final_figures.py results/figures/tx-final/data.json <dir>` |
 | Upstream's BER, rerun | `results/figures/tx-final/upstream_ber_rerun.txt` | `git archive upstream-baseline python \| tar -x; cd python; python3 test_btle_ber.py 50` (and `-30`) |
 
 Related reports: `docs/Validation/TX_MIN_VALIDATION.md` (this branch in full), `TX_ROM_VALIDATION.md`,
