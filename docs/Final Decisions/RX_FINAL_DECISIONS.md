@@ -5,7 +5,7 @@
 **Base:** tag `upstream-baseline` (`8540186`), forked from github.com/JiaoXianjun/BTLE  
 **Reference results:** [`open_btle_baseband_chip/`](../../open_btle_baseband_chip/open_btle_baseband_chip.md), upstream's own report (2024-05-13)  
 **Companion:** [TX_FINAL_DECISIONS.md](TX_FINAL_DECISIONS.md) (the transmitter)  
-**Date:** 2026-10-26 (first version 2026-10-23)  
+**Date:** 2026-10-30 (first version 2026-10-23)  
 **Author:** Miguel Simões  
 **Status:** every number below is measured and its evidence is committed on `ble-rx-micro` (§ 11). Pre-layout
 results in 45 nm, a routed FPGA implementation, and signoff-clean layouts of the two receivers in an open
@@ -62,9 +62,9 @@ carries over.
 | SRAM bits in the RX | 32 768 (8 × 512 × 8, two ports) | 2 688 (336 × 8, one port) | **0** | § 4 |
 | RX on the xc7z020: LUTs / flip-flops / RAMB18 / DSP48 | 2 247 / 2 572 / 8 / 48 | **911 / 1 181 / 1 / 2** | **482 / 435 / 0 / 0** | § 6 |
 | `btle_rx` min period, 45 nm (target 62.5 ns) | 1.862 ns | 2.092 ns | **1.461 ns** | § 5 |
-| Switching activity of the controller, `mixed`, against corrected master | −2.9 % | +8.8 % | **−32.4 %** | § 7 |
+| Switching activity of the controller, `mixed`, against corrected master | −2.9 % | +8.8 % | **−32.4 %** (of these, −0.8 and −0.6 points the dead UART removed) | § 7 |
 | RX logic leakage, 45 nm | 1 063.4 µW | 263.2 µW | **138.5 µW** | § 7 |
-| Open-PDK layout | sky130: STA failed (one RX core); global routing failed (whole chip) | **GF180MCU, signoff clean**, with the PDK's SRAM: 513 642 µm² | **GF180MCU, signoff clean**: 144 817 µm² | § 8 |
+| Open-PDK layout | sky130: STA failed (one RX core); global routing failed (whole chip); another PDK and other blocks, not laid out in GF180MCU (§ 8) | **GF180MCU, signoff clean**, with the PDK's SRAM: 513 642 µm² | **GF180MCU, signoff clean**: 144 817 µm² | § 8 |
 | Warnings of synthesis (Vivado, Yosys) and layout (LibreLane) | Vivado: 207 in synthesis, none reviewed | **0 unreviewed** (the gate: Vivado 150, Yosys 0, LibreLane 25, all reviewed exceptions) | **0 unreviewed** (Vivado 150, Yosys 0, LibreLane 16) | § 8.1 |
 
 **In one sentence:** `ble-rx-best` receives every Legacy Advertising packet upstream receives, the same
@@ -162,13 +162,22 @@ point** (upstream: 100/200/300/300), at upstream's four SNR points of each ppm a
 
 | BER 0.1 % at (log-linear interpolation) | 50 ppm | −30 ppm | 20 ppm | 0 ppm |
 |---|---:|---:|---:|---:|
-| upstream, published (`open_btle_baseband_chip.md`) | ≈ 24.5 dB | ≈ 13.5 dB | ≈ 11.5 dB | — |
-| `test_btle_ber.py` rerun, unmodified (`TX_FINAL_DECISIONS.md` § 3.3) | 24.6 dB | 13.9 dB | — | — |
 | upstream's Python receiver, this run (1 000 packets per point) | **25.12 dB** | **14.22 dB** | **12.09 dB** | 8.97 dB |
+| the transmitter's 20 noise realizations together (`TX_FINAL_DECISIONS.md` § 3.3: 100/200/300/300 packets each) | 25.17 dB | 13.97 dB | — | — |
+| one realization of 100/200/300/300 packets: the range over those 20 | 23.8 – 25.4 dB | 13.6 – 14.4 dB | — | — |
+| upstream, published (one realization; read off its figures, its text for 20 ppm) | ≈ 24.6 dB | ≈ 13.8 dB | ≈ 11.5 dB | — |
+| `test_btle_ber.py` rerun, unmodified (one realization) | 24.6 dB | 13.9 dB | — | — |
 
-The three agree to within 0.7 dB, the spread of upstream's few packets per point: the BER of a point near
-the threshold is dominated by the packets whose Access Address is not found (all 312 bits counted wrong),
-a few per hundred (`TX_FINAL_DECISIONS.md` § 3.3).
+**The rows are not one comparison**: each has its own packets and noise. Upstream's published figure and
+the rerun are one realization each at upstream's 100–300 packets per point, and one realization of
+those counts crosses 0.1 % anywhere in a range of 1.5 dB (50 ppm) and 0.8 dB (−30 ppm): both lie in it.
+The BER is the mean over many packets: the 20 realizations together give 25.17 and 13.97 dB, this run's
+1 000 packets per point 25.12 and 14.22 dB (similar packets: the header 0x42 0x25 and 37 random octets
+here, the chip's AdvA and 31 random octets there). One realization tends to lie below the mean: near the
+threshold the BER is dominated by the rare packets whose Access Address is not found (all 312 bits
+counted wrong), which a draw of 100–300 packets often does not hold. 1 000 packets are few for them too
+at −30 ppm: at 14 dB one such packet makes 312 of the 543 errors, and without it the curve would cross
+at about 13.8 dB.
 
 ### 3.3 Packet error rate of the RTL receivers
 
@@ -177,7 +186,9 @@ a few per hundred (`TX_FINAL_DECISIONS.md` § 3.3).
 The same packets and samples as § 3.2, fed to the RTL of the three receivers (`tb_rx_ber.v`, Icarus; each
 receiver with its defaults, one sample every second clock), and upstream's Python receiver beside them. A
 packet is received when the receiver gives it with the right CRC and the PDU sent. 1 000 packets per point,
-the bars the Wilson 95 % interval; 32 000 packets per receiver.
+the bars the Wilson 95 % interval; 32 000 packets per receiver. Each SNR at PER 10 % is one noise
+realization of 1 000 packets per point (about ±0.1 dB from the noise); the differences between the
+receivers are measured on the same samples, so the noise does not enter them.
 
 | SNR at PER 10 % (log-linear) | 0 ppm | 20 ppm | −30 ppm | 50 ppm |
 |---|---:|---:|---:|---:|
@@ -197,7 +208,8 @@ the bars the Wilson 95 % interval; 32 000 packets per receiver.
   about 3 %, with 5–6 dB almost none (0 ppm: 0.5 % at 13 dB, 0 at 14 dB).
 - With the packet at a random time (64–127 samples and a fraction of a sample after the start: the
   receiver does not know the symbol timing), every receiver needs 0.2–0.7 dB more (PER 10 % at 9.53,
-  12.22, 14.73 and 25.73 dB for upstream), and the picture is the same: upstream's RTL, `ble-rx-best` and
+  12.22, 14.73 and 25.73 dB for upstream; another run, other noise: the smallest of these differences is
+  about twice the uncertainty of one run), and the picture is the same: upstream's RTL, `ble-rx-best` and
   the Python receiver receive the same 25 175 packets of 32 000, and `ble-rx-micro` needs 11.04, 14.03,
   16.43 and 28.18 dB (+1.5, +1.8, +1.7, +2.5 dB)
   ([`rx_final_per_random.png`](../../results/figures/rx-final/rx_final_per_random.png),
@@ -265,6 +277,11 @@ included, untouched):
 | upstream | 50 295 | 4 578 | 71 706.4 | 15 / 1 136 070 |
 | `ble-rx-best` | 23 119 | 4 003 | 38 680.9 | 8 / 1 105 990 |
 | `ble-rx-micro` | 19 525 | 3 419 | 32 988.5 | 7 / 1 103 302 |
+| corrected master (`TX_FINAL_DECISIONS.md` § 4) | 52 357 | 4 722 | 74 684.8 | 15 / 1 136 070 |
+
+The two branches are corrected master with their receiver, so corrected master is their controllers'
+reference: −48.2 % and −55.8 % against it. Against upstream (−46.1 %, −54.0 %) the difference also holds
+corrected master's own changes, 2 978.4 µm² more than upstream, most in its transmitter.
 
 ## 5. Timing
 
@@ -282,7 +299,9 @@ clock-to-Q + setup (Nangate45 typical, no wires); target 62.5 ns (the 16 MHz bas
 The one multiplier of `ble-rx-best` takes its operands through a multiplexer in the clock of the history
 read (+0.23 ns; ABC's mapping moves it by about 0.1 ns from run to run); `ble-rx-micro`'s 8-bit one is the shortest receiver of every branch. The controllers of
 the two branches time at the transmitter of corrected master (the audit's Gaussian tail,
-`TX_FINAL_DECISIONS.md` § 5.1); at 16 MHz none of it matters (slack > 59 ns). `ble-rx-best`'s macro and
+`TX_FINAL_DECISIONS.md` § 5.1): corrected master's controller has a min period of 3.410 ns on that path,
+so against it the two branches move the controller by −0.034 and +0.007 ns; the step from upstream's
+1.991 ns is the transmitter's, not the receivers'. At 16 MHz none of it matters (slack > 59 ns). `ble-rx-best`'s macro and
 its address are not timed here (no timing model; § 8 times the GF180 SRAM).
 
 ### 5.2 In the FPGA and in GF180MCU
@@ -327,6 +346,10 @@ pins, the resets deasserted in the power analysis; § 8.1), the same for the thr
 - **The receiver goes from 2 247 LUTs to 911 and 482** (−59 % and −79 %), its flip-flops from 2 572 to
   1 181 and 435. The 2024 receiver (1 544 LUTs, its packet RAMs in 96 LUTRAM) is the published flow's,
   with IOs; it is the calibration of the flow, not a configuration compared.
+- **The controller rows hold corrected master's transmitter**, not upstream's: corrected master's
+  controller is 4 535 LUTs / 5 900 flip-flops, 38 block RAM tiles, 48 DSPs, 0.211 W
+  (`TX_FINAL_DECISIONS.md` § 6). Against it the branches' controllers take 1 124 and 1 550 LUTs and
+  1 391 and 2 137 flip-flops fewer.
 - Vivado's power is vectorless (default toggle rates) and rounds to 1 mW: an estimate; 0.106 W of every
   total is the device's static power.
 
@@ -374,7 +397,8 @@ more than upstream**: one multiplier computes two products in two clocks, its op
 the single-port RAM's clock-domain logic (132 flip-flops on the AXI clock) toggle; the clock load falls
 (−15.1 %), the data rises (+62.9 %). **`ble-rx-micro` switches a third less**: one decoder instead of
 eight, 584 flip-flops fewer, an 8-bit datapath (clock −27.4 %, data −43.7 % in `mixed`). The cleanup of
-§ 8.1 removes no logic that toggles but the link layer's dead TX UART: −0.8 and −0.6 points.
+§ 8.1 removes no logic that toggles but the link layer's dead TX UART: −0.8 and −0.6 points, which
+corrected master still has; the receivers' own share is about +9.6 % and −31.8 %.
 
 **7.2 The SRAMs' energy (SPICE).** **`ble-rx-best`'s 336 × 8 macro could not be characterized**: OpenRAM's flow probes the address of all ones, which a 336-word macro lacks; `openram_char.py` now probes its last word, and then the measurement at a 5 ns period fails (ngspice: "Couldn't run a simulation", `results/power/sram-char-rx-final-5ns/`), and the search for a feasible period did not end within the 6 h limit (`results/power/sram-char-rx-final/`). **Upstream's 512 × 8 two-port macro** (eight in its receiver) could not be characterized either: it did not finish in 6 h in run `sram-char`, and run again without that limit it ended after 14.4 h with OpenRAM's "Sense amp enable timing error" at the 5 ns period (`results/power/sram-char-rx-final-upstream/`): the macro as generated does not read at that period, and its energy stays unknown. For reference, the one-port 512 × 8 of `ble-rx-min` (the same column width, more words on each bitline) costs 1.161 pJ per write, 1.068 pJ per read and 25.11 µW of settled leakage (`RX_BRANCH_COMPARISON.md` § 15.4): a bound from above for `ble-rx-best`'s macro. `ble-rx-micro` has no SRAM.
 
@@ -388,7 +412,9 @@ eight, 584 flip-flops fewer, an 8-bit datapath (clock −27.4 %, data −43.7 % 
 | **`ble-rx-micro`** | **138.51 µW** | 62.26 µW | 675.53 µW |
 
 The macros are not included (§ 7.2). In this 45 nm library (predictive, leaky) the logic dominates:
-upstream's receiver leaks 7.7 times `ble-rx-micro`'s.
+upstream's receiver leaks 7.7 times `ble-rx-micro`'s. The controller column holds corrected master's
+transmitter in the two branches: it leaks 182.58 µW against upstream's 112.61 µW
+(`TX_FINAL_DECISIONS.md` § 7.3), about 70 µW of the branches' controllers that is not the receiver's.
 
 **7.4 In GF180MCU** (§ 8), OpenSTA's vectorless estimate at 5 V, the default activity of every net:
 67.54 mW for `ble-rx-best` (its SRAM's internal power included) and 23.51 mW for `ble-rx-micro`; leakage
@@ -423,7 +449,7 @@ The thesis laid out the two final receivers, `btle_rx` alone, with LibreLane (Op
 | DRC, KLayout (the foundry's deck, whole GDS) | **0** (the SRAM's inside included) | **0** |
 | DRC, Magic | 2 516, **all inside the GlobalFoundries SRAM** (`magic_drc_sram.txt`: 0 outside it), whose own layout Magic's deck rejects | 0 |
 | LVS (Netgen) / antenna / routing DRC | clean / 0 / 0 | clean / 0 / 0 |
-| Worst setup slack: ss / tt / ff | +13.934 / +36.258 / +42.954 ns | +2.266 / +8.463 / +11.202 ns (`clkb` at 20 ns) |
+| Worst setup slack: ss / tt / ff | +13.934 / +36.258 / +42.954 ns (`clkb` at 62.5 ns) | +2.266 / +8.463 / +11.202 ns (`clkb` at 20 ns) |
 | Worst hold slack (9 corners) | +0.157 ns | +0.124 ns |
 | Max slew / max capacitance violations | 0 / 0 | 0 / 0 |
 | Max fanout (10, LibreLane's for the PDK; the liberty sets none) | every data net within it; 7 clock-tree buffers at 11–13 | every data net within it; 1 clock-tree buffer at 11 |
@@ -440,8 +466,13 @@ The thesis laid out the two final receivers, `btle_rx` alone, with LibreLane (Op
 | Taps, end caps, antenna diodes | 33 274.8 | 17 232.3 |
 | **Placed cells + macros** | **513 641.6** | **144 817.2** (−71.8 %) |
 
-- **In GF180MCU the gap widens**: `ble-rx-micro` is 28.2 % of `ble-rx-best` (33.4 % in 45 nm), because
-  the PDK's smallest SRAM that holds 336 words is a 512 × 8 of 209 400 µm², sized for its periphery.
+- **In GF180MCU the gap widens**: `ble-rx-micro` is 28.2 % of `ble-rx-best` (33.4 % in 45 nm), and not
+  through the SRAM, which is about the same share of `ble-rx-best` in both (40.8 % here, 38.8 % in
+  45 nm). Without it `ble-rx-micro` is 47.6 % of the rest of `ble-rx-best` here, 54.6 % in 45 nm:
+  `ble-rx-best` has 2.9 times the timing-repair buffers and clock trees (its tighter targets, below),
+  1.9 times the taps and end caps (a die of 1 150 µm against 760 µm, sized for the SRAM) and 2.0 times
+  the logic (1.8 times in 45 nm). The two runs differ in settings (the targets below; `clkb` at 16 and
+  50 MHz): the ratio is of these two layouts, not of the two receivers alone.
 - The settings of the two runs, all recorded in `run.sh` (§ 8.1): `ble-rx-best` places and routes with
   tighter targets (max transition 2.0 ns, max fanout 8, signoff with the library's: without them pins of
   one net end 0.03 ns over the max slew at ss), its SRAM at x = 70 µm (at 60 a strap of the power grid

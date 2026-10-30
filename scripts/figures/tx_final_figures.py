@@ -145,16 +145,13 @@ def fig_ber(d, out):
         b = d["ber"][ppm]
         # the comparison: the same packets and the same noise for both transmitters (draw 0)
         ax.fill_between(b["snr"], b["band_min"], b["band_max"], color=GRID, linewidth=0,
-                        label=f"{b['band_count']} noise draws, min-max (RTL = Python in each)")
+                        label=f"range over {b['band_count']} noise realizations (RTL = Python in each)")
+        ax.semilogy(b["snr"], b["band_mean"], ":", color=INK2, linewidth=1.5,
+                    label=f"mean of the {b['band_count']} realizations (the BER)")
         ax.semilogy(b["snr"], b["upstream_same_noise"], "+-", color=BLUE, markersize=10, linewidth=2,
                     label="upstream: Python TX, same packets and noise")
         ax.semilogy(b["snr"], b["min_rtl"], "x--", color=ORANGE, markersize=8, linewidth=2,
                     label="ble-tx-min: RTL TX (Icarus), same packets and noise")
-        # other noise draws and packets, upstream's script: where they fall, not a comparison
-        ax.semilogy(b["snr"], b["upstream_rerun"], "o", color=INK2, markersize=5, markerfacecolor="none",
-                    label="upstream's script rerun (other draw)")
-        ax.semilogy(b["snr"], b["upstream_published"], "s", color=INK2, markersize=5, markerfacecolor="none",
-                    label="upstream's published figure (other draw)")
         ax.axhline(1e-3, color=INK2, linewidth=1, linestyle=":")
         ax.text(b["snr"][0], 1.15e-3, "BER 0.1 % (Core spec, -70 dBm)", fontsize=7, color=INK2)
         ax.set_title(f"BER, clock error {ppm} ppm")

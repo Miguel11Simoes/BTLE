@@ -38,7 +38,7 @@
   }
  },
  "ber": {
-  "source": "upstream_same_noise and min_rtl: results/figures/tx-min/tx_min_figures_ber.json, realization 0 ('python' = upstream's Python transmitter, 'rtl'), the same packets and noise; band_*: the RTL over its 20 realizations (RTL = Python in each); upstream_rerun: results/figures/tx-final/upstream_ber_rerun.txt (test_btle_ber.py of upstream-baseline, unmodified, its own packets and noise); upstream_published: read off open_btle_baseband_chip_21_1.png and _23_1.png (marker centres against the decade grid lines, about +-2 %)",
+  "source": "upstream_same_noise and min_rtl: results/figures/tx-min/tx_min_figures_ber.json, realization 0 ('python' = upstream's Python transmitter, 'rtl'), the same packets and noise; band_min, band_median, band_max: the RTL over its 20 realizations (RTL = Python in each); band_mean: all their errors over all their bits, the BER's estimate; upstream_rerun: results/figures/tx-final/upstream_ber_rerun.txt (test_btle_ber.py of upstream-baseline, unmodified, its own packets and noise); upstream_published: read off open_btle_baseband_chip_21_1.png and _23_1.png (marker centres against the decade grid lines, about +-2 %)",
   "50": {
    "snr": [22.0, 23.5, 25.0, 26.0],
    "upstream_same_noise": [0.04451923076923077, 0.011426282051282051, 0.0003205128205128205, 7.478632478632479e-05],
@@ -46,6 +46,7 @@
    "band_count": 20,
    "band_min": [0.01375, 0.001298076923076923, 0.00022435897435897436, 3.205128205128205e-05],
    "band_median": [0.04440705128205128, 0.01125, 0.0003418803418803419, 7.478632478632479e-05],
+   "band_mean": [0.04630769230769231, 0.009181891025641025, 0.0013215811965811965, 0.00024465811965811965],
    "band_max": [0.09477564102564102, 0.026794871794871795, 0.0037927350427350427, 0.0034294871794871796],
    "upstream_rerun": [0.022692307692307692, 0.011201923076923076, 0.00037393162393162396, 7.478632478632479e-05],
    "upstream_published": [0.0538, 0.0267, 0.000245, 0.000107]
@@ -57,6 +58,7 @@
    "band_count": 20,
    "band_min": [0.007692307692307693, 0.003173076923076923, 0.0005982905982905983, 7.478632478632479e-05],
    "band_median": [0.020016025641025642, 0.004110576923076923, 0.0008173076923076923, 0.00018696581196581195],
+   "band_mean": [0.024775641025641025, 0.00649599358974359, 0.000967948717948718, 0.0001987179487179487],
    "band_max": [0.050256410256410255, 0.013637820512820514, 0.004049145299145299, 0.00037393162393162396],
    "upstream_rerun": [0.01891025641025641, 0.0027884615384615383, 0.0009081196581196581, 0.00021367521367521368],
    "upstream_published": [0.0389, 0.00301, 0.000839, 0.000181]

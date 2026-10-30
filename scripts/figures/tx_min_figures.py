@@ -302,30 +302,52 @@ def fig_ber(out_dir: Path, packets: int, realizations: int) -> None:
                         raise RuntimeError(f"ppm {ppm} snr {snr} realization {r}: RTL and Python BER differ")
                 print(f"ppm {ppm} realization {r}: errors {[c['errors'] for c in curves['rtl']]} (RTL = Python)", flush=True)
                 runs.append(curves)
-        ber = np.array([[c["ber"] for c in run["rtl"]] for run in runs])  # realizations x SNR
         results[ppm] = dict(runs[0], realizations=dict(
             count=realizations, seed="10000000 * realization + 1000 * snr_index + packet + (ppm + 100) * 100000",
             rtl_equals_python_in_every_realization=True,
-            errors=[[c["errors"] for c in run["rtl"]] for run in runs],
-            ber_min=ber.min(axis=0).tolist(), ber_median=np.median(ber, axis=0).tolist(), ber_max=ber.max(axis=0).tolist()))
+            errors=[[c["errors"] for c in run["rtl"]] for run in runs]))
+        _ber_stats(results[ppm])
+    (out_dir / "tx_min_figures_ber.json").write_text(json.dumps(results, indent=2) + "\n")
+    plot_ber(out_dir, results)
+
+
+def _ber_stats(res: dict) -> None:
+    """The band (min, median, max of the realizations) and the mean: all the realizations' errors over
+    all their bits, the BER's estimate (a rare packet whose access address is missed adds 312 errors,
+    so the median of small draws lies below it)."""
+    rz = res["realizations"]
+    bits = np.array([c["bits"] for c in res["rtl"]])
+    err = np.array(rz["errors"])  # realizations x SNR
+    ber = err / bits
+    rz.update(ber_min=ber.min(axis=0).tolist(), ber_median=np.median(ber, axis=0).tolist(),
+              ber_max=ber.max(axis=0).tolist(), ber_mean=(err.sum(axis=0) / (bits * len(err))).tolist())
+
+
+def plot_ber(out_dir: Path, results: dict) -> None:
+    """The figures from the results of fig_ber (tx_min_figures_ber.json): no simulation."""
+    for ppm, res in results.items():
+        _ber_stats(res)
+        rz = res["realizations"]
+        snrs = [c["snr"] for c in res["rtl"]]
+        counts = [c["bits"] // 312 for c in res["rtl"]]
         plt.figure(figsize=(6.4, 4.8))
-        if realizations > 1:
-            plt.fill_between(snrs, np.maximum(ber.min(axis=0), 1e-7), ber.max(axis=0), color="0.85",
-                             label=f"{realizations} noise draws (min-max)")
-        plt.semilogy(snrs, [max(c["ber"], 1e-7) for c in runs[0]["rtl"]], "b+-", markersize=10, label="TX: ble-tx-min RTL")
-        plt.semilogy(snrs, [max(c["ber"], 1e-7) for c in runs[0]["python"]], "rx--", markersize=8, label="TX: upstream's Python model")
+        if rz["count"] > 1:
+            plt.fill_between(snrs, np.maximum(rz["ber_min"], 1e-7), rz["ber_max"], color="0.85",
+                             label=f"range over {rz['count']} noise realizations")
+            plt.semilogy(snrs, rz["ber_mean"], "k:", linewidth=1.5, label=f"mean of {rz['count']} realizations (the BER)")
+        plt.semilogy(snrs, [max(c["ber"], 1e-7) for c in res["rtl"]], "b+-", markersize=10, label="TX: ble-tx-min RTL")
+        plt.semilogy(snrs, [max(c["ber"], 1e-7) for c in res["python"]], "rx--", markersize=8, label="TX: upstream's Python model")
         plt.title(f"BER (Bit Error Rate) with ppm {ppm}")
         plt.xlabel("SNR(dB)")
         plt.ylabel("BER")
         plt.grid()
-        plt.legend(loc="upper right")
+        plt.legend(loc="upper right", fontsize=8)
         plt.figtext(0.5, 0.005, f"39-byte ADV PDUs, random AdvData, {counts} packets per SNR\n"
-                    f"the two lines: the same packets and noise (draw 0); RTL = Python in all {realizations} draws",
+                    f"the two lines: the same packets and noise (realization 0); RTL = Python in all {rz['count']}",
                     ha="center", fontsize=7)
         plt.tight_layout(rect=(0, 0.05, 1, 1))
         plt.savefig(out_dir / f"tx_min_ber_ppm{ppm}.png", dpi=100)
         plt.close()
-    (out_dir / "tx_min_figures_ber.json").write_text(json.dumps(results, indent=2) + "\n")
 
 
 # ---- the transmitter's area per branch ----
@@ -361,7 +383,8 @@ def fig_area(out_dir: Path, area_json: Path) -> None:
 
 def main() -> None:
     p = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    p.add_argument("figure", choices=("tx", "ber", "area"))
+    p.add_argument("figure", choices=("tx", "ber", "ber-plot", "area"),
+                   help="ber-plot: the BER figures again from out_dir/tx_min_figures_ber.json, no simulation")
     p.add_argument("out_dir", type=Path)
     p.add_argument("area_json", type=Path, nargs="?")
     p.add_argument("--packets", type=int, default=300)
@@ -372,6 +395,11 @@ def main() -> None:
         fig_tx(a.out_dir)
     elif a.figure == "ber":
         fig_ber(a.out_dir, a.packets, a.realizations)
+    elif a.figure == "ber-plot":
+        f = a.out_dir / "tx_min_figures_ber.json"
+        results = json.loads(f.read_text())
+        plot_ber(a.out_dir, results)
+        f.write_text(json.dumps(results, indent=2) + "\n")
     else:
         fig_area(a.out_dir, a.area_json)
 
