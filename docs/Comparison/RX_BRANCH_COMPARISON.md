@@ -1,7 +1,7 @@
-# Comparison of the receiver branches: upstream, `ble-rx-dm`, `ble-rx-dmult`, `ble-rx-aa`, `ble-rx-shared`, `ble-rx-adv`, `ble-rx-min`, `ble-rx-best` and `ble-rx-micro`
+# Comparison of the receiver branches: upstream, `ble-rx-dm`, `ble-rx-dmult`, `ble-rx-aa`, `ble-rx-shared`, `ble-rx-adv`, `ble-rx-min`, `ble-rx-best`, `ble-rx-micro`, `ble-rx-3p1c`, `ble-rx-2p1c`, `ble-rx-2p2c` and `ble-rx-1p2c`
 
 **Project:** BTLE — reconfigurable RISC-V baseband  
-**Branch:** these branches carry this same file, with its companion [TX_BRANCH_COMPARISON.md](TX_BRANCH_COMPARISON.md) (`master`, `risc-v-ble`, `ble-tx-table`, `ble-tx-table-reg`, `ble-tx-table-sram`, `ble-tx-fir2`, `ble-tx-sin4`, `ble-tx-sin8`, `ble-tx-sin8-1rw`, `ble-tx-sin2`, `ble-tx-1--8`, `ble-tx-opt`, `ble-tx-pdu`, `ble-tx-pdu-we`, `ble-tx-rom`, `ble-tx-cordic`, `ble-tx-min`, `ble-rx-dm`, `ble-rx-dmult`, `ble-rx-aa`, `ble-rx-shared`, `ble-rx-adv`, `ble-rx-min`, `ble-rx-best`, `ble-rx-micro`, `ble-opt`)  
+**Branch:** these branches carry this same file, with its companion [TX_BRANCH_COMPARISON.md](TX_BRANCH_COMPARISON.md) (`master`, `risc-v-ble`, `ble-tx-table`, `ble-tx-table-reg`, `ble-tx-table-sram`, `ble-tx-fir2`, `ble-tx-sin4`, `ble-tx-sin8`, `ble-tx-sin8-1rw`, `ble-tx-sin2`, `ble-tx-1--8`, `ble-tx-opt`, `ble-tx-pdu`, `ble-tx-pdu-we`, `ble-tx-rom`, `ble-tx-cordic`, `ble-tx-min`, `ble-rx-dm`, `ble-rx-dmult`, `ble-rx-aa`, `ble-rx-shared`, `ble-rx-adv`, `ble-rx-min`, `ble-rx-best`, `ble-rx-micro`, `ble-rx-3p1c`, `ble-rx-2p1c`, `ble-rx-2p2c`, `ble-rx-1p2c`, `ble-opt`)  
 **Base:** tag `upstream-baseline` (`8540186`); reference of the measurements: corrected `master` (`fca6ac6`)  
 **Date:** 2026-10-18 (split from `BRANCH_COMPARISON.md`, whose receiver branch was `ble-rx-dm`; `ble-rx-dmult` and run `rx-dmult`)  
 **Author:** Miguel Simões  
@@ -16,7 +16,9 @@ run `rx-adv` (§ 14), the flows of run `rx-shared`, the same reference and vecto
 `ble-rx-adv`. `ble-rx-min`: run `rx-min` (§ 15), the flows of run `rx-adv`, the same reference and vectors, on
 `ble-rx-min`. `ble-rx-best`: run `rx-best` (§ 16), the flows of run `rx-min`, the same reference and
 vectors, on `ble-rx-best`. `ble-rx-micro`: run `micro` (§ 17), the flows of run `rx-best` (area, timing, the activity
-vectors) and the packet-error-rate harness `rx_per`, its lockstep and formal checks. Pre-layout
+vectors) and the packet-error-rate harness `rx_per`, its lockstep and formal checks. `ble-rx-3p1c`,
+`ble-rx-2p1c`, `ble-rx-2p2c`, `ble-rx-1p2c`: run `rx-kfix` (§ 18), the area flow of run `micro` and the
+bit-error-rate harness `rx_ber` of `RX_FINAL_DECISIONS.md`, on `ble-rx-3p1c`. Pre-layout
 area and static timing, and gate-level switching activity, which is a proxy and **not power**.
 
 ---
@@ -86,6 +88,10 @@ links below resolve on `ble-rx-dmult`. Those of `ble-rx-aa` (§ 12) are on `ble-
 | `ble-rx-min` | `ble-rx-adv` + the demodulator of one multiplier of `ble-rx-dmult` + the packet RAM on one single-port macro; the receiver of Legacy Advertising by default (§ 15) | `gfsk_demodulation_shared.v` of `ble-rx-dmult`, new `rx_pdu_ram_1rw.v`, `RX_PDU_1RW` in `btle_rx.v`, `btle_phy.v`, `btle_controller.v`; the defaults of `RX_ADV_AA_ONLY`, `RX_PDU_ADV_DEPTH`, `RX_PDU_ONE_RAM`, `RX_PDU_1RW` set to 1; tree `054fd05`, commit `a0e3fe47` | its defaults, and `RX_PDU_1RW=0` |
 | `ble-rx-best` | `ble-rx-min` with the packet RAM sized to Legacy Advertising: 42 words per phase, packed, in one single-port macro of 336 × 8; each phase holds the word of its octet (§ 16) | `rx_pdu_ram_1rw.v` (`PHASE_WORDS`), `RX_PDU_PACKED` (default 1) in `btle_rx.v`, `btle_phy.v`, `btle_controller.v`, `sdpram_one_clk.v` (`DEPTH`); commit `3d92ea80` | its defaults |
 | `ble-rx-micro` | `ble-rx-best` with **one stored phase**, chosen when the Access Address is found (the middle of the phases that find it), one decoder and the 42 octets in registers, no packet macro; and a **demodulator of 8 bits**, the samples saturated; **not equivalent**: about 2 dB of sensitivity (§ 17) | `rx_one_phase.v` (new), `RX_ONE_PHASE` (default 1), `RX_IQ_BITS`/`RX_IQ_SHIFT` (default 8/0) in `btle_rx.v`, `RX_ONE_PHASE` in `btle_phy.v`, `btle_controller.v`; commit `745e4bba` | its defaults |
+| `ble-rx-3p1c` | `ble-rx-micro` with **3 phases** chosen at the Access Address (the middle of `rx_one_phase` and its two neighbours), each decoded and its 42 octets stored, and the **CRC-24 correcting 1 wrong bit** when none has its CRC right; no packet macro; **not equivalent**: more sensitive than `ble-rx-best` (§ 18) | `rx_k_phase.v` (new), `RX_AA_PHASES`, `RX_CRC_FIX` (defaults 3, 1) in `btle_rx.v`, `btle_phy.v`, `btle_controller.v`; `run_lint.py` with the integer parameters; commit `f965fdb0` | its defaults |
+| `ble-rx-2p1c` | the same with 2 phases (the middle and the one before), 1 bit corrected (§ 18) | `ble-rx-3p1c` with `RX_AA_PHASES = 2` by default; commit `cb56849e` | its defaults |
+| `ble-rx-2p2c` | the same with 2 phases, **2 bits corrected** (§ 18) | `ble-rx-3p1c` with `RX_AA_PHASES = 2`, `RX_CRC_FIX = 2`; commit `6326889a` | its defaults |
+| `ble-rx-1p2c` | the one phase of `ble-rx-micro`, 2 bits corrected (§ 18) | `ble-rx-3p1c` with `RX_AA_PHASES = 1`, `RX_CRC_FIX = 2`; commit `69fd72c1` | its defaults |
 
 How they relate:
 
@@ -104,7 +110,12 @@ master  (corrected: upstream-baseline + the product audit + the lint closure, fc
                  └─ ble-rx-best  from 8e63e5ef: 42 words per phase packed in a 336 × 8 macro, the word held
                      │           with the octet (3d92ea80), its validation; the harness rx_per (951150c7)
                      └─ ble-rx-micro  from d9080f36: one stored phase chosen at the Access Address and an
-                                      8-bit demodulator (745e4bba); not equivalent: rx_per, its validation
+                         │            8-bit demodulator (745e4bba); not equivalent: rx_per, its validation
+                         └─ ble-rx-3p1c  from 4920e092: K phases chosen at the Access Address and the CRC-24
+                             │           correcting their wrong bits (rx_k_phase, f965fdb0), K = 3, 1 bit
+                             ├─ ble-rx-2p1c  K = 2, 1 bit (cb56849e)
+                             ├─ ble-rx-2p2c  K = 2, 2 bits (6326889a)
+                             └─ ble-rx-1p2c  K = 1, 2 bits (69fd72c1)
  └─ ble-rx-aa      from fca6ac6: one Access Address detector (76d1175 … 6ea9a0e), the harness of
                    ble-tx-min (a079b76), its own validation; independent of B1 (no common block)
 ble-opt  B1 + B2 + A1 + A2 (TX_BRANCH_COMPARISON.md)
@@ -1455,3 +1466,213 @@ LEVEL_DB=24 QBITS=8 QSHIFT=4 DUT_PARAMS='RX_IQ_SHIFT=4' MUTANTS=0 scripts/valida
 scripts/validation/rx_micro_lockstep/run_rx_micro_lockstep.sh micro2 200
 scripts/validation/formal_micro/run_formal_micro.sh micro2 7b2ebdc5
 ```
+
+## 18. K phases chosen at the Access Address and the CRC-24 correction: `ble-rx-3p1c`, `ble-rx-2p1c`, `ble-rx-2p2c`, `ble-rx-1p2c` (run `rx-kfix`)
+
+Run `rx-kfix`, on `ble-rx-3p1c`: the RTL of `f965fdb0` and of the three branches cut from it, each with
+its defaults (`cb56849e`, `6326889a`, `69fd72c1`); the area flow of run `micro` (§ 17.3, Nangate45, the same
+liberty); and the bit-error-rate harness of `RX_FINAL_DECISIONS.md` (`scripts/validation/rx_ber/`:
+upstream's `test_btle_ber.py` packets, transmitter, clock error and noise, `btlelib.py` of
+`upstream-baseline`), at the 32 points of run `rx-final`, 1 000 packets per point, seed 1, chunks of 50:
+the same 32 000 packets as there. **Every receiver of the tables below was measured again in this run, on
+the same samples**: `ble-rx-best` and `ble-rx-micro` at their heads, and `ble-rx-micro` with
+`RX_ONE_PHASE = 0` (the 8 phases of `ble-rx-best` with the 8-bit demodulator, commit `64964c29`, the
+local branch `ble-rx-micro-8bit`, not published), called "8 phases, 8 bits" below. Like `ble-rx-micro`,
+**none of the four is equivalent to the branch it was cut from**, and none receives data-channel packets
+(§ 7).
+
+### 18.1 What changes
+
+`ble-rx-micro` loses about 2 dB because it keeps one phase, chosen at the Access Address (§ 17.5); its 8-bit
+demodulator costs almost nothing (§ 18.2: 8 phases at 8 bits are `ble-rx-best` within ±0.05 dB). Two
+levers win that back without the 336 × 8 macro:
+
+- **K phases chosen at the Access Address** (`rx_k_phase.v`, `RX_AA_PHASES` = K): the window and the middle *c*
+  of `rx_one_phase` (§ 17.1), and the K offsets *c* − K/2 … *c* − K/2 + K − 1, held inside the window:
+  K = 1 is `rx_one_phase`'s phase, K = 2 adds *c* − 1, K = 3 adds *c* − 1 and *c* + 1. One `rx_decoder_shared`
+  with `NUM_PHASE = K`, each kept phase fed as `rx_one_phase` feeds its one (the kept phases are distinct,
+  so their bits come one per clock, in cyclic order, as the decoder requires); each kept phase has its 42
+  octets in registers and its **CRC-24 residual** (the LFSR of `crc24_core` over the octets stored, from
+  the CRC init: 0 when the CRC is right), both written with the octet.
+- **The CRC-24 corrects `RX_CRC_FIX` wrong bits** when every kept phase ended with its CRC wrong. The
+  residual of one wrong bit *t* of a packet of *N* bits (*N* = 8 × (length + 5)) is *A*^(*N*−1−*t*) *F*,
+  with *A* the LFSR's step without input and *F* its feedback (`0x00065B`); of two, the sum of two such
+  terms. The polynomial has the factor *x* + 1, so **the parity of the residual is that of the number of
+  wrong bits**: an odd residual is searched for one bit, an even one for two. The search steps the
+  residual back (*A*⁻¹, 8 steps per clock) and compares it with *A*^*j* *F*, *j* < 8 (constants); for two
+  bits, for each *t*₂ the residual stepped back to *t*₂ with *F* removed is stepped back further until it
+  equals *F* (at *t*₁). The kept phases are searched in priority order (the nearest to *c* first, *c* − 1
+  before *c* + 1), the 1-bit search of all of them before any 2-bit one; the first solution is taken, its
+  bits flipped when the packet is read; none: the packet ends with its CRC wrong. **The length octet is
+  never corrected** (it sets *N*), and a phase is corrected only when its whole packet is stored.
+- **At these lengths the CRC-24 has a distance of at least 6** (computed for 40, 176 and 336 bits: the
+  328 one-bit residuals of a 42-octet packet, the length octet left out, are distinct and all odd; its
+  53 628 two-bit residuals are distinct and none is a one-bit one), so **a solution with up to 2 bits is
+  unique**. What the correction cannot know is whether the packet had more wrong bits than it corrects:
+  a residual of 4 or more wrong bits (even) looks like one of 2 bits with a probability of 53 628 / 2²³ =
+  **0.64 %**, of 3 or more (odd) like one of 1 bit with 328 / 2²³ = 0.0039 %. That is the price of the
+  correction (§ 18.5).
+- **The receiver is held in the packet until the correction ends** (no restart of the Access Address search,
+  as `ble-rx-best` holds it until its 8 decoders end). Worst case, at 16 MHz and 42 octets, every kept phase
+  searched without a solution: 43 clocks per phase for one bit, 7 183 for two: **8.1 µs** (`ble-rx-3p1c`),
+  5.4 µs (`ble-rx-2p1c`), **0.90 ms** (`ble-rx-2p2c`), 0.45 ms (`ble-rx-1p2c`). A packet whose CRC is right
+  ends as soon as it is decoded, as before.
+
+`RX_AA_PHASES = 1`, `RX_CRC_FIX = 0` keep `rx_one_phase` (`ble-rx-micro`'s receiver, unchanged); `RX_ONE_PHASE = 0`
+keeps the 8 decoders of `ble-rx-best`.
+
+### 18.2 The comparison
+
+| | `ble-rx-best` | 8 phases, 8 bits | **`ble-rx-3p1c`** | **`ble-rx-2p1c`** | **`ble-rx-2p2c`** | **`ble-rx-1p2c`** | `ble-rx-micro` |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Phases decoded / stored | 8 / 8 | 8 / 8 | **3 / 3** | **2 / 2** | **2 / 2** | **1 / 1** | 1 / 1 |
+| Wrong bits corrected by the CRC-24 | 0 | 0 | **1** | **1** | **2** | **2** | 0 |
+| Demodulator width | 16 | 8 | 8 | 8 | 8 | 8 | 8 |
+| RX packet RAM | 336 × 8 macro | 336 × 8 macro | **none**: 3 × 42 octets in registers | 2 × 42 octets | 2 × 42 octets | 42 octets | 42 octets |
+| Std cells / flip-flops, `btle_rx` | 7 255 / 1 371 | 5 166 / 1 179 | 8 151 / 1 757 | 6 601 / 1 320 | 6 614 / 1 320 | 4 844 / 880 | 3 624 / 787 |
+| Cell area, `btle_rx` (µm²) | 12 780.2 | 9 797.3 | 16 085.0 | 12 437.4 | 12 474.1 | 8 725.3 | 6 976.1 |
+| **Receiver: cells + RX macro (µm²)** | **20 896.7** | 17 913.8 | **16 085.0** | **12 437.4** | **12 474.1** | **8 725.3** | 6 976.1 |
+| … against `ble-rx-best` / against 8 phases, 8 bits | — / +16.7 % | −14.3 % / — | **−23.0 % / −10.2 %** | **−40.5 % / −30.6 %** | **−40.3 % / −30.4 %** | **−58.2 % / −51.3 %** | −66.6 % / −61.1 % |
+| **Packets received**, of 32 000 | 25 981 | 25 921 | **28 837** | **28 494** | **29 929** | **27 957** | 22 981 |
+| … of `ble-rx-best`'s, lost | — | 184 | **43** | **130** | **46** | **908** | 3 072 |
+| … that `ble-rx-best` lost, received | — | 124 | 2 899 | 2 643 | 3 994 | 2 884 | 72 |
+| **False packets accepted** (CRC right after the correction, PDU not the one sent) | 0 | 0 | **0** | **0** | **17** | **10** | 0 |
+| **SNR at PER 10 % (90 % of the packets received), 0 ppm** (dB) | 9.34 | 9.39 | **8.60** | **8.83** | **8.32** | **9.07** | 10.98 |
+| … 20 ppm | 12.01 | 11.99 | **10.76** | **10.94** | **10.35** | **11.19** | 13.65 |
+| … −30 ppm | 14.44 | 14.44 | **12.98** | **13.27** | **12.40** | **13.28** | 16.15 |
+| … 50 ppm | 25.05 | 25.06 | **23.24** | **23.24** | **22.43** | **26.18** | 27.17 |
+| **… against `ble-rx-best`** (0, 20, −30, 50 ppm, dB) | — | +0.05, −0.02, 0.00, +0.01 | **−0.74, −1.25, −1.46, −1.81** | **−0.51, −1.07, −1.17, −1.81** | **−1.02, −1.66, −2.04, −2.62** | **−0.27, −0.82, −1.16, +1.13** | +1.64, +1.64, +1.71, +2.12 |
+| SNR at BER 0.1 % (`test_btle_ber.py`'s count; 0, 20, −30, 50 ppm, dB) | 10.07, 13–14, 16–17, 26.70 | 10.11, 12.99, 16–17, 26.73 | 8.69, 12–13, 14–15, 25.02 | 8.85, 12.02, 14.07, 25.02 | 8.5–10, 12–13, 14.02, 25.02 | 9.17, 12.08, 14.19, 26.41 | 10.06, 12.72, 15.04, 26.80 |
+| Worst correction time (42 octets, 16 MHz) | — | — | 8.1 µs | 5.4 µs | 0.90 ms | 0.45 ms | — |
+| Std cells / cell area, `btle_controller` (µm²) | 23 119 / 38 680.9 | 20 682 / 35 479.6 | 23 969 / 42 050.1 | 22 527 / 38 429.0 | 22 219 / 38 221.3 | 20 942 / 34 827.1 | 19 525 / 32 988.5 |
+| SRAM macros / bits, controller | 8 / 1 105 990 | 8 / 1 105 990 | 7 / 1 103 302 | 7 / 1 103 302 | 7 / 1 103 302 | 7 / 1 103 302 | 7 / 1 103 302 |
+| The product audit's matrix (§ 18.6) | 220 PASS, 50 ERROR | — | 214 PASS, 56 ERROR | 214 / 56 | 214 / 56 | 216 / 54 | 214 / 56 |
+
+A negative SNR difference is a gain: the branch receives 90 % of the packets at a lower SNR than
+`ble-rx-best`. "BER 0.1 %" counts as `test_btle_ber.py` does (a packet with its CRC right has no wrong bit,
+any other the bits that differ), which favours a receiver whose failed decodes are close to the packet sent
+(`ble-rx-micro`'s); the PER is the measure of reception. A range ("13–14 dB") is a crossing whose next point
+has no error at all.
+
+### 18.3 Area
+
+[`results/area/rx-kfix/`](../../results/area/rx-kfix/) (on `ble-rx-3p1c`): `btle_rx` and `btle_controller` of the
+seven receivers, each with its defaults; the RX macro of `ble-rx-best` and of the 8 phases at 8 bits is
+§ 16.1's 336 × 8 (8 116.5 µm²). `ble-rx-micro`'s `btle_rx` measures 6 976.1 µm² in this run, 6 993.7 in run
+`micro` (§ 17.3): its later commits (the warning cleanup of `RX_FINAL_DECISIONS.md` § 8.1) and the flow's noise.
+
+- **A stored phase costs about 3 650 µm²** (2 → 3 phases: +3 647.6 µm², +437 flip-flops): its 42 octets in
+  flip-flops with their write enables, its share of the read multiplexer, its slot of the shared decoder's
+  ring and its residual.
+- **The correction itself is small**: one phase with the correction against `ble-rx-micro`: +1 749.2 µm² for
+  the residual, the search (two residual registers, a bit counter, the 8 comparisons with constants, the
+  8-step *A*⁻¹) and the flip at the read; **the second bit adds 36.7 µm²** (2 phases: 12 437.4 → 12 474.1), the
+  search of two bits reusing the registers of one.
+- **The macro is what the K phases save**: no variant here has an SRAM macro in the receiver, so the 8 116.5
+  µm² of the 336 × 8 macro and its single-port logic go, as in `ble-rx-micro`.
+- The controller follows `btle_rx` (the rest is the same RTL); `ble-rx-2p2c`'s controller is 207.7 µm² below
+  `ble-rx-2p1c`'s, though its `btle_rx` is 36.7 µm² above: the flow's noise (§§ 3.1, 12.3, 15.3).
+
+### 18.4 Packets lost per point
+
+Packets lost (PER), %, on the same samples (run `rx-kfix`, RTL, 1 000 packets per point):
+
+| ppm | SNR (dB) | `ble-rx-best` | 8 phases, 8 bits | `ble-rx-3p1c` | `ble-rx-2p1c` | `ble-rx-2p2c` | `ble-rx-1p2c` | `ble-rx-micro` |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 0 | 7 | 95.8 | 96.7 | 81.0 | 84.1 | 65.6 | 80.0 | 97.9 |
+| 0 | 8.5 | 45.4 | 49.4 | 14.1 | 21.8 | 7.8 | 23.7 | 72.4 |
+| 0 | 10 | 3.0 | 3.3 | 0.1 | 0.6 | 0.0 | 2.4 | 26.5 |
+| 0 | 11 | 0.1 | 0.1 | 0.0 | 0.0 | 0.0 | 0.0 | 9.8 |
+| 0 | 12 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 2.9 |
+| 20 | 9 | 91.6 | 91.8 | 67.8 | 71.4 | 47.3 | 68.0 | 94.9 |
+| 20 | 10.5 | 57.5 | 58.1 | 18.0 | 23.6 | 8.4 | 26.2 | 75.6 |
+| 20 | 12 | 10.2 | 9.9 | 0.6 | 1.3 | 0.3 | 3.2 | 36.7 |
+| 20 | 13 | 1.4 | 1.7 | 0.0 | 0.2 | 0.0 | 1.3 | 19.6 |
+| 20 | 14 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.2 | 7.0 |
+| −30 | 11 | 92.4 | 92.9 | 69.2 | 73.1 | 48.2 | 64.5 | 95.5 |
+| −30 | 12.5 | 63.8 | 63.1 | 21.4 | 28.2 | 8.9 | 25.4 | 75.9 |
+| −30 | 14 | 19.1 | 19.8 | 2.0 | 3.7 | 0.9 | 4.2 | 44.1 |
+| −30 | 15 | 4.4 | 4.2 | 0.0 | 0.4 | 0.1 | 1.2 | 27.1 |
+| −30 | 16 | 0.8 | 0.8 | 0.0 | 0.0 | 0.0 | 0.0 | 11.9 |
+| 50 | 22 | 67.8 | 67.7 | 33.3 | 33.3 | 15.4 | 40.4 | 76.1 |
+| 50 | 23.5 | 34.3 | 33.8 | 7.8 | 7.8 | 3.4 | 28.2 | 50.4 |
+| 50 | 25 | 10.7 | 10.8 | 0.8 | 0.8 | 0.6 | 15.7 | 28.2 |
+| 50 | 26 | 3.0 | 3.2 | 0.2 | 0.3 | 0.2 | 11.4 | 20.9 |
+| 50 | 27 | 0.5 | 0.5 | 0.0 | 0.0 | 0.0 | 5.5 | 10.9 |
+| 50 | 28 | 0.1 | 0.1 | 0.0 | 0.0 | 0.0 | 1.9 | 6.6 |
+| 50 | 30 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.1 | 0.6 |
+| **Lost, of 32 000** | | **6 019** | 6 079 | **3 163** | **3 506** | **2 071** | **4 043** | 9 019 |
+
+In the rows left out (0 ppm from 13 dB, 20 ppm from 15 dB, −30 ppm from 17 dB, 50 ppm at 29 dB) only
+`ble-rx-micro` loses packets, and `ble-rx-1p2c` 0.1 % at 20 ppm 15 dB and 0.7 % at 50 ppm 29 dB; all 32 are
+in [`points.tsv`](../../results/validation/rx-kfix/rx_ber_exact/points.tsv). The 8 bits cost nothing at this
+scale; one phase costs about 1.7 dB (`ble-rx-micro`); **one bit of correction on 2 or 3 phases more than pays
+for the 5 or 6 phases that go**, at every ppm. At 50 ppm one phase is not enough even with 2 bits corrected
+(`ble-rx-1p2c`: +1.13 dB): at that clock error the sampling instant drifts across the packet, away from the
+phase chosen at its Access Address, and its wrong bits are more than two.
+
+### 18.5 The price of correcting 2 bits
+
+**`ble-rx-2p2c` accepted 17 packets that were not the ones sent, and `ble-rx-1p2c` 10**: decodes with 4 or
+more wrong bits whose residual is that of 2 (§ 18.1). None with 1 bit corrected, and none in `ble-rx-best` or
+`ble-rx-micro`, whose CRC alone let none through in the 32 000 packets. They are all at the lowest SNRs,
+where most packets have many wrong bits:
+
+| | 0 ppm, 7 dB | 0 ppm, 8.5 dB | 20 ppm, 9 dB | −30 ppm, 11 dB | 50 ppm, 22 dB | 50 ppm, 23.5 dB | of 32 000 |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| `ble-rx-2p2c` | 6 | 3 | 4 | 3 | — | 1 | **17** |
+| `ble-rx-1p2c` | 5 | — | 1 | 2 | 1 | 1 | **10** |
+
+Up to 6 in 1 000 packets at 0 ppm and 7 dB, where most are lost anyway. The link layer takes a packet with
+its CRC right as the packet sent: the Core specification relies on the CRC-24 to reject the others. **A
+receiver that corrects 2 bits gives the link layer wrong packets as right ones**, and what reads Legacy
+Advertising above it (an address, the advertising data) must then check them by other means; one that
+corrects 1 bit lets a wrong packet through with a probability 160 times lower (§ 18.1), not seen here.
+
+### 18.6 Evidence
+
+| | `ble-rx-3p1c`, `ble-rx-2p1c`, `ble-rx-2p2c`, `ble-rx-1p2c` |
+|---|---|
+| The BER harness, 32 points × 1 000 packets, the seven receivers on the same samples ([`rx-kfix`](../../results/validation/rx-kfix/rx_ber_exact/report.txt)) | every simulation finished; per receiver, in [`kfix_stats.txt`](../../results/validation/rx-kfix/kfix_stats.txt): received, lost and gained against `ble-rx-best`, false accepts |
+| `rx_k_phase` with K = 1 and no correction against `rx_one_phase` (`ble-rx-micro`), forced in its place (`50519eb5`, not a branch; [`rx-kfix-equiv`](../../results/validation/rx-kfix-equiv/equiv.txt)), the 32 000 packets of the harness | **640/640 chunks identical**: every decode (31 858: segment, phase, CRC flag, length, the octets read) the same as `ble-rx-micro`'s. The choice of the phases, the decoder fed as `rx_one_phase` feeds it and the packet store of `rx_k_phase` are `rx_one_phase`'s where they meet |
+| The product audit's matrix against corrected `master` (`fca6ac6`) ([`kfix-matrix-*`](../../results/validation/)), each ERROR case simulated again and its decision and PDU compared with the packet sent (`error_cases.tsv`) | `ble-rx-3p1c`, `ble-rx-2p1c`, `ble-rx-2p2c`: 214 PASS, 56 ERROR: **the 50 data-channel cases** of `ble-rx-best` (§ 16.5), and **3 advertising packets (6 cases) that corrected `master` rejects and these receive, each PDU the one sent** (ex0 at 20 dB and 50 ppm, both delays; ex0 at 8 dB, 0 ppm, delay 5). `ble-rx-1p2c`: 216 PASS, 54 ERROR: the 50, one packet that it receives and `master` rejects (its PDU the one sent), and one that it loses (ex0 at 8 dB, 0 ppm, delay 0, which `ble-rx-micro` also loses). The matrix asks for `master`'s decision, so a packet received that `master` loses is an ERROR |
+| Lint gate (Verilator 5.020, `--Wall`) ([`kfix-lint`](../../results/validation/kfix-lint/)) | **73/73 configurations** on each branch: the 64 of `ble-rx-micro`'s flags, and the 9 combinations of `RX_AA_PHASES` ∈ {1, 2, 3} and `RX_CRC_FIX` ∈ {0, 1, 2}; 12 reviewed exceptions, none new |
+| Not done | a formal proof of the K phases or of the correction (they are measured, not proved); static timing and switching activity; the cost of the correction time in packets under real traffic (the harness sends one packet per reset); false accepts beyond these 32 000 packets |
+
+### 18.7 Conclusions for the K phases and the correction
+
+- **`ble-rx-3p1c` receives more than `ble-rx-best` in 23 % less area** (16 085.0 against 20 896.7 µm², no
+  macro): 0.7 to 1.8 dB better at PER 10 %, 2 899 packets more of 32 000, 43 of `ble-rx-best`'s lost, no false
+  packet. It answers the question `ble-rx-micro` left open: **the 2 dB were the phase, and 3 phases with one
+  bit of correction give them back and more**, in 10 % less area than the 8 phases at 8 bits.
+- **`ble-rx-2p1c` is the balance of area and sensitivity**: −40.5 % against `ble-rx-best` (12 437.4 µm²),
+  0.5 to 1.8 dB better, 130 of its packets lost and 2 643 gained, no false packet, 5.4 µs of correction at
+  most.
+- **`ble-rx-2p2c` is the most sensitive** (1.0 to 2.6 dB better than `ble-rx-best`, 2 071 packets lost of
+  32 000 against 6 019) in the area of `ble-rx-2p1c`, **but it accepts false packets** (17 of 32 000, up to
+  0.6 % at the lowest SNRs) and can hold the receiver 0.9 ms: it is for a link that checks what it receives.
+- **`ble-rx-1p2c` is the smallest** (8 725.3 µm², −58.2 %, 25 % above `ble-rx-micro`), better than `ble-rx-best`
+  up to 30 ppm, but 1.1 dB worse at 50 ppm, with 908 of `ble-rx-best`'s packets lost and false packets like
+  `ble-rx-2p2c`.
+- **What to take is a requirement**: with the CRC trusted as the Core specification trusts it, the choice is
+  between `ble-rx-3p1c` and `ble-rx-2p1c`, both more sensitive than `ble-rx-best` in less area.
+
+### 18.8 Reproducing
+
+From WSL, at the root of `ble-rx-3p1c` (the four branches and `ble-rx-micro-8bit` as local branches):
+
+```bash
+for d in best=origin/ble-rx-best micro=origin/ble-rx-micro micro8=ble-rx-micro-8bit ble-rx-3p1c=ble-rx-3p1c \
+         ble-rx-2p1c=ble-rx-2p1c ble-rx-2p2c=ble-rx-2p2c ble-rx-1p2c=ble-rx-1p2c; do
+  RTL_REV=${d#*=} scripts/area/run_area.sh rx-kfix/${d%%=*} btle_rx rx_k_phase btle_controller; done
+POINTS="0:7 0:8.5 0:10 0:11 0:12 0:13 0:14 0:15 20:9 20:10.5 20:12 20:13 20:14 20:15 20:16 20:17 -30:11 -30:12.5 \
+  -30:14 -30:15 -30:16 -30:17 -30:18 -30:19 50:22 50:23.5 50:25 50:26 50:27 50:28 50:29 50:30" CHUNK=50 SEED=1 \
+  scripts/validation/rx_ber/run_rx_ber.sh rx-kfix 1000 best=origin/ble-rx-best micro=origin/ble-rx-micro \
+  micro8=ble-rx-micro-8bit k3f1=ble-rx-3p1c k2f1=ble-rx-2p1c k2f2=ble-rx-2p2c k1f2=ble-rx-1p2c
+python3 scripts/validation/rx_ber/kfix_stats.py . results/validation/rx-kfix/rx_ber_exact best micro micro8 k3f1 k2f1 k2f2 k1f2
+python3 scripts/validation/run_lint.py --output results/validation/kfix-lint/<branch>      # on each branch
+scripts/validation/run_rx_regression.sh kfix-matrix-<branch> fca6ac64                       # on each branch
+scripts/validation/kfix_matrix_check.sh . kfix-matrix-<branch>                              # its ERROR cases
+```
+(`rx_k_phase` synthesised alone has its own defaults, K = 3 and 1 bit, on every branch: its row in the area
+summaries is not a branch's.)
