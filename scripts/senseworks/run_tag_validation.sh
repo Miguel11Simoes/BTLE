@@ -55,6 +55,7 @@ else
   echo "scapy        SKIPPED: no interpreter with scapy (SCAPY_PY)" | tee -a "$out/summary.txt"
 fi
 check controller "$PY" tests/test_tag_controller.py --events 3
-check lint env PATH=/usr/bin:$PATH python3 scripts/validation/run_lint.py --output "$out/lint"
+strict_lint() { PATH="/usr/bin:$PATH" python3 scripts/validation/run_lint.py --output "$out/lint"; }   # Verilator 5.020
+check lint strict_lint
 gzip -9 "$out"/*.log
 exit $status
