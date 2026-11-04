@@ -25,7 +25,8 @@
 #   DUT_PARAMS  the dut configuration (default: every reduction its btle_controller
 #               declares, switched on; see scripts/branch_config.sh)
 #   STA_SET     full (default: the controllers, btle_rx, and each changed block the
-#               dut has) | controller (the two controllers only)
+#               dut has) | controller (the two controllers only) | tx (the controllers
+#               and btle_tx, the reference's with GAUSS_TABLE=1: the senseworks tag)
 # Output: results/timing/<label>/ (refuses to overwrite)
 
 set -euo pipefail
@@ -152,6 +153,9 @@ if [ "$STA_SET" = full ]; then
     design ref_gfsk_demod       "$work/ref/verilog" gfsk_demodulation
     design dut_gfsk_demod_shared "$dut_rtl"         gfsk_demodulation_shared
   fi
+elif [ "$STA_SET" = tx ]; then   # the senseworks tag (ble-tx-tag-*): no receiver; the transmitter itself
+  design ref_btle_tx          "$work/ref/verilog" btle_tx GAUSS_TABLE=1
+  design dut_btle_tx          "$dut_rtl"          btle_tx $DUT_PARAMS
 fi
 
 column -t -s $'\t' "$out/summary.tsv" | tee "$out/summary.txt"
