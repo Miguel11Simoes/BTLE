@@ -8,6 +8,7 @@ import argparse, hashlib, itertools, json, os, re, subprocess, sys
 from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 FLAGS = ('ENABLE_IQ_CAPTURE', 'LL_MINIMAL', 'GAUSS_TABLE', 'PDU_WRITE_STROBE', 'ADV_DATA_FLOPS')  # ble-tx-min: both AdvData stores
+INTEGERS = {'BCH_T': (8, 12, 18)}  # ble-tx-tag-*: the tag's three BCH codes
 
 def sources(root):
     files = sorted((root/'verilog').glob('*.v'))
@@ -35,7 +36,9 @@ def configurations(root):
     text = (root/'verilog/btle_controller.v').read_text().split(') (')[0]
     text = re.sub(r'//[^\n]*', '', text)
     names = [n for n in FLAGS if re.search(r'parameter\s+integer\s+'+n+r'\b', text)]
-    return [dict(zip(names, bits)) for bits in itertools.product((0, 1), repeat=len(names))]
+    integers = {n: v for n, v in INTEGERS.items() if re.search(r'parameter\s+integer\s+'+n+r'\b', text)}
+    values = [(0, 1)] * len(names) + list(integers.values())
+    return [dict(zip(names + list(integers), bits)) for bits in itertools.product(*values)]
 
 def complete_success(code, output):
     return code == 0 and not re.search(r'%Warning|%Error|\b(?:fatal|error):', output, re.I)

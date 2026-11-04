@@ -3,8 +3,10 @@
 // SPDX-License-Identifier: Apache-2.0 license
 // Modified 2026-09-19 by Miguel Simões: GAUSS_TABLE parameter passed to btle_tx (default 0 = original). See CHANGES.md.
 // Modified 2026-10-16 by Miguel Simões: ADV_ADDRESS, ADV_DATA_FLOPS and ADV_ADDRESS_OTP passed to btle_tx; the OTP programming port tied off. See CHANGES.md.
+// Modified 2026-11-04 by Miguel Simões: the senseworks tag: no receiver (the RX ports kept, their
+// outputs 0); TX_ADD, COMPANY_ID and BCH_T passed to btle_tx, ADV_DATA_FLOPS gone. See CHANGES.md.
 
-// iverilog -o btle_phy btle_phy.v btle_rx.v btle_rx_core_tb.v btle_rx_core.v gfsk_demodulation.v search_unique_bit_sequence.v scramble_core.v crc24_core.v serial_in_ram_out.v sdpram_two_clk.v sdpram_one_clk.v btle_tx.v crc24.v scramble.v gfsk_modulation.v bit_repeat_upsample.v gauss_filter.v vco.v 
+// iverilog -o btle_phy btle_phy.v scramble_core.v crc24_core.v btle_tx.v crc24.v scramble.v gfsk_modulation.v bit_repeat_upsample.v gauss_filter.v vco.v
 
 `timescale 1ns / 1ps
 module btle_phy #
@@ -23,9 +25,11 @@ module btle_phy #
   parameter integer LEN_UNIQUE_BIT_SEQUENCE = 32,
   parameter integer NUM_BIT_PAYLOAD_LENGTH = 8, // 8 bit in the core spec 6.2
   parameter integer GAUSS_TABLE = 0, // passed to btle_tx
-  parameter [47:0] ADV_ADDRESS = 48'h010203040506, // passed to btle_tx: AdvA, fixed per chip
-  parameter integer ADV_DATA_FLOPS = 0, // passed to btle_tx
-  parameter integer ADV_ADDRESS_OTP = 0 // passed to btle_tx
+  parameter [47:0] ADV_ADDRESS = 48'hC10203040506, // passed to btle_tx: AdvA, fixed per chip
+  parameter integer ADV_ADDRESS_OTP = 0, // passed to btle_tx
+  parameter integer TX_ADD = 1, // passed to btle_tx: the tag's packet
+  parameter [15:0] COMPANY_ID = 16'hFFFF, // passed to btle_tx
+  parameter integer BCH_T = 8 // passed to btle_tx
 ) (
   input wire clk,
   input wire rst,
@@ -102,8 +106,10 @@ btle_tx # (
   .GAUSS_FILTER_BIT_WIDTH(GAUSS_FILTER_BIT_WIDTH),
   .GAUSS_TABLE(GAUSS_TABLE),
   .ADV_ADDRESS(ADV_ADDRESS),
-  .ADV_DATA_FLOPS(ADV_DATA_FLOPS),
   .ADV_ADDRESS_OTP(ADV_ADDRESS_OTP),
+  .TX_ADD(TX_ADD),
+  .COMPANY_ID(COMPANY_ID),
+  .BCH_T(BCH_T),
   .NUM_TAP_GAUSS_FILTER(NUM_TAP_GAUSS_FILTER),
   .VCO_BIT_WIDTH(VCO_BIT_WIDTH),
   .SIN_COS_ADDR_BIT_WIDTH(SIN_COS_ADDR_BIT_WIDTH),
@@ -159,38 +165,17 @@ btle_tx # (
   .bit_upsample_gauss_filter_valid_last(tx_bit_upsample_gauss_filter_valid_last)
 );
 
-btle_rx # (
-  .SAMPLE_PER_SYMBOL(SAMPLE_PER_SYMBOL),
-  .GFSK_DEMODULATION_BIT_WIDTH(GFSK_DEMODULATION_BIT_WIDTH),
-  .LEN_UNIQUE_BIT_SEQUENCE(LEN_UNIQUE_BIT_SEQUENCE),
-  .CHANNEL_NUMBER_BIT_WIDTH(CHANNEL_NUMBER_BIT_WIDTH),
-  .CRC_STATE_BIT_WIDTH(CRC_STATE_BIT_WIDTH),
-  .NUM_BIT_PAYLOAD_LENGTH(NUM_BIT_PAYLOAD_LENGTH)
-) btle_rx_i (
-  .clk(clk),
-  .rst(rst),
-
-  .clkb(clkb),
-  
-  .unique_bit_sequence(rx_unique_bit_sequence),
-  .channel_number(rx_channel_number),
-  .crc_state_init_bit(rx_crc_state_init_bit),
-
-  .i(rx_i_signal),
-  .q(rx_q_signal),
-  .iq_valid(rx_iq_valid),
-
-  .hit_flag(rx_hit_flag),
-  .decode_run(rx_decode_run),
-  .decode_end(rx_decode_end),
-  .crc_ok(rx_crc_ok),
-  .best_phase(rx_best_phase),
-
-  .payload_length(rx_payload_length),
-
-  .pdu_octet_mem_data(rx_pdu_octet_mem_data),
-  .pdu_octet_mem_addr(rx_pdu_octet_mem_addr)
-);
+// No receiver (the senseworks tag, a Broadcaster with a transmitter only): the RX ports are kept for
+// the controller's interface, their outputs constant 0 (nothing is ever received), their inputs unused.
+assign rx_hit_flag = 1'b0;
+assign rx_decode_run = 1'b0;
+assign rx_decode_end = 1'b0;
+assign rx_crc_ok = 1'b0;
+assign rx_best_phase = 3'd0;
+assign rx_payload_length = {NUM_BIT_PAYLOAD_LENGTH{1'b0}};
+assign rx_pdu_octet_mem_data = 8'd0;
+wire unused_rx_inputs = &{1'b0, rx_unique_bit_sequence, rx_channel_number, rx_crc_state_init_bit,
+  rx_i_signal, rx_q_signal, rx_iq_valid, rx_pdu_octet_mem_addr};
 
 endmodule
 

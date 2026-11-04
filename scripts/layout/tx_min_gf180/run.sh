@@ -3,6 +3,9 @@
 # SPDX-FileCopyrightText: 2026 Miguel Simões
 # SPDX-License-Identifier: Apache-2.0
 #
+# The senseworks tag (ble-tx-tag-*, 2026-11-04): config.json lays out btle_tx with GAUSS_TABLE=1
+# ADV_ADDRESS_OTP=1 and the branch's BCH_T (its default); no AdvData memory, so no sram64 variant.
+# From ble-tx-min:
 # Layout of btle_tx (ble-tx-min, GAUSS_TABLE=1 ADV_DATA_FLOPS=1 ADV_ADDRESS_OTP=1) in GF180MCU-D with the
 # six eFuse blocks of AdvA, LibreLane Classic flow in the Nix environment of the GF180MCU eFuse compiler.
 #
@@ -41,7 +44,7 @@ set -euo pipefail
 label=${1:?usage: run.sh <label> [rtl-rev]}
 rev=${2:-HEAD}
 variant=${3:-flops}
-case $variant in flops|sram64) ;; *) echo "variant: flops or sram64" >&2; exit 1;; esac
+case $variant in flops) ;; *) echo "variant: flops (the senseworks tag has no AdvData memory: no sram64)" >&2; exit 1;; esac
 EFUSE_DIR=${EFUSE_DIR:-$HOME/eda/efuse}
 repo=$(git rev-parse --show-toplevel)
 here=$repo/scripts/layout/tx_min_gf180

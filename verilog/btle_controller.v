@@ -3,10 +3,12 @@
 // SPDX-License-Identifier: Apache-2.0 license
 // Modified 2026-09-28 by Miguel Simões: GAUSS_TABLE parameter (default 0 = original). See CHANGES.md.
 // Modified 2026-10-16 by Miguel Simões: ADV_ADDRESS, ADV_DATA_FLOPS and ADV_ADDRESS_OTP passed to btle_phy. See CHANGES.md.
+// Modified 2026-11-04 by Miguel Simões: the senseworks tag: TX_ADD, COMPANY_ID and BCH_T passed to
+// btle_phy, ADV_DATA_FLOPS gone; btle_phy has no receiver. See CHANGES.md.
 
-// btle_controller = btle_ll (link layer) + btle_phy (phy: btle_tx and btle_rx)
+// btle_controller = btle_ll (link layer) + btle_phy (phy: btle_tx; no receiver on the tag branches)
 
-// iverilog -o btle_controller btle_controller.v clock_domain_conversion_iq.v ./btle_ll/hw/fpga/btle_ll_stub.v btle_phy.v btle_rx.v btle_rx_core.v gfsk_demodulation.v search_unique_bit_sequence.v scramble_core.v crc24_core.v serial_in_ram_out.v sdpram_two_clk.v sdpram_one_clk.v btle_tx.v crc24.v scramble.v gfsk_modulation.v bit_repeat_upsample.v gauss_filter.v vco.v
+// iverilog -o btle_controller btle_controller.v clock_domain_conversion_iq.v ./btle_ll/hw/fpga/btle_ll_stub.v btle_phy.v scramble_core.v crc24_core.v sdpram_two_clk.v sdpram_one_clk.v btle_tx.v crc24.v scramble.v gfsk_modulation.v bit_repeat_upsample.v gauss_filter.v vco.v
 
 `define KEEP_FOR_DBG (*mark_debug="true",DONT_TOUCH="TRUE"*)
 
@@ -48,11 +50,14 @@ module btle_controller #
 
   // Area reduction B2 (branch ble-tx-table); defaults to the original design.
   parameter integer GAUSS_TABLE = 0,       // 1: fixed-tap Gaussian table instead of the runtime FIR (gauss_filter)
-  // Legacy Advertising transmitter (branch ble-tx-min): AdvA fixed per chip (a ROM here, an OTP in
-  // the ASIC) and AdvData in a 32 x 8 memory (or in flip-flops with ADV_DATA_FLOPS = 1)
-  parameter [47:0] ADV_ADDRESS = 48'h010203040506,
-  parameter integer ADV_DATA_FLOPS = 0,
-  parameter integer ADV_ADDRESS_OTP = 0    // AdvA from six GF180MCU eFuse blocks instead of the ROM
+  // The senseworks tag's transmitter (branches ble-tx-tag-*, from ble-tx-min): AdvA fixed per chip
+  // (a ROM here, an OTP in the ASIC), one packet format with the sensor's two bytes and their BCH
+  // parity (btle_tx.v)
+  parameter [47:0] ADV_ADDRESS = 48'hC10203040506,
+  parameter integer ADV_ADDRESS_OTP = 0,   // AdvA from six GF180MCU eFuse blocks instead of the ROM
+  parameter integer TX_ADD = 1,            // 1: AdvA a random static address; 0: a public one
+  parameter [15:0] COMPANY_ID = 16'hFFFF,  // the value for tests; a product needs its own (Bluetooth SIG)
+  parameter integer BCH_T = 8              // errors the BCH code corrects: 8, 12 or 18
 ) (
   input  wire rf_clk,
   input  wire rf_rst,
@@ -465,8 +470,10 @@ btle_phy #
   .GAUSS_FILTER_BIT_WIDTH(GAUSS_FILTER_BIT_WIDTH),
   .GAUSS_TABLE(GAUSS_TABLE),
   .ADV_ADDRESS(ADV_ADDRESS),
-  .ADV_DATA_FLOPS(ADV_DATA_FLOPS),
   .ADV_ADDRESS_OTP(ADV_ADDRESS_OTP),
+  .TX_ADD(TX_ADD),
+  .COMPANY_ID(COMPANY_ID),
+  .BCH_T(BCH_T),
   .NUM_TAP_GAUSS_FILTER(NUM_TAP_GAUSS_FILTER),
   .VCO_BIT_WIDTH(VCO_BIT_WIDTH),
   .SIN_COS_ADDR_BIT_WIDTH(SIN_COS_ADDR_BIT_WIDTH),

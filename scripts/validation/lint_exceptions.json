@@ -57,12 +57,7 @@
   {
     "file": "verilog/btle_tx.v",
     "rule": "DECLFILENAME",
-    "declaration": "module adv_pdu_buffer #"
-  },
-  {
-    "file": "verilog/btle_tx.v",
-    "rule": "DECLFILENAME",
-    "declaration": "module pdu_buffer_ram #"
+    "declaration": "module tag_pdu_buffer #"
   },
   {
     "file": "verilog/gfsk_modulation.v",
