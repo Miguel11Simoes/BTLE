@@ -40,6 +40,10 @@
 #     falls to 0.2 ns with it);
 #   DESIGN_REPAIR_MAX_SLEW_PCT 60 (both; the SRAM's already): the repair's margin on the max slew;
 #   CTS_SINK_CLUSTERING 7 flip-flops over 150 um: the fewest clock-tree buffers above the max fanout.
+# And of the tag (2026-11-04): RUN_POST_GRT_DESIGN_REPAIR true: the reset net (rst, on the BCH LFSR's flip-flops
+#   too) left the repair after placement at 3.2-3.3 ns of slew at ss, over the 3 ns max; repaired again
+#   with the global route's parasitics; aoi221_1 excluded as ble-tx-min excluded aoi222_1: one, in the AdvA
+#   multiplexer, then drove the only net over the max slew at ss (t = 18, by 1.3 ps).
 set -euo pipefail
 label=${1:?usage: run.sh <label> [rtl-rev]}
 rev=${2:-HEAD}
@@ -87,7 +91,7 @@ in_nix() {
     nix-shell --run 'export PATH=/src/.bin:\$PATH; $1'"
 }
 L=/src/gf180mcu/gf180mcuD/libs.tech/klayout/tech/gf180mcu.lyp
-fig=tx_min_gf180; [ "$variant" = sram64 ] && fig=tx_min_gf180_sram64
+fig=$(echo "$label" | tr - _)   # the tag: the renders named after the run, in results/figures/tx-tag
 in_nix "cd /out/$label && librelane --pdk-root /src/gf180mcu --pdk gf180mcuD --manual-pdk config.json > librelane.log 2>&1; echo \$? > librelane.exit
   G=\$(ls -d runs/RUN_*/final/gds | tail -1)/btle_tx.gds; export QT_QPA_PLATFORM=offscreen
   python3 render.py \$G $L ${fig}_gds.png 1600
@@ -128,7 +132,7 @@ cp "$work/librelane.log" "$R/warning.log" "$out/"
 gzip -9 -c "$R/final/gds/btle_tx.gds" > "$out/btle_tx.gds.gz"
 gzip -9 -c "$R/final/nl/btle_tx.nl.v" > "$out/btle_tx.nl.v.gz"
 gzip -9 "$out"/sta/*.rpt "$out"/librelane.log
-mkdir -p "$repo/results/figures/tx-min"; cp "$work"/${fig}_*.png "$repo/results/figures/tx-min/"
+mkdir -p "$repo/results/figures/tx-tag"; cp "$work"/${fig}_*.png "$repo/results/figures/tx-tag/"
 {
   echo "label=$label"
   echo "date_utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)"

@@ -19,7 +19,7 @@
   "EXTRA_EXCLUDED_CELLS": ["gf180mcu_fd_sc_mcu7t5v0__dlya_*", "gf180mcu_fd_sc_mcu7t5v0__dlyb_*",
                            "gf180mcu_fd_sc_mcu7t5v0__dlyc_*", "gf180mcu_fd_sc_mcu7t5v0__dlyd_*",
                            "gf180mcu_fd_sc_mcu7t5v0__clkbuf_1", "gf180mcu_fd_sc_mcu7t5v0__buf_1",
-                           "gf180mcu_fd_sc_mcu7t5v0__aoi222_1"],
+                           "gf180mcu_fd_sc_mcu7t5v0__aoi222_1", "gf180mcu_fd_sc_mcu7t5v0__aoi221_1"],
   "RUN_HEURISTIC_DIODE_INSERTION": false,
   "GRT_ANTENNA_REPAIR_ITERS": 6,
   "GRT_ANTENNA_REPAIR_MARGIN": 15,
@@ -27,6 +27,7 @@
   "DESIGN_REPAIR_MAX_CAP_PCT": 30,
   "GRT_DESIGN_REPAIR_MAX_SLEW_PCT": 60,
   "GRT_DESIGN_REPAIR_MAX_CAP_PCT": 30,
+  "RUN_POST_GRT_DESIGN_REPAIR": true,
   "PAD_LEFS": [], "PAD_GDS": [], "PAD_VERILOG_MODELS": [], "PAD_SPICE_MODELS": [], "PAD_CDLS": [],
   "LIB": {
           "*_tt_025C_5v00": ["/src/gf180mcu/gf180mcuD/libs.ref/gf180mcu_fd_sc_mcu7t5v0/lib/gf180mcu_fd_sc_mcu7t5v0__tt_025C_5v00.lib"],
