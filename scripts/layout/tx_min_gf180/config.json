@@ -37,6 +37,7 @@
   "GPL_CELL_PADDING": 1,
   "CTS_SINK_CLUSTERING_SIZE": 7,
   "CTS_SINK_CLUSTERING_MAX_DIAMETER": 150,
+  "IO_EXCLUDE_PIN_REGION": ["bottom:*"],
   "STA_MACRO_PRIORITIZE_NL": false,
   "MACROS": {
     "efuse_async_mem_1x8": {

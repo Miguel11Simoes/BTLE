@@ -43,7 +43,9 @@
 # And of the tag (2026-11-04): RUN_POST_GRT_DESIGN_REPAIR true: the reset net (rst, on the BCH LFSR's flip-flops
 #   too) left the repair after placement at 3.2-3.3 ns of slew at ss, over the 3 ns max; repaired again
 #   with the global route's parasitics; aoi221_1 excluded as ble-tx-min excluded aoi222_1: one, in the AdvA
-#   multiplexer, then drove the only net over the max slew at ss (t = 18, by 1.3 ps).
+#   multiplexer, then drove the only net over the max slew at ss (t = 18, by 1.3 ps); IO_EXCLUDE_PIN_REGION
+#   bottom:* (as the SRAM variant): a quarter of the pins fell on the bottom edge, below the eFuse row, and
+#   their wires to the input buffers went over the max slew at ss (t = 8, up to 4.8 ns).
 set -euo pipefail
 label=${1:?usage: run.sh <label> [rtl-rev]}
 rev=${2:-HEAD}
