@@ -1,0 +1,51 @@
+
+33. Printing statistics.
+
+=== btle_tx ===
+
+        +----------Local Count, excluding submodules.
+        |        +-Local Area, excluding submodules.
+        |        | 
+     1535        - wires
+     2003        - wire bits
+       83        - public wires
+      543        - public wire bits
+       33        - ports
+      242        - port bits
+     1493 2.54E+03 cells
+        1        -   $print
+       55    58.52   AND2_X1
+       18    23.94   AND3_X1
+        2    3.192   AND4_X1
+       38    50.54   AOI211_X1
+      135   143.64   AOI21_X1
+       18   28.728   AOI221_X1
+        1    2.128   AOI222_X1
+       31    41.23   AOI22_X1
+      239 1.08E+03   DFF_X1
+       86   45.752   INV_X1
+      163  303.506   MUX2_X1
+      125    99.75   NAND2_X1
+       34   36.176   NAND3_X1
+        7     9.31   NAND4_X1
+      149  118.902   NOR2_X1
+       48   51.072   NOR3_X1
+       12    15.96   NOR4_X1
+       25    33.25   OAI211_X1
+      139  147.896   OAI21_X1
+        6    9.576   OAI221_X1
+        8    10.64   OAI22_X1
+        3    5.586   OAI33_X1
+       24   25.536   OR2_X1
+        4     5.32   OR3_X1
+        5     7.98   OR4_X1
+       82  130.872   XNOR2_X1
+       34   54.264   XOR2_X1
+        1        -   sdpram_one_clk
+
+   Area for cell type $print is unknown!
+   Area for cell type \sdpram_one_clk is unknown!
+
+   Chip area for module '\btle_tx': 2544.024000
+     of which used for sequential elements: 1080.758000 (42.48%)
+

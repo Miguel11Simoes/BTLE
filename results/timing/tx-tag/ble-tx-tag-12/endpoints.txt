@@ -1,0 +1,4 @@
+ref_controller	btle_phy_i.btle_tx_i.gfsk_modulation_i.tail_i.remaining[4].  End-point = btle_phy_i.btle_tx_i.gfsk_modulation_i.tail_i.correction[15].
+dut_controller	btle_ll_i.clk_cross_bus_bb_to_s_axi_i.write_data[16].  End-point = btle_ll_i.clk_cross_bus_bb_to_s_axi_i.write_data[76].
+ref_btle_tx	gfsk_modulation_i.vco_i.integral_voltage_signal[3].  End-point = i_internal[6].
+dut_btle_tx	gfsk_modulation_i.vco_i.integral_voltage_signal[3].  End-point = q_internal[7].

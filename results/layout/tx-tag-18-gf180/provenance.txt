@@ -1,0 +1,8 @@
+label=tx-tag-18-gf180
+date_utc=2026-11-04T21:50:02Z
+rtl=HEAD (dd4c8680af0d1939d3e420218e4ef419d8dc01ab), btle_tx, variant flops: GAUSS_TABLE=1 ADV_ADDRESS_OTP=1
+harness=dd4c8680af0d1939d3e420218e4ef419d8dc01ab, dirty files under scripts/layout: 0
+flow=LibreLane Classic, gf180mcuD, gf180mcu_fd_sc_mcu7t5v0, in the eFuse compiler's nix-shell (e77f729373f28eda5d370d66764e81c3b109c31a)
+run=RUN_2026-11-04_21-44-22
+config_overrides=none
+gds sha256=d05b170051f3420e07c39b2490d372e4c63a9738d7d78115383493e57aa80ad6

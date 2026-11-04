@@ -32,6 +32,7 @@ Latest lint and documentation update: [LINT_CLOSURE.md](Validation/LINT_CLOSURE.
 | See the VCO without memory, its tables fixed in a ROM of an eighth of the wave: its checks, area, timing and SRAM energy | [Validation/TX_ROM_VALIDATION.md](Validation/TX_ROM_VALIDATION.md) |
 | See the Legacy Advertising transmitter (header in registers, AdvA in ROM/OTP, AdvData in 32 x 8), the smallest transmitter measured: its checks, area, timing, activity, OTP and figures | [Validation/TX_MIN_VALIDATION.md](Validation/TX_MIN_VALIDATION.md) |
 | Compare the final transmitter with upstream, every result side by side (signals, BER, area, timing, FPGA, power, layout, OTP), and read the decisions | [TX_FINAL_DECISIONS.md](TX_FINAL_DECISIONS.md) |
+| Compare the senseworks tags (`ble-tx-tag-8/12/18`: the minimal ADV_NONCONN_IND with BCH parity, no receiver): packet, code, validation, area, timing, layout, FPGA, time on the air, and the choice | [Senseworks/TX_TAG_COMPARISON.md](Senseworks/TX_TAG_COMPARISON.md) |
 | Compare the transmitter branches and `ble-opt`: area (the transmitter with its SRAM macros), timing, switching activity | [Validation/TX_BRANCH_COMPARISON.md](Validation/TX_BRANCH_COMPARISON.md) |
 | Compare the receiver branches (`ble-rx-dm`, `ble-rx-dmult`): area, timing, switching activity | [Validation/RX_BRANCH_COMPARISON.md](Validation/RX_BRANCH_COMPARISON.md) |
 | Choose where the Gaussian table lives (OTP, ROM, SRAM, REG) or a folded FIR, by TX area | [Design Decisions/GAUSS_FILTER_OPTIONS.md](Design%20Decisions/GAUSS_FILTER_OPTIONS.md) |
@@ -52,6 +53,7 @@ when it has content; planned sections are listed below.
 | `Validation/` | Test inventory, evidence, results | B2 and the {cos, sin} memory together, checked and measured (branch `ble-tx-opt`); branches compared |
 | `Thesis/` | Reports written for the dissertation | Not started |
 | `Guides/` | How to reproduce, build and contribute | Written, not yet executed |
+| `Senseworks/` | The senseworks system: the tag (transmitter only) and the gateway (receiver only) | The three tags measured (branches `ble-tx-tag-*`); the gateway not started |
 | `Reference Manual/` | Pointers to the upstream documentation | Written |
 | `Meetings and Discussions/` | Meeting notes with the supervisor | Not started |
 

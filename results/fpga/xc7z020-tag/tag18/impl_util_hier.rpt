@@ -1,0 +1,47 @@
+Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2026 Advanced Micro Devices, Inc. All Rights Reserved.
+---------------------------------------------------------------------------------------------------------------------------------------------
+| Tool Version : Vivado v.2026.1 (win64) Build 6511674 Tue Jun 16 11:02:23 MDT 2026
+| Date         : Wed Nov  4 19:42:49 2026
+| Host         : Simon running 64-bit major release  (build 9200)
+| Command      : report_utilization -hierarchical -hierarchical_depth 3 -file C:/Users/msmig/vtag/tag18/impl_util_hier.rpt
+| Design       : btle_controller
+| Device       : xc7z020clg484-1
+| Speed File   : -1
+| Design State : Routed
+---------------------------------------------------------------------------------------------------------------------------------------------
+
+Utilization Design Information
+
+Table of Contents
+-----------------
+1. Utilization by Hierarchy
+
+1. Utilization by Hierarchy
+---------------------------
+
++------------------------------------------+-------------------------------------+------------+------------+---------+------+------+--------+--------+------------+
+|                 Instance                 |                Module               | Total LUTs | Logic LUTs | LUTRAMs | SRLs |  FFs | RAMB36 | RAMB18 | DSP Blocks |
++------------------------------------------+-------------------------------------+------------+------------+---------+------+------+--------+--------+------------+
+| btle_controller                          |                               (top) |       1939 |       1589 |     350 |    0 | 3088 |     32 |      1 |          0 |
+|   (btle_controller)                      |                               (top) |        110 |        110 |       0 |    0 |    0 |      0 |      0 |          0 |
+|   btle_ll_i                              |                             btle_ll |       1348 |        998 |     350 |    0 | 2655 |      0 |      1 |          0 |
+|     (btle_ll_i)                          |                             btle_ll |        103 |        103 |       0 |    0 |  418 |      0 |      0 |          0 |
+|     clk_cross_bus_bb_to_s_axi_i          |       clk_cross_bus__parameterized0 |        255 |          9 |     246 |    0 |  365 |      0 |      0 |          0 |
+|       sdpram_two_clk_for_clk_cross_bus_i |      sdpram_two_clk__parameterized1 |        246 |          0 |     246 |    0 |  365 |      0 |      0 |          0 |
+|     clk_cross_bus_s_axi_to_bb_i          |                       clk_cross_bus |        104 |          0 |     104 |    0 |  149 |      0 |      0 |          0 |
+|       sdpram_two_clk_for_clk_cross_bus_i |      sdpram_two_clk__parameterized0 |        104 |          0 |     104 |    0 |  149 |      0 |      0 |          0 |
+|     event_counter_pulse_timestamp_i      | event_counter_pulse__parameterized0 |          1 |          1 |       0 |    0 |   64 |      0 |      0 |          0 |
+|     ll_s_axi_i                           |                            ll_s_axi |        712 |        712 |       0 |    0 | 1338 |      0 |      0 |          0 |
+|     rx_ram_i                             |                              rx_ram |        134 |        134 |       0 |    0 |  122 |      0 |      1 |          0 |
+|       (rx_ram_i)                         |                              rx_ram |        109 |        109 |       0 |    0 |   65 |      0 |      0 |          0 |
+|       octet_to_word_for_rx_ram_i         |                       octet_to_word |         25 |         25 |       0 |    0 |   57 |      0 |      0 |          0 |
+|   btle_phy_i                             |                            btle_phy |        474 |        474 |       0 |    0 |  362 |      0 |      0 |          0 |
+|     btle_tx_i                            |                             btle_tx |        474 |        474 |       0 |    0 |  362 |      0 |      0 |          0 |
+|       (btle_tx_i)                        |                             btle_tx |        225 |        225 |       0 |    0 |  189 |      0 |      0 |          0 |
+|       crc24_i                            |                               crc24 |         50 |         50 |       0 |    0 |   38 |      0 |      0 |          0 |
+|       gfsk_modulation_i                  |                     gfsk_modulation |        166 |        166 |       0 |    0 |   88 |      0 |      0 |          0 |
+|   clock_domain_conversion_iq_i           |          clock_domain_conversion_iq |          3 |          3 |       0 |    0 |   55 |      0 |      0 |          0 |
++------------------------------------------+-------------------------------------+------------+------------+---------+------+------+--------+--------+------------+
+* Note: The sum of lower-level cells may be larger than their parent cells total, due to cross-hierarchy LUT combining
+
+

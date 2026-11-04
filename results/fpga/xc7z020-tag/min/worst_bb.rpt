@@ -1,0 +1,70 @@
+Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2026 Advanced Micro Devices, Inc. All Rights Reserved.
+---------------------------------------------------------------------------------------------------------------------------------------------
+| Tool Version : Vivado v.2026.1 (win64) Build 6511674 Tue Jun 16 11:02:23 MDT 2026
+| Date         : Wed Nov  4 19:44:32 2026
+| Host         : Simon running 64-bit major release  (build 9200)
+| Command      : report_timing -max_paths 1 -nworst 1 -group [get_clocks bb_clk] -file C:/Users/msmig/vtag/min/worst_bb.rpt
+| Design       : btle_controller
+| Device       : 7z020-clg484
+| Speed File   : -1  PRODUCTION 1.12 2019-11-22
+| Design State : Routed
+---------------------------------------------------------------------------------------------------------------------------------------------
+
+Timing Report
+
+Slack (MET) :             46.041ns  (required time - arrival time)
+  Source:                 btle_phy_i/btle_rx_i/decode_end_store_effective_reg[4]/C
+                            (rising edge-triggered cell FDRE clocked by bb_clk  {rise@0.000ns fall@31.250ns period=62.500ns})
+  Destination:            btle_phy_i/btle_rx_i/genblk1[0].btle_rx_core_i/gfsk_demodulation_i/i0_reg[11]/R
+                            (rising edge-triggered cell FDRE clocked by bb_clk  {rise@0.000ns fall@31.250ns period=62.500ns})
+  Path Group:             bb_clk
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            62.500ns  (bb_clk rise@62.500ns - bb_clk rise@0.000ns)
+  Data Path Delay:        15.872ns  (logic 0.952ns (5.998%)  route 14.920ns (94.002%))
+  Logic Levels:           4  (LUT2=1 LUT3=1 LUT4=1 LUT5=1)
+  Clock Path Skew:        -0.028ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    1.625ns = ( 64.125 - 62.500 ) 
+    Source Clock Delay      (SCD):    1.666ns
+    Clock Pessimism Removal (CPR):    0.013ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock bb_clk rise edge)     0.000     0.000 r  <hidden>
+                                                      0.000     0.000 r  bb_clk
+                         net (fo=4034, unset)         1.666     1.666    btle_phy_i/btle_rx_i/clk
+    SLICE_X44Y9          FDRE                                         r  btle_phy_i/btle_rx_i/decode_end_store_effective_reg[4]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X44Y9          FDRE (Prop_fdre_C_Q)         0.456     2.122 r  btle_phy_i/btle_rx_i/decode_end_store_effective_reg[4]/Q
+                         net (fo=2, routed)           0.962     3.084    btle_phy_i/btle_rx_i/decode_end_store_effective[4]
+    SLICE_X43Y10         LUT2 (Prop_lut2_I0_O)        0.124     3.208 r  btle_phy_i/btle_rx_i/decode_end_and_crc_ok_store_inferred_i_4/O
+                         net (fo=12, routed)          1.107     4.316    btle_phy_i/btle_rx_i/decode_end_and_crc_ok_store[4]
+    SLICE_X48Y12         LUT4 (Prop_lut4_I1_O)        0.124     4.440 r  btle_phy_i/btle_rx_i/decode_end_early_inferred_i_2/O
+                         net (fo=1, routed)           0.280     4.719    btle_phy_i/btle_rx_i/decode_end_early_inferred_i_2_n_0
+    SLICE_X48Y12         LUT5 (Prop_lut5_I4_O)        0.124     4.843 r  btle_phy_i/btle_rx_i/decode_end_early_inferred_i_1/O
+                         net (fo=12, routed)          0.344     5.187    btle_phy_i/btle_rx_i/decode_end_early
+    SLICE_X48Y14         LUT3 (Prop_lut3_I1_O)        0.124     5.311 r  btle_phy_i/btle_rx_i/genblk1[0].btle_rx_core_i_i_1/O
+                         net (fo=1864, routed)       12.227    17.538    btle_phy_i/btle_rx_i/genblk1[0].btle_rx_core_i/gfsk_demodulation_i/rst
+    SLICE_X94Y47         FDRE                                         r  btle_phy_i/btle_rx_i/genblk1[0].btle_rx_core_i/gfsk_demodulation_i/i0_reg[11]/R
+  -------------------------------------------------------------------    -------------------
+
+                         (clock bb_clk rise edge)    62.500    62.500 r  <hidden>
+                                                      0.000    62.500 r  bb_clk
+                         net (fo=4034, unset)         1.625    64.125    btle_phy_i/btle_rx_i/genblk1[0].btle_rx_core_i/gfsk_demodulation_i/clk
+    SLICE_X94Y47         FDRE                                         r  btle_phy_i/btle_rx_i/genblk1[0].btle_rx_core_i/gfsk_demodulation_i/i0_reg[11]/C
+                         clock pessimism              0.013    64.138    <hidden>
+                         clock uncertainty           -0.035    64.103    <hidden>
+    SLICE_X94Y47         FDRE (Setup_fdre_C_R)       -0.524    63.579    btle_phy_i/btle_rx_i/genblk1[0].btle_rx_core_i/gfsk_demodulation_i/i0_reg[11]
+  -------------------------------------------------------------------
+                         required time                         63.579    <hidden>
+                         arrival time                         -17.538    <hidden>
+  -------------------------------------------------------------------
+                         slack                                 46.041    <hidden>
+
+
+
+

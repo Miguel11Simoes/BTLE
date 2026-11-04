@@ -1,0 +1,329 @@
+{
+  "status": "PASS",
+  "configurations": [
+    {
+      "parameters": {
+        "GAUSS_TABLE": 0,
+        "BCH_T": 8
+      },
+      "command": [
+        "verilator",
+        "--lint-only",
+        "--Wall",
+        "--top-module",
+        "btle_controller",
+        "-GGAUSS_TABLE=0",
+        "-GBCH_T=8",
+        "verilog/auxiliary_daemon.v",
+        "verilog/bit_repeat_upsample.v",
+        "verilog/btle_controller.v",
+        "verilog/btle_ll.v",
+        "verilog/btle_phy.v",
+        "verilog/btle_tx.v",
+        "verilog/clock_domain_conversion_iq.v",
+        "verilog/crc24.v",
+        "verilog/crc24_core.v",
+        "verilog/gauss_filter.v",
+        "verilog/gfsk_modulation.v",
+        "verilog/rx_clk_gen.v",
+        "verilog/scramble.v",
+        "verilog/scramble_core.v",
+        "verilog/sdpram_one_clk.v",
+        "verilog/sdpram_two_clk.v",
+        "verilog/tx_clk_gen.v",
+        "verilog/uart_frame_rx.v",
+        "verilog/uart_frame_tx.v",
+        "verilog/vco.v"
+      ],
+      "exit": 0,
+      "log": "config-00.log",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": "PASS"
+    },
+    {
+      "parameters": {
+        "GAUSS_TABLE": 0,
+        "BCH_T": 12
+      },
+      "command": [
+        "verilator",
+        "--lint-only",
+        "--Wall",
+        "--top-module",
+        "btle_controller",
+        "-GGAUSS_TABLE=0",
+        "-GBCH_T=12",
+        "verilog/auxiliary_daemon.v",
+        "verilog/bit_repeat_upsample.v",
+        "verilog/btle_controller.v",
+        "verilog/btle_ll.v",
+        "verilog/btle_phy.v",
+        "verilog/btle_tx.v",
+        "verilog/clock_domain_conversion_iq.v",
+        "verilog/crc24.v",
+        "verilog/crc24_core.v",
+        "verilog/gauss_filter.v",
+        "verilog/gfsk_modulation.v",
+        "verilog/rx_clk_gen.v",
+        "verilog/scramble.v",
+        "verilog/scramble_core.v",
+        "verilog/sdpram_one_clk.v",
+        "verilog/sdpram_two_clk.v",
+        "verilog/tx_clk_gen.v",
+        "verilog/uart_frame_rx.v",
+        "verilog/uart_frame_tx.v",
+        "verilog/vco.v"
+      ],
+      "exit": 0,
+      "log": "config-01.log",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": "PASS"
+    },
+    {
+      "parameters": {
+        "GAUSS_TABLE": 0,
+        "BCH_T": 18
+      },
+      "command": [
+        "verilator",
+        "--lint-only",
+        "--Wall",
+        "--top-module",
+        "btle_controller",
+        "-GGAUSS_TABLE=0",
+        "-GBCH_T=18",
+        "verilog/auxiliary_daemon.v",
+        "verilog/bit_repeat_upsample.v",
+        "verilog/btle_controller.v",
+        "verilog/btle_ll.v",
+        "verilog/btle_phy.v",
+        "verilog/btle_tx.v",
+        "verilog/clock_domain_conversion_iq.v",
+        "verilog/crc24.v",
+        "verilog/crc24_core.v",
+        "verilog/gauss_filter.v",
+        "verilog/gfsk_modulation.v",
+        "verilog/rx_clk_gen.v",
+        "verilog/scramble.v",
+        "verilog/scramble_core.v",
+        "verilog/sdpram_one_clk.v",
+        "verilog/sdpram_two_clk.v",
+        "verilog/tx_clk_gen.v",
+        "verilog/uart_frame_rx.v",
+        "verilog/uart_frame_tx.v",
+        "verilog/vco.v"
+      ],
+      "exit": 0,
+      "log": "config-02.log",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": "PASS"
+    },
+    {
+      "parameters": {
+        "GAUSS_TABLE": 1,
+        "BCH_T": 8
+      },
+      "command": [
+        "verilator",
+        "--lint-only",
+        "--Wall",
+        "--top-module",
+        "btle_controller",
+        "-GGAUSS_TABLE=1",
+        "-GBCH_T=8",
+        "verilog/auxiliary_daemon.v",
+        "verilog/bit_repeat_upsample.v",
+        "verilog/btle_controller.v",
+        "verilog/btle_ll.v",
+        "verilog/btle_phy.v",
+        "verilog/btle_tx.v",
+        "verilog/clock_domain_conversion_iq.v",
+        "verilog/crc24.v",
+        "verilog/crc24_core.v",
+        "verilog/gauss_filter.v",
+        "verilog/gfsk_modulation.v",
+        "verilog/rx_clk_gen.v",
+        "verilog/scramble.v",
+        "verilog/scramble_core.v",
+        "verilog/sdpram_one_clk.v",
+        "verilog/sdpram_two_clk.v",
+        "verilog/tx_clk_gen.v",
+        "verilog/uart_frame_rx.v",
+        "verilog/uart_frame_tx.v",
+        "verilog/vco.v"
+      ],
+      "exit": 0,
+      "log": "config-03.log",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": "PASS"
+    },
+    {
+      "parameters": {
+        "GAUSS_TABLE": 1,
+        "BCH_T": 12
+      },
+      "command": [
+        "verilator",
+        "--lint-only",
+        "--Wall",
+        "--top-module",
+        "btle_controller",
+        "-GGAUSS_TABLE=1",
+        "-GBCH_T=12",
+        "verilog/auxiliary_daemon.v",
+        "verilog/bit_repeat_upsample.v",
+        "verilog/btle_controller.v",
+        "verilog/btle_ll.v",
+        "verilog/btle_phy.v",
+        "verilog/btle_tx.v",
+        "verilog/clock_domain_conversion_iq.v",
+        "verilog/crc24.v",
+        "verilog/crc24_core.v",
+        "verilog/gauss_filter.v",
+        "verilog/gfsk_modulation.v",
+        "verilog/rx_clk_gen.v",
+        "verilog/scramble.v",
+        "verilog/scramble_core.v",
+        "verilog/sdpram_one_clk.v",
+        "verilog/sdpram_two_clk.v",
+        "verilog/tx_clk_gen.v",
+        "verilog/uart_frame_rx.v",
+        "verilog/uart_frame_tx.v",
+        "verilog/vco.v"
+      ],
+      "exit": 0,
+      "log": "config-04.log",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": "PASS"
+    },
+    {
+      "parameters": {
+        "GAUSS_TABLE": 1,
+        "BCH_T": 18
+      },
+      "command": [
+        "verilator",
+        "--lint-only",
+        "--Wall",
+        "--top-module",
+        "btle_controller",
+        "-GGAUSS_TABLE=1",
+        "-GBCH_T=18",
+        "verilog/auxiliary_daemon.v",
+        "verilog/bit_repeat_upsample.v",
+        "verilog/btle_controller.v",
+        "verilog/btle_ll.v",
+        "verilog/btle_phy.v",
+        "verilog/btle_tx.v",
+        "verilog/clock_domain_conversion_iq.v",
+        "verilog/crc24.v",
+        "verilog/crc24_core.v",
+        "verilog/gauss_filter.v",
+        "verilog/gfsk_modulation.v",
+        "verilog/rx_clk_gen.v",
+        "verilog/scramble.v",
+        "verilog/scramble_core.v",
+        "verilog/sdpram_one_clk.v",
+        "verilog/sdpram_two_clk.v",
+        "verilog/tx_clk_gen.v",
+        "verilog/uart_frame_rx.v",
+        "verilog/uart_frame_tx.v",
+        "verilog/vco.v"
+      ],
+      "exit": 0,
+      "log": "config-05.log",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": "PASS"
+    }
+  ],
+  "exceptions": [
+    {
+      "file": "verilog/btle_controller.v",
+      "rule": "SYNCASYNCNET",
+      "declaration": "input  wire s00_axi_aresetn,"
+    },
+    {
+      "file": "verilog/btle_ll.v",
+      "rule": "DECLFILENAME",
+      "declaration": "module rx_ram #"
+    },
+    {
+      "file": "verilog/btle_ll.v",
+      "rule": "DECLFILENAME",
+      "declaration": "module octet_to_word #"
+    },
+    {
+      "file": "verilog/btle_ll.v",
+      "rule": "DECLFILENAME",
+      "declaration": "module event_counter_pulse # ("
+    },
+    {
+      "file": "verilog/btle_ll.v",
+      "rule": "DECLFILENAME",
+      "declaration": "module event_counter_level # ("
+    },
+    {
+      "file": "verilog/btle_ll.v",
+      "rule": "DECLFILENAME",
+      "declaration": "module ll_s_axi #"
+    },
+    {
+      "file": "verilog/btle_ll.v",
+      "rule": "DECLFILENAME",
+      "declaration": "module uart_frame_rx"
+    },
+    {
+      "file": "verilog/btle_ll.v",
+      "rule": "DECLFILENAME",
+      "declaration": "module uart_frame_tx"
+    },
+    {
+      "file": "verilog/btle_ll.v",
+      "rule": "DECLFILENAME",
+      "declaration": "module tx_clk_gen"
+    },
+    {
+      "file": "verilog/btle_ll.v",
+      "rule": "DECLFILENAME",
+      "declaration": "module rx_clk_gen"
+    },
+    {
+      "file": "verilog/btle_ll.v",
+      "rule": "DECLFILENAME",
+      "declaration": "module clk_cross_bus #"
+    },
+    {
+      "file": "verilog/btle_tx.v",
+      "rule": "DECLFILENAME",
+      "declaration": "module tag_pdu_buffer #"
+    },
+    {
+      "file": "verilog/gfsk_modulation.v",
+      "rule": "DECLFILENAME",
+      "declaration": "module btle_gauss_tail #("
+    }
+  ],
+  "rtl_sha256": {
+    "verilog/auxiliary_daemon.v": "b8cff59771154792573c600fad8e388049c4645408c2b780c934853a8b351a1e",
+    "verilog/bit_repeat_upsample.v": "84563a0c313f00ceffb2289d2e29244de249829fe04c6a5bc3b94ffe5432d336",
+    "verilog/btle_controller.v": "c70d22be5df6f632e99f01d195944a6efed7674f410f7061d4670b9c1bc03e1d",
+    "verilog/btle_ll.v": "af0c00527cc6ca4b1b9f4ec879b3b6317ba8000719b013c6c4976035221904c3",
+    "verilog/btle_phy.v": "ecf37c24ff948e970a5e53fa8df75ba7b354edc6476b2d819c36d9a8d4d2065e",
+    "verilog/btle_tx.v": "7f8f086f3425d67d93400b932ff921450494eb9ee38be7d9128cbfcfea7e6ef9",
+    "verilog/clock_domain_conversion_iq.v": "4a84118558ff5dcc412b34e5688ac323cca4d2cc0cd78259192fc0b66bcef52e",
+    "verilog/crc24.v": "71a100a36282f3264330aa6d3bafd14ddd0ddf5c9a27c3669eb3c45333b033ee",
+    "verilog/crc24_core.v": "e149fd1e5e0345a4d8856e4039645401bf04355f54ace46330401f78338433e4",
+    "verilog/gauss_filter.v": "340bcf861deaaa40b1ccc4eeb0c64a8f3907e7670661115359a393f99970dabc",
+    "verilog/gfsk_modulation.v": "c856d7183045487ec4ffc298b414c28f24f2adf5e8534d647b2ec73f5316d85d",
+    "verilog/rx_clk_gen.v": "41cc3ed3f48ac9b6c75ad56da56148f128e6a556c5e572d9be96a3e070bb7d2b",
+    "verilog/scramble.v": "ab7781ca10c183e4d320045a660981ecdceca6757ef99471da85c319d54562e5",
+    "verilog/scramble_core.v": "e63f7ddc5e3ecdb95af6110183cc0e49b20802917432322978e7c8379a971635",
+    "verilog/sdpram_one_clk.v": "57372b21ff46884a8cabf5e803cdadae0bad629e0d241b45017dbadabf111cd3",
+    "verilog/sdpram_two_clk.v": "a9b99157777e445d812fdf8d50a5a7c657f8914912a679ea55f0f4e0f8acc327",
+    "verilog/tx_clk_gen.v": "0b8f76bd51788dc04c33b7f31a4be9590a3f9f5521a0237025891fa27ccd11d3",
+    "verilog/uart_frame_rx.v": "70d556ff3e1d1cd55832d4ea7f74926a5d8e01664b79e1400994f1591f3ed82a",
+    "verilog/uart_frame_tx.v": "bba1e6f0da2c805995ea705306423d3305b92526dd0b9d7b792d5da1300753e9",
+    "verilog/vco.v": "9620a76fe8ab2674d950a62ef3cf69e808e75b8a46571987f5c727b43525d892"
+  },
+  "tool": "Verilator 5.020 2024-01-01 rev (Debian 5.020-1)"
+}

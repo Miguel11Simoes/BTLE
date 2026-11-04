@@ -1,0 +1,3 @@
+tool=Vivado 2026.1, GUI, Device view (default layout, Device panel maximized, zoom to fit)
+checkpoint=min/routed.dcp
+orange=btle_tx_i: 767 of the design's 11346 primitives (highlight_objects -color orange)

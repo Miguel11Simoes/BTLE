@@ -1,0 +1,6 @@
+label=tx-tag-12-validation
+date_utc=2026-11-04T19:53:21Z
+commit=72e4b85370f8ab0bfb63c8b897d3a994604557fe dirty=0
+branch=ble-tx-tag-12
+python=Python 3.11.14 iverilog=Icarus Verilog version 14.0 (devel) (s20260301-411-gca6b8d376-dirty)
+verilator=Verilator 5.020 2024-01-01 rev (Debian 5.020-1)

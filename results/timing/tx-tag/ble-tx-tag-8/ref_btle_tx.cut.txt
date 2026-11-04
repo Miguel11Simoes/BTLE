@@ -1,0 +1,12 @@
+sequential cells cut: 239
+macros cut (no library timing): 2
+  $print (macro): 1
+  DFF_X1: 239
+  sdpram_one_clk (macro): 1
+combinational gates: 1252 (of which 0 from inverting aliases)
+aliases resolved: 36
+constant nets as inputs: 3
+launch points (flop/macro outputs as inputs): 486
+capture points (flop/macro inputs as outputs): 253
+undriven nets as inputs: 0
+cut 239 flops, 2 macros; 1252 gates; 486 launch, 253 capture, 0 undriven

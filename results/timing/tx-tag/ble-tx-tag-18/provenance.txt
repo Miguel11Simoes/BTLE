@@ -1,0 +1,9 @@
+label=tx-tag/ble-tx-tag-18
+date_utc=2026-11-04T18:08:52Z
+ref=be5d9774 (be5d977422db73c4a0e2dfc7a5efa769274ace33), default parameters
+dut=ble-tx-tag-18 (cc6c7b59b9b98db149278284530c267caf287adb, verilog tree 8fb5b8b18d62f52449fc52408bcaf87aeb437bd9), GAUSS_TABLE=1
+sta_set=tx
+target_clock_ns=62.5
+yosys=Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+abc========= ABC command line "version"
+liberty=NangateOpenCellLibrary_typical.lib sha256=8d540a4d4cf6d09d27c87ad067857a9c0c2eeb023ab7a56e058cd3113db4e9b1

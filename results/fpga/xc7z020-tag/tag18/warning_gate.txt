@@ -1,0 +1,10 @@
+== vivado /mnt/c/Users/msmig/vtag/tag18/vivado.log: 450 warnings, 450 reviewed, 0 unreviewed, 0 errors
+   reviewed (exception line 3) x 12: btle_controller's interface (kept): the AXI4-Lite protection signals, which this slave ignores, as every AXI4-Lite slave without protection levels
+   reviewed (exception line 4) x 70: btle_controller's interface (kept): the PS side of the IQ-capture BRAM, of which the PS only reads (its write, enable and reset are unused)
+   reviewed (exception line 5) x 40: a configuration's port: with GAUSS_TABLE = 1 (the final transmitter) the Gaussian taps are constants and these writes are not read; GAUSS_TABLE = 0 (the branch's default, upstream's runtime FIR) reads them
+   reviewed (exception line 6) x 20: the same configuration's port, one level up: gfsk_modulation passes the tap writes to gauss_filter and btle_gauss_tail, which read them with GAUSS_TABLE = 0 only
+   reviewed (exception line 8) x 96: a configuration's port: with ADV_ADDRESS_OTP = 0 (the ROM: the FPGA and the 45 nm runs) AdvA is the parameter ADV_ADDRESS; with ADV_ADDRESS_OTP = 1 (the ASIC) it programs the six eFuse blocks
+   reviewed (exception line 9) x 208: the senseworks tag (ble-tx-tag-*): no receiver; btle_phy keeps the RX ports of the controller's interface (and of the FPGA's block design), its outputs 0, these inputs unused
+   reviewed (exception line 11) x 3: the tool, out of context: the DRCs that need the device's IOs do not run; inherent to an out-of-context implementation (no pins)
+   reviewed (exception line 12) x 1: the tool's installation: the router lacks device data files for splitting tiles (Vivado 2026.1 on this machine); not the design
+RESULT: PASS

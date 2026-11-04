@@ -1,0 +1,12 @@
+label=xc7z020-tag (docs/Senseworks/TX_TAG_COMPARISON.md)
+date=2026-11-04
+tool=Vivado v2026.1 (64-bit), Windows; part xc7z020clg484-1
+flow=scripts/fpga/xc7z020/impl.tcl mode ooc_hd, then post.tcl <root> min tag8 tag12 tag18 (post.tcl: worst_rx.rpt only where btle_rx exists)
+configurations (name, revision, commit, verilog tree, defaults set in btle_controller.v of the copy):
+  min be5d9774 be5d977422db73c4a0e2dfc7a5efa769274ace33 tree 8346936e2dd905a17b95677dae2756b6fd0ed37e GAUSS_TABLE=1
+  tag8 ble-tx-tag-8 5ca79a22a3c65cdac0cd3275e4c856c54241cbad tree 0db2081d02d488d46fc3b72d88fec328f9724f82 GAUSS_TABLE=1
+  tag12 ble-tx-tag-12 72e4b85370f8ab0bfb63c8b897d3a994604557fe tree 786f54fdb5a6ba81ca78a6e32dfbafcb03a4ab90 GAUSS_TABLE=1
+  tag18 ble-tx-tag-18 48c008640df34a0e4921ba177b73eaede88d684b tree 363d61d1c1777833c20baba39f845a644226431d GAUSS_TABLE=1
+warning gate: scripts/validation/synth_warning_gate.py --vivado <vivado.log> (warning_gate.txt per configuration)
+power: report_power, vectorless with the resets deasserted, 25 C ambient: an estimate, not a measurement
+run folder: C:\Users\msmig\vtag (a short path: the scratch folder exceeded MAX_PATH, the first try failed on it)

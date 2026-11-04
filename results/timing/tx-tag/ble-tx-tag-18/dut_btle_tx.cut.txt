@@ -1,0 +1,10 @@
+sequential cells cut: 355
+macros cut (no library timing): 0
+  DFF_X1: 355
+combinational gates: 1569 (of which 0 from inverting aliases)
+aliases resolved: 35
+constant nets as inputs: 3
+launch points (flop/macro outputs as inputs): 710
+capture points (flop/macro inputs as outputs): 354
+undriven nets as inputs: 0
+cut 355 flops, 0 macros; 1569 gates; 710 launch, 354 capture, 0 undriven
