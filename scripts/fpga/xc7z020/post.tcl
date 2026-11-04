@@ -14,7 +14,10 @@ foreach n $names {
     report_timing -max_paths 1 -nworst 1 -group [get_clocks bb_clk] -file $d/worst_bb.rpt
     report_timing -max_paths 1 -nworst 1 -group [get_clocks axi_clk] -file $d/worst_axi.rpt
     report_timing -max_paths 1 -nworst 1 -from [get_cells -hier -filter {NAME =~ *btle_tx_i*} -quiet] -to [get_cells -hier -filter {NAME =~ *btle_tx_i*} -quiet] -file $d/worst_tx.rpt
-    report_timing -max_paths 1 -nworst 1 -from [get_cells -hier -filter {NAME =~ *btle_rx_i*} -quiet] -to [get_cells -hier -filter {NAME =~ *btle_rx_i*} -quiet] -file $d/worst_rx.rpt
+    # the senseworks tag (ble-tx-tag-*) has no receiver: no btle_rx cells, no worst_rx.rpt
+    if {[llength [get_cells -hier -filter {NAME =~ *btle_rx_i*} -quiet]] > 0} {
+      report_timing -max_paths 1 -nworst 1 -from [get_cells -hier -filter {NAME =~ *btle_rx_i*} -quiet] -to [get_cells -hier -filter {NAME =~ *btle_rx_i*} -quiet] -file $d/worst_rx.rpt
+    }
   }
   close_design
 }

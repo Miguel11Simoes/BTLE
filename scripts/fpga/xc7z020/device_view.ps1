@@ -4,6 +4,9 @@
 # panel, captures the window to <dir>/device_full.png and closes the Vivado it started; then device_crop.py.
 # The screen must be unlocked and left alone for a minute: the Vivado window comes to the front, the mouse
 # clicks the Device panel's maximize button and Zoom Fit, and goes back where it was after the capture.
+# Windows lets a background process bring its window to the front only so far: if Vivado is not in front
+# (someone at the keyboard), the script stops before any click, and the capture is of Vivado's window
+# itself (PrintWindow), never of what covers it.
 param([Parameter(Mandatory = $true)][string]$Dir, [string]$Vivado = "C:\AMDDesignTools\2026.1\Vivado\bin\vivado.bat")
 $ErrorActionPreference = "Stop"
 Add-Type -AssemblyName System.Drawing
@@ -18,6 +21,9 @@ public class DeviceViewWin {
   [DllImport("user32.dll")] public static extern bool SetCursorPos(int x, int y);
   [DllImport("user32.dll")] public static extern bool GetCursorPos(out POINT p);
   [DllImport("user32.dll")] public static extern void mouse_event(uint f, uint dx, uint dy, uint d, IntPtr e);
+  [DllImport("user32.dll")] public static extern void keybd_event(byte k, byte s, uint f, IntPtr e);
+  [DllImport("user32.dll")] public static extern IntPtr GetForegroundWindow();
+  [DllImport("user32.dll")] public static extern bool PrintWindow(IntPtr h, IntPtr dc, uint f);
   public struct RECT { public int L, T, R, B; }
   public struct POINT { public int X, Y; }
   public static void Click(int x, int y) {
@@ -39,7 +45,7 @@ function Grab($h) {
   [DeviceViewWin]::GetWindowRect($h, [ref]$r) | Out-Null
   $bmp = New-Object System.Drawing.Bitmap ($r.R - $r.L), ($r.B - $r.T)
   $g = [System.Drawing.Graphics]::FromImage($bmp)
-  $g.CopyFromScreen($r.L, $r.T, 0, 0, $bmp.Size)
+  $dc = $g.GetHdc(); [DeviceViewWin]::PrintWindow($h, $dc, 2) | Out-Null; $g.ReleaseHdc($dc)
   $g.Dispose()
   return @($bmp, $r)
 }
@@ -62,18 +68,24 @@ try {
   $mouse = New-Object DeviceViewWin+POINT
   [DeviceViewWin]::GetCursorPos([ref]$mouse) | Out-Null
   [DeviceViewWin]::ShowWindow($h, 3) | Out-Null   # SW_MAXIMIZE
-  [DeviceViewWin]::SetForegroundWindow($h) | Out-Null
+  for ($i = 0; $i -lt 10 -and [DeviceViewWin]::GetForegroundWindow() -ne $h; $i++) {
+    [DeviceViewWin]::keybd_event(0x12, 0, 0, [IntPtr]::Zero); [DeviceViewWin]::keybd_event(0x12, 0, 2, [IntPtr]::Zero)   # ALT: lets SetForegroundWindow through
+    [DeviceViewWin]::SetForegroundWindow($h) | Out-Null
+    Start-Sleep -Milliseconds 500
+  }
   Start-Sleep -Seconds 4
+  function Front { if ([DeviceViewWin]::GetForegroundWindow() -ne $h) { throw "Vivado is not in front: no click, no capture" } }
+  Front
   $s = [DeviceViewWin]::GetDpiForWindow($h) / 96.0
   $bmp, $r = Grab $h
   # in the default layout the Netlist panel (white) sits where the maximized Device canvas (black) would be
   $c = $bmp.GetPixel([int](258 * $s), [int](344 * $s))
   $bmp.Dispose()
   if ($c.R -gt 128) {
-    [DeviceViewWin]::Click($r.R - [int](37 * $s), $r.T + [int](161 * $s))   # the Device panel's maximize button
+    Front; [DeviceViewWin]::Click($r.R - [int](37 * $s), $r.T + [int](161 * $s))   # the Device panel's maximize button
     Start-Sleep -Seconds 4
   }
-  [DeviceViewWin]::Click($r.L + [int](186 * $s), $r.T + [int](189 * $s))     # Zoom Fit, in the Device toolbar
+  Front; [DeviceViewWin]::Click($r.L + [int](186 * $s), $r.T + [int](189 * $s))     # Zoom Fit, in the Device toolbar
   [DeviceViewWin]::SetCursorPos($r.L + [int](($r.R - $r.L) / 2), $r.T + [int](14 * $s)) | Out-Null   # title bar: no tooltip on the canvas
   Start-Sleep -Seconds 3
   $bmp, $r = Grab $h
