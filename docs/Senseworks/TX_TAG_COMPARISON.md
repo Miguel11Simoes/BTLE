@@ -1,12 +1,12 @@
-# The senseworks tag: three transmitters with BCH parity, side by side
+# The senseworks tag: four transmitters with BCH parity, side by side
 
 **Project:** BTLE — reconfigurable RISC-V baseband  
 **Branches:** `ble-tx-tag-8`, `ble-tx-tag-12`, `ble-tx-tag-18` (one implementation; they differ only in the default
-of `BCH_T`)  
+of `BCH_T`), and `ble-tx-tag-1byte` (`ble-tx-tag-8` with one byte of sensor instead of two)  
 **Base:** `ble-tx-min` (`be5d9774`), the final Legacy Advertising transmitter (`TX_FINAL_DECISIONS.md`)  
-**Date:** 2026-11-04  
+**Date:** 2026-11-05 (first version 2026-11-04; `ble-tx-tag-1byte` added 2026-11-05)  
 **Author:** Miguel Simões  
-**Status:** run `tx-tag`. Every number below is measured, and its evidence is committed (§ 13): simulation
+**Status:** runs `tx-tag` and `tx-tag-1byte`. Every number below is measured, and its evidence is committed (§ 13): simulation
 against `ble-tx-min` and upstream's Python model, area and timing in 45 nm, signoff-clean layouts in
 GF180MCU, the controller placed and routed on the Zynq's FPGA (out of context, § 9). **Not done:** the
 board's bitstream (the block design with the AD9361's IP) and any test on a board; the firmware's tag mode
@@ -29,33 +29,35 @@ receiver that keeps packets with a wrong CRC (the gateway) can use the parity; t
 step (branches `ble-rx-gateway-8/12/18`, not part of this document).
 
 The three branches use three BCH codes. Each corrects up to t wrong bits among AdvA, the sensor's bytes
-and the parity: t = 8 (8 bytes of parity), t = 12 (12 bytes) and t = 18 (16 bytes). § 1 compares them with
+and the parity: t = 8 (8 bytes of parity), t = 12 (12 bytes) and t = 18 (16 bytes). A fourth branch,
+**`ble-tx-tag-1byte`**, is `ble-tx-tag-8` for a sensor that needs **one byte** (a temperature or a humidity,
+not both): the same code (t = 8, 8 bytes of parity), one byte less in the packet (§§ 2, 3). § 1 compares them with
 each other and with `ble-tx-min`; §§ 2–4 define the packet, the code and the RTL; §§ 5–9 give the
 evidence and the measurements (§ 9 on the FPGA); § 11 says how to run the tag on a board; § 12 gives the
-choice between the three.
+choice between them.
 
-## 1. The three tags and `ble-tx-min`, in one table
+## 1. The four tags and `ble-tx-min`, in one table
 
-| | `ble-tx-min` (39-byte PDU of its campaigns) | **`ble-tx-tag-8`** | **`ble-tx-tag-12`** | **`ble-tx-tag-18`** |
-|---|---|---|---|---|
-| Packet | any Legacy Advertising PDU, ≤ 39 bytes, written by the software | ADV_NONCONN_IND, fixed: AdvA, Company ID, 2 sensor bytes, BCH parity | the same | the same |
-| BCH parity (t) | — | 8 bytes (t = 8) | 12 bytes (t = 12) | 16 bytes (t = 18) |
-| On the air, one packet | 47 bytes, 376 µs | 30 bytes, **240 µs** | 34 bytes, 272 µs | 38 bytes, 304 µs |
-| One advertising event (channels 37, 38, 39) | 1 128 µs | **720 µs (−36.2 %)** | 816 µs (−27.7 %) | 912 µs (−19.1 %) |
-| `btle_tx`, 45 nm (cells + macros, µm²) | 5 018.5 (with its 32 × 8 SRAM) | **2 921.2 (−41.8 %)** | 3 141.2 (−37.4 %) | 3 398.9 (−32.3 %) |
-| `btle_tx`, static leakage, 45 nm (µW) | 68.12 | **59.43** | 63.83 | 68.94 |
-| `btle_controller`, 45 nm (µm²) | 68 470.0 (with the receiver) | 17 228.3 (−74.8 %) | 17 424.6 | 17 662.4 |
-| `btle_tx`, min period (pre-layout) | 1.199 ns | 1.209 ns | 1.181 ns | 1.228 ns |
-| `btle_tx` laid out in GF180MCU-D with the AdvA OTP (µm²) | 160 785.0 (AdvData in flip-flops) | **129 286.0 (−19.6 %)** | 131 916.0 (−18.0 %) | 137 068.0 (−14.8 %) |
-| xc7z020, routed (§ 9): `btle_tx` LUTs / flip-flops | 387 / 254 (8 of the LUTs as RAM) | 422 / 302 | 444 / 330 | 474 / 362 |
-| xc7z020, routed: `btle_controller` LUTs / flip-flops / DSPs / RAMB18 + RAMB36 | 3 871 / 5 552 / 48 / 9 + 32 | **1 881 / 3 028 / 0 / 1 + 32** | 1 906 / 3 056 / 0 / 1 + 32 | 1 939 / 3 088 / 0 / 1 + 32 |
-| Validation (§ 5) | `TX_MIN_VALIDATION.md` | **all pass** | all pass | all pass |
-| SNR at PER 10 %, 0 / 20 / −30 / 50 ppm, the receiver of today (`ble-rx-1p1c`'s front end), **simulated** | 9.85 / 12.31 / 14.34 / 26.73 dB | **6.54 / 8.07 / 9.82 / 20.56 dB** | 6.40 / 7.90 / 9.67 / 20.38 | 6.23 / 7.84 / 9.55 / 20.38 |
-| The same, the improved receiver (filter, CFO correction, AA tolerance 3), **simulated** | 4.46 / 4.58 / 4.60 / 4.88 dB | −0.05 / 0.29 / 0.14 / 2.82 dB | −0.36 / −0.15 / −0.26 / 2.78 | **−1.02 / −0.43 / −0.68 / 2.76** |
+| | `ble-tx-min` (39-byte PDU of its campaigns) | **`ble-tx-tag-8`** | **`ble-tx-tag-12`** | **`ble-tx-tag-18`** | **`ble-tx-tag-1byte`** |
+|---|---|---|---|---|---|
+| Packet | any Legacy Advertising PDU, ≤ 39 bytes, written by the software | ADV_NONCONN_IND, fixed: AdvA, Company ID, 2 sensor bytes, BCH parity | the same | the same | ADV_NONCONN_IND, fixed: AdvA, Company ID, **1** sensor byte, BCH parity |
+| BCH parity (t) | — | 8 bytes (t = 8) | 12 bytes (t = 12) | 16 bytes (t = 18) | 8 bytes (t = 8) |
+| On the air, one packet | 47 bytes, 376 µs | 30 bytes, **240 µs** | 34 bytes, 272 µs | 38 bytes, 304 µs | 29 bytes, **232 µs** |
+| One advertising event (channels 37, 38, 39) | 1 128 µs | **720 µs (−36.2 %)** | 816 µs (−27.7 %) | 912 µs (−19.1 %) | **696 µs (−38.3 %)** |
+| `btle_tx`, 45 nm (cells + macros, µm²) | 5 018.5 (with its 32 × 8 SRAM) | **2 921.2 (−41.8 %)** | 3 141.2 (−37.4 %) | 3 398.9 (−32.3 %) | **2 874.7 (−42.7 %)** |
+| `btle_tx`, static leakage, 45 nm (µW) | 68.12 | **59.43** | 63.83 | 68.94 | **58.61** |
+| `btle_controller`, 45 nm (µm²) | 68 470.0 (with the receiver) | 17 228.3 (−74.8 %) | 17 424.6 | 17 662.4 | **17 154.6** |
+| `btle_tx`, min period (pre-layout) | 1.199 ns | 1.209 ns | 1.181 ns | 1.228 ns | 1.263 ns |
+| `btle_tx` laid out in GF180MCU-D with the AdvA OTP (µm²) | 160 785.0 (AdvData in flip-flops) | **129 286.0 (−19.6 %)** | 131 916.0 (−18.0 %) | 137 068.0 (−14.8 %) | **126 983.0 (−21.0 %)** |
+| xc7z020, routed (§ 9): `btle_tx` LUTs / flip-flops | 387 / 254 (8 of the LUTs as RAM) | 422 / 302 | 444 / 330 | 474 / 362 | 411 / 294 |
+| xc7z020, routed: `btle_controller` LUTs / flip-flops / DSPs / RAMB18 + RAMB36 | 3 871 / 5 552 / 48 / 9 + 32 | **1 881 / 3 028 / 0 / 1 + 32** | 1 906 / 3 056 / 0 / 1 + 32 | 1 939 / 3 088 / 0 / 1 + 32 | **1 880 / 3 020 / 0 / 1 + 32** |
+| Validation (§ 5) | `TX_MIN_VALIDATION.md` | **all pass** | all pass | all pass | **all pass** |
+| SNR at PER 10 %, 0 / 20 / −30 / 50 ppm, the receiver of today (`ble-rx-1p1c`'s front end), **simulated** | 9.85 / 12.31 / 14.34 / 26.73 dB | **6.54 / 8.07 / 9.82 / 20.56 dB** | 6.40 / 7.90 / 9.67 / 20.38 | 6.23 / 7.84 / 9.55 / 20.38 | not simulated (§ 10) |
+| The same, the improved receiver (filter, CFO correction, AA tolerance 3), **simulated** | 4.46 / 4.58 / 4.60 / 4.88 dB | −0.05 / 0.29 / 0.14 / 2.82 dB | −0.36 / −0.15 / −0.26 / 2.78 | **−1.02 / −0.43 / −0.68 / 2.76** | not simulated (§ 10) |
 
 The SNR rows are the simulator of the FEC study (§ 10): a model of the receivers calibrated against the
 RTL within 0.35 dB, not a measurement of these transmitters with a receiver; the gateway branches will
-measure them in the RTL.
+measure them in the RTL. `ble-tx-tag-1byte` was not simulated: `fec_sim.py` is not in the repository (§ 10).
 
 ## 2. The packet
 
@@ -76,6 +78,11 @@ The tag sends one PDU, `ADV_NONCONN_IND`, its format fixed in the hardware:
 On the air: 1 byte of preamble, 4 of access address, 22 / 26 / 30 bytes of PDU, 3 of CRC: 30 / 34 / 38
 bytes, 240 / 272 / 304 µs at 1 Mbit/s. Without the parity the same two bytes take 22 bytes on the air
 (176 µs), the shortest standard way to send them.
+
+**`ble-tx-tag-1byte`** sends the same packet with one sensor byte: byte 1 (the payload length) is 19, byte 8
+(the AD structure's length) 12, byte 12 the sensor's byte d0, and the 8 bytes of parity from byte 13 on. The
+PDU is 21 bytes, 29 on the air, **232 µs** (8 µs less than `ble-tx-tag-8`); without the parity, one byte would take
+21 bytes on the air (168 µs).
 
 **What makes it a standard packet** (Bluetooth Core 6.1 and the Core Specification Supplement v12):
 - the PDU type, its fields and the length are the Link Layer's (Vol 6 Part B § 2.3.1.3); AdvData may hold
@@ -115,6 +122,12 @@ distance is 2t + 1 (the BCH bound) and it corrects any t errors.
 | g(x) without its x^deg term (hex) | `6ce707e26b6f9977` | `e810da40f70569be7529981` | `1bcb6cce6906958aa17f2231050eb39` |
 | a random word decodes (≈ V(n, t) / 2^deg) | 8.3 × 10⁻⁸ | 6.2 × 10⁻¹¹ | 3.0 × 10⁻¹³ |
 
+**`ble-tx-tag-1byte`**: the same code as t = 8, (255, 191) with the same g(x), shortened further. The message is
+**56 bits**, AdvA (PDU bits 16–63) and the sensor's byte (bits 96–103), so n = 120 (64 bits of parity); the
+parity starts at PDU bit 104, byte 13. It still corrects any 8 errors, now among 120 bits instead of 128, and
+a random word decodes with ≈ V(120, 8) / 2^64 = 4.9 × 10⁻⁸ (8.3 × 10⁻⁸ at n = 128). In the RTL only the
+limits change (`PARITY_FIRST_BIT = 104`, the payload length `11 + PARITY_BYTES`); the LFSR is the same.
+
 **The message is the 64 bits a receiver does not know**: AdvA (PDU bits 16–63) and the sensor (bits 96–111),
 in the order they are sent (bytes in order, each least significant bit first). The header and the AD
 structure's first four bytes are known to the gateway, which sets them instead of decoding them; the CRC
@@ -138,6 +151,7 @@ device decodes into some codeword with that probability, before the CRC is check
 | **No receiver**: `btle_phy` has no `btle_rx`; the RX ports stay (the controller's interface, the FPGA's block design), their outputs 0, so synthesis removes the Link Layer's RX logic too | `btle_phy.v`; `btle_rx.v`, `btle_rx_core.v`, `gfsk_demodulation.v`, `search_unique_bit_sequence.v`, `serial_in_ram_out.v` and their testbenches removed; `btle_controller.tcl` (the Vivado project) without them | |
 | The tag mode of the firmware: `-T` interval, `-s` sensor value, `-k` count up, `-g` TX gain, `-e` events | `firmware/btle_ll.c` | not run on a board (§ 11) |
 | Everything else: B2 (fixed Gaussian taps), the ROM VCO, the CRC, the whitening, the modulator | from `ble-tx-min`, unchanged | |
+| **`ble-tx-tag-1byte`**: one sensor register (`sensor0`, PDU address 12; writes to 13 are dropped like any other), the payload length `11 + PARITY_BYTES`, the AD length `4 + PARITY_BYTES`, `PARITY_FIRST_BIT = 104`; `tag_bch.py`, the tests, the scapy check and the firmware (`-s` one byte, `0x12`) follow | `verilog/btle_tx.v`, `scripts/senseworks/`, `tests/`, `firmware/btle_ll.c` | `BCH_T` still a parameter (default 8) |
 
 **Contract.** The sensor's two bytes are written before `tx_start`, never while the packet is sent;
 `clkb` runs at 8 MHz or faster (as `ble-tx-min`). Within it, every output of `btle_tx` is, on every clock,
@@ -161,6 +175,15 @@ The tests set `BCH_T` themselves, so each branch runs the three codes.
 | `check_tag_scapy.py` (scapy 2.8.0's BLE dissector) on those 150 packets | an independent parser: its CRC, the PDU type, TxAdd, AdvA, one Manufacturer Specific Data structure, the sensor bytes | **150/150** |
 | `tests/test_tag_controller.py`: `btle_controller` through its AXI registers as the firmware writes them (the boards' path), three readings × channels 37, 38, 39 back to back, t = 8, 12, 18, both filters | the PHY bits and the Gaussian filter's output against the model, the I/Q (turned, below), loopback, the samples to the RF transceiver; one packet per pulse of reg 9 | **54/54 packets** |
 | `run_lint.py` (Verilator 5.020, `--Wall`, warnings fatal): `GAUSS_TABLE` 0, 1 × `BCH_T` 8, 12, 18 | | **PASS 6/6**, 13 reviewed exceptions (`tag_pdu_buffer` replaces `adv_pdu_buffer` and `pdu_buffer_ram`) |
+
+**`ble-tx-tag-1byte`** (run `tx-tag-1byte`, `results/validation/tx-tag-1byte-validation/`, commit `a8c073c4`):
+the same checks with one sensor byte, **every one passes**. `tag_bch.py`: 1 000 + 1 000 words per code,
+all corrected / all detected, at n = 120 / 148 / 180; galois: equal; `test_tx_tag.py`: **216/216 runs, no
+difference** from `ble-tx-min` given the whole PDU (the tag on its own pair, only address 12 kept among random
+writes to every other address, 13 included), **21/21 mutants caught** (two new: the sensor's byte written by
+address 13, and read at PDU byte 13, the parity's first); 150/150 waveforms equal to upstream's model, with
+a CRC-valid loopback and the code's checks; scapy 150/150 (the sensor's byte, then the parity); the
+controller 54/54 packets; lint 6/6 with the same 13 exceptions.
 
 **Three things the controller test showed**, none of them the tag's, all of them upstream's and present in
 `ble-tx-min`:
@@ -193,6 +216,7 @@ five configurations in one run (`results/area/tx-tag/`); `ble-tx-min`'s 32 × 8 
 | **`ble-tx-tag-8`** | 1670 | 295 | 2 921.2 | — | **2 921.2** | -41.8 % | 59.43 | 0.00 | **59.43** |
 | **`ble-tx-tag-12`** | 1790 | 323 | 3 141.2 | — | **3 141.2** | -37.4 % | 63.83 | 0.00 | **63.83** |
 | **`ble-tx-tag-18`** | 1918 | 355 | 3 398.9 | — | **3 398.9** | -32.3 % | 68.94 | 0.00 | **68.94** |
+| **`ble-tx-tag-1byte`** (t = 8, one sensor byte) | 1653 | 287 | 2 874.7 | — | **2 874.7** | -42.7 % | 58.61 | 0.00 | **58.61** |
 
 The blocks and the controller:
 
@@ -203,6 +227,7 @@ The blocks and the controller:
 | **`ble-tx-tag-8`** | 353.8 | 147.9 | 1 150.2 | 2 921.2 | 2 939.3 | 16 529.5 | 17 228.3 |
 | **`ble-tx-tag-12`** | 353.8 | 147.9 | 1 150.2 | 3 141.2 | 3 139.3 | 16 529.5 | 17 424.6 |
 | **`ble-tx-tag-18`** | 353.8 | 147.9 | 1 150.2 | 3 398.9 | 3 397.1 | 16 529.5 | 17 662.4 |
+| **`ble-tx-tag-1byte`** (t = 8, one sensor byte) | 353.8 | 147.9 | 1 119.9 | 2 874.7 | 2 878.1 | 16 529.5 | 17 154.6 |
 
 | `btle_controller` | cells | flip-flops | cell area (µm²) | SRAM bits | of which `btle_phy` (µm², SRAM bits) |
 |---|---:|---:|---:|---:|---:|
@@ -211,6 +236,7 @@ The blocks and the controller:
 | **`ble-tx-tag-8`** | 10019 | 1995 | 17 228.3 | 1066438 | 2 939.3, 0 |
 | **`ble-tx-tag-12`** | 10071 | 2023 | 17 424.6 | 1066438 | 3 139.3, 0 |
 | **`ble-tx-tag-18`** | 10236 | 2055 | 17 662.4 | 1066438 | 3 397.1, 0 |
+| **`ble-tx-tag-1byte`** (t = 8, one sensor byte) | 9941 | 1987 | 17 154.6 | 1066438 | 2 878.1, 0 |
 
 1. **The tag's transmitter is the smallest of all**: no memory, and fewer bits of storage than the
    AdvData it replaces. `ble-tx-min` keeps 31 bytes of AdvData (248 bits, in SRAM or flip-flops); the tag
@@ -223,8 +249,11 @@ The blocks and the controller:
    `btle_phy` falls from 51 194.1 to 2 939.3 µm² and 33 024 SRAM bits to 0. The controller's 1 066 438
    SRAM bits that remain are the Link Layer's and the IQ-capture RAM of the FPGA platform, which a tag
    chip would not carry.
-4. **The flow's noise**: `gfsk_modulation`, the same RTL in all five, is 1 115.9 µm² in `ble-tx-min`'s run and
-   1 150.2 µm² in the tags' (a third file set gives 1 119.9): Yosys and ABC map an unchanged block
+4. **One sensor byte less saves 8 flip-flops and 46.5 µm² (−1.6 %)** on `btle_tx` (2 874.7 against
+   2 921.2 µm² for `ble-tx-tag-8`; 287 against 295 flip-flops: the register `sensor1`), and 0.82 µW of leakage
+   (58.61 µW). The LFSR, the counters and the rest are the same; the byte is little next to the code.
+5. **The flow's noise**: `gfsk_modulation`, the same RTL in all five, is 1 115.9 µm² in `ble-tx-min`'s run and
+   1 150.2 µm² in the tags' (a third file set gives 1 119.9, as in `ble-tx-tag-1byte`'s run): Yosys and ABC map an unchanged block
    differently when the set of files read differs. About ±3 % on a block; the comparisons above are of
    whole configurations.
 
@@ -243,9 +272,11 @@ the mapped netlist cut at the flip-flops, sized by ABC.
 | **`ble-tx-tag-12` `btle_tx`** | 0.834 | 1.181 | +61.319 ns | 846.4 |
 | `ble-tx-tag-18` `btle_controller` | 1.190 | 1.549 | +60.951 ns | 645.5 |
 | **`ble-tx-tag-18` `btle_tx`** | 0.881 | 1.228 | +61.272 ns | 814.3 |
+| `ble-tx-tag-1byte` `btle_controller` | 1.173 | 1.533 | +60.967 ns | 652.5 |
+| **`ble-tx-tag-1byte` `btle_tx`** | 0.915 | 1.263 | +61.237 ns | 792.0 |
 
 The LFSR adds no path of note: the transmitter's period stays within ±0.03 ns of `ble-tx-min`'s (the flow's
-noise), 50 times faster than the 16 MHz clock needs. The controller's worst path falls from 3.421 to 1.549 ns
+noise; `ble-tx-tag-1byte` +0.06 ns, a path through the VCO's integrator that the change does not touch), 50 times faster than the 16 MHz clock needs. The controller's worst path falls from 3.421 to 1.549 ns
 because the receiver, which held it (the demodulator's multiplier), is gone.
 
 ## 8. Layout in GF180MCU-D
@@ -255,30 +286,31 @@ the eFuse compiler's Nix environment), `btle_tx` of each branch with `GAUSS_TABL
 (AdvA in the six eFuse blocks) and its `BCH_T`; die 760 × 760 µm, `clk` 62.5 ns and `clkb` 20 ns, the
 settings of `ble-tx-min`'s final layout (`TX_FINAL_DECISIONS.md` § 8, `tx-clean-gf180`) and three more
 (note 4 below). Evidence in
-`results/layout/tx-tag-<t>-gf180/`.
+`results/layout/tx-tag-<t>-gf180/` (`ble-tx-tag-1byte`: `results/layout/tx-tag-1byte-gf180/`, the same
+configuration, run `tx-tag-1byte`).
 
-| GF180MCU-D (µm²) | `ble-tx-min`, AdvData in flip-flops | `ble-tx-min`, AdvData in the SRAM 64 × 8 | **`ble-tx-tag-8`** | **`ble-tx-tag-12`** | **`ble-tx-tag-18`** |
-|---|---:|---:|---:|---:|---:|
-| eFuse blocks (AdvA, OTP) | 48 452.1 | 48 452.1 | 48 452.1 | 48 452.1 | 48 452.1 |
-| SRAM | — | 100 571.9 | — | — | — |
-| Logic: combinational, flip-flops, inverters, buffers | 74 685.1 | 50 204.2 | 48 691.7 | 51 699.2 | 55 850.2 |
-| Timing-repair buffers + clock trees | 21 719.3 | 21 565.7 | 16 209.4 | 15 840.5 | 16 841.6 |
-| Taps, end caps, antenna diodes | 15 928.4 | 13 206.3 | 15 932.8 | 15 924.0 | 15 924.0 |
-| **Placed cells + macros** | 160 785.0 | 234 009.0 | 129 286.0 | 131 916.0 | 137 068.0 |
-| flip-flops | 502 | 247 | 303 | 331 | 363 |
+| GF180MCU-D (µm²) | `ble-tx-min`, AdvData in flip-flops | `ble-tx-min`, AdvData in the SRAM 64 × 8 | **`ble-tx-tag-8`** | **`ble-tx-tag-12`** | **`ble-tx-tag-18`** | **`ble-tx-tag-1byte`** |
+|---|---:|---:|---:|---:|---:|---:|
+| eFuse blocks (AdvA, OTP) | 48 452.1 | 48 452.1 | 48 452.1 | 48 452.1 | 48 452.1 | 48 452.1 |
+| SRAM | — | 100 571.9 | — | — | — | — |
+| Logic: combinational, flip-flops, inverters, buffers | 74 685.1 | 50 204.2 | 48 691.7 | 51 699.2 | 55 850.2 | 48 114.4 |
+| Timing-repair buffers + clock trees | 21 719.3 | 21 565.7 | 16 209.4 | 15 840.5 | 16 841.6 | 14 492.7 |
+| Taps, end caps, antenna diodes | 15 928.4 | 13 206.3 | 15 932.8 | 15 924.0 | 15 924.0 | 15 924.0 |
+| **Placed cells + macros** | 160 785.0 | 234 009.0 | 129 286.0 | 131 916.0 | 137 068.0 | **126 983.0** |
+| flip-flops | 502 | 247 | 303 | 331 | 363 | 295 |
 
-| Signoff | `ble-tx-min`, AdvData in flip-flops | `ble-tx-min`, AdvData in the SRAM 64 × 8 | **`ble-tx-tag-8`** | **`ble-tx-tag-12`** | **`ble-tx-tag-18`** |
-|---|---:|---:|---:|---:|---:|
-| DRC: routing, KLayout, Magic | 0, 0, 0 | 0, 0, 2353 | 0, 0, 0 | 0, 0, 0 | 0, 0, 0 |
-| LVS errors | 0 | 0 | 0 | 0 | 0 |
-| antenna violations | 0 | 0 | 0 | 0 | 0 |
-| max slew violations | 0 | 0 | 0 | 0 | 0 |
-| max capacitance violations | 0 | 0 | 0 | 0 | 0 |
-| max fanout violations | 4 | 0 | 4 | 3 | 3 |
-| worst setup / hold slack, 9 corners (ns) | +3.888 / +0.191 | +5.581 / +0.146 | +10.575 / +0.195 | +10.334 / +0.169 | +10.061 / +0.195 |
-| IR drop, worst (mV) | 1.92 | 1.81 | 1.82 | 2.28 | 2.30 |
-| clock skew, worst (ns) | 0.33 | 0.38 | 0.32 | 0.32 | 0.33 |
-| OpenSTA vectorless power, 5 V (mW) | 43.28 | 35.29 | 27.78 | 24.38 | 25.42 |
+| Signoff | `ble-tx-min`, AdvData in flip-flops | `ble-tx-min`, AdvData in the SRAM 64 × 8 | **`ble-tx-tag-8`** | **`ble-tx-tag-12`** | **`ble-tx-tag-18`** | **`ble-tx-tag-1byte`** |
+|---|---:|---:|---:|---:|---:|---:|
+| DRC: routing, KLayout, Magic | 0, 0, 0 | 0, 0, 2353 | 0, 0, 0 | 0, 0, 0 | 0, 0, 0 | 0, 0, 0 |
+| LVS errors | 0 | 0 | 0 | 0 | 0 | 0 |
+| antenna violations | 0 | 0 | 0 | 0 | 0 | 0 |
+| max slew violations | 0 | 0 | 0 | 0 | 0 | 0 |
+| max capacitance violations | 0 | 0 | 0 | 0 | 0 | 0 |
+| max fanout violations | 4 | 0 | 4 | 3 | 3 | 4 |
+| worst setup / hold slack, 9 corners (ns) | +3.888 / +0.191 | +5.581 / +0.146 | +10.575 / +0.195 | +10.334 / +0.169 | +10.061 / +0.195 | +9.630 / +0.191 |
+| IR drop, worst (mV) | 1.92 | 1.81 | 1.82 | 2.28 | 2.30 | 2.41 |
+| clock skew, worst (ns) | 0.33 | 0.38 | 0.32 | 0.32 | 0.33 | 0.48 |
+| OpenSTA vectorless power, 5 V (mW) | 43.28 | 35.29 | 27.78 | 24.38 | 25.42 | 26.35 |
 
 Every layout passes `synth_warning_gate.py --librelane` (31 warnings, all reviewed, 0 unreviewed;
 `warning_gate.txt` in each folder). The max fanout violations are clock-tree buffers driving 11–16 sinks
@@ -287,11 +319,17 @@ for a limit of 10, as on `ble-tx-min` (`CTS_SINK_CLUSTERING`, `TX_FINAL_DECISION
 1. **The tag laid out is 19.6 / 18.0 / 14.8 % smaller than `ble-tx-min` with AdvData in flip-flops**, and
    45 / 44 / 41 % smaller than `ble-tx-min` with the SRAM. The six eFuse blocks (48 452.1 µm²) are the same in
    all; without them the tag's cells are 80 834 / 83 464 / 88 616 µm² against 112 333 µm².
-2. **Each LFSR bit costs about 120 µm² in GF180** (logic from t = 8 to t = 18: +7 158 µm² for 60 bits).
-3. **Timing has room**: +10.1 to +10.6 ns of setup slack at 62.5 ns in the worst of 9 corners (`ble-tx-min`:
+2. **`ble-tx-tag-1byte` is the smallest layout: 126 983.0 µm², −21.0 % against `ble-tx-min` with AdvData in
+   flip-flops** (−45.7 % against the SRAM variant) and 2 303 µm² (−1.8 %) below `ble-tx-tag-8`; 78 531 µm²
+   without the eFuse blocks. Its logic is 577 µm² smaller (8 flip-flops less) and the placer's buffers and clock
+   tree 1 717 µm² smaller, the second the flow's variation more than the design's. Same signoff: 0 DRC, LVS,
+   antenna, slew and capacitance violations, the 4 clock-tree fanouts of every flops layout, setup +9.6 ns at
+   62.5 ns; `synth_warning_gate.py --librelane`: 31 warnings, all reviewed, 0 unreviewed.
+3. **Each LFSR bit costs about 120 µm² in GF180** (logic from t = 8 to t = 18: +7 158 µm² for 60 bits).
+4. **Timing has room**: +10.1 to +10.6 ns of setup slack at 62.5 ns in the worst of 9 corners (`ble-tx-min`:
    +3.9 ns). The OpenSTA power is vectorless (every input toggling at a default rate), not the tag's activity:
    it does not follow t (tag-8 above tag-12), and is no basis for the choice.
-4. **Three settings more than `ble-tx-min`'s final layout**, each found by a run that failed the gate,
+5. **Three settings more than `ble-tx-min`'s final layout**, each found by a run that failed the gate,
    all in `run.sh`'s header:
    - `RUN_POST_GRT_DESIGN_REPAIR`: the reset net, which now also reaches the LFSR's flip-flops, left the
      repair after placement at 3.2–3.3 ns of slew at ss, over the 3 ns maximum (10, 4 and 19 pins);
@@ -299,39 +337,42 @@ for a limit of 10, as on `ble-tx-min` (`CTS_SINK_CLUSTERING`, `TX_FINAL_DECISION
      only net over the maximum, at t = 18, by 1.3 ps;
    - `IO_EXCLUDE_PIN_REGION bottom:*` (as `ble-tx-min`'s SRAM variant): most of the pins (193 of 244 at t = 8) fell on the
      bottom edge, below the eFuse row, and their wires to the input buffers reached 4.8 ns at t = 8.
-   The earlier runs were removed; the three committed layouts all use the same, final configuration.
+   The earlier runs were removed; the four committed layouts all use the same, final configuration.
 
 | `ble-tx-tag-8` | `ble-tx-tag-12` | `ble-tx-tag-18` |
 |---|---|---|
 | ![tag-8 GDS](../../results/figures/tx-tag/tx_tag_8_gf180_gds.png) | ![tag-12 GDS](../../results/figures/tx-tag/tx_tag_12_gf180_gds.png) | ![tag-18 GDS](../../results/figures/tx-tag/tx_tag_18_gf180_gds.png) |
+| **`ble-tx-tag-1byte`** | | |
+| ![tag-1byte GDS](../../results/figures/tx-tag/tx_tag_1byte_gf180_gds.png) | | |
 
 The eFuse row along the bottom and its power straps: `results/figures/tx-tag/tx_tag_<t>_gf180_efuse.png` and
-`_efuse_pdn.png`.
+`_efuse_pdn.png` (`tx_tag_1byte_gf180_*` for `ble-tx-tag-1byte`).
 
 ## 9. FPGA: the controller on the xc7z020
 
 Run `xc7z020-tag`: Vivado 2026.1, `scripts/fpga/xc7z020/impl.tcl` in mode `ooc_hd` (synthesis, placement and
 routing of `btle_controller` out of context on `xc7z020clg484-1`, the part of upstream's
 `verilog/btle_controller.tcl`; `bb_clk` 16 MHz, the AXI clock 100 MHz), then `post.tcl` for the reports,
-the four configurations in one run, `GAUSS_TABLE = 1` set on each. `ble-tx-min` is the reference and
+the four configurations in one run, `GAUSS_TABLE = 1` set on each; `ble-tx-tag-1byte` in a run of its own
+(2026-11-05, the same scripts and settings, `results/fpga/xc7z020-tag/tag1byte/`). `ble-tx-min` is the reference and
 reproduces `TX_FINAL_DECISIONS.md`'s run `xc7z020-clean` exactly (the same LUTs, flip-flops, BRAM, DSPs and
 WNS). Evidence in `results/fpga/xc7z020-tag/<configuration>/`; `post.tcl` writes the receiver's worst path
 only where `btle_rx` exists.
 
-| xc7z020, routed | `ble-tx-min` | **`ble-tx-tag-8`** | `ble-tx-tag-12` | `ble-tx-tag-18` |
-|---|---:|---:|---:|---:|
-| `btle_tx`: LUTs / flip-flops | 387 / 254 (8 LUTs as RAM) | 422 / 302 | 444 / 330 | 474 / 362 |
-| `btle_tx`: block RAM | 0 | 0 | 0 | 0 |
-| `btle_controller`: LUTs (of 53 200) | 3 871 (7.28 %) | **1 881 (3.54 %)** | 1 906 (3.58 %) | 1 939 (3.64 %) |
-| `btle_controller`: flip-flops | 5 552 | 3 028 | 3 056 | 3 088 |
-| `btle_controller`: DSP48 | 48 | 0 | 0 | 0 |
-| `btle_controller`: RAMB36 / RAMB18 | 32 / 9 | 32 / 1 | 32 / 1 | 32 / 1 |
-| WNS, `bb_clk` (16 MHz) | +46.041 ns | +54.130 ns | +54.109 ns | +53.363 ns |
-| WNS, AXI clock (100 MHz) | +2.475 ns | +3.323 ns | +3.874 ns | +3.041 ns |
-| `btle_tx`'s worst path, slack | +5.901 ns | +7.002 ns | +7.324 ns | +7.505 ns |
-| power, total / dynamic (vectorless estimate) | 0.208 / 0.102 W | 0.188 / 0.082 W | 0.188 / 0.082 W | 0.188 / 0.082 W |
-| of which `btle_tx`, dynamic | 0.001 W | 0.001 W | 0.001 W | 0.001 W |
-| Vivado's warnings (`synth_warning_gate.py --vivado`) | 0 unreviewed (243 reviewed) | 0 unreviewed (450 reviewed) | the same | the same |
+| xc7z020, routed | `ble-tx-min` | **`ble-tx-tag-8`** | `ble-tx-tag-12` | `ble-tx-tag-18` | **`ble-tx-tag-1byte`** |
+|---|---:|---:|---:|---:|---:|
+| `btle_tx`: LUTs / flip-flops | 387 / 254 (8 LUTs as RAM) | 422 / 302 | 444 / 330 | 474 / 362 | 411 / 294 |
+| `btle_tx`: block RAM | 0 | 0 | 0 | 0 | 0 |
+| `btle_controller`: LUTs (of 53 200) | 3 871 (7.28 %) | **1 881 (3.54 %)** | 1 906 (3.58 %) | 1 939 (3.64 %) | **1 880 (3.53 %)** |
+| `btle_controller`: flip-flops | 5 552 | 3 028 | 3 056 | 3 088 | 3 020 |
+| `btle_controller`: DSP48 | 48 | 0 | 0 | 0 | 0 |
+| `btle_controller`: RAMB36 / RAMB18 | 32 / 9 | 32 / 1 | 32 / 1 | 32 / 1 | 32 / 1 |
+| WNS, `bb_clk` (16 MHz) | +46.041 ns | +54.130 ns | +54.109 ns | +53.363 ns | +53.925 ns |
+| WNS, AXI clock (100 MHz) | +2.475 ns | +3.323 ns | +3.874 ns | +3.041 ns | +3.374 ns |
+| `btle_tx`'s worst path, slack | +5.901 ns | +7.002 ns | +7.324 ns | +7.505 ns | +7.069 ns |
+| power, total / dynamic (vectorless estimate) | 0.208 / 0.102 W | 0.188 / 0.082 W | 0.188 / 0.082 W | 0.188 / 0.082 W | 0.188 / 0.082 W |
+| of which `btle_tx`, dynamic | 0.001 W | 0.001 W | 0.001 W | 0.001 W | 0.001 W |
+| Vivado's warnings (`synth_warning_gate.py --vivado`) | 0 unreviewed (243 reviewed) | 0 unreviewed (450 reviewed) | the same | the same | 0 unreviewed (450 reviewed) |
 
 1. **On the FPGA the tag's `btle_tx` is larger than `ble-tx-min`'s**, against the ASIC: +35 to +87 LUTs and
    +48 to +108 flip-flops. On the FPGA `ble-tx-min`'s 31 bytes of AdvData cost 8 LUTs as distributed RAM;
@@ -343,6 +384,11 @@ only where `btle_rx` exists.
    over AXI (`serial_in_ram_out` to `axi_rdata`); in the tags it is the Link Layer's AXI write-address
    decode (`axi_awaddr` to a `slv_reg` enable), +3.0 to +3.9 ns, the placer's spread of the same path. Power differs by the receiver only (−20 mW); the transmitter is 1 mW of it in all four, a vectorless
    estimate, not a measurement.
+
+4. **`ble-tx-tag-1byte` is `ble-tx-tag-8` less a few cells**: `btle_tx` 411 LUTs and 294 flip-flops (−11 and −8,
+   the register `sensor1` and its multiplexer), the controller 1 880 LUTs and 3 020 flip-flops; timing and
+   power as `ble-tx-tag-8`'s, within the placer's spread. Its Device view was not made (`device_view.ps1` needs
+   the GUI and the screen left alone).
 
 The placement of `btle_tx` (orange) in the routed controller, Vivado's Device view (`device_view.ps1`):
 
@@ -362,9 +408,11 @@ whose ports may sit anywhere in a range (`HD.PARTPIN_RANGE`), not of the design.
 |---|---:|---:|---:|---:|---:|
 | `ble-tx-min`'s campaigns: 39-byte PDU (31 bytes of AdvData) | 39 | 47 | 376 µs | 1128 µs | +0.0 % |
 | the minimal packet, no FEC (AdvA, `05 FF CID CID d0 d1`) | 14 | 22 | 176 µs | 528 µs | -53.2 % |
+| the minimal packet with one byte, no FEC (AdvA, `04 FF CID CID d0`) | 13 | 21 | 168 µs | 504 µs | -55.3 % |
 | **`ble-tx-tag-8`** (+8 bytes of parity) | 22 | 30 | 240 µs | 720 µs | -36.2 % |
 | **`ble-tx-tag-12`** (+12 bytes of parity) | 26 | 34 | 272 µs | 816 µs | -27.7 % |
 | **`ble-tx-tag-18`** (+16 bytes of parity) | 30 | 38 | 304 µs | 912 µs | -19.1 % |
+| **`ble-tx-tag-1byte`** (one sensor byte, +8 bytes of parity) | 21 | 29 | 232 µs | 696 µs | **-38.3 %** |
 
 The time on the air is the energy of the transmitter per event, to first order (the PA is on for the packet;
 the digital part is small). What the parity buys back is SNR: the gateway needs less signal for the same
@@ -403,7 +451,13 @@ The energy the tag radiates per event for the same packet loss at the gateway, a
    (−93 % to −99.7 %): the extra parity pays for its time on the air, no more.
 3. **The parity, not the shorter packet, is what helps at 50 ppm with today's receiver** (20.56 against
    25.00 dB for the minimal packet); with the improved receiver the CFO correction does it.
-4. These are a model's numbers, not the RTL's. The gateway branches measure the same packets through the RTL
+4. **`ble-tx-tag-1byte` was not simulated**: the simulator of the FEC study, `fec_sim.py`, is not in the
+   repository (on no branch, nor in the work folders), so its SNR rows are left empty rather than estimated.
+   What is known: its codeword is 8 bits shorter at the same t (n = 120 against 128), so at the same bit
+   error rate it is a little more likely to hold at most 8 errors, and its time on the air is 3.3 % shorter;
+   with today's receiver, which loses the packet at the access address first (note 1), the difference in
+   SNR should be small. The gateway branches will measure it.
+5. These are a model's numbers, not the RTL's. The gateway branches measure the same packets through the RTL
    receivers, the decoder in software, as `RX_BRANCH_COMPARISON.md` § 18 measured `ble-rx-1p1c`.
 
 ## 11. On a board
@@ -449,6 +503,13 @@ here beyond the controller's implementation of § 9:
 - **`ble-tx-tag-12`** sits between the two in every row; it is the choice only if one code must serve both
   receivers.
 
+- **`ble-tx-tag-1byte` if one byte of sensor is enough** (a temperature or a humidity, not both): `ble-tx-tag-8`'s
+  code and its properties, 8 µs less on the air per packet (232 µs, −38.3 % of `ble-tx-min`'s event against
+  −36.2 %), the smallest transmitter (2 874.7 µm² in 45 nm, 126 983.0 µm² laid out in GF180) and the lowest
+  leakage (58.61 µW). The gain over `ble-tx-tag-8` is small (−1.6 % to −3.3 % in every row): the parity, not
+  the sensor, sets the size of the packet and of the circuit. Its gateway must know the other packet length
+  (21-byte PDU) and the shorter code (n = 120).
+
 The three are one implementation: the choice is a parameter, `BCH_T`, also once the chip is made by changing
 it before synthesis. The gateway's receiver must match the tag's t (its packet length and the code).
 
@@ -466,12 +527,18 @@ RTL_REV=be5d9774 AREA_PARAMS="GAUSS_TABLE=1 ADV_DATA_FLOPS=1" scripts/area/run_a
 STA_SET=tx DUT_REV=<branch> scripts/timing/run_sta.sh tx-tag/<branch> 62.5 be5d9774              # § 7
 scripts/layout/tx_min_gf180/run.sh tx-tag-<t>-gf180 HEAD                                          # § 8 (EFUSE_DIR, docker)
 python3 scripts/senseworks/tag_summary.py > results/senseworks/tx_tag_summary.md                  # the tables
+# ble-tx-tag-1byte (run tx-tag-1byte), at the root of that branch:
+scripts/senseworks/run_tag_validation.sh tx-tag-1byte-validation
+AREA_PARAMS="GAUSS_TABLE=1" scripts/area/run_area.sh tx-tag/ble-tx-tag-1byte $TOPS
+STA_SET=tx DUT_REV=ble-tx-tag-1byte scripts/timing/run_sta.sh tx-tag/ble-tx-tag-1byte 62.5 be5d9774
+scripts/layout/tx_min_gf180/run.sh tx-tag-1byte-gf180 HEAD
 ```
 
 § 9, on Windows (Vivado 2026.1), in a folder with a short path: per configuration a copy of `verilog/` with
 `GAUSS_TABLE = 1` as the default of `btle_controller.v`, then
 `vivado -mode batch -source scripts/fpga/xc7z020/impl.tcl -tclargs <dir> ooc_hd`, then
-`vivado -mode batch -source scripts/fpga/xc7z020/post.tcl -tclargs <root> min tag8 tag12 tag18`,
+`vivado -mode batch -source scripts/fpga/xc7z020/post.tcl -tclargs <root> min tag8 tag12 tag18` (`tag1byte`,
+the copy of `ble-tx-tag-1byte`'s `verilog/`, in a run of its own),
 `synth_warning_gate.py --vivado` on each `vivado.log`, and `device_view.ps1 <dir>` + `device_crop.py` for
 the figures (the GUI: the screen left alone for a minute per figure).
 
