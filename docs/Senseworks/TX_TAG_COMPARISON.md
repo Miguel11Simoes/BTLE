@@ -281,7 +281,7 @@ settings of `ble-tx-min`'s final layout (`TX_FINAL_DECISIONS.md` § 8, `tx-clean
 | OpenSTA vectorless power, 5 V (mW) | 43.28 | 35.29 | 27.78 | 24.38 | 25.42 |
 
 Every layout passes `synth_warning_gate.py --librelane` (31 warnings, all reviewed, 0 unreviewed;
-`warning_gate.txt` in each folder). The max fanout violations are clock-tree buffers driving 11 flip-flops
+`warning_gate.txt` in each folder). The max fanout violations are clock-tree buffers driving 11–16 sinks
 for a limit of 10, as on `ble-tx-min` (`CTS_SINK_CLUSTERING`, `TX_FINAL_DECISIONS.md` § 8.1).
 
 1. **The tag laid out is 19.6 / 18.0 / 14.8 % smaller than `ble-tx-min` with AdvData in flip-flops**, and
@@ -297,7 +297,7 @@ for a limit of 10, as on `ble-tx-min` (`CTS_SINK_CLUSTERING`, `TX_FINAL_DECISION
      repair after placement at 3.2–3.3 ns of slew at ss, over the 3 ns maximum (10, 4 and 19 pins);
    - `aoi221_1` excluded (as `ble-tx-min` excluded `aoi222_1`): one, in the AdvA multiplexer, then drove the
      only net over the maximum, at t = 18, by 1.3 ps;
-   - `IO_EXCLUDE_PIN_REGION bottom:*` (as `ble-tx-min`'s SRAM variant): a quarter of the pins fell on the
+   - `IO_EXCLUDE_PIN_REGION bottom:*` (as `ble-tx-min`'s SRAM variant): most of the pins (193 of 244 at t = 8) fell on the
      bottom edge, below the eFuse row, and their wires to the input buffers reached 4.8 ns at t = 8.
    The earlier runs were removed; the three committed layouts all use the same, final configuration.
 
