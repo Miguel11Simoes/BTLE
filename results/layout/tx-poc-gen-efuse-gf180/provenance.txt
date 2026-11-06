@@ -1,0 +1,8 @@
+label=tx-poc-gen-efuse-gf180
+date_utc=2026-11-06T23:55:39Z
+rtl=HEAD (4a3ca2bc6615d40c6d3af38b44c3c20b3019ddb7), tag_chip, variant efuse: ADV_ADDRESS_OTP=1
+harness=4a3ca2bc6615d40c6d3af38b44c3c20b3019ddb7, dirty files under scripts/layout: 0
+flow=LibreLane Classic, gf180mcuD, gf180mcu_fd_sc_mcu7t5v0, in the eFuse compiler's nix-shell (e77f729373f28eda5d370d66764e81c3b109c31a)
+run=RUN_2026-11-06_23-51-16
+config_overrides=none
+gds sha256=4b52dc7ede219e0da6ab88300ca0405c8338979af9166b8535c3015f7314c63a

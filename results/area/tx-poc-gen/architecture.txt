@@ -1,0 +1,3 @@
+commit=0e0d1808172c4bc82fa727a5b418a958c3ca0dfa dirty=0
+tag_chip	area 3123.1 um2	flip-flops 308
+tag_chip_sequencer	area 3504.3 um2	flip-flops 346

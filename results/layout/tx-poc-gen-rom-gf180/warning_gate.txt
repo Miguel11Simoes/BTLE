@@ -1,0 +1,7 @@
+== librelane results/layout/tx-poc-gen-rom-gf180: 16 warnings, 16 reviewed, 0 unreviewed, 0 errors
+   reviewed (exception line 15) x 8: the PDK's technology LEF: a LEF58 enclosure rule the detailed router does not support (it skips it; the foundry's DRC deck checks the enclosures, 0 errors)
+   reviewed (exception line 16) x 6: the PDK: 3 liberties (ss, tt, ff) for the 9 signoff corners (each with 3 RC extractions), so STA reads a library a second time for another corner
+   reviewed (exception line 18) x 1: btle_tx is a macro, not a chip: its supplies come from the chip's grid (the flow's own advice: ignore it then); the IR drop is reported from the macro's pins
+   reviewed (exception line 22) x 1: ble-tx-poc-gen, no eFuse: the production port of AdvA's eFuse blocks, on the pins of tag_chip, which that configuration does not have; its 48 inputs reach no gate
+   reviewed signoff metric (exception line 24): design__max_fanout_violation__count = 3: clock-tree buffers clkbuf_2_0__f_clk/Z (16), clkbuf_2_1__f_clk/Z (12), clkbuf_2_2__f_clk/Z (12); clock-tree buffers only: the max fanout of 10 is LibreLane's setting for the PDK (the liberty sets none); every data net meets it, and CTS's sink clustering (7 flip-flops over 150 um) leaves a few tree buffers above it, with every transition and capacitance within the liberty's limits
+RESULT: PASS

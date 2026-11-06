@@ -1,0 +1,7 @@
+label=xc7z020-gen (the branch's report in docs/Senseworks/)
+date=2026-11-06
+tool=Vivado v2026.1 (64-bit), Windows; part xc7z020clg484-1
+flow=scripts/fpga/xc7z020/impl.tcl mode ooc_hd, then post.tcl <root> gen
+configuration: gen, the defaults of btle_controller.v; ble-tx-poc-gen 0e0d1808172c4bc82fa727a5b418a958c3ca0dfa, verilog tree 0aa73acd83de87400614c0a3d50464d56e362107
+warning gate: scripts/validation/synth_warning_gate.py --vivado <vivado.log> (warning_gate.txt)
+power: report_power, vectorless with the resets deasserted, 25 C ambient: an estimate, not a measurement

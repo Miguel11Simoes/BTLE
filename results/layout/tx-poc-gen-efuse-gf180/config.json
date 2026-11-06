@@ -1,0 +1,176 @@
+{
+  "meta": {
+    "version": 3,
+    "flow": "Classic"
+  },
+  "DESIGN_NAME": "tag_chip",
+  "VERILOG_FILES": [
+    "dir::src/tag_chip.v",
+    "dir::src/tag_fsm.v",
+    "dir::src/tag_profiles.v",
+    "dir::src/btle_tx.v",
+    "dir::src/crc24.v",
+    "dir::src/crc24_core.v",
+    "dir::src/scramble.v",
+    "dir::src/scramble_core.v",
+    "dir::src/gfsk_modulation.v",
+    "dir::src/bit_repeat_upsample.v",
+    "dir::src/gauss_filter.v",
+    "dir::src/vco.v"
+  ],
+  "SYNTH_PARAMETERS": ["ADV_ADDRESS_OTP=1"],
+  "RUN_LINTER": false,
+  "CLOCK_PORT": "clk",
+  "CLOCK_PERIOD": 62.5,
+  "FP_SIZING": "absolute",
+  "DIE_AREA": [
+    0,
+    0,
+    760,
+    760
+  ],
+  "PL_TARGET_DENSITY_PCT": 50,
+  "PDN_HOFFSET": 69.92,
+  "PNR_SDC_FILE": "dir::tag_chip.sdc",
+  "SIGNOFF_SDC_FILE": "dir::tag_chip.sdc",
+  "MAX_FANOUT_CONSTRAINT": 10,
+  "RSZ_CORNERS": [
+    "max_ss_125C_4v50",
+    "nom_tt_025C_5v00",
+    "min_ff_n40C_5v50"
+  ],
+  "EXTRA_EXCLUDED_CELLS": [
+    "gf180mcu_fd_sc_mcu7t5v0__dlya_*",
+    "gf180mcu_fd_sc_mcu7t5v0__dlyb_*",
+    "gf180mcu_fd_sc_mcu7t5v0__dlyc_*",
+    "gf180mcu_fd_sc_mcu7t5v0__dlyd_*",
+    "gf180mcu_fd_sc_mcu7t5v0__clkbuf_1",
+    "gf180mcu_fd_sc_mcu7t5v0__buf_1",
+    "gf180mcu_fd_sc_mcu7t5v0__aoi222_1",
+    "gf180mcu_fd_sc_mcu7t5v0__aoi221_1"
+  ],
+  "RUN_HEURISTIC_DIODE_INSERTION": false,
+  "GRT_ANTENNA_REPAIR_ITERS": 6,
+  "GRT_ANTENNA_REPAIR_MARGIN": 15,
+  "DESIGN_REPAIR_MAX_SLEW_PCT": 60,
+  "DESIGN_REPAIR_MAX_CAP_PCT": 30,
+  "GRT_DESIGN_REPAIR_MAX_SLEW_PCT": 60,
+  "GRT_DESIGN_REPAIR_MAX_CAP_PCT": 30,
+  "RUN_POST_GRT_DESIGN_REPAIR": true,
+  "PAD_LEFS": [],
+  "PAD_GDS": [],
+  "PAD_VERILOG_MODELS": [],
+  "PAD_SPICE_MODELS": [],
+  "PAD_CDLS": [],
+  "LIB": {
+    "*_tt_025C_5v00": [
+      "/src/gf180mcu/gf180mcuD/libs.ref/gf180mcu_fd_sc_mcu7t5v0/lib/gf180mcu_fd_sc_mcu7t5v0__tt_025C_5v00.lib"
+    ],
+    "*_ss_125C_4v50": [
+      "/src/gf180mcu/gf180mcuD/libs.ref/gf180mcu_fd_sc_mcu7t5v0/lib/gf180mcu_fd_sc_mcu7t5v0__ss_125C_4v50.lib"
+    ],
+    "*_ff_n40C_5v50": [
+      "/src/gf180mcu/gf180mcuD/libs.ref/gf180mcu_fd_sc_mcu7t5v0/lib/gf180mcu_fd_sc_mcu7t5v0__ff_n40C_5v50.lib"
+    ]
+  },
+  "WIRE_LENGTH_THRESHOLD": 1500,
+  "GPL_CELL_PADDING": 1,
+  "CTS_SINK_CLUSTERING_SIZE": 7,
+  "CTS_SINK_CLUSTERING_MAX_DIAMETER": 150,
+  "IO_EXCLUDE_PIN_REGION": [
+    "bottom:*"
+  ],
+  "STA_MACRO_PRIORITIZE_NL": false,
+  "MACROS": {
+    "efuse_async_mem_1x8": {
+      "gds": [
+        "/out/macros/efuse_array_async_1x8/efuse_async_mem_1x8/efuse_async_mem_1x8.gds"
+      ],
+      "lef": [
+        "/out/macros/efuse_array_async_1x8/efuse_async_mem_1x8/efuse_async_mem_1x8.lef"
+      ],
+      "nl": [
+        "/out/macros/efuse_array_async_1x8/efuse_async_mem_1x8/efuse_async_mem_1x8.nl.v"
+      ],
+      "pnl": [
+        "/out/macros/efuse_array_async_1x8/efuse_async_mem_1x8/efuse_async_mem_1x8.pnl.v"
+      ],
+      "lib": {
+        "nom_tt_025C_5v00": [
+          "/out/macros/efuse_array_async_1x8/efuse_async_mem_1x8/nom_tt_025C_5v00/efuse_async_mem_1x8__nom_tt_025C_5v00.lib"
+        ],
+        "nom_ss_125C_4v50": [
+          "/out/macros/efuse_array_async_1x8/efuse_async_mem_1x8/nom_ss_125C_4v50/efuse_async_mem_1x8__nom_ss_125C_4v50.lib"
+        ],
+        "nom_ff_n40C_5v50": [
+          "/out/macros/efuse_array_async_1x8/efuse_async_mem_1x8/nom_ff_n40C_5v50/efuse_async_mem_1x8__nom_ff_n40C_5v50.lib"
+        ],
+        "min_tt_025C_5v00": [
+          "/out/macros/efuse_array_async_1x8/efuse_async_mem_1x8/min_tt_025C_5v00/efuse_async_mem_1x8__min_tt_025C_5v00.lib"
+        ],
+        "min_ss_125C_4v50": [
+          "/out/macros/efuse_array_async_1x8/efuse_async_mem_1x8/min_ss_125C_4v50/efuse_async_mem_1x8__min_ss_125C_4v50.lib"
+        ],
+        "min_ff_n40C_5v50": [
+          "/out/macros/efuse_array_async_1x8/efuse_async_mem_1x8/min_ff_n40C_5v50/efuse_async_mem_1x8__min_ff_n40C_5v50.lib"
+        ],
+        "max_tt_025C_5v00": [
+          "/out/macros/efuse_array_async_1x8/efuse_async_mem_1x8/max_tt_025C_5v00/efuse_async_mem_1x8__max_tt_025C_5v00.lib"
+        ],
+        "max_ss_125C_4v50": [
+          "/out/macros/efuse_array_async_1x8/efuse_async_mem_1x8/max_ss_125C_4v50/efuse_async_mem_1x8__max_ss_125C_4v50.lib"
+        ],
+        "max_ff_n40C_5v50": [
+          "/out/macros/efuse_array_async_1x8/efuse_async_mem_1x8/max_ff_n40C_5v50/efuse_async_mem_1x8__max_ff_n40C_5v50.lib"
+        ]
+      },
+      "instances": {
+        "tag_fsm_i.btle_tx_i.btle_tx_pdu_buffer_i.gen_adv_address_otp.otp_byte[0].efuse_i": {
+          "location": [
+            28,
+            40
+          ],
+          "orientation": "N"
+        },
+        "tag_fsm_i.btle_tx_i.btle_tx_pdu_buffer_i.gen_adv_address_otp.otp_byte[1].efuse_i": {
+          "location": [
+            141.56,
+            40
+          ],
+          "orientation": "N"
+        },
+        "tag_fsm_i.btle_tx_i.btle_tx_pdu_buffer_i.gen_adv_address_otp.otp_byte[2].efuse_i": {
+          "location": [
+            264,
+            40
+          ],
+          "orientation": "N"
+        },
+        "tag_fsm_i.btle_tx_i.btle_tx_pdu_buffer_i.gen_adv_address_otp.otp_byte[3].efuse_i": {
+          "location": [
+            382,
+            40
+          ],
+          "orientation": "N"
+        },
+        "tag_fsm_i.btle_tx_i.btle_tx_pdu_buffer_i.gen_adv_address_otp.otp_byte[4].efuse_i": {
+          "location": [
+            500,
+            40
+          ],
+          "orientation": "N"
+        },
+        "tag_fsm_i.btle_tx_i.btle_tx_pdu_buffer_i.gen_adv_address_otp.otp_byte[5].efuse_i": {
+          "location": [
+            622.36,
+            40
+          ],
+          "orientation": "N"
+        }
+      }
+    }
+  },
+  "PDN_MACRO_CONNECTIONS": [
+    ".*efuse_i VDD VSS VDD VSS"
+  ]
+}

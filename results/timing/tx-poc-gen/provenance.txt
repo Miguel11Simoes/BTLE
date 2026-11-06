@@ -1,0 +1,9 @@
+label=tx-poc-gen
+date_utc=2026-11-06T23:43:49Z
+ref=7fb89713 (7fb897136610443be0056d583d15a9b45bcf1e3b), default parameters
+dut=HEAD (0e0d1808172c4bc82fa727a5b418a958c3ca0dfa, verilog tree 0aa73acd83de87400614c0a3d50464d56e362107), default parameters
+sta_set=poc
+target_clock_ns=62.5
+yosys=Yosys 0.68+195 (git sha1 435977e97-dirty, Release, Clang /usr/bin/clang++ 21.1.8)
+abc========= ABC command line "version"
+liberty=NangateOpenCellLibrary_typical.lib sha256=8d540a4d4cf6d09d27c87ad067857a9c0c2eeb023ab7a56e058cd3113db4e9b1

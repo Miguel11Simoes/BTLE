@@ -1,0 +1,8 @@
+== librelane results/layout/tx-poc-gen-efuse-gf180: 30 warnings, 30 reviewed, 0 unreviewed, 0 errors
+   reviewed (exception line 15) x 8: the PDK's technology LEF: a LEF58 enclosure rule the detailed router does not support (it skips it; the foundry's DRC deck checks the enclosures, 0 errors)
+   reviewed (exception line 16) x 6: the PDK: 3 liberties (ss, tt, ff) for the 9 signoff corners (each with 3 RC extractions), so STA reads a library a second time for another corner
+   reviewed (exception line 17) x 14: the eFuse compiler: its liberties of efuse_async_mem_1x8, one per corner, all name the library efuse_async_mem_1x8, so STA reads the name again for each corner
+   reviewed (exception line 18) x 1: btle_tx is a macro, not a chip: its supplies come from the chip's grid (the flow's own advice: ignore it then); the IR drop is reported from the macro's pins
+   reviewed (exception line 20) x 1: the macros come with their liberties and no parasitics for their netlists (the eFuse compiler's blocks, GlobalFoundries' SRAM): they are timed by their liberties (STA_MACRO_PRIORITIZE_NL off)
+   reviewed signoff metric (exception line 24): design__max_fanout_violation__count = 3: clock-tree buffers clkbuf_2_1__f_clk/Z (13), clkbuf_2_2__f_clk/Z (12), clkbuf_2_3__f_clk/Z (13); clock-tree buffers only: the max fanout of 10 is LibreLane's setting for the PDK (the liberty sets none); every data net meets it, and CTS's sink clustering (7 flip-flops over 150 um) leaves a few tree buffers above it, with every transition and capacitance within the liberty's limits
+RESULT: PASS
