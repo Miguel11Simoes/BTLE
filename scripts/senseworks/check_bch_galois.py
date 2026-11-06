@@ -2,9 +2,10 @@
 
 Author: Miguel Simões
 
-For t = 8, 12 and 18: the generator polynomial of galois.BCH(255, k) against tag_bch.GENERATORS, the
-parity of random messages (galois's systematic shortened encoder) against tag_bch.encode_bits, and
-galois's decoder against tag_bch.decode_bits on words with 0 to 2t errors. galois is not one of the
+For t = 8, 12 and 18 and both message lengths (one or two bytes of sensor): the generator polynomial of
+galois.BCH(255, k) against tag_bch.GENERATORS, the parity of random messages (galois's systematic
+shortened encoder) against tag_bch.encode_bits, and galois's decoder against tag_bch.decode_bits on words
+with 0 to 2t errors. galois is not one of the
 repository's dependencies: run it with an interpreter that has it (pip install galois).
 
   python3 scripts/senseworks/check_bch_galois.py [--trials N]
@@ -37,29 +38,30 @@ def main() -> None:
         assert code.t == t, f"galois BCH(255, {255 - deg}) corrects {code.t}, not {t}"
         g = int(code.generator_poly)
         assert g == tag_bch.GENERATORS[t], f"t={t}: generator differs"
-        n = tag_bch.MESSAGE_BITS + deg
-        k = tag_bch.MESSAGE_BITS
-        same_parity = decoded_same = 0
-        for trial in range(args.trials):
-            msg = [rng.getrandbits(1) for _ in range(k)]
-            ours = msg + tag_bch.encode_bits(msg, t)
-            theirs = code.encode(galois.GF2(np.array(msg, dtype=int)))   # shortened by 255 - deg - k
-            assert len(theirs) == n
-            assert [int(b) for b in theirs] == ours, f"t={t}: the parity differs"
-            same_parity += 1
-            w = trial % (2 * t + 1)
-            bad = list(ours)
-            for p in rng.sample(range(n), w):
-                bad[p] ^= 1
-            ours_out = tag_bch.decode_bits(bad, t)
-            theirs_out, errors = code.decode(galois.GF2(np.array(bad, dtype=int)), output="codeword", errors=True)
-            theirs_out = None if errors < 0 else [int(b) for b in theirs_out]
-            assert ours_out == theirs_out, f"t={t}, {w} errors: the decoders differ"
-            if w <= t:
-                assert ours_out == ours
-            decoded_same += 1
-        print(f"t = {t:2}: generator equal (deg {deg}); {same_parity} messages, parity equal; "
-              f"{decoded_same} words with 0..{2 * t} errors, both decoders give the same result")
+        for s in tag_bch.SENSOR_SIZES:
+            k = tag_bch.message_length(s)
+            n = k + deg
+            same_parity = decoded_same = 0
+            for trial in range(args.trials):
+                msg = [rng.getrandbits(1) for _ in range(k)]
+                ours = msg + tag_bch.encode_bits(msg, t)
+                theirs = code.encode(galois.GF2(np.array(msg, dtype=int)))   # shortened by 255 - deg - k
+                assert len(theirs) == n
+                assert [int(b) for b in theirs] == ours, f"t={t}, S={s}: the parity differs"
+                same_parity += 1
+                w = trial % (2 * t + 1)
+                bad = list(ours)
+                for p in rng.sample(range(n), w):
+                    bad[p] ^= 1
+                ours_out = tag_bch.decode_bits(bad, t)
+                theirs_out, errors = code.decode(galois.GF2(np.array(bad, dtype=int)), output="codeword", errors=True)
+                theirs_out = None if errors < 0 else [int(b) for b in theirs_out]
+                assert ours_out == theirs_out, f"t={t}, S={s}, {w} errors: the decoders differ"
+                if w <= t:
+                    assert ours_out == ours
+                decoded_same += 1
+            print(f"t = {t:2}, S = {s}: generator equal (deg {deg}); {same_parity} messages, parity equal; "
+                  f"{decoded_same} words with 0..{2 * t} errors, both decoders give the same result")
     print("PASS")
 
 

@@ -2,12 +2,13 @@
 
 Author: Miguel Simões
 
-For t = 8, 12 and 18, channels 37, 38, 39 (advertising) and 0, 10 (other
-whitening), the sensor 0000, ffff and random values, and both Gaussian filters
-(GAUSS_TABLE 0 with the taps loaded, 1 with the fixed taps): the RTL btle_tx
-under upstream's TX testbench (verilog/btle_tx_tb.v, which writes the PDU
-through the pair; the tag keeps only bytes 12 and 13), against
-python/btlelib.py's btle_tx for the PDU of scripts/senseworks/tag_bch.py:
+For t = 8, 12 and 18, one and two bytes of sensor, channels 37, 38, 39
+(advertising) and 0, 10 (other whitening), the sensor all 0s, all 1s and random
+values, TxAdd 0 and 1, and both Gaussian filters (GAUSS_TABLE 0 with the taps
+loaded, 1 with the fixed taps): the RTL btle_tx under upstream's TX testbench
+(verilog/btle_tx_tb.v, which puts AdvA, TxAdd and the sensor of the PDU on the
+tag's ports), against python/btlelib.py's btle_tx for the PDU of
+scripts/senseworks/tag_bch.py:
 - every I and Q sample equal (upstream's testbench check, and again here);
 - upstream's Python receiver (btle_rx, no noise) decodes the RTL's waveform with
   the CRC right and returns that PDU;
@@ -60,35 +61,36 @@ def main():
     a = parser.parse_args()
     cad = Path(os.environ.get("OSS_CAD", str(Path.home() / "eda/oss-cad-suite-20260907"))) / "bin"
     rng = random.Random(20261104)
-    sensors = [bytes([0, 0]), bytes([0xff, 0xff])] + [rng.randbytes(2) for _ in range(a.random_sensors)]
     channels = (37, 38, 39, 0, 10)
     rows = []
     with tempfile.TemporaryDirectory(prefix="btle-tx-tag-packet-") as temp:
         work = Path(temp)
-        m = re.search(r"parameter \[47:0\] ADV_ADDRESS = 48'h([0-9a-fA-F_]+)", (ROOT / "verilog/btle_tx.v").read_text())
-        adv = int(m.group(1).replace("_", ""), 16)
+        adv = 0xC10203040506                 # a random static address
         vectors = work / "vectors"
         vectors.mkdir()
         taps = np.int8(np.round(128 * gauss_fir_gen()))
         cos, sin = sin_cos_gen(64)
         for name, data in [("gauss_filter_tap", taps), ("cos_table", cos), ("sin_table", sin)]:
             np.savetxt(vectors / (name + ".txt"), data, fmt="%d")
-        for t in tag_bch.TS:
+        for t, s in ((t, s) for t in tag_bch.TS for s in tag_bch.SENSOR_SIZES):
+            sensors = [bytes(s), bytes([0xff] * s)] + [rng.randbytes(s) for _ in range(a.random_sensors)]
             for gauss_table in (0, 1):
-                rtl = work / f"rtl_t{t}_g{gauss_table}"
+                rtl = work / f"rtl_t{t}_s{s}_g{gauss_table}"
                 shutil.copytree(ROOT / "verilog", rtl, ignore=shutil.ignore_patterns("*.txt", "*.vcd"))
                 tb = rtl / "btle_tx_tb.v"
-                tb.write_text(re.sub(r"^\s*\$dump(?:file|vars)\b[^;]*;", "", tb.read_text(), flags=re.M))
+                tb.write_text(set_default(re.sub(r"^\s*\$dump(?:file|vars)\b[^;]*;", "", tb.read_text(), flags=re.M),
+                                          "SENSOR_BYTES", s))
                 f = rtl / "btle_tx.v"
                 f.write_text(set_default(set_default(f.read_text(), "BCH_T", t), "GAUSS_TABLE", gauss_table))
                 files = [str(p) for p in rtl.glob("*.v") if not p.name.endswith("_tb.v")
                          and p.name not in {"btle_controller_wrapper.v", "sdpram_two_clk_xilinx.v"}]
-                sim = work / f"sim_t{t}_g{gauss_table}"
+                sim = work / f"sim_t{t}_s{s}_g{gauss_table}"
                 subprocess.run([str(cad / "iverilog"), "-s", "btle_tx_tb", "-o", str(sim), str(tb), *files],
                                check=True, capture_output=True, timeout=120)
                 for ch in channels:
-                    for sensor in sensors:
-                        packet = tag_bch.tag_pdu(adv, sensor, t)
+                    for index, sensor in enumerate(sensors):
+                        tx_add = index % 2
+                        packet = tag_bch.tag_pdu(adv, sensor, t, tx_add=tx_add)
                         pdu = hex_string_to_bit(packet.hex())
                         aa = ACCESS_ADDRESS if ch >= 37 else DATA_ACCESS_ADDRESS
                         crc_init = hex_string_to_bit(CRC_INIT)
@@ -101,7 +103,7 @@ def main():
                                              text=True, timeout=60)
                         log = run.stdout + run.stderr
                         if run.returncode or bad_lines(log) or not all(f"output {c} Test PASS." in log for c in "IQ"):
-                            raise RuntimeError(f"TX t={t} GAUSS_TABLE={gauss_table} channel={ch} sensor={sensor.hex()} "
+                            raise RuntimeError(f"TX t={t} S={s} GAUSS_TABLE={gauss_table} channel={ch} sensor={sensor.hex()} "
                                                f"exit={run.returncode}: " + log[-2500:])
                         actual_i = np.loadtxt(vectors / "btle_tx_test_output_i.txt", dtype=np.int16)
                         actual_q = np.loadtxt(vectors / "btle_tx_test_output_q.txt", dtype=np.int16)
@@ -127,13 +129,13 @@ def main():
                         if beyond == word:
                             raise RuntimeError(f"t={t}: {t + 1} errors returned the word sent")
                         crc_bits = "".join(str(int(b)) for b in crc24_core(pdu, crc_init))  # in the order sent
-                        rows.append(dict(t=t, gauss_table=gauss_table, channel=ch, sensor=sensor.hex(),
+                        rows.append(dict(t=t, sensor_bytes=s, tx_add=tx_add, gauss_table=gauss_table, channel=ch, sensor=sensor.hex(),
                                          access_address="8e89bed6" if ch >= 37 else "60850a1b", pdu=packet.hex(), crc_bits=crc_bits,
                                          samples=len(actual_i), phy_bits=40 + len(packet) * 8 + 24,
                                          loopback_crc=True, codeword=True, corrected_t=True,
                                          beyond_t="detected" if beyond is None else "other codeword",
                                          result="PASS"))
-                print(f"t = {t:2}, GAUSS_TABLE = {gauss_table}: {len(channels) * len(sensors)} packets: the RTL's I/Q "
+                print(f"t = {t:2}, S = {s}, GAUSS_TABLE = {gauss_table}: {len(channels) * len(sensors)} packets: the RTL's I/Q "
                       f"equal to the model's, CRC-valid loopback, a codeword, {t} errors corrected", flush=True)
     if a.output:
         a.output.parent.mkdir(parents=True, exist_ok=True)

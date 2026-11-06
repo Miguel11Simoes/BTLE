@@ -9,6 +9,10 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 FLAGS = ('ENABLE_IQ_CAPTURE', 'LL_MINIMAL', 'GAUSS_TABLE', 'PDU_WRITE_STROBE', 'ADV_DATA_FLOPS')  # ble-tx-min: both AdvData stores
 INTEGERS = {'BCH_T': (8, 12, 18)}  # ble-tx-tag-*: the tag's three BCH codes
+# ble-tx-poc-tmp100: the state machine alone, where the controller does not take it (the fixed rate, a tick every clock),
+# and the top of the ASIC flows
+OTHER_TOPS = [('tag_fsm', dict(RATE_EN=r, TICK_DIV=d)) for r in (0, 1) for d in (1, 488)] + \
+             [('tag_chip', dict()), ('tag_chip_rate', dict())]
 
 def sources(root):
     files = sorted((root/'verilog').glob('*.v'))
@@ -63,8 +67,10 @@ def main():
         result['tool'] = version.stdout.strip()
         configs = configurations(ROOT)
         if not configs: raise ValueError('empty lint configuration matrix')
-        for index, params in enumerate(configs):
-            cmd = [executable, '--lint-only', '--Wall', '--top-module', 'btle_controller']
+        names = {f.stem for f in files}
+        runs = [('btle_controller', p) for p in configs] + [r for r in OTHER_TOPS if r[0] in names]
+        for index, (top, params) in enumerate(runs):
+            cmd = [executable, '--lint-only', '--Wall', '--top-module', top]
             cmd += [f'-G{k}={v}' for k, v in params.items()]
             cmd += [str(f.relative_to(ROOT)) for f in files]
             run = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True, timeout=args.timeout)
@@ -72,9 +78,9 @@ def main():
             log = args.output/f'config-{index:02d}.log'
             log.write_text(output)
             ok = complete_success(run.returncode, output)
-            result['configurations'].append(dict(parameters=params, command=cmd, exit=run.returncode,
+            result['configurations'].append(dict(top=top, parameters=params, command=cmd, exit=run.returncode,
                 log=log.name, log_sha256=hashlib.sha256(log.read_bytes()).hexdigest(), status='PASS' if ok else 'FAIL'))
-        if len(result['configurations']) == len(configs) and all(r['status']=='PASS' for r in result['configurations']):
+        if len(result['configurations']) == len(runs) and all(r['status']=='PASS' for r in result['configurations']):
             result['status'] = 'PASS'
     except Exception as exc:
         result['error'] = str(exc)

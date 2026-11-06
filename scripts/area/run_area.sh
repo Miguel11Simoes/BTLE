@@ -86,7 +86,7 @@ echo "area_params=${AREA_PARAMS:-<none: module defaults>}" >> "$out/provenance.t
 params_of() {  # parameter names declared in the header of module $1
   awk -v m="$1" '$0 ~ "^[[:space:]]*module[[:space:]]+"m"([^a-zA-Z0-9_]|$)" {f=1}
                  f && /parameter/ {for (i=1;i<=NF;i++) if ($i ~ /^[A-Za-z_][A-Za-z0-9_]*$/ && $(i+1) == "=") print $i}
-                 f && /^[[:space:]]*\)[[:space:]]*\(/ {exit}' "$rtl"/*.v
+                 f && /^[[:space:]]*\)[[:space:]]*(\(|;)/ {exit}' "$rtl"/*.v
 }
 
 status=0
