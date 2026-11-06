@@ -1,6 +1,8 @@
 // Author: Xianjun Jiao <putaoshu@msn.com>
 // SPDX-FileCopyrightText: 2024 Xianjun Jiao
 // SPDX-License-Identifier: Apache-2.0 license
+// Modified 2026-11-06 by Miguel Simões: ble-tx-poc: AdvA, TxAdd and the sensor of the test PDU on the
+// tag's direct ports, instead of the whole PDU through the (address, data) pair. See CHANGES.md.
 
 // To generate test vector and result reference, in python directory run:
 // python3 test_vector_for_btle_verilog.py
@@ -24,7 +26,8 @@ module btle_tx_tb #
   parameter integer VCO_BIT_WIDTH = 16,
   parameter integer SIN_COS_ADDR_BIT_WIDTH = 11,
   parameter integer IQ_BIT_WIDTH = 8,
-  parameter integer GAUSS_FIR_OUT_AMP_SCALE_DOWN_NUM_BIT_SHIFT = 1
+  parameter integer GAUSS_FIR_OUT_AMP_SCALE_DOWN_NUM_BIT_SHIFT = 1,
+  parameter integer SENSOR_BYTES = 1
 ) (
 );
 
@@ -200,8 +203,18 @@ reg crc_state_init_bit_load;
 reg [(CHANNEL_NUMBER_BIT_WIDTH-1) : 0] channel_number;
 reg channel_number_load;
 
-reg [7:0] pdu_octet_mem_data;
-reg [NUM_BIT_PAYLOAD_LENGTH:0] pdu_octet_mem_addr;
+// the tag's ports, from the test PDU
+wire [47:0] adv_address = {btle_tx_test_input_mem[7], btle_tx_test_input_mem[6], btle_tx_test_input_mem[5],
+                           btle_tx_test_input_mem[4], btle_tx_test_input_mem[3], btle_tx_test_input_mem[2]};
+wire tx_add = btle_tx_test_input_mem[0][6];
+wire [(8*SENSOR_BYTES-1):0] sensor;
+generate
+if (SENSOR_BYTES == 2) begin : gen_sensor2
+  assign sensor = {btle_tx_test_input_mem[13], btle_tx_test_input_mem[12]};
+end else begin : gen_sensor1
+  assign sensor = btle_tx_test_input_mem[12];
+end
+endgenerate
 
 wire tx_start;
 
@@ -257,9 +270,6 @@ always @ (posedge clk) begin
     crc_state_init_bit_load <= 0;
     channel_number_load <= 0;
 
-    pdu_octet_mem_data <= 0;
-    pdu_octet_mem_addr <= 0;
-
     gauss_filter_tap_init_done <= 0;
     sin_cos_table_init_done <= 0;
     pkt_mem_init_done <= 0;
@@ -303,10 +313,7 @@ always @ (posedge clk) begin
       $display("cos sin table initialized.");
     end
 
-    if (clk_count < NUM_OCTET_INPUT) begin
-      pdu_octet_mem_addr <= clk_count;
-      pdu_octet_mem_data <= btle_tx_test_input_mem[clk_count];
-    end else if (clk_count == NUM_OCTET_INPUT) begin
+    if (clk_count == NUM_OCTET_INPUT) begin
       pkt_mem_init_done <= 1;
       $display("tx pkt mem initialized.");
     end
@@ -399,6 +406,9 @@ always @ (posedge clk) begin
   end
 end
 
+wire unused_otp_ready;
+wire [47:0] unused_adv_address_sent;
+
 btle_tx # (
 .NUM_BIT_PAYLOAD_LENGTH(NUM_BIT_PAYLOAD_LENGTH),
 .CRC_STATE_BIT_WIDTH(CRC_STATE_BIT_WIDTH),
@@ -409,12 +419,11 @@ btle_tx # (
 .VCO_BIT_WIDTH(VCO_BIT_WIDTH),
 .SIN_COS_ADDR_BIT_WIDTH(SIN_COS_ADDR_BIT_WIDTH),
 .IQ_BIT_WIDTH(IQ_BIT_WIDTH),
-.GAUSS_FIR_OUT_AMP_SCALE_DOWN_NUM_BIT_SHIFT(GAUSS_FIR_OUT_AMP_SCALE_DOWN_NUM_BIT_SHIFT)
+.GAUSS_FIR_OUT_AMP_SCALE_DOWN_NUM_BIT_SHIFT(GAUSS_FIR_OUT_AMP_SCALE_DOWN_NUM_BIT_SHIFT),
+.SENSOR_BYTES(SENSOR_BYTES)
 ) btle_tx_i (
   .clk(clk),
   .rst(rst),
-
-  .clkb(clk),
 
   .gauss_filter_tap_index(gauss_filter_tap_index),
   .gauss_filter_tap_value(gauss_filter_tap_value),
@@ -432,10 +441,15 @@ btle_tx # (
   .channel_number(channel_number),
   .channel_number_load(channel_number_load),
 
-  .pdu_octet_mem_data(pdu_octet_mem_data),
-  .pdu_octet_mem_addr(pdu_octet_mem_addr),
+  .adv_address(adv_address),
+  .tx_add(tx_add),
+  .sensor(sensor),
 
   .tx_start(tx_start),
+
+  .adv_address_otp_prog(48'd0),
+  .adv_address_otp_ready(unused_otp_ready),
+  .adv_address_sent(unused_adv_address_sent),
 
   .i(i_signal),
   .q(q_signal),

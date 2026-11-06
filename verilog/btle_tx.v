@@ -16,6 +16,10 @@
 // structure with COMPANY_ID, the sensor's two bytes (the only bytes written, PDU addresses 12 and
 // 13) and the parity of a shortened BCH code (BCH_T = 8, 12 or 18) of AdvA and the sensor, computed
 // by an LFSR while they are sent. See CHANGES.md and docs/Senseworks/TX_TAG_COMPARISON.md.
+// Modified 2026-11-06 by Miguel Simões: ble-tx-poc: SENSOR_BYTES, one or two bytes of sensor (the
+// lengths, the BCH message and the last bit follow); AdvA, TxAdd and the sensor on direct ports of
+// the clk domain, instead of the (address, data) pair on clkb: no clkb, no read request, no read
+// register (the same outputs on every clock). See CHANGES.md and docs/Senseworks/TX_POC.md.
 
 // iverilog -o btle_tx btle_tx.v crc24.v crc24_core.v scramble.v scramble_core.v gfsk_modulation.v bit_repeat_upsample.v gauss_filter.v vco.v
 
@@ -36,26 +40,20 @@ module btle_tx #
   parameter integer IQ_BIT_WIDTH = 8,
   parameter integer GAUSS_FIR_OUT_AMP_SCALE_DOWN_NUM_BIT_SHIFT = 1,
   parameter integer GAUSS_TABLE = 0, // passed to gauss_filter
-  // AdvA, the device address sent in PDU bytes 2..7, least significant byte first (byte 2 =
-  // ADV_ADDRESS[7:0]), as the Core spec sends it. A ROM: fixed per chip. Default: a random static
-  // address (its two most significant bits 11, as TX_ADD = 1 requires), C1:02:03:04:05:06.
-  parameter [47:0] ADV_ADDRESS = 48'hC10203040506,
   // AdvA from an OTP (1): six GF180MCU eFuse blocks (efuse_async_mem_1x8), programmed once per chip
-  // through adv_address_otp_prog and read into their latches after each reset; ADV_ADDRESS is then
-  // ignored. 0 (default): the ROM, ADV_ADDRESS.
+  // through adv_address_otp_prog and read into their latches after each reset; the port adv_address
+  // is then ignored. 0 (default): the port adv_address (tied to a constant it is a ROM).
   parameter integer ADV_ADDRESS_OTP = 0,
-  // The tag's packet: TxAdd of the header (1: AdvA is a random static address; 0: a public one),
-  // the Company ID of the Manufacturer Specific Data (0xFFFF, the value for tests; a product needs
-  // its own, assigned by the Bluetooth SIG), and the number of errors the BCH code corrects in
-  // AdvA, the sensor and the parity: 8, 12 or 18 (8, 12 or 16 bytes of parity).
-  parameter integer TX_ADD = 1,
+  // The tag's packet: the Company ID of the Manufacturer Specific Data (0xFFFF, the value for tests;
+  // a product needs its own, assigned by the Bluetooth SIG), the number of errors the BCH code
+  // corrects in AdvA, the sensor and the parity: 8, 12 or 18 (8, 12 or 16 bytes of parity), and the
+  // bytes of sensor: 1 or 2.
   parameter [15:0] COMPANY_ID = 16'hFFFF,
-  parameter integer BCH_T = 8
+  parameter integer BCH_T = 8,
+  parameter integer SENSOR_BYTES = 1
 ) (
   input wire clk, // for baseband processing, 16MHz
   input wire rst,
-
-  input wire clkb, // for writing pkt to ram with different/higher clock speed
 
   `KEEP_FOR_DBG input wire [3:0] gauss_filter_tap_index, // only need to set 0~8, 9~16 will be mirror of 0~7
   `KEEP_FOR_DBG input wire signed [(GAUSS_FILTER_BIT_WIDTH-1) : 0] gauss_filter_tap_value,
@@ -73,17 +71,22 @@ module btle_tx #
   `KEEP_FOR_DBG input  wire [(CHANNEL_NUMBER_BIT_WIDTH-1) : 0] channel_number, // load into lfsr (linear feedback shift register) upon channel_number_load==1
   `KEEP_FOR_DBG input  wire channel_number_load,
 
-  // the (address, data) pair on clkb: only the sensor's two bytes, PDU addresses 12 and 13, are kept
-  `KEEP_FOR_DBG input  wire [7:0] pdu_octet_mem_data,
-  `KEEP_FOR_DBG input  wire [NUM_BIT_PAYLOAD_LENGTH:0] pdu_octet_mem_addr,
+  // What the packet carries, on the clk domain, stable from tx_start to the end of the packet:
+  // AdvA, the device address sent in PDU bytes 2..7, least significant byte first (byte 2 =
+  // adv_address[7:0]), as the Core spec sends it; TxAdd of the header (1: AdvA is a random address;
+  // 0: a public one); the sensor, d0 in sensor[7:0] and, with SENSOR_BYTES = 2, d1 in sensor[15:8].
+  `KEEP_FOR_DBG input  wire [47:0] adv_address,
+  `KEEP_FOR_DBG input  wire tx_add,
+  `KEEP_FOR_DBG input  wire [(8*SENSOR_BYTES-1) : 0] sensor,
 
   `KEEP_FOR_DBG input  wire tx_start,
 
-  // ADV_ADDRESS_OTP = 1 only: the production port that programs AdvA (bit k of ADV_ADDRESS's order)
+  // ADV_ADDRESS_OTP = 1 only: the production port that programs AdvA (bit k of adv_address's order)
   // once per chip, a 1 blowing its fuse when held for at least 50 us out of reset; ready once
-  // the fuses are read after a reset. With the ROM: unused, and ready is 1.
+  // the fuses are read after a reset. Otherwise: unused, and ready is 1.
   input  wire [47:0] adv_address_otp_prog,
   output wire adv_address_otp_ready,
+  output wire [47:0] adv_address_sent, // the AdvA of the packet: the port's or the OTP's
 
   `KEEP_FOR_DBG output wire signed [(IQ_BIT_WIDTH-1) : 0] i,
   `KEEP_FOR_DBG output wire signed [(IQ_BIT_WIDTH-1) : 0] q,
@@ -119,15 +122,16 @@ module btle_tx #
 //     its first use) and for the preamble/access-address shift register (loaded
 //     at tx_start before its first use).
 // The senseworks tag (2026-11-04): one PDU, its length fixed (no payload_length
-// register): 2 header bytes and a payload of PAYLOAD_LENGTH = 12 + PARITY_BYTES
-// (20, 24 or 28), at most 30 bytes, so the PDU bits are counted in 8 bits (at
-// most 240) and the byte address is 5 bits (0..29). The outputs are, on every
+// register): 2 header bytes and a payload of PAYLOAD_LENGTH = 10 + SENSOR_BYTES +
+// PARITY_BYTES (19 to 28), at most 30 bytes, so the PDU bits are counted in 8 bits
+// (at most 240) and the byte address is 5 bits (0..29). The outputs are, on every
 // clock, ble-tx-min's (upstream's) for the same PDU written whole in its buffer.
 //
-// The BCH parity. The code's message is the 64 bits that a receiver does not
-// know, AdvA (PDU bits 16..63) and the sensor (bits 96..111), in the order they
-// are sent; the parity follows from bit 112 on. bch_lfsr divides the message by
-// the generator g(x) as the bits are sent (the first bit the highest power):
+// The BCH parity. The code's message is the bits that a receiver does not know,
+// AdvA (PDU bits 16..63) and the sensor (bits 96..103 or 96..111), 56 or 64 bits,
+// in the order they are sent; the parity follows from bit 104 or 112 on. bch_lfsr
+// divides the message by the generator g(x) as the bits are sent (the first bit
+// the highest power):
 // each message bit enters with the bit that leaves, and in the parity bits the
 // register shifts out its remainder, the highest coefficient first, while 0s
 // shift in. The bit sent there is bch_lfsr's top bit instead of octet's, so the
@@ -149,16 +153,21 @@ localparam [123:0] BCH_G_ALL = (BCH_T == 8)  ? {60'd0, 64'h6ce707e26b6f9977} :
                                                124'h1bcb6cce6906958aa17f2231050eb39;
 localparam [BCH_DEG-1:0] BCH_G = BCH_G_ALL[BCH_DEG-1:0];
 localparam integer PARITY_BYTES = (BCH_DEG + 7) / 8;                 // 8, 12, 16
-localparam integer PAYLOAD_LENGTH = 12 + PARITY_BYTES;               // AdvA, the AD structure: 20, 24, 28
+localparam integer PAYLOAD_LENGTH = 10 + SENSOR_BYTES + PARITY_BYTES;   // AdvA, the AD structure: 19..28
 localparam integer PDU_BIT_COUNT_WIDTH = 8;                          // (2 + 28) * 8 = 240 PDU bits
-localparam integer LAST_PDU_BIT_INDEX = (PAYLOAD_LENGTH + 2) * 8 - 1;   // 175, 207, 239
+localparam integer LAST_PDU_BIT_INDEX = (PAYLOAD_LENGTH + 2) * 8 - 1;   // 167..239
 localparam [PDU_BIT_COUNT_WIDTH-1:0] LAST_PDU_BIT = LAST_PDU_BIT_INDEX[PDU_BIT_COUNT_WIDTH-1:0];
+localparam integer PARITY_FIRST_BIT_INDEX = 96 + 8 * SENSOR_BYTES;   // 104, 112
 localparam [PDU_BIT_COUNT_WIDTH-1:0] ADVA_FIRST_BIT = 16, ADVA_END_BIT = 64,
-                                     SENSOR_FIRST_BIT = 96, PARITY_FIRST_BIT = 112;
+                                     SENSOR_FIRST_BIT = 96,
+                                     PARITY_FIRST_BIT = PARITY_FIRST_BIT_INDEX[PDU_BIT_COUNT_WIDTH-1:0];
 
 generate
 if (BCH_T != 8 && BCH_T != 12 && BCH_T != 18) begin : gen_bch_t_check
   initial $fatal(1, "btle_tx: BCH_T must be 8, 12 or 18");
+end
+if (SENSOR_BYTES != 1 && SENSOR_BYTES != 2) begin : gen_sensor_bytes_check
+  initial $fatal(1, "btle_tx: SENSOR_BYTES must be 1 or 2");
 end
 endgenerate
 
@@ -192,15 +201,7 @@ wire bch_message_bit = ((bit_count >= ADVA_FIRST_BIT) && (bit_count < ADVA_END_B
                        ((bit_count >= SENSOR_FIRST_BIT) && (bit_count < PARITY_FIRST_BIT));
 wire bch_parity_bit = (bit_count >= PARITY_FIRST_BIT);
 
-// The byte for octet is asked of the packet buffer at [clk_count] 116 of the
-// bit period before it: bit_count / 8 is then already the next byte's address
-// (since [clk_count] 114) and the byte is taken 12 clocks later, at
-// [clk_count] 0. The request also comes in the first 14 clocks of TX_PDU, for
-// byte 0.
-localparam [3:0] PDU_READ_CLOCK = 4;
-wire pdu_read_request = (phy_tx_state == TX_PDU) && (clk_count == PDU_READ_CLOCK) && (bit_count[2:0] == 0);
-
-assign i = (phy_tx_state == IDLE? 0 : i_internal);
+assign i =(phy_tx_state == IDLE? 0 : i_internal);
 assign q = (phy_tx_state == IDLE? 0 : q_internal);
 
 // registers whose reset value is never read
@@ -306,22 +307,19 @@ always @ (posedge clk) begin
 end
 
 tag_pdu_buffer # (
-  .WRITE_ADDRESS_WIDTH(NUM_BIT_PAYLOAD_LENGTH+1),
-  .ADV_ADDRESS(ADV_ADDRESS),
   .ADV_ADDRESS_OTP(ADV_ADDRESS_OTP),
-  .TX_ADD(TX_ADD),
   .COMPANY_ID(COMPANY_ID),
-  .PARITY_BYTES(PARITY_BYTES)
+  .PARITY_BYTES(PARITY_BYTES),
+  .SENSOR_BYTES(SENSOR_BYTES)
 ) btle_tx_pdu_buffer_i (
-  .clkb(clkb),
+  .rst(rst),
   .otp_prog(adv_address_otp_prog),
   .otp_ready(adv_address_otp_ready),
-  .write_address(pdu_octet_mem_addr),
-  .write_data(pdu_octet_mem_data),
+  .adv_address_in(adv_address),
+  .tx_add(tx_add),
+  .sensor(sensor),
 
-  .clk(clk),
-  .rst(rst),
-  .read_request(pdu_read_request),
+  .adv_address(adv_address_sent),
   .read_address(addr),
   .read_data(data)
 );
@@ -406,117 +404,85 @@ wire unused_vco_table_writes = &{1'b0, cos_table_write_address, cos_table_write_
 endmodule
 
 // The packet buffer of the senseworks tag (2026-11-04). The TX reads PDU bytes
-// 0 to 13 here (14.. are the BCH parity, which btle_tx sends from its LFSR):
-//   - bytes 0 and 1, the header: constants, ADV_NONCONN_IND with TX_ADD and
-//     the payload length 12 + PARITY_BYTES;
-//   - bytes 2..7, AdvA: ADV_ADDRESS, fixed per chip (a ROM here, an OTP in the
-//     ASIC: programmed once);
-//   - bytes 8..11, the AD structure's length (5 + PARITY_BYTES), its type
-//     (0xFF, Manufacturer Specific Data) and COMPANY_ID, least significant byte
-//     first: constants;
-//   - bytes 12 and 13, the sensor: two registers on clkb, the only bytes the
-//     (address, data) pair writes (pairs to every other address are dropped).
-// The read protocol is ble-tx-min's, unchanged: btle_tx raises read_request
-// for one clk clock with read_address stable and keeps read_address until it
-// takes the byte; the request toggles a flip-flop on clk, two flip-flops
-// synchronize it to clkb, and the next clkb clock puts the byte in read_data
-// (clkb domain): at most 3 clkb clocks after the request, within the 12 clk
-// clocks btle_tx leaves when clkb runs at 8 MHz or faster.
-// Contract: the sensor's two bytes written before tx_start and not while the
-// packet is sent. Bytes 14 and above read 0 (btle_tx does not use them).
+// here up to the sensor's last (the next ones are the BCH parity, which btle_tx
+// sends from its LFSR):
+//   - bytes 0 and 1, the header: ADV_NONCONN_IND with the port tx_add and the
+//     payload length 10 + SENSOR_BYTES + PARITY_BYTES;
+//   - bytes 2..7, AdvA: the port adv_address_in, or an OTP in the ASIC
+//     (ADV_ADDRESS_OTP = 1: programmed once);
+//   - bytes 8..11, the AD structure's length (3 + SENSOR_BYTES + PARITY_BYTES),
+//     its type (0xFF, Manufacturer Specific Data) and COMPANY_ID, least
+//     significant byte first: constants;
+//   - byte 12, and 13 with SENSOR_BYTES = 2, the sensor: the port sensor.
+// The read is combinational (ble-tx-poc, 2026-11-06): btle_tx takes the byte at
+// [clk_count] 0, read_address stable since [clk_count] 114, where the (address,
+// data) pair of the tag's earlier branches had a request toggle, its
+// synchronizers and a register on clkb to give the same byte there.
+// Contract: the ports stable from tx_start to the end of the packet. Every other
+// byte reads 0 (btle_tx does not use them).
 // Bundled helper: preserve the existing single-file compilation interface.
 /* verilator lint_off DECLFILENAME */
 module tag_pdu_buffer #
 /* verilator lint_on DECLFILENAME */
 (
-  parameter integer WRITE_ADDRESS_WIDTH = 9,
-  parameter [47:0] ADV_ADDRESS = 48'hC10203040506,
   parameter integer ADV_ADDRESS_OTP = 0,
-  parameter integer TX_ADD = 1,
   parameter [15:0] COMPANY_ID = 16'hFFFF,
-  parameter integer PARITY_BYTES = 8
+  parameter integer PARITY_BYTES = 8,
+  parameter integer SENSOR_BYTES = 1
 ) (
-  input  wire clkb,
+  input  wire rst,
   input  wire [47:0] otp_prog,
   output wire otp_ready,
-  input  wire [WRITE_ADDRESS_WIDTH-1:0] write_address,
-  input  wire [7:0] write_data,
+  input  wire [47:0] adv_address_in,
+  input  wire tx_add,
+  input  wire [(8*SENSOR_BYTES-1):0] sensor,
 
-  input  wire clk,
-  input  wire rst,
-  input  wire read_request,
+  output wire [47:0] adv_address,
   input  wire [4:0] read_address,
   output reg  [7:0] read_data
 );
 
 // header byte 0: PDU type 0010 (ADV_NONCONN_IND), RFU 0, ChSel 0, TxAdd, RxAdd 0
-localparam [7:0] HEADER0 = {1'b0, (TX_ADD != 0), 2'b00, 4'b0010};
-localparam integer PAYLOAD_LENGTH = 12 + PARITY_BYTES;  // AdvA and the AD structure
-localparam integer AD_STRUCTURE_LENGTH = 5 + PARITY_BYTES; // type, Company ID, sensor, parity
+wire [7:0] header0 = {1'b0, tx_add, 2'b00, 4'b0010};
+localparam integer PAYLOAD_LENGTH = 10 + SENSOR_BYTES + PARITY_BYTES;  // AdvA and the AD structure
+localparam integer AD_STRUCTURE_LENGTH = 3 + SENSOR_BYTES + PARITY_BYTES; // type, Company ID, sensor, parity
 localparam [7:0] HEADER1 = PAYLOAD_LENGTH[7:0];
 localparam [7:0] AD_LENGTH = AD_STRUCTURE_LENGTH[7:0];
 localparam [7:0] AD_TYPE = 8'hFF;                   // Manufacturer Specific Data
 
-// clk side: each request toggles request_toggle
-reg request_toggle;
-always @ (posedge clk) begin
-  if (rst) begin
-    request_toggle <= 0;
-  end else if (read_request) begin
-    request_toggle <= ~request_toggle;
-  end
-end
-
-// clkb side
-reg [1:0] rst_sync;     // rst, synchronized to clkb
-reg [2:0] request_sync; // two synchronizing flip-flops, then the value seen last
-reg [7:0] sensor0, sensor1; // PDU bytes 12 and 13
-wire clkb_rst = rst_sync[1];
-wire read = request_sync[2] ^ request_sync[1];
-wire [47:0] adv_address;
-reg [7:0] pdu_byte;
+wire [7:0] sensor_d1;                               // PDU byte 13: the parity's first with one byte of sensor
 always @(*) begin
   case (read_address)
-    5'd0:    pdu_byte = HEADER0;
-    5'd1:    pdu_byte = HEADER1;
-    5'd2:    pdu_byte = adv_address[7:0];
-    5'd3:    pdu_byte = adv_address[15:8];
-    5'd4:    pdu_byte = adv_address[23:16];
-    5'd5:    pdu_byte = adv_address[31:24];
-    5'd6:    pdu_byte = adv_address[39:32];
-    5'd7:    pdu_byte = adv_address[47:40];
-    5'd8:    pdu_byte = AD_LENGTH;
-    5'd9:    pdu_byte = AD_TYPE;
-    5'd10:   pdu_byte = COMPANY_ID[7:0];
-    5'd11:   pdu_byte = COMPANY_ID[15:8];
-    5'd12:   pdu_byte = sensor0;
-    5'd13:   pdu_byte = sensor1;
-    default: pdu_byte = 8'h00;                      // the parity: sent from btle_tx's LFSR
+    5'd0:    read_data = header0;
+    5'd1:    read_data = HEADER1;
+    5'd2:    read_data = adv_address[7:0];
+    5'd3:    read_data = adv_address[15:8];
+    5'd4:    read_data = adv_address[23:16];
+    5'd5:    read_data = adv_address[31:24];
+    5'd6:    read_data = adv_address[39:32];
+    5'd7:    read_data = adv_address[47:40];
+    5'd8:    read_data = AD_LENGTH;
+    5'd9:    read_data = AD_TYPE;
+    5'd10:   read_data = COMPANY_ID[7:0];
+    5'd11:   read_data = COMPANY_ID[15:8];
+    5'd12:   read_data = sensor[7:0];
+    5'd13:   read_data = sensor_d1;
+    default: read_data = 8'h00;                     // the parity: sent from btle_tx's LFSR
   endcase
 end
 
-always @ (posedge clkb) begin
-  rst_sync <= {rst_sync[0], rst};
-  if (clkb_rst) begin
-    request_sync <= 0;
-  end else begin
-    request_sync <= {request_sync[1:0], request_toggle};
-  end
-
-  if (write_address == 12) sensor0 <= write_data;
-  if (write_address == 13) sensor1 <= write_data;
-
-  if (read) begin
-    read_data <= pdu_byte;
-  end
+generate
+if (SENSOR_BYTES == 2) begin : gen_sensor_d1
+  assign sensor_d1 = sensor[15:8];
+end else begin : gen_no_sensor_d1
+  assign sensor_d1 = 8'h00;
 end
 
-generate
 if (ADV_ADDRESS_OTP != 0) begin : gen_adv_address_otp
   // AdvA in six 8-bit eFuse blocks of the GF180MCU eFuse compiler (efuse_async_mem_1x8, a macro):
   // each senses its fuses into latches after reset_n rises (within 10 ns) and holds them;
   // prog[i] = 1 for 50 us blows fuse i (a blown fuse reads 1). The fuses are static after a
-  // reset, so the clkb side reads them like the ROM.
+  // reset, so they are read like a ROM.
   wire [5:0] byte_ready;
   genvar b;
   for (b=0; b<6; b=b+1) begin : otp_byte
@@ -528,10 +494,11 @@ if (ADV_ADDRESS_OTP != 0) begin : gen_adv_address_otp
     );
   end
   assign otp_ready = &byte_ready;
-end else begin : gen_adv_address_rom
-  assign adv_address = ADV_ADDRESS;
+  wire unused_adv_address_in = &{1'b0, adv_address_in};
+end else begin : gen_adv_address_port
+  assign adv_address = adv_address_in;
   assign otp_ready = 1'b1;
-  wire unused_otp_prog = &{1'b0, otp_prog};
+  wire unused_otp_inputs = &{1'b0, otp_prog, rst};
 end
 endgenerate
 

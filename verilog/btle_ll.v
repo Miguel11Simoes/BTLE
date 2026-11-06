@@ -1,6 +1,8 @@
 // Author: Xianjun Jiao <putaoshu@msn.com>
 // SPDX-FileCopyrightText: 2025 Xianjun Jiao
 // SPDX-License-Identifier: Apache-2.0 license
+// Modified 2026-11-06 by Miguel Simões: ble-tx-poc: the tag's state on the reserved read-only registers
+// 42 to 46 (through a clk_cross_bus of their own). See CHANGES.md and docs/Architecture/LL_REGISTER_MAP.md.
 
 // This link layer module interfaces with the host via UART HCI (Host Controller Interface), 
 // and axi lite interface as alternative channel for configuration and control.
@@ -102,6 +104,13 @@ module btle_ll # (
   input wire agc_lock_change,
   input wire agc_lock_state,
 
+  // the tag's state (btle_controller.v), read-only registers 42 to 46
+  input wire [C_S00_AXI_DATA_WIDTH-1 : 0] tag_status0,
+  input wire [C_S00_AXI_DATA_WIDTH-1 : 0] tag_status1,
+  input wire [C_S00_AXI_DATA_WIDTH-1 : 0] tag_status2,
+  input wire [C_S00_AXI_DATA_WIDTH-1 : 0] tag_status3,
+  input wire [C_S00_AXI_DATA_WIDTH-1 : 0] tag_status4,
+
   input  wire simulation_en,
   input  wire simulation_rx_ram_read_en,
 
@@ -178,12 +187,18 @@ wire [(C_S00_AXI_DATA_WIDTH-1):0] slv_reg44;
 wire [(C_S00_AXI_DATA_WIDTH-1):0] slv_reg45;
 wire [(C_S00_AXI_DATA_WIDTH-1):0] slv_reg46;
 wire [(C_S00_AXI_DATA_WIDTH-1):0] slv_reg47;
+// The tag's state (ble-tx-poc), from the bb clock domain.
+wire [(C_S00_AXI_DATA_WIDTH-1):0] tag_status0_axi;
+wire [(C_S00_AXI_DATA_WIDTH-1):0] tag_status1_axi;
+wire [(C_S00_AXI_DATA_WIDTH-1):0] tag_status2_axi;
+wire [(C_S00_AXI_DATA_WIDTH-1):0] tag_status3_axi;
+wire [(C_S00_AXI_DATA_WIDTH-1):0] tag_status4_axi;
+assign slv_reg42 = tag_status0_axi;
+assign slv_reg43 = tag_status1_axi;
+assign slv_reg44 = tag_status2_axi;
+assign slv_reg45 = tag_status3_axi;
+assign slv_reg46 = tag_status4_axi;
 // Reserved read-only slots have a defined zero value.
-assign slv_reg42 = {C_S00_AXI_DATA_WIDTH{1'b0}};
-assign slv_reg43 = {C_S00_AXI_DATA_WIDTH{1'b0}};
-assign slv_reg44 = {C_S00_AXI_DATA_WIDTH{1'b0}};
-assign slv_reg45 = {C_S00_AXI_DATA_WIDTH{1'b0}};
-assign slv_reg46 = {C_S00_AXI_DATA_WIDTH{1'b0}};
 assign slv_reg47 = {C_S00_AXI_DATA_WIDTH{1'b0}};
 
 wire [(C_S00_AXI_DATA_WIDTH-1):0] slv_reg48;
@@ -701,6 +716,30 @@ clk_cross_bus #
               rx_decode_end_axi,
               rx_crc_ok_axi,
               rx_payload_length_axi})
+);
+
+// The tag's state, in a crossing of its own: with these 160 bits more, the bus above no longer fits Vivado's
+// distributed RAM and is inferred as block RAM (9 RAMB36), where a read of the address being written by the other
+// clock, this bus's every clock, is a collision with an undefined result.
+clk_cross_bus #
+(
+  .DATA_WIDTH(5*C_S00_AXI_DATA_WIDTH)
+) clk_cross_bus_tag_status_i (
+  .write_clk(bb_clk),
+  .rst(bb_rst),
+
+  .write_data({tag_status0,
+               tag_status1,
+               tag_status2,
+               tag_status3,
+               tag_status4}),
+
+  .read_clk(axi_aclk),
+  .read_data({tag_status0_axi,
+              tag_status1_axi,
+              tag_status2_axi,
+              tag_status3_axi,
+              tag_status4_axi})
 );
 
 // -----------------------------debug-----------------------------

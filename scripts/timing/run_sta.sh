@@ -26,7 +26,9 @@
 #               declares, switched on; see scripts/branch_config.sh)
 #   STA_SET     full (default: the controllers, btle_rx, and each changed block the
 #               dut has) | controller (the two controllers only) | tx (the controllers
-#               and btle_tx, the reference's with GAUSS_TABLE=1: the senseworks tag)
+#               and btle_tx, the reference's with GAUSS_TABLE=1: the senseworks tag) | poc
+#               (those, both btle_tx with GAUSS_TABLE=1, and ble-tx-poc's tag_chip in its two
+#               configurations)
 # Output: results/timing/<label>/ (refuses to overwrite)
 
 set -euo pipefail
@@ -156,6 +158,11 @@ if [ "$STA_SET" = full ]; then
 elif [ "$STA_SET" = tx ]; then   # the senseworks tag (ble-tx-tag-*): no receiver; the transmitter itself
   design ref_btle_tx          "$work/ref/verilog" btle_tx GAUSS_TABLE=1
   design dut_btle_tx          "$dut_rtl"          btle_tx $DUT_PARAMS
+elif [ "$STA_SET" = poc ]; then  # ble-tx-poc: tag_core as a chip
+  design ref_btle_tx          "$work/ref/verilog" btle_tx GAUSS_TABLE=1
+  design dut_btle_tx          "$dut_rtl"          btle_tx GAUSS_TABLE=1
+  design dut_tag_chip_eeprom  "$dut_rtl"          tag_chip CFG_SRC=0
+  design dut_tag_chip_otp     "$dut_rtl"          tag_chip CFG_SRC=1
 fi
 
 column -t -s $'\t' "$out/summary.tsv" | tee "$out/summary.txt"
