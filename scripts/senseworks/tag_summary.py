@@ -83,7 +83,7 @@ def airtime() -> str:
     ref = 3 * (1 + 4 + 39 + 3) * 8
     cases = [("`ble-tx-min`'s campaigns: 39-byte PDU (31 bytes of AdvData)", 39),
              ("the minimal packet, no FEC (AdvA, `05 FF CID CID d0 d1`)", 14)]
-    cases += [(f"**`ble-tx-tag-{t}`** (+{tag_bch.parity_bytes(t)} bytes of parity)", 2 + tag_bch.payload_length(t))
+    cases += [(f"**`ble-tx-tag-{t}`** (+{tag_bch.parity_bytes(t)} bytes of parity)", 2 + tag_bch.payload_length(t, 2))
               for t, _ in TAGS]
     for label, pdu in cases:
         us = (1 + 4 + pdu + 3) * 8

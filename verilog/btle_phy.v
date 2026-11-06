@@ -5,38 +5,35 @@
 // Modified 2026-10-16 by Miguel Simões: ADV_ADDRESS, ADV_DATA_FLOPS and ADV_ADDRESS_OTP passed to btle_tx; the OTP programming port tied off. See CHANGES.md.
 // Modified 2026-11-04 by Miguel Simões: the senseworks tag: no receiver (the RX ports kept, their
 // outputs 0); TX_ADD, COMPANY_ID and BCH_T passed to btle_tx, ADV_DATA_FLOPS gone. See CHANGES.md.
+// Modified 2026-11-06 by Miguel Simões: ble-tx-poc-gen: tag_fsm (the tag's link layer and btle_tx) in
+// place of btle_tx: of the TX inputs from the Link Layer only the channel register is used, for the tag's
+// rate and test mode; the I2C bus and the tag's state are new ports. See CHANGES.md and docs/Senseworks/TX_POC_GEN.md.
 
-// iverilog -o btle_phy btle_phy.v scramble_core.v crc24_core.v btle_tx.v crc24.v scramble.v gfsk_modulation.v bit_repeat_upsample.v gauss_filter.v vco.v
+// iverilog -o btle_phy btle_phy.v tag_fsm.v tag_profiles.v scramble_core.v crc24_core.v btle_tx.v crc24.v scramble.v gfsk_modulation.v bit_repeat_upsample.v gauss_filter.v vco.v
 
 `timescale 1ns / 1ps
 module btle_phy #
 (
   parameter integer CRC_STATE_BIT_WIDTH = 24,
   parameter integer CHANNEL_NUMBER_BIT_WIDTH = 6,
-  parameter integer SAMPLE_PER_SYMBOL = 8,
   parameter integer GAUSS_FILTER_BIT_WIDTH = 16,
-  parameter integer NUM_TAP_GAUSS_FILTER = 17,
-  parameter integer VCO_BIT_WIDTH = 16,
   parameter integer SIN_COS_ADDR_BIT_WIDTH = 11,
   parameter integer IQ_BIT_WIDTH = 8,
-  parameter integer GAUSS_FIR_OUT_AMP_SCALE_DOWN_NUM_BIT_SHIFT = 1,
 
   parameter integer GFSK_DEMODULATION_BIT_WIDTH = 16,
   parameter integer LEN_UNIQUE_BIT_SEQUENCE = 32,
   parameter integer NUM_BIT_PAYLOAD_LENGTH = 8, // 8 bit in the core spec 6.2
-  parameter integer GAUSS_TABLE = 0, // passed to btle_tx
-  parameter [47:0] ADV_ADDRESS = 48'hC10203040506, // passed to btle_tx: AdvA, fixed per chip
-  parameter integer ADV_ADDRESS_OTP = 0, // passed to btle_tx
-  parameter integer TX_ADD = 1, // passed to btle_tx: the tag's packet
-  parameter [15:0] COMPANY_ID = 16'hFFFF, // passed to btle_tx
-  parameter integer BCH_T = 8 // passed to btle_tx
+  parameter integer TICK_DIV = 488, // passed to tag_fsm
+  parameter [47:0] ADV_ADDRESS = 48'hC10203040506, // passed to tag_fsm
+  parameter integer ADV_ADDRESS_OTP = 0, // passed to tag_fsm
+  parameter [15:0] COMPANY_ID = 16'hFFFF, // passed to tag_fsm
+  parameter [5:0] CHANNEL = 6'd37, // passed to tag_fsm
+  parameter integer BCH_T = 8 // passed to tag_fsm
 ) (
   input wire clk,
   input wire rst,
 
-  input wire clkb,
-
-  // for tx
+  // for tx: the Link Layer's registers, not used but for tx_channel_number: tag_fsm drives btle_tx
   input wire [3:0] tx_gauss_filter_tap_index, // only need to set 0~8, 9~16 will be mirror of 0~7
   input wire signed [(GAUSS_FILTER_BIT_WIDTH-1) : 0] tx_gauss_filter_tap_value,
 
@@ -76,6 +73,14 @@ module btle_phy #
   output wire tx_bit_upsample_gauss_filter_valid,
   output wire tx_bit_upsample_gauss_filter_valid_last,
 
+  // the tag: its I2C bus and its state
+  input  wire tag_sda_i,
+  output wire tag_scl_oe,
+  output wire tag_sda_oe,
+  output wire tag_cs_n,
+  output wire [15:0] tag_sensor,
+  output wire [47:0] tag_adv_address,
+
   // for rx
   input wire [(LEN_UNIQUE_BIT_SEQUENCE-1) : 0]  rx_unique_bit_sequence,
   input wire [(CHANNEL_NUMBER_BIT_WIDTH-1) : 0] rx_channel_number,
@@ -97,50 +102,30 @@ module btle_phy #
 );
 
 wire unused_adv_address_otp_ready; // the OTP's ready, not used by this controller (see below)
+wire unused_tag_tx_start;
 
-btle_tx # (
-  .NUM_BIT_PAYLOAD_LENGTH(NUM_BIT_PAYLOAD_LENGTH),
-  .CRC_STATE_BIT_WIDTH(CRC_STATE_BIT_WIDTH),
-  .CHANNEL_NUMBER_BIT_WIDTH(CHANNEL_NUMBER_BIT_WIDTH),
-  .SAMPLE_PER_SYMBOL(SAMPLE_PER_SYMBOL),
-  .GAUSS_FILTER_BIT_WIDTH(GAUSS_FILTER_BIT_WIDTH),
-  .GAUSS_TABLE(GAUSS_TABLE),
-  .ADV_ADDRESS(ADV_ADDRESS),
-  .ADV_ADDRESS_OTP(ADV_ADDRESS_OTP),
-  .TX_ADD(TX_ADD),
-  .COMPANY_ID(COMPANY_ID),
+// Register 7 (docs/Architecture/LL_REGISTER_MAP.md), which the ARM writes once at start: [2:0] the rate, 0: off, the
+// value at reset, so that the tag starts when the radio is ready; [3] the test mode; [5:4] the sensor.
+tag_fsm # (
+  .TICK_DIV(TICK_DIV),
   .BCH_T(BCH_T),
-  .NUM_TAP_GAUSS_FILTER(NUM_TAP_GAUSS_FILTER),
-  .VCO_BIT_WIDTH(VCO_BIT_WIDTH),
-  .SIN_COS_ADDR_BIT_WIDTH(SIN_COS_ADDR_BIT_WIDTH),
-  .IQ_BIT_WIDTH(IQ_BIT_WIDTH),
-  .GAUSS_FIR_OUT_AMP_SCALE_DOWN_NUM_BIT_SHIFT(GAUSS_FIR_OUT_AMP_SCALE_DOWN_NUM_BIT_SHIFT)
-) btle_tx_i (
+  .ADV_ADDRESS_OTP(ADV_ADDRESS_OTP),
+  .ADV_ADDRESS(ADV_ADDRESS),
+  .COMPANY_ID(COMPANY_ID),
+  .CHANNEL(CHANNEL)
+) tag_fsm_i (
   .clk(clk),
   .rst(rst),
 
-  .clkb(clkb),
+  .rate(tx_channel_number[2:0]),
+  .sel(tx_channel_number[5:4]),
+  .test_mode(tx_channel_number[3]),
 
-  .gauss_filter_tap_index(tx_gauss_filter_tap_index),
-  .gauss_filter_tap_value(tx_gauss_filter_tap_value),
+  .sda_i(tag_sda_i),
+  .scl_oe(tag_scl_oe),
+  .sda_oe(tag_sda_oe),
+  .cs_n(tag_cs_n),
 
-  .cos_table_write_address(tx_cos_table_write_address),
-  .cos_table_write_data(tx_cos_table_write_data),
-  .sin_table_write_address(tx_sin_table_write_address),
-  .sin_table_write_data(tx_sin_table_write_data),
-  
-  .preamble(tx_preamble),
-
-  .access_address(tx_access_address),
-  .crc_state_init_bit(tx_crc_state_init_bit),
-  .crc_state_init_bit_load(tx_crc_state_init_bit_load),
-  .channel_number(tx_channel_number),
-  .channel_number_load(tx_channel_number_load),
-
-  .pdu_octet_mem_data(tx_pdu_octet_mem_data),
-  .pdu_octet_mem_addr(tx_pdu_octet_mem_addr),
-
-  .tx_start(tx_start),
   // AdvA OTP (ADV_ADDRESS_OTP = 1): programmed in production through a chip-level test port,
   // which this controller does not have: tied off here.
   .adv_address_otp_prog(48'd0),
@@ -162,8 +147,19 @@ btle_tx # (
 
   .bit_upsample_gauss_filter(tx_bit_upsample_gauss_filter),
   .bit_upsample_gauss_filter_valid(tx_bit_upsample_gauss_filter_valid),
-  .bit_upsample_gauss_filter_valid_last(tx_bit_upsample_gauss_filter_valid_last)
+  .bit_upsample_gauss_filter_valid_last(tx_bit_upsample_gauss_filter_valid_last),
+
+  .tx_start(unused_tag_tx_start),
+  .sensor(tag_sensor),
+  .adv_address_sent(tag_adv_address)
 );
+
+// The tag is driven by tag_fsm: the Link Layer's other TX registers go nowhere. The ports stay for the controller's
+// interface, as the receiver's do.
+wire unused_tx_inputs = &{1'b0, tx_gauss_filter_tap_index, tx_gauss_filter_tap_value, tx_cos_table_write_address,
+  tx_cos_table_write_data, tx_sin_table_write_address, tx_sin_table_write_data, tx_preamble, tx_access_address,
+  tx_crc_state_init_bit, tx_crc_state_init_bit_load, tx_channel_number_load,
+  tx_pdu_octet_mem_data, tx_pdu_octet_mem_addr, tx_start};
 
 // No receiver (the senseworks tag, a Broadcaster with a transmitter only): the RX ports are kept for
 // the controller's interface, their outputs constant 0 (nothing is ever received), their inputs unused.

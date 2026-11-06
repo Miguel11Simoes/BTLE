@@ -5,10 +5,13 @@
 // Modified 2026-10-16 by Miguel Simões: ADV_ADDRESS, ADV_DATA_FLOPS and ADV_ADDRESS_OTP passed to btle_phy. See CHANGES.md.
 // Modified 2026-11-04 by Miguel Simões: the senseworks tag: TX_ADD, COMPANY_ID and BCH_T passed to
 // btle_phy, ADV_DATA_FLOPS gone; btle_phy has no receiver. See CHANGES.md.
+// Modified 2026-11-06 by Miguel Simões: ble-tx-poc-gen: tag_fsm in btle_phy, GAUSS_TABLE fixed there at 1:
+// the sensor's bus as new ports; the tag's state, with counters of its packets and of those with no reading,
+// on the Link Layer's read-only registers 42 to 46. See CHANGES.md and docs/Senseworks/TX_POC_GEN.md.
 
-// btle_controller = btle_ll (link layer) + btle_phy (phy: btle_tx; no receiver on the tag branches)
+// btle_controller = btle_ll (link layer) + btle_phy (phy: tag_fsm, with btle_tx; no receiver on the tag branches)
 
-// iverilog -o btle_controller btle_controller.v clock_domain_conversion_iq.v ./btle_ll/hw/fpga/btle_ll_stub.v btle_phy.v scramble_core.v crc24_core.v sdpram_two_clk.v sdpram_one_clk.v btle_tx.v crc24.v scramble.v gfsk_modulation.v bit_repeat_upsample.v gauss_filter.v vco.v
+// iverilog -o btle_controller btle_controller.v clock_domain_conversion_iq.v ./btle_ll/hw/fpga/btle_ll_stub.v btle_phy.v tag_fsm.v tag_profiles.v scramble_core.v crc24_core.v sdpram_two_clk.v sdpram_one_clk.v btle_tx.v crc24.v scramble.v gfsk_modulation.v bit_repeat_upsample.v gauss_filter.v vco.v
 
 `define KEEP_FOR_DBG (*mark_debug="true",DONT_TOUCH="TRUE"*)
 
@@ -31,13 +34,9 @@ module btle_controller #
 
   parameter integer CRC_STATE_BIT_WIDTH = 24,
   parameter integer CHANNEL_NUMBER_BIT_WIDTH = 6,
-  parameter integer SAMPLE_PER_SYMBOL = 8,
   parameter integer GAUSS_FILTER_BIT_WIDTH = 16,
-  parameter integer NUM_TAP_GAUSS_FILTER = 17,
-  parameter integer VCO_BIT_WIDTH = 16,
   parameter integer SIN_COS_ADDR_BIT_WIDTH = 11,
   parameter integer IQ_BIT_WIDTH = 8,
-  parameter integer GAUSS_FIR_OUT_AMP_SCALE_DOWN_NUM_BIT_SHIFT = 1,
 
   parameter integer GFSK_DEMODULATION_BIT_WIDTH = 16,
   parameter integer LEN_UNIQUE_BIT_SEQUENCE = 32,
@@ -48,14 +47,11 @@ module btle_controller #
   parameter integer BRAM_DATA_WIDTH = (2*RF_I_OR_Q_BIT_WIDTH),
   parameter integer BRAM_ADDR_WIDTH_IN_BYTE = $clog2(BRAM_DEPTH*BRAM_DATA_WIDTH/8),
 
-  // Area reduction B2 (branch ble-tx-table); defaults to the original design.
-  parameter integer GAUSS_TABLE = 0,       // 1: fixed-tap Gaussian table instead of the runtime FIR (gauss_filter)
-  // The senseworks tag's transmitter (branches ble-tx-tag-*, from ble-tx-min): AdvA fixed per chip
-  // (a ROM here, an OTP in the ASIC), one packet format with the sensor's two bytes and their BCH
-  // parity (btle_tx.v)
-  parameter [47:0] ADV_ADDRESS = 48'hC10203040506,
-  parameter integer ADV_ADDRESS_OTP = 0,   // AdvA from six GF180MCU eFuse blocks instead of the ROM
-  parameter integer TX_ADD = 1,            // 1: AdvA a random static address; 0: a public one
+  // The tag (ble-tx-poc-gen, tag_fsm.v) and the BCH parity of its packet (btle_tx.v)
+  parameter integer TAG_TICK_DIV = 488,    // bb_clk clocks per tick: 32.787 kHz, SCL at 8.2 kHz
+  parameter [5:0] TAG_CHANNEL = 6'd37,
+  parameter [47:0] ADV_ADDRESS = 48'hC10203040506,  // a ROM here, an OTP in the ASIC; a random static address
+  parameter integer ADV_ADDRESS_OTP = 0,   // AdvA from six GF180MCU eFuse blocks
   parameter [15:0] COMPANY_ID = 16'hFFFF,  // the value for tests; a product needs its own (Bluetooth SIG)
   parameter integer BCH_T = 8              // errors the BCH code corrects: 8, 12 or 18
 ) (
@@ -89,6 +85,13 @@ module btle_controller #
   // ============================to host: UART HCI=========================
   input  wire uart_rx,
   output wire uart_tx,
+
+  // =================the tag's bus, I2C or SPI (tag_fsm.v)================
+  // open-drain on the board: an IOBUF per pin, T = !oe, I = 0; external pull-ups
+  `KEEP_FOR_DBG input  wire tag_sda_i,
+  `KEEP_FOR_DBG output wire tag_scl_oe,
+  `KEEP_FOR_DBG output wire tag_sda_oe,
+  `KEEP_FOR_DBG output wire tag_cs_n,
 
   // =========================to zero-IF RF transceiver====================
   `KEEP_FOR_DBG input wire [7:0]         rf_gpio,
@@ -195,6 +198,22 @@ wire                                              tx_iq_valid_last;
 `KEEP_FOR_DBG wire                                              agc_lock_state;
 `KEEP_FOR_DBG wire [6:0]                                        rf_gain;
 
+// ===========the tag's state, for the Link Layer's read-only registers (docs/Architecture/LL_REGISTER_MAP.md)=========
+wire [15:0] tag_sensor;
+wire [47:0] tag_adv_address;
+wire [31:0] tag_status0;
+reg [31:0] tag_events;
+reg [31:0] tag_failures;
+always @ (posedge bb_clk) begin
+  if (bb_rst) begin
+    tag_events <= 32'd0;
+    tag_failures <= 32'd0;
+  end else if (tx_iq_valid_last) begin
+    tag_events <= tag_events + 32'd1;
+    if (tag_sensor == 16'hFFFF) tag_failures <= tag_failures + 32'd1;   // no sensor: no reading is all 1s
+  end
+end
+
 // =================link layer and auxiliary==================
 // `KEEP_FOR_DBG wire [15:0] ll_reg_gpio;
 wire [BRAM_ADDR_WIDTH-1 : 0] bram_addr_b;
@@ -270,6 +289,7 @@ assign tx_access_address = (baremetal_phy_intf_mode? ext_tx_access_address : ll_
 assign tx_crc_state_init_bit = (baremetal_phy_intf_mode? ext_tx_crc_state_init_bit : ll_tx_crc_state_init_bit);
 assign tx_crc_state_init_bit_load = (baremetal_phy_intf_mode? ext_tx_crc_state_init_bit_load : ll_tx_start);
 assign tx_channel_number = (baremetal_phy_intf_mode? ext_tx_channel_number : ll_tx_channel_number);
+assign tag_status0 = {8'd0, 1'b1, tx_channel_number[3], TAG_CHANNEL, tag_sensor};
 assign tx_channel_number_load = (baremetal_phy_intf_mode? ext_tx_channel_number_load : ll_tx_start);
 
 assign tx_pdu_octet_mem_data = (baremetal_phy_intf_mode? ext_tx_pdu_octet_mem_data : ll_tx_pdu_octet_mem_data);
@@ -437,6 +457,12 @@ btle_ll #
   .agc_lock_change(agc_lock_change),
   .agc_lock_state(agc_lock_state),
 
+  .tag_status0(tag_status0),
+  .tag_status1(tag_events),
+  .tag_status2(tag_failures),
+  .tag_status3(tag_adv_address[31:0]),
+  .tag_status4({11'd0, tx_channel_number[5:4], tx_channel_number[2:0], tag_adv_address[47:32]}),
+
   .simulation_en(1'b0), //disable simulation mode
   .simulation_rx_ram_read_en(1'b0), //disable simulation mode
 
@@ -466,19 +492,15 @@ btle_phy #
 (
   .CRC_STATE_BIT_WIDTH(CRC_STATE_BIT_WIDTH),
   .CHANNEL_NUMBER_BIT_WIDTH(CHANNEL_NUMBER_BIT_WIDTH),
-  .SAMPLE_PER_SYMBOL(SAMPLE_PER_SYMBOL),
   .GAUSS_FILTER_BIT_WIDTH(GAUSS_FILTER_BIT_WIDTH),
-  .GAUSS_TABLE(GAUSS_TABLE),
+  .TICK_DIV(TAG_TICK_DIV),
+  .CHANNEL(TAG_CHANNEL),
   .ADV_ADDRESS(ADV_ADDRESS),
   .ADV_ADDRESS_OTP(ADV_ADDRESS_OTP),
-  .TX_ADD(TX_ADD),
   .COMPANY_ID(COMPANY_ID),
   .BCH_T(BCH_T),
-  .NUM_TAP_GAUSS_FILTER(NUM_TAP_GAUSS_FILTER),
-  .VCO_BIT_WIDTH(VCO_BIT_WIDTH),
   .SIN_COS_ADDR_BIT_WIDTH(SIN_COS_ADDR_BIT_WIDTH),
   .IQ_BIT_WIDTH(IQ_BIT_WIDTH),
-  .GAUSS_FIR_OUT_AMP_SCALE_DOWN_NUM_BIT_SHIFT(GAUSS_FIR_OUT_AMP_SCALE_DOWN_NUM_BIT_SHIFT),
 
   .GFSK_DEMODULATION_BIT_WIDTH(GFSK_DEMODULATION_BIT_WIDTH),
   .LEN_UNIQUE_BIT_SEQUENCE(LEN_UNIQUE_BIT_SEQUENCE),
@@ -486,8 +508,6 @@ btle_phy #
 ) btle_phy_i (
   .clk(bb_clk),
   .rst(bb_rst),
-
-  .clkb(s00_axi_aclk),
 
   .tx_gauss_filter_tap_index(tx_gauss_filter_tap_index),
   .tx_gauss_filter_tap_value(tx_gauss_filter_tap_value),
@@ -527,6 +547,14 @@ btle_phy #
   .tx_bit_upsample_gauss_filter(ext_tx_bit_upsample_gauss_filter),
   .tx_bit_upsample_gauss_filter_valid(ext_tx_bit_upsample_gauss_filter_valid),
   .tx_bit_upsample_gauss_filter_valid_last(ext_tx_bit_upsample_gauss_filter_valid_last),
+
+  // the tag
+  .tag_sda_i(tag_sda_i),
+  .tag_scl_oe(tag_scl_oe),
+  .tag_sda_oe(tag_sda_oe),
+  .tag_cs_n(tag_cs_n),
+  .tag_sensor(tag_sensor),
+  .tag_adv_address(tag_adv_address),
 
   // for rx
   .rx_unique_bit_sequence(rx_unique_bit_sequence),

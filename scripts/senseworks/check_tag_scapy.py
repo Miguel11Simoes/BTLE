@@ -2,13 +2,13 @@
 
 Author: Miguel Simões
 
-Reads the JSON that tests/test_tx_tag_packet.py writes (each packet the RTL sent: access address, PDU,
-CRC bits in the order sent) and checks, with scapy and nothing of this repository:
+Reads the JSON that tests/test_tx_tag_packet.py or tests/test_tag_core.py writes (each packet the RTL sent: access
+address, PDU, CRC bits in the order sent) and checks, with scapy and nothing of this repository:
 - the CRC that scapy computes over the PDU (init 0x555555) is the one the transmitter sent;
-- scapy reads the PDU as ADV_NONCONN_IND, TxAdd random, RxAdd 0, the length the PDU has, AdvA the
-  chip's;
+- scapy reads the PDU as ADV_NONCONN_IND, the TxAdd of the packet (its "tx_add"; 1 when absent), RxAdd
+  0, the length the PDU has, AdvA the chip's;
 - AdvData is exactly one AD structure, Manufacturer Specific Data, its length the rest of the PDU,
-  the Company ID 0xFFFF, then the sensor's two bytes and the parity.
+  the Company ID 0xFFFF, then the sensor's bytes and the parity.
 scapy is not one of the repository's dependencies: run this with an interpreter that has it.
 
   python3 scripts/senseworks/check_tag_scapy.py PACKETS.json
@@ -41,7 +41,8 @@ def main() -> None:
         # changes only the whitening, which the receiver has undone): scapy reads an advertising PDU
         frame = BTLE((0x8E89BED6).to_bytes(4, "little") + pdu + crc)
         adv = frame[BTLE_ADV]
-        assert adv.PDU_type == 2 and adv.TxAdd == 1 and adv.RxAdd == 0 and adv.Length == len(pdu) - 2, adv.summary()
+        tx_add = row.get("tx_add", 1)
+        assert adv.PDU_type == 2 and adv.TxAdd == tx_add and adv.RxAdd == 0 and adv.Length == len(pdu) - 2, adv.summary()
         nonconn = frame[BTLE_ADV_NONCONN_IND]
         adv_address = pdu[2:8][::-1].hex(":")
         assert nonconn.AdvA == adv_address, (nonconn.AdvA, adv_address)
@@ -52,11 +53,12 @@ def main() -> None:
         mfg = hdr[EIR_Manufacturer_Specific_Data]
         assert mfg.company_identifier == 0xFFFF
         rest = bytes(mfg[Raw].load) if Raw in mfg else b""
-        assert rest[:2] == bytes.fromhex(row["sensor"]) and rest == pdu[12:], (rest.hex(), row["sensor"])
+        sensor = bytes.fromhex(row["sensor"])
+        assert rest[:len(sensor)] == sensor and rest == pdu[12:], (rest.hex(), row["sensor"])
         checked += 1
     by_t = sorted({r["t"] for r in rows})
-    print(f"PASS: {checked} packets (t = {by_t}): scapy's CRC equal to the one sent; ADV_NONCONN_IND, TxAdd random, "
-          f"AdvA, one Manufacturer Specific Data structure (Company ID 0xFFFF), the sensor's two bytes, the parity")
+    print(f"PASS: {checked} packets (t = {by_t}): scapy's CRC equal to the one sent; ADV_NONCONN_IND, the TxAdd sent, "
+          f"AdvA, one Manufacturer Specific Data structure (Company ID 0xFFFF), the sensor's bytes, the parity")
 
 
 if __name__ == "__main__":
