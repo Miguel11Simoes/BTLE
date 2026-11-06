@@ -125,42 +125,42 @@
         ]
       },
       "instances": {
-        "tag_core_i.btle_tx_i.btle_tx_pdu_buffer_i.gen_adv_address_otp.otp_byte[0].efuse_i": {
+        "tag_fsm_i.btle_tx_i.btle_tx_pdu_buffer_i.gen_adv_address_otp.otp_byte[0].efuse_i": {
           "location": [
             28,
             40
           ],
           "orientation": "N"
         },
-        "tag_core_i.btle_tx_i.btle_tx_pdu_buffer_i.gen_adv_address_otp.otp_byte[1].efuse_i": {
+        "tag_fsm_i.btle_tx_i.btle_tx_pdu_buffer_i.gen_adv_address_otp.otp_byte[1].efuse_i": {
           "location": [
             141.56,
             40
           ],
           "orientation": "N"
         },
-        "tag_core_i.btle_tx_i.btle_tx_pdu_buffer_i.gen_adv_address_otp.otp_byte[2].efuse_i": {
+        "tag_fsm_i.btle_tx_i.btle_tx_pdu_buffer_i.gen_adv_address_otp.otp_byte[2].efuse_i": {
           "location": [
             264,
             40
           ],
           "orientation": "N"
         },
-        "tag_core_i.btle_tx_i.btle_tx_pdu_buffer_i.gen_adv_address_otp.otp_byte[3].efuse_i": {
+        "tag_fsm_i.btle_tx_i.btle_tx_pdu_buffer_i.gen_adv_address_otp.otp_byte[3].efuse_i": {
           "location": [
             382,
             40
           ],
           "orientation": "N"
         },
-        "tag_core_i.btle_tx_i.btle_tx_pdu_buffer_i.gen_adv_address_otp.otp_byte[4].efuse_i": {
+        "tag_fsm_i.btle_tx_i.btle_tx_pdu_buffer_i.gen_adv_address_otp.otp_byte[4].efuse_i": {
           "location": [
             500,
             40
           ],
           "orientation": "N"
         },
-        "tag_core_i.btle_tx_i.btle_tx_pdu_buffer_i.gen_adv_address_otp.otp_byte[5].efuse_i": {
+        "tag_fsm_i.btle_tx_i.btle_tx_pdu_buffer_i.gen_adv_address_otp.otp_byte[5].efuse_i": {
           "location": [
             622.36,
             40
