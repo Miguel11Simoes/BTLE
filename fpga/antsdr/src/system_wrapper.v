@@ -33,6 +33,12 @@ module system_wrapper
     gpio_i,
     gpio_o,
     gpio_status,
+    tag_cs_n,
+    tag_miso_i,
+    tag_scl_i,
+    tag_scl_oe,
+    tag_sda_i,
+    tag_sda_oe,
     gpio_t,
     gps_pps,
     iic_main_scl_io,
@@ -101,6 +107,12 @@ module system_wrapper
   input [63:0]gpio_i;
   output [63:0]gpio_o;
   input [7:0] gpio_status;
+  output tag_cs_n;
+  input tag_miso_i;
+  input tag_scl_i;
+  output tag_scl_oe;
+  input tag_sda_i;
+  output tag_sda_oe;
   output [63:0]gpio_t;
   input gps_pps;
   inout iic_main_scl_io;
@@ -255,6 +267,12 @@ module system_wrapper
         .gpio_i(gpio_i),
         .gpio_o(gpio_o),
         .gpio_status(gpio_status),
+        .tag_cs_n(tag_cs_n),
+        .tag_miso_i(tag_miso_i),
+        .tag_scl_i(tag_scl_i),
+        .tag_scl_oe(tag_scl_oe),
+        .tag_sda_i(tag_sda_i),
+        .tag_sda_oe(tag_sda_oe),
         .gpio_t(gpio_t),
         .gps_pps(gps_pps),
         .iic_main_scl_i(iic_main_scl_i),

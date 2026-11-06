@@ -30,6 +30,27 @@ create_debug_port u_ila_0 probe
 set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe3]
 set_property port_width 1 [get_debug_ports u_ila_0/probe3]
 connect_debug_port u_ila_0/probe3 [get_nets [list i_system_wrapper/system_i/btle_controller_0/inst/ll_itrpt2]]
+# ble-tx-poc: the tag's state machine and its bus, on the same ILA (16 MHz, 65536 samples: 4 ms, a bus transaction)
+create_debug_port u_ila_0 probe
+set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe4]
+set_property port_width 4 [get_debug_ports u_ila_0/probe4]
+connect_debug_port u_ila_0/probe4 [get_nets [list {i_system_wrapper/system_i/btle_controller_0/inst/btle_phy_i/tag_core_i/state[0]} {i_system_wrapper/system_i/btle_controller_0/inst/btle_phy_i/tag_core_i/state[1]} {i_system_wrapper/system_i/btle_controller_0/inst/btle_phy_i/tag_core_i/state[2]} {i_system_wrapper/system_i/btle_controller_0/inst/btle_phy_i/tag_core_i/state[3]}]]
+create_debug_port u_ila_0 probe
+set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe5]
+set_property port_width 2 [get_debug_ports u_ila_0/probe5]
+connect_debug_port u_ila_0/probe5 [get_nets [list {i_system_wrapper/system_i/btle_controller_0/inst/btle_phy_i/tag_core_i/ph[0]} {i_system_wrapper/system_i/btle_controller_0/inst/btle_phy_i/tag_core_i/ph[1]}]]
+create_debug_port u_ila_0 probe
+set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe6]
+set_property port_width 5 [get_debug_ports u_ila_0/probe6]
+connect_debug_port u_ila_0/probe6 [get_nets [list {i_system_wrapper/system_i/btle_controller_0/inst/btle_phy_i/tag_core_i/pc[0]} {i_system_wrapper/system_i/btle_controller_0/inst/btle_phy_i/tag_core_i/pc[1]} {i_system_wrapper/system_i/btle_controller_0/inst/btle_phy_i/tag_core_i/pc[2]} {i_system_wrapper/system_i/btle_controller_0/inst/btle_phy_i/tag_core_i/pc[3]} {i_system_wrapper/system_i/btle_controller_0/inst/btle_phy_i/tag_core_i/pc[4]}]]
+create_debug_port u_ila_0 probe
+set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe7]
+set_property port_width 3 [get_debug_ports u_ila_0/probe7]
+connect_debug_port u_ila_0/probe7 [get_nets [list i_system_wrapper/system_i/btle_controller_0/inst/btle_phy_i/tag_core_i/tag_bus_i/scl_oe i_system_wrapper/system_i/btle_controller_0/inst/btle_phy_i/tag_core_i/tag_bus_i/sda_oe i_system_wrapper/system_i/btle_controller_0/inst/btle_phy_i/tag_core_i/tag_bus_i/active]]
+create_debug_port u_ila_0 probe
+set_property PROBE_TYPE DATA_AND_TRIGGER [get_debug_ports u_ila_0/probe8]
+set_property port_width 2 [get_debug_ports u_ila_0/probe8]
+connect_debug_port u_ila_0/probe8 [get_nets [list i_system_wrapper/system_i/btle_controller_0/inst/btle_phy_i/tag_core_i/scl_i i_system_wrapper/system_i/btle_controller_0/inst/btle_phy_i/tag_core_i/sda_i]]
 set_property C_CLK_INPUT_FREQ_HZ 300000000 [get_debug_cores dbg_hub]
 set_property C_ENABLE_CLK_DIVIDER false [get_debug_cores dbg_hub]
 set_property C_USER_SCAN_CHAIN 1 [get_debug_cores dbg_hub]

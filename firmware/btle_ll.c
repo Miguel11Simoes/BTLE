@@ -444,24 +444,19 @@ static inline int parse_mac(const char *mac_str, unsigned char mac[6]) {
   return 0;  // success
 }
 
-// ---------------- the senseworks tag (branches ble-tx-tag-*, 2026-11-04, Miguel Simões) ----------------
-// TX only: the advertising events of a Broadcaster. The packet's format is fixed in the hardware
-// (verilog/btle_tx.v): only the sensor's two bytes are written (PDU addresses 12 and 13, through the
-// pair of reg 8); the transmitter computes the BCH parity, the CRC and the whitening. Per event: the
-// sensor's bytes, then channels 37, 38 and 39: the AD9361's TX LO, reg 7, a pulse of reg 9 (1 then 0:
-// one packet; held at 1, the transmitter would send again after each packet), the packet's time.
-// Between events: the interval plus advDelay, pseudo-random 0..10 ms (Core 6.1, Vol 6 Part B 4.4.2.2).
-// NOT TESTED ON A BOARD: the register sequence is the one tests/tag_controller_tb.v checks; the RF
-// settings (TX LO, attenuation, the DAC's data source) follow ADI's drivers and HDL.
-#define BTLE_LL_REG_TX_GAUSS_TAP_IDX   1
-#define BTLE_LL_REG_TX_PREAMBLE_IDX    4
-#define BTLE_LL_REG_TX_ACCESS_ADDR_IDX 5
-#define BTLE_LL_REG_TX_CRC_INIT_IDX    6
-#define BTLE_LL_REG_TX_CHANNEL_IDX     7
-#define BTLE_LL_REG_TX_PDU_PAIR_IDX    8
-#define BTLE_LL_REG_TX_START_IDX       9
-#define TAG_SENSOR_PDU_ADDR            12   // the sensor's first byte; the second at 13
-#define TAG_PACKET_TIME_US             400  // the longest tag packet (t = 18) is 304 us
+// ---------------- the tag of ble-tx-poc (2026-11-06, Miguel Simões) ----------------
+// The tag runs in the PL with no processor (verilog/tag_core.v): it reads its profile and the sensor, and sends the
+// packets. The ARM only initializes the AD9361: the RF scripts, the TX attenuation, the TX LO at the profile's channel
+// (read from the tag's state: changing the channel is regraving the profile), the DAC's data source. Then it only reads
+// the state, for debugging. NOT TESTED ON A BOARD: the RF settings follow ADI's drivers and HDL; the registers are the
+// ones tests/tag_controller_tb.v reads.
+#define BTLE_LL_REG_TAG_STATUS_IDX     42   // [15:0] sensor, [21:16] channel, [22] test mode, [23] TxAdd, [24] profile read,
+                                            // [25] AdvA read, [26] the last reading failed, [31:28] the state machine
+#define BTLE_LL_REG_TAG_EVENTS_IDX     43   // packets sent
+#define BTLE_LL_REG_TAG_FAILURES_IDX   44   // of which with a failed reading (0xFF)
+#define BTLE_LL_REG_TAG_ADV_LOW_IDX    45   // AdvA[31:0]
+#define BTLE_LL_REG_TAG_ADV_HIGH_IDX   46   // [15:0] AdvA[47:32], [31:16] the interval, units of 32 ticks (1 ms at 32 kHz)
+#define TAG_FIRST_PACKET_TIMEOUT_MS    5000
 // The AD9361's DAC core (cf-ad9361-dds-core-lpc in fpga/*/devicetree.dts): the data source of each
 // DAC channel (ADI axi_dac REG_CHAN_CNTRL_7, DAC_DDS_SEL) must be 2, the input data (dac_data_*, which
 // btle_controller's tx_iq_signal_ext feeds through util_ad9361_dac_upack), not 0, the internal DDS.
@@ -482,15 +477,11 @@ static int write_sysfs(const char *file, const char *value) {
   return 0;
 }
 
-static int tag_mode(uint32_t interval_ms, uint32_t sensor, int increment, int tx_gain_db, uint32_t n_events,
-                    int omit_rf_init_script) {
-  // the Gaussian taps 0..8 of python/btlelib.py (BT = 0.5, 8 samples per symbol); with GAUSS_TABLE = 1
-  // the transmitter has them fixed and ignores these writes
-  static const int32_t gauss_taps[9] = {0, 0, 0, 1, 4, 9, 15, 22, 24};
+static int tag_mode(uint32_t status_period_ms, int tx_gain_db, uint32_t n_reports, int omit_rf_init_script) {
   char value_str[FREQ_HZ_STRING_BUF_SIZE];
   int fd_mem;
   volatile uint32_t *dac;
-  uint32_t e, ch;
+  uint32_t r, ch, status, waited_ms;
 
   if (omit_rf_init_script == 0) {
     if (system("./btle_rf_init.sh") == -1 || system("./fir.sh") == -1) { perror("system"); return -1; }
@@ -509,41 +500,33 @@ static int tag_mode(uint32_t interval_ms, uint32_t sensor, int increment, int tx
   if (dac == MAP_FAILED) { perror("DAC mmap"); close(fd_mem); return -1; }
   for (ch = 0; ch < 2; ch++) dac[AD9361_DAC_DDS_SEL_IDX(ch)] = AD9361_DAC_DDS_SEL_INPUT;   // I and Q of TX1
 
-  fpga_regs[0] = (1<<15);                       // reset the counters, as the RX mode does
-  __sync_synchronize();
-  usleep(100);
-  fpga_regs[0] = 0;
-  for (ch = 0; ch < 9; ch++) fpga_regs[BTLE_LL_REG_TX_GAUSS_TAP_IDX] = (ch << 16) | (gauss_taps[ch] & 0xFFFF);
-  fpga_regs[BTLE_LL_REG_TX_GAUSS_TAP_IDX] = (15 << 16);
-  fpga_regs[BTLE_LL_REG_TX_PREAMBLE_IDX] = 0xAA;
-  fpga_regs[BTLE_LL_REG_TX_ACCESS_ADDR_IDX] = 0x8E89BED6;
-  fpga_regs[BTLE_LL_REG_TX_CRC_INIT_IDX] = 0x555555;
-  __sync_synchronize();
+  // The RF scripts restart the clocks, and with them the tag (bb_rst follows the MMCM's lock): the first packet
+  // means the profile has been read, and so the channel in the registers is the profile's.
+  for (waited_ms = 0; fpga_regs[BTLE_LL_REG_TAG_EVENTS_IDX] == 0 && waited_ms < TAG_FIRST_PACKET_TIMEOUT_MS; waited_ms += 10) {
+    usleep(10000);
+  }
+  status = fpga_regs[BTLE_LL_REG_TAG_STATUS_IDX];
+  if (fpga_regs[BTLE_LL_REG_TAG_EVENTS_IDX] == 0) {
+    printf("tag: no packet after %u ms: state 0x%08X\n", TAG_FIRST_PACKET_TIMEOUT_MS, status);
+  }
+  ch = (status >> 16) & 0x3F;
+  freq_Hz_to_string(channel_number_to_freq_Hz(ch), value_str);
+  if (write_sysfs(ad9361_tx_lo_file, value_str) != 0) return -1;
+  printf("tag: channel %u, TX LO %s Hz, TX gain %d dB, AdvA %04X%08X (%s, TxAdd %u), profile %s, interval %u units\n",
+         ch, value_str, tx_gain_db, fpga_regs[BTLE_LL_REG_TAG_ADV_HIGH_IDX] & 0xFFFF, fpga_regs[BTLE_LL_REG_TAG_ADV_LOW_IDX],
+         ((status >> 25) & 1) ? "the EEPROM's EUI-48" : "compiled in", (status >> 23) & 1,
+         ((status >> 24) & 1) ? "from the EEPROM" : "compiled in (the EEPROM's failed its checks)",
+         fpga_regs[BTLE_LL_REG_TAG_ADV_HIGH_IDX] >> 16);
 
   signal(SIGINT, handle_sigint);
   signal(SIGTERM, handle_sigint);
-  srand((unsigned)get_time_us());
-  printf("tag: interval %u ms + advDelay 0..10 ms, sensor 0x%04X%s, TX gain %d dB, %u events (0: until stopped)\n",
-         interval_ms, sensor & 0xFFFF, increment ? " (+1 per event)" : "", tx_gain_db, n_events);
-  for (e = 0; signal_stop == 0 && (n_events == 0 || e < n_events); e++) {
-    uint32_t value = (sensor + (increment ? e : 0)) & 0xFFFF;
-    // d0 = the value's first byte sent (its most significant), d1 the second
-    fpga_regs[BTLE_LL_REG_TX_PDU_PAIR_IDX] = (TAG_SENSOR_PDU_ADDR << 16) | ((value >> 8) & 0xFF);
-    fpga_regs[BTLE_LL_REG_TX_PDU_PAIR_IDX] = ((TAG_SENSOR_PDU_ADDR + 1) << 16) | (value & 0xFF);
-    for (ch = 37; ch <= 39; ch++) {
-      freq_Hz_to_string(channel_number_to_freq_Hz(ch), value_str);
-      if (write_sysfs(ad9361_tx_lo_file, value_str) != 0) return -1;
-      fpga_regs[BTLE_LL_REG_TX_CHANNEL_IDX] = ch;
-      __sync_synchronize();
-      fpga_regs[BTLE_LL_REG_TX_START_IDX] = 1;
-      __sync_synchronize();
-      fpga_regs[BTLE_LL_REG_TX_START_IDX] = 0;
-      __sync_synchronize();
-      usleep(TAG_PACKET_TIME_US);
-    }
-    usleep(interval_ms * 1000 + (uint32_t)(rand() % 10001));   // advDelay: 0..10 ms
+  for (r = 0; signal_stop == 0 && (n_reports == 0 || r < n_reports); r++) {
+    status = fpga_regs[BTLE_LL_REG_TAG_STATUS_IDX];
+    printf("tag: %u packets, %u with a failed reading; last sensor 0x%04X%s%s\n", fpga_regs[BTLE_LL_REG_TAG_EVENTS_IDX],
+           fpga_regs[BTLE_LL_REG_TAG_FAILURES_IDX], status & 0xFFFF, ((status >> 26) & 1) ? " (failed)" : "",
+           ((status >> 22) & 1) ? " (test mode)" : "");
+    usleep(status_period_ms * 1000);
   }
-  printf("tag: %u events sent\n", e);
   munmap((void *)dac, AD9361_DAC_MAP_SIZE);
   close(fd_mem);
   munmap((void *)fpga_regs, BTLE_LL_REG_SIZE);
@@ -560,12 +543,10 @@ static inline void print_usage() {
   printf("  -a access address : such as 0x8E89BED6\n");
   printf("  -q IQ capture duration in milli seconds. Integer number.\n");
   printf("  -o 1: omit rf init script; 0: execute rf init script.\n");
-  printf("  the senseworks tag (TX only, ble-tx-tag-*):\n");
-  printf("  -T advertising interval in ms (at least 20): the tag mode, instead of the receiver\n");
-  printf("  -s the sensor's two bytes, such as 0x1234 (d0 = 0x12, d1 = 0x34)\n");
-  printf("  -k 1: add 1 to the sensor's value at each event (to count lost events at the gateway)\n");
+  printf("  the tag (ble-tx-poc: it runs in the PL; this only initializes the radio and reports):\n");
+  printf("  -T period of the report in ms: the tag mode, instead of the receiver\n");
   printf("  -g TX gain in dB, 0 to -89 (an attenuation; default -10)\n");
-  printf("  -e number of events, 0 until stopped (default 0)\n");
+  printf("  -e number of reports, 0 until stopped (default 0)\n");
 }
 
 int main(int argc, char *argv[])
@@ -601,25 +582,15 @@ int main(int argc, char *argv[])
   uint32_t crc_init = 0x555555; // default to 0x555555
   uint32_t unique_bit_seq = 0x8E89BED6; // default to 0x8E89BED6packet_word
 
-  uint32_t tag_interval_ms = 0, tag_sensor = 0, tag_events = 0;   // the tag mode (-T)
-  int tag_increment = 0, tag_tx_gain_db = -10;
+  uint32_t tag_report_ms = 0, tag_reports = 0;   // the tag mode (-T)
+  int tag_tx_gain_db = -10;
 
   freq_hz = channel_number_to_freq_Hz(channel_number);
 
-  while ((opt = getopt(argc, argv, "i:m:n:c:a:q:o:T:s:k:g:e:")) != -1) {
+  while ((opt = getopt(argc, argv, "i:m:n:c:a:q:o:T:g:e:")) != -1) {
     switch (opt) {
       case 'T':
-        tag_interval_ms = (uint32_t)strtoul(optarg, NULL, 0);
-        if (tag_interval_ms < 20) {
-          fprintf(stderr, "The advertising interval is at least 20 ms: %s\n", optarg);
-          return EXIT_FAILURE;
-        }
-        break;
-      case 's':
-        tag_sensor = (uint32_t)strtoul(optarg, NULL, 0) & 0xFFFF;
-        break;
-      case 'k':
-        tag_increment = atoi(optarg);
+        tag_report_ms = (uint32_t)strtoul(optarg, NULL, 0);
         break;
       case 'g':
         tag_tx_gain_db = atoi(optarg);
@@ -629,7 +600,7 @@ int main(int argc, char *argv[])
         }
         break;
       case 'e':
-        tag_events = (uint32_t)strtoul(optarg, NULL, 0);
+        tag_reports = (uint32_t)strtoul(optarg, NULL, 0);
         break;
       case 'i':
         strcpy(ifname, optarg);
@@ -679,9 +650,8 @@ int main(int argc, char *argv[])
     }
   }
 
-  if (tag_interval_ms != 0) {   // the senseworks tag: TX only, no receiver
-    return tag_mode(tag_interval_ms, tag_sensor, tag_increment, tag_tx_gain_db, tag_events,
-                    omit_rf_init_script) == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
+  if (tag_report_ms != 0) {   // the tag: TX only, no receiver, in the PL
+    return tag_mode(tag_report_ms, tag_tx_gain_db, tag_reports, omit_rf_init_script);
   }
 
   if (iq_duration_ms == -1) {

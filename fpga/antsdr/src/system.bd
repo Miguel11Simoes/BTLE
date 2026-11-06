@@ -408,6 +408,24 @@
         "direction": "I",
         "left": "7",
         "right": "0"
+      },
+      "tag_scl_i": {
+        "direction": "I"
+      },
+      "tag_sda_i": {
+        "direction": "I"
+      },
+      "tag_miso_i": {
+        "direction": "I"
+      },
+      "tag_scl_oe": {
+        "direction": "O"
+      },
+      "tag_sda_oe": {
+        "direction": "O"
+      },
+      "tag_cs_n": {
+        "direction": "O"
       }
     },
     "components": {
@@ -4203,6 +4221,42 @@
           "util_ad9361_tdd_sync/sync_out",
           "axi_ad9361/tdd_sync",
           "tdd_sync_o"
+        ]
+      },
+      "tag_scl_i_1": {
+        "ports": [
+          "tag_scl_i",
+          "btle_controller_0/tag_scl_i"
+        ]
+      },
+      "tag_sda_i_1": {
+        "ports": [
+          "tag_sda_i",
+          "btle_controller_0/tag_sda_i"
+        ]
+      },
+      "tag_miso_i_1": {
+        "ports": [
+          "tag_miso_i",
+          "btle_controller_0/tag_miso_i"
+        ]
+      },
+      "btle_controller_0_tag_scl_oe": {
+        "ports": [
+          "btle_controller_0/tag_scl_oe",
+          "tag_scl_oe"
+        ]
+      },
+      "btle_controller_0_tag_sda_oe": {
+        "ports": [
+          "btle_controller_0/tag_sda_oe",
+          "tag_sda_oe"
+        ]
+      },
+      "btle_controller_0_tag_cs_n": {
+        "ports": [
+          "btle_controller_0/tag_cs_n",
+          "tag_cs_n"
         ]
       }
     },

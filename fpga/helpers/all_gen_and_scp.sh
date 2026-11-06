@@ -29,6 +29,7 @@ scp ad9361_fir_smpl8M_pass0.8_stop1.1.ftr root@10.10.10.10:
 scp update_BOOT_partition.sh root@10.10.10.10:
 scp fir.sh root@10.10.10.10:
 scp btle_rf_init_wideband_no_fir_no_tx.sh root@10.10.10.10:
+scp btle_rf_init.sh root@10.10.10.10:
 scp ../$HARDWARE/devicetree.dtb root@10.10.10.10:
 scp ../../firmware/btle_ll root@10.10.10.10:
 echo "Try to run remotely on board and reboot ..."
