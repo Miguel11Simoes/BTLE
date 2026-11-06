@@ -437,7 +437,7 @@ def scenarios() -> list[Scenario]:
                                   "reset_after": after, "i2c_monitor": 0}))
     # clock stretching: a device that holds SCL; on every bit, and long on the acknowledges
     out.append(Scenario("stretch_every_bit", image=image_of(tag_profile.tmp100(interval=200)), capture=TMP100_9,
-                        temps=[33.0, 34.0], events=2, plus={"stretch_ns": 8000, "stretch_every_bit": 1}))
+                        temps=[33.0, 34.0], events=2, frames=frames(2), plus={"stretch_ns": 8000, "stretch_every_bit": 1}))
     out.append(Scenario("stretch_long", image=image_of(tag_profile.tmp100(interval=200)), capture=TMP100_9,
                         temps=[33.0, 34.0], events=2, frames=frames(2), plus={"stretch_ns": 40000, "stretch_every_bit": 0}))
     # SCL held low by a device in the middle of a byte the master sends (SDA pulled low): the timeout releases the pins
@@ -549,7 +549,7 @@ MUTANTS = [
     ("tag_bus.v", "no STOP: SDA stays low", [("2'd2: sda_oe <= 1'b0;                // SDA rises with SCL high", "2'd2: ;")], ["nominal"]),
     ("tag_bus.v", "START with SCL low", [("2'd1: scl_oe <= 1'b0;\n          2'd2: sda_oe <= 1'b1;", "2'd1: ;\n          2'd2: sda_oe <= 1'b1;")], ["nominal"]),
     ("tag_bus.v", "START does not wait for the lines", [("(!spi && !(scl && sda))", "1'b0")], ["sda_stuck"]),
-    ("tag_bus.v", "STOP does not wait for SCL", [("(!adc && !spi && !scl));", "1'b0);")], ["stretch_long"]),
+    ("tag_bus.v", "STOP does not wait for SCL", [("(!adc && !spi && !scl));", "1'b0);")], ["stretch_every_bit"]),
     ("tag_bus.v", "SPI: CS_n stays low", [("2'd1: cs_n <= 1'b1;", "2'd1: ;")], ["spi_mode0_read_only"]),
     ("tag_bus.v", "SPI: CS_n does not fall", [("2'd1: cs_n <= 1'b0;", "2'd1: ;")], ["spi_mode0_read_only"]),
     ("tag_bus.v", "SPI: the clock's idle level ignored", [("2'd0: if (cs_n) scl_oe <= !cpol;", "2'd0: if (cs_n) scl_oe <= 1'b1;")], ["spi_mode3_command"]),
