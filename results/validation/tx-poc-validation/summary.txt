@@ -1,0 +1,11 @@
+bch            PASS: PASS
+galois         PASS: PASS
+equivalence    PASS: PASS
+packets        PASS: PASS: 300 complete tag TX waveforms
+scapy          PASS: PASS: 300 packets (t = [8, 12, 18]): scapy's CRC equal to the one sent; ADV_NONCONN_IND, the TxAdd sent, AdvA, one Manufacturer Specific Data structure (Company ID 0xFFFF), the sensor's bytes, the parity
+tag_core       PASS: PASS
+tag_core_scapy PASS: PASS: 138 packets (t = [8]): scapy's CRC equal to the one sent; ADV_NONCONN_IND, the TxAdd sent, AdvA, one Manufacturer Specific Data structure (Company ID 0xFFFF), the sensor's bytes, the parity
+profile        PASS: PASS: DEFAULT_PROFILE in verilog/tag_core.v is tag_profile.py's default
+controller     PASS: PASS: 12 packets; widest turn spread 0.0142 rad; RF window at offset 0: 0, lagging one sample: 12
+board          PASS: PASS
+lint           PASS: PASS: 50/50 lint configurations; reviewed exceptions: 13

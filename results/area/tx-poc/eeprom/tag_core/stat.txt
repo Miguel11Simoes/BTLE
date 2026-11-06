@@ -1,0 +1,46 @@
+34. Printing statistics.
+
+=== tag_core ===
+
+        +----------Local Count, excluding submodules.
+        |        +-Local Area, excluding submodules.
+        |        | 
+     4061        - wires
+     4899        - wire bits
+      107        - public wires
+      918        - public wire bits
+       41        - ports
+      217        - port bits
+     3994  6.7E+03 cells
+       85    90.44   AND2_X1
+       28    37.24   AND3_X1
+       10    15.96   AND4_X1
+       74    98.42   AOI211_X1
+      641  682.024   AOI21_X1
+       41   65.436   AOI221_X1
+       24   51.072   AOI222_X1
+      106   140.98   AOI22_X1
+      719 3.25E+03   DFF_X1
+      476  253.232   INV_X1
+       73  135.926   MUX2_X1
+      275   219.45   NAND2_X1
+       52   55.328   NAND3_X1
+       23    30.59   NAND4_X1
+      241  192.318   NOR2_X1
+       82   87.248   NOR3_X1
+       26    34.58   NOR4_X1
+      108   143.64   OAI211_X1
+      562  597.968   OAI21_X1
+       10    15.96   OAI221_X1
+        3    6.384   OAI222_X1
+       39    51.87   OAI22_X1
+        5     9.31   OAI33_X1
+       53   56.392   OR2_X1
+       17    22.61   OR3_X1
+       10    15.96   OR4_X1
+      144  229.824   XNOR2_X1
+       67  106.932   XOR2_X1
+
+   Chip area for module '\tag_core': 6698.412000
+     of which used for sequential elements: 3251.318000 (48.54%)
+

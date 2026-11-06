@@ -4,7 +4,7 @@
 **Branches a criar:** `ble-tx-poc` (a partir de `ble-tx-tag-8`) e `ble-rx-poc` (a partir da branch da gateway)  
 **Data:** 2026-11-06  
 **Autor:** Miguel Simões  
-**Estado:** plano. Ainda não há nada implementado.
+**Estado:** plano. A `ble-tx-poc` está implementada até à fase 4, sem placa: ver [`Senseworks/TX_POC.md`](Senseworks/TX_POC.md). A `ble-rx-poc` ainda não existe.
 
 ---
 

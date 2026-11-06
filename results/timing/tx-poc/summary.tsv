@@ -1,0 +1,7 @@
+design	unbuffered_ns	comb_path_ns	seq_overhead_ns	min_period_ns	slack_at_target_ns	fmax_MHz
+ref_controller	3.744	3.127	0.359	3.487	59.013	286.8
+dut_controller	2.856	1.190	0.359	1.549	60.951	645.5
+ref_btle_tx	1.187	0.915	0.347	1.263	61.237	792.0
+dut_btle_tx	1.071	0.826	0.347	1.173	61.327	852.3
+dut_tag_chip_eeprom	2.395	0.912	0.347	1.259	61.241	794.4
+dut_tag_chip_otp	1.318	0.844	0.347	1.191	61.309	839.4

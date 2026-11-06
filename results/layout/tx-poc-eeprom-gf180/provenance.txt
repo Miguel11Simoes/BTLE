@@ -1,0 +1,8 @@
+label=tx-poc-eeprom-gf180
+date_utc=2026-11-06T15:34:17Z
+rtl=HEAD (55449be43cb018802d00cf62f80b45178bdbc6e0), tag_chip, variant eeprom: CFG_SRC=0
+harness=55449be43cb018802d00cf62f80b45178bdbc6e0, dirty files under scripts/layout: 0
+flow=LibreLane Classic, gf180mcuD, gf180mcu_fd_sc_mcu7t5v0, in the eFuse compiler's nix-shell (e77f729373f28eda5d370d66764e81c3b109c31a)
+run=RUN_2026-11-06_15-26-16
+config_overrides=none
+gds sha256=dc61a78891648d2ee0d495465be9ae2c204a4493b20eaf71badcf25e84d3333d

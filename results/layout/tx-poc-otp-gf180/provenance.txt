@@ -1,0 +1,8 @@
+label=tx-poc-otp-gf180
+date_utc=2026-11-06T15:40:57Z
+rtl=HEAD (55449be43cb018802d00cf62f80b45178bdbc6e0), tag_chip, variant otp: CFG_SRC=1 ADV_ADDRESS_OTP=1
+harness=78785ff82354fd7acf5de6e76fc12670b9e8589d, dirty files under scripts/layout: 0
+flow=LibreLane Classic, gf180mcuD, gf180mcu_fd_sc_mcu7t5v0, in the eFuse compiler's nix-shell (e77f729373f28eda5d370d66764e81c3b109c31a)
+run=RUN_2026-11-06_15-34-58
+config_overrides=none
+gds sha256=3094cb66c3a95ccfd119a3c92daa6bc3bc5ad2d7ca32f9f65cfe1f3f525f6913

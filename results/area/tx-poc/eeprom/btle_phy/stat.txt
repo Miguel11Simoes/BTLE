@@ -1,0 +1,46 @@
+34. Printing statistics.
+
+=== btle_phy ===
+
+        +----------Local Count, excluding submodules.
+        |        +-Local Area, excluding submodules.
+        |        | 
+     4071        - wires
+     5096        - wire bits
+      130        - public wires
+     1128        - public wire bits
+       64        - ports
+      427        - port bits
+     3981 6.71E+03 cells
+       60    63.84   AND2_X1
+       33    43.89   AND3_X1
+       10    15.96   AND4_X1
+      157   208.81   AOI211_X1
+      585   622.44   AOI21_X1
+       25     39.9   AOI221_X1
+        7   14.896   AOI222_X1
+       68    90.44   AOI22_X1
+      719 3.25E+03   DFF_X1
+      407  216.524   INV_X1
+      121  225.302   MUX2_X1
+      243  193.914   NAND2_X1
+       65    69.16   NAND3_X1
+       13    17.29   NAND4_X1
+      374  298.452   NOR2_X1
+       77   81.928   NOR3_X1
+       28    37.24   NOR4_X1
+       58    77.14   OAI211_X1
+      557  592.648   OAI21_X1
+       16   25.536   OAI221_X1
+        1    2.128   OAI222_X1
+       75    99.75   OAI22_X1
+        4    7.448   OAI33_X1
+       43   45.752   OR2_X1
+       17    22.61   OR3_X1
+       11   17.556   OR4_X1
+      114  181.944   XNOR2_X1
+       93  148.428   XOR2_X1
+
+   Chip area for module '\btle_phy': 6712.244000
+     of which used for sequential elements: 3251.318000 (48.44%)
+
