@@ -1,6 +1,7 @@
 // ***************************************************************************
 // Xianjun jiao. putaoshu@msn.com
 // based on Analog Devices HDL reference design. add necessary modules/modifications.
+// Modified 2026-11-06 by Miguel Simões: ble-tx-poc-gen: the tag's bus on gpio_bd[2:0]. See CHANGES.md.
 // ***************************************************************************
 
 `timescale 1ns/100ps
@@ -95,6 +96,10 @@ module system_top (
 	wire            rx2_band_sel_h;
 	wire            tx2_band_sel_l;
 	wire            tx2_band_sel_h;
+	wire            tag_scl_oe;
+	wire            tag_cs_n;
+	wire            tag_sda_i;
+	wire            tag_sda_oe;
 
 	// assignments
 	assign clkout_out = clkout_in;
@@ -119,12 +124,19 @@ module system_top (
   // board gpio - 31-0
 
   assign gpio_i[31:11] = gpio_o[31:11];
+  assign gpio_i[2:0] = gpio_o[2:0];
 
-  ad_iobuf #(.DATA_WIDTH(11)) i_iobuf_bd (
-    .dio_t (gpio_t[10:0]),
-    .dio_i (gpio_o[10:0]),
-    .dio_o (gpio_i[10:0]),
-    .dio_p (gpio_bd));
+  ad_iobuf #(.DATA_WIDTH(8)) i_iobuf_bd (
+    .dio_t (gpio_t[10:3]),
+    .dio_i (gpio_o[10:3]),
+    .dio_o (gpio_i[10:3]),
+    .dio_p (gpio_bd[10:3]));
+
+  // the tag's bus (ble-tx-poc-gen, verilog/tag_fsm.v), in the PL, no processor: gpio_bd[0] SCL or SCLK, gpio_bd[1] SDA or
+  // SIO, open-drain (the pin only pulls low; pull-ups of 4.7 kOhm to 3.3 V on the breadboard), gpio_bd[2] CS_n
+  IOBUF i_tag_scl (.I (1'b0), .T (!tag_scl_oe), .O (), .IO (gpio_bd[0]));
+  IOBUF i_tag_sda (.I (1'b0), .T (!tag_sda_oe), .O (tag_sda_i), .IO (gpio_bd[1]));
+  assign gpio_bd[2] = tag_cs_n;
 
   // ad9361 gpio - 63-32
 
@@ -172,6 +184,10 @@ module system_top (
     .gpio_i (gpio_i),
     .gpio_o (gpio_o),
     .gpio_status(gpio_status),
+    .tag_cs_n (tag_cs_n),
+    .tag_scl_oe (tag_scl_oe),
+    .tag_sda_i (tag_sda_i),
+    .tag_sda_oe (tag_sda_oe),
     .gpio_t (gpio_t),
     .gps_pps (1'b0),
     .iic_main_scl_io (iic_scl),
