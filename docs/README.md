@@ -39,6 +39,7 @@ Latest lint and documentation update: [LINT_CLOSURE.md](Validation/LINT_CLOSURE.
 | Compare the senseworks gateways (`ble-rx-gateway-8/12/18`) with `ble-rx-micro` and `ble-rx-2p1c`: packet loss in the RTL, false accepts, area, timing, GF180 layout, FPGA | [Senseworks/RX_GATEWAY_COMPARISON.md](Senseworks/RX_GATEWAY_COMPARISON.md) |
 | Read the tag of the proof of concept for the TMP100 alone (`ble-tx-poc-tmp100`: the least area, no memory): its validation, area, layout, FPGA | [Senseworks/TX_POC_TMP100.md](Senseworks/TX_POC_TMP100.md) |
 | Read the tag of the proof of concept for several sensors (`ble-tx-poc-gen`: I2C and SPI, profiles and rate on pins): its validation, area, layout, FPGA | [Senseworks/TX_POC_GEN.md](Senseworks/TX_POC_GEN.md) |
+| Read the gateway of the proof of concept (`ble-rx-poc`: many tags into one gateway, the queue, UDP to the PC, the application): its validation end to end from the tags' RTL, FPGA | [Senseworks/RX_POC.md](Senseworks/RX_POC.md) |
 | Compare the transmitter branches and `ble-opt`: area (the transmitter with its SRAM macros), timing, switching activity | [Validation/TX_BRANCH_COMPARISON.md](Validation/TX_BRANCH_COMPARISON.md) |
 | Compare the receiver branches (`ble-rx-dm`, `ble-rx-dmult`): area, timing, switching activity | [Validation/RX_BRANCH_COMPARISON.md](Validation/RX_BRANCH_COMPARISON.md) |
 | Choose where the Gaussian table lives (OTP, ROM, SRAM, REG) or a folded FIR, by TX area | [Design Decisions/GAUSS_FILTER_OPTIONS.md](Design%20Decisions/GAUSS_FILTER_OPTIONS.md) |
