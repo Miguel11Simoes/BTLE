@@ -1,0 +1,6 @@
+label=tx-poc-tmp100-validation
+date_utc=2026-11-06T23:39:24Z
+commit=51cb52301a751f4b9d9d4894161ccf00621036c0 dirty=0
+branch=ble-tx-poc-tmp100
+python=Python 3.11.14 iverilog=Icarus Verilog version 14.0 (devel) (s20260301-411-gca6b8d376-dirty)
+verilator=Verilator 5.020 2024-01-01 rev (Debian 5.020-1)

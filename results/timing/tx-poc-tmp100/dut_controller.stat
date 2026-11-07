@@ -1,0 +1,53 @@
+
+30. Printing statistics.
+
+=== btle_controller ===
+
+        +----------Local Count, excluding submodules.
+        |        +-Local Area, excluding submodules.
+        |        | 
+    10633        - wires
+    14953        - wire bits
+      226        - public wires
+     4314        - public wire bits
+       89        - ports
+      638        - port bits
+    10441  1.8E+04 cells
+      303  322.392   AND2_X1
+       58    77.14   AND3_X1
+       62   98.952   AND4_X1
+       86   114.38   AOI211_X1
+     1646 1.75E+03   AOI21_X1
+       47   75.012   AOI221_X1
+      221  470.288   AOI222_X1
+      656   872.48   AOI22_X1
+       39   207.48   DFFR_X1
+        1     5.32   DFFS_X1
+     2041 9.23E+03   DFF_X1
+     1594  848.008   INV_X1
+       39   72.618   MUX2_X1
+      406  323.988   NAND2_X1
+      163  173.432   NAND3_X1
+      186   247.38   NAND4_X1
+      572  456.456   NOR2_X1
+      144  153.216   NOR3_X1
+       72    95.76   NOR4_X1
+       54    71.82   OAI211_X1
+     1732 1.84E+03   OAI21_X1
+       14   22.344   OAI221_X1
+       37    49.21   OAI22_X1
+        6   11.172   OAI33_X1
+       44   46.816   OR2_X1
+       14    18.62   OR3_X1
+       10    15.96   OR4_X1
+      110   175.56   XNOR2_X1
+       79  126.084   XOR2_X1
+        1        -   sdpram_one_clk
+        4        -   sdpram_two_clk
+
+   Area for cell type \sdpram_one_clk is unknown!
+   Area for cell type \sdpram_two_clk is unknown!
+
+   Chip area for module '\btle_controller': 17975.482000
+     of which used for sequential elements: 9442.202000 (52.53%)
+

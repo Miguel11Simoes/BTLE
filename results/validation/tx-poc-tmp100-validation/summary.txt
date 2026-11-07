@@ -1,0 +1,10 @@
+bch            PASS: PASS
+galois         PASS: PASS
+equivalence    PASS: PASS
+packets        PASS: PASS: 300 complete tag TX waveforms
+scapy          PASS: PASS: 300 packets (t = [8, 12, 18]): scapy's CRC equal to the one sent; ADV_NONCONN_IND, the TxAdd sent, AdvA, one Manufacturer Specific Data structure (Company ID 0xFFFF), the sensor's bytes, the parity
+tag_fsm        PASS: PASS
+tag_fsm_scapy  PASS: PASS: 95 packets (t = [8]): scapy's CRC equal to the one sent; ADV_NONCONN_IND, the TxAdd sent, AdvA, one Manufacturer Specific Data structure (Company ID 0xFFFF), the sensor's bytes, the parity
+controller     PASS: PASS: 9 packets; widest turn spread 0.0121 rad; RF window at offset 0: 3, lagging one sample: 6
+board          PASS: PASS
+lint           PASS: PASS: 9/9 lint configurations; reviewed exceptions: 13

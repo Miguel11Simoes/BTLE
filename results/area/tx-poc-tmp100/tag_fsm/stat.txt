@@ -1,0 +1,44 @@
+32. Printing statistics.
+
+=== tag_fsm ===
+
+        +----------Local Count, excluding submodules.
+        |        +-Local Area, excluding submodules.
+        |        | 
+     1992        - wires
+     2449        - wire bits
+       67        - public wires
+      508        - public wire bits
+       25        - ports
+      165        - port bits
+     1959  3164.07 cells
+       68   72.352   AND2_X1
+       17    22.61   AND3_X1
+        3    4.788   AND4_X1
+       45    59.85   AOI211_X1
+      249  264.936   AOI21_X1
+       15    23.94   AOI221_X1
+       47    62.51   AOI22_X1
+      314 1.42E+03   DFF_X1
+      147   78.204   INV_X1
+       27   50.274   MUX2_X1
+      201  160.398   NAND2_X1
+       59   62.776   NAND3_X1
+        9    11.97   NAND4_X1
+      185   147.63   NOR2_X1
+       61   64.904   NOR3_X1
+       16    21.28   NOR4_X1
+       35    46.55   OAI211_X1
+      226  240.464   OAI21_X1
+        4    6.384   OAI221_X1
+       14    18.62   OAI22_X1
+        3    5.586   OAI33_X1
+       39   41.496   OR2_X1
+       10     13.3   OR3_X1
+        7   11.172   OR4_X1
+       91  145.236   XNOR2_X1
+       67  106.932   XOR2_X1
+
+   Chip area for module '\tag_fsm': 3164.070000
+     of which used for sequential elements: 1419.908000 (44.88%)
+

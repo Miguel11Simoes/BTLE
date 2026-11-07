@@ -36,7 +36,7 @@ checked in simulation yet.
 | 4 | 0x10 | [7:0] | TX preamble | no |
 | 5 | 0x14 | [31:0] | TX access address | no |
 | 6 | 0x18 | [23:0] | TX CRC init | no |
-| 7 | 0x1C | [5:0] | TX channel number | no |
+| 7 | 0x1C | [5:0] | TX channel number. *Branch `ble-tx-poc-tmp100`:* [2:0] the tag's rate (0 off, the value at reset; 1..7: 125 ms to 8 s), [3] its test mode, written once by `btle_ll -T` | no; `-T` on `ble-tx-poc-tmp100` |
 | 8 | 0x20 | [7:0] data, [24:16] address | TX PDU octet memory write | no |
 | 9 | 0x24 | [0] | `tx_start` | no |
 | 10 | 0x28 | [31:0] | RX access address (unique bit sequence) | yes |
@@ -52,7 +52,11 @@ checked in simulation yet.
 |---|---|---|
 | 40 | 0xA0 | **RX PDU data port.** Each read returns the next word of the received PDU from `rx_ram`. A write resets the read address. |
 | 41 | 0xA4 | `decode_end_to_host_read_counter`: time from decode end to the host read |
-| 42–46 | 0xA8–0xB8 | No driver found (the timestamp `assign`s are commented out) |
+| 42 | 0xA8 | *Branch `ble-tx-poc-tmp100`: the tag's state, through `clk_cross_bus_tag_status_i`.* [15:0] the sensor as read, [21:16] the channel, [22] test mode, [23] TxAdd. On the other branches: no driver found (the timestamp `assign`s are commented out) |
+| 43 | 0xAC | *`ble-tx-poc-tmp100`:* packets sent, since the last reset of `bb_clk`'s domain. Elsewhere: no driver found |
+| 44 | 0xB0 | *`ble-tx-poc-tmp100`:* of those, packets with no reading, `0xFFFF`. Elsewhere: no driver found |
+| 45 | 0xB4 | *`ble-tx-poc-tmp100`:* AdvA[31:0]. Elsewhere: no driver found |
+| 46 | 0xB8 | *`ble-tx-poc-tmp100`:* [15:0] AdvA[47:32], [18:16] the rate. Elsewhere: no driver found |
 | 47 | 0xBC | No driver found, yet bits [7:0] and [8] feed `data_frame` / `frame_en` of the UART TX. See the note below. |
 | 48 | 0xC0 | [0] `tx_iq_valid_last`: TX packet finished |
 | 49 | 0xC4 | [19] hit flag, [18] decode running, [17] decode end, [16] CRC OK (latched), [15:8] payload length (latched), [7:0] PDU octet |
@@ -68,6 +72,9 @@ checked in simulation yet.
 
 - **The TX path can be driven entirely from registers 1–9.** No upstream
   software does this. The testbenches drive TX through the `ext_*` ports instead.
+  On branch `ble-tx-poc` these registers go nowhere: `tag_core` drives the
+  transmitter, with no processor in the path of the data, and the AXI interface
+  only reads its state (registers 42–46).
 - **Register 47 looks like a real defect.** It is declared as an input to the
   AXI slave and feeds the UART transmitter, but nothing drives it. If
   simulation confirms this, the UART HCI TX path cannot be used from the

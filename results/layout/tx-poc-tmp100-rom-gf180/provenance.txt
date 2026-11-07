@@ -1,0 +1,8 @@
+label=tx-poc-tmp100-rom-gf180
+date_utc=2026-11-06T23:52:23Z
+rtl=HEAD (51cb52301a751f4b9d9d4894161ccf00621036c0), tag_chip, variant rom: 
+harness=e42047379064fee2877f91d80afe260186fd355f, dirty files under scripts/layout: 0
+flow=LibreLane Classic, gf180mcuD, gf180mcu_fd_sc_mcu7t5v0, in the eFuse compiler's nix-shell (e77f729373f28eda5d370d66764e81c3b109c31a)
+run=RUN_2026-11-06_23-48-05
+config_overrides=none
+gds sha256=c99ccbd052dc679935c9ef3eb37272233e7daa7f6ba078dbf82ee5dcd1919a1d
