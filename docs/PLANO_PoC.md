@@ -1,12 +1,29 @@
 # Plano de implementação da prova de conceito: `ble-tx-poc` e `ble-rx-poc`
 
 **Projeto:** BTLE, a tese  
-**Branches a criar:** `ble-tx-poc` (a partir de `ble-tx-tag-8`) e `ble-rx-poc` (a partir da branch da gateway)  
+**Branches a criar:** `ble-tx-poc-tmp100` e `ble-tx-poc-gen` (a partir de `ble-tx-tag-8`; ver § 0) e `ble-rx-poc` (a partir da branch da gateway)  
 **Data:** 2026-11-06  
 **Autor:** Miguel Simões  
-**Estado:** plano. A `ble-tx-poc` está implementada até à fase 4, sem placa: ver [`Senseworks/TX_POC.md`](Senseworks/TX_POC.md). A `ble-rx-poc` ainda não existe.
+**Estado:** revisto a 2026-11-06 (§ 0). As branches do TX estão implementadas até à fase 4, sem placa: ver [`Senseworks/TX_POC_TMP100.md`](Senseworks/TX_POC_TMP100.md) e [`Senseworks/TX_POC_GEN.md`](Senseworks/TX_POC_GEN.md). A `ble-rx-poc` ainda não existe.
 
 ---
+
+## 0. Revisão de 2026-11-06: as duas branches do TX
+
+Esta secção prevalece sobre o resto do plano onde o contradiz. A `ble-tx-poc`, feita segundo o plano original (núcleo genérico, EEPROM), fica como referência de comparação.
+
+| Tema | Decisão |
+|---|---|
+| Objetivo | a área mínima, com a `ble-tx-tag-8` como TX e uma FSM como link layer até à AdvData |
+| Material | só as duas placas FPGA, o sensor e o PC (e os acessórios). **Sem EEPROM** nem programador |
+| Branches | `ble-tx-poc-tmp100` (só o TMP100) e `ble-tx-poc-gen` (vários sensores I2C e SPI, uma FSM comum, perfis fixos escolhidos por pinos) |
+| Ligação ao `btle_tx` | porta direta, nas duas |
+| TMP100 | one-shot a 9 bits, uma medição por segundo por omissão, em shutdown entre medições: pedir a conversão, esperar que termine, ler os dois bytes, transmitir |
+| Dados no pacote | os 2 bytes da `ble-tx-tag-8`, crus; a gateway converte |
+| Taxa de amostragem | três bits: desligado, 125 ms, 250 ms, 500 ms, 1 s, 2 s, 4 s, 8 s, 1 s por omissão, contada entre inícios de medições. No FPGA, um registo que o ARM escreve ao arrancar; no ASIC, pads ligados na placa flexível. Na `ble-tx-poc-gen`, obrigatória; na `ble-tx-poc-tmp100`, fixa só se isso poupar uma grande área, com os pads incluídos na conta |
+| Perfis da `ble-tx-poc-gen` | TMP100 (referência de bancada), TMP114 (candidato principal para miniaturizar), MAX31875, TMP126 |
+
+Do plano original deixam de valer o § 3.3, a memória de configuração nos §§ 2 e 3.1, as variantes da fase 3, a EEPROM e o programador nos §§ 5 e 6, e "só regravando o perfil" na fase 6. O cabeçalho do § 3.4 passa a ter `TxAdd = 1`. Resultados: [`Senseworks/TX_POC_TMP100.md`](Senseworks/TX_POC_TMP100.md) e [`Senseworks/TX_POC_GEN.md`](Senseworks/TX_POC_GEN.md), cada um na sua branch.
 
 ## 1. Objetivo
 
