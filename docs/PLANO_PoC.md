@@ -4,7 +4,7 @@
 **Branches a criar:** `ble-tx-poc-tmp100` e `ble-tx-poc-gen` (a partir de `ble-tx-tag-8`; ver § 0) e `ble-rx-poc` (a partir da branch da gateway)  
 **Data:** 2026-11-06  
 **Autor:** Miguel Simões  
-**Estado:** revisto a 2026-11-06 (§ 0). As branches do TX estão implementadas até à fase 4, sem placa: ver [`Senseworks/TX_POC_TMP100.md`](Senseworks/TX_POC_TMP100.md) e [`Senseworks/TX_POC_GEN.md`](Senseworks/TX_POC_GEN.md). A `ble-rx-poc` ainda não existe.
+**Estado:** revisto a 2026-11-06 (§ 0) e a 2026-11-07 (§ 0.1). As branches do TX estão implementadas até à fase 4, sem placa: ver [`Senseworks/TX_POC_TMP100.md`](Senseworks/TX_POC_TMP100.md) e [`Senseworks/TX_POC_GEN.md`](Senseworks/TX_POC_GEN.md). A `ble-rx-poc` está implementada até à fase 5, sem placa: ver [`Senseworks/RX_POC.md`](Senseworks/RX_POC.md).
 
 ---
 
@@ -24,6 +24,21 @@ Esta secção prevalece sobre o resto do plano onde o contradiz. A `ble-tx-poc`,
 | Perfis da `ble-tx-poc-gen` | TMP100 (referência de bancada), TMP114 (candidato principal para miniaturizar), MAX31875, TMP126 |
 
 Do plano original deixam de valer o § 3.3, a memória de configuração nos §§ 2 e 3.1, as variantes da fase 3, a EEPROM e o programador nos §§ 5 e 6, e "só regravando o perfil" na fase 6. O cabeçalho do § 3.4 passa a ter `TxAdd = 1`. Resultados: [`Senseworks/TX_POC_TMP100.md`](Senseworks/TX_POC_TMP100.md) e [`Senseworks/TX_POC_GEN.md`](Senseworks/TX_POC_GEN.md), cada um na sua branch.
+
+### 0.1 Revisão de 2026-11-07: a `ble-rx-poc`
+
+Uma só branch, a partir da `ble-rx-gateway-8`, sem variantes: os dois TX enviam o mesmo pacote (AdvA e 2 bytes, BCH t = 8). O que muda em relação ao § 3.4:
+
+| Tema | Decisão |
+|---|---|
+| Várias tags | todas as tags ao alcance enviam para a mesma gateway, no mesmo canal, cada uma ao seu relógio. O `rx_ram` guarda uma **fila de 4 pacotes** enquanto o ARM descodifica e conta os que perde (registos 42, 43 e 49) |
+| BCH e CRC | no ARM, em C (`firmware/gw_bch.h`, da gateway), não no PC |
+| Formato | o pacote de 2 bytes, `TxAdd = 1`; deixa de valer o de 1 byte do § 3.4 |
+| Ligação ao PC | `btle_ll -G 8 -U <PC>:5600`: um datagrama UDP em JSON por pacote aceite e um por segundo com os contadores. Sem `ble_fpga_ctl` nem Wireshark |
+| App | `host/senseworks_gateway`, uma página no browser com todas as tags (a identidade visual da senseworks.ai). O sensor de cada tag vem da configuração, indexada pelo AdvA |
+| Alimentação das tags pela gateway (transformador de núcleo de ar) | fora desta branch |
+
+Resultados: [`Senseworks/RX_POC.md`](Senseworks/RX_POC.md).
 
 ## 1. Objetivo
 
@@ -207,6 +222,9 @@ As fases 1 a 3 são de simulação e não precisam das placas. O caminho crític
 - A app Python no PC.
 - **Validação:** em simulação, os pacotes do RTL da `ble-tx-poc` passam pelo recetor RTL e pela app com o valor
   certo, também com bits errados (até 8 corrigidos pelo BCH).
+- **Feito a 2026-11-07, sem placa** (§ 0.1): os 258 pacotes do RTL da `ble-tx-poc-tmp100` e da `ble-tx-poc-gen`,
+  com 0 a 8 bits errados, passam pelo controlador RTL, pelo C do ARM e por UDP até à app, todos com o valor certo.
+  Ver [`Senseworks/RX_POC.md`](Senseworks/RX_POC.md).
 
 ### Fase 6: demonstração e medições
 - Aquecer e arrefecer o sensor e ver a curva no PC.
@@ -246,8 +264,7 @@ As fases 1 a 3 são de simulação e não precisam das placas. O caminho crític
 1. **As placas.** A lista de máquinas do laboratório não tem nenhuma placa com AD9361. A única Zynq-7020 é uma
    ZedBoard (na `sofia`), que só teria rádio com uma placa FMC com AD9361 (por exemplo AD-FMCOMMS3). Seria só uma,
    e o repo não tem o fluxo da ZedBoard. Falta decidir que duas placas se usam.
-2. **A branch da gateway.** Não existe em nenhum repositório local (`Desktop\Tese`) nem no `origin`. É preciso
-   saber onde está antes da fase 5.
+2. **A branch da gateway.** Resolvido: é a `ble-rx-gateway-8`, no `origin`, e a `ble-rx-poc` parte dela (§ 0.1).
 3. **O processo do tag final** (§ 8): o GF180 do PDK aberto só tem eFuse. Outro processo pode ter MTP ou OTP
    antifuse.
 4. **"Alimentado pelo ar":** a potência disponível e a distância ao emissor, porque determinam o orçamento de
