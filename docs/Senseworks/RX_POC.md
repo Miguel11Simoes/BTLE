@@ -5,7 +5,7 @@
 **Base:** `ble-rx-gateway-8` (`a49d50d6`); the plan is [`docs/PLANO_PoC.md`](../PLANO_PoC.md), phase 5, revised on 2026-11-07 (its § 0.1)  
 **Date:** 2026-11-07  
 **Author:** Miguel Simões  
-**Status:** run `rx-poc-validation`. The queue in the RTL, the firmware's UDP to the PC, the PC's application, their tests, the path end to end from the two tags' RTL to the degrees on the page, and the controller on the Zynq's FPGA out of context are done, every number below measured, with its evidence committed (§ 9). **Not done:** the board's bitstream (it needs Vivado 2022.2 and ADI's IP) and anything on a board (§ 7). The ARM's time per packet is not measured.
+**Status:** run `rx-poc-validation`. The queue in the RTL, the firmware's UDP to the PC, the PC's application, their tests, the path end to end from the two tags' RTL to the degrees on the page, and the controller on the Zynq's FPGA out of context are done, every number below measured, with its evidence committed (§ 9). **Not done:** the board's bitstream (it needs Vivado 2022.2 and ADI's IP) and anything on a board (§ 7). The ARM's time per packet is not measured. **The range is not measured either**; § 7.1 estimates it from the SNR measured on the RTL (a sensitivity of about −99.6 dBm, assumptions stated there).
 
 ---
 
@@ -174,6 +174,35 @@ These steps are not done. They need the two boards, Vivado 2022.2 and ADI's IP (
    - the ARM's time per packet (`decode_end_to_host_read_counter`, register 41), against the queue's 4 slots;
    - the PER with and without the BCH, in test mode, against attenuation (the plan's phase 6);
    - two tags woken together.
+
+### 7.1 The range: an estimate, not a measurement
+
+**Nothing below was measured.** No range has been measured on any branch, and no SNR of this project is a sensitivity in dBm. This subsection turns the SNR measured on the RTL into a sensitivity and a distance, under assumptions stated here, so that the board's measurements (step 5) have a number to be compared with. It applies to `ble-tx-poc-tmp100` or `ble-tx-poc-gen` into `ble-rx-poc` and to `ble-tx-tag-8` into `ble-rx-gateway-8` alike: the receiver is the same (§ 2), and so is the packet (a PDU of 22 bytes, 240 µs on the air, BCH t = 8). Only the second pair has a measured curve of packet loss (`RX_GATEWAY_COMPARISON.md` § 5); this branch's end-to-end test runs at 25 dB, far above it.
+
+**From the SNR to a sensitivity.** Upstream's SNR (`btlelib.add_noise`) is the signal's power (a constant envelope of peak 127, so its mean power too) against the noise in the whole band sampled, 8 MS/s for 1 Mbit/s. So E<sub>b</sub>/N<sub>0</sub> = SNR + 10 log<sub>10</sub>(8) = SNR + 9.03 dB, and the sensitivity is S = −174 dBm/Hz + 10 log<sub>10</sub>(1 MHz) + NF + E<sub>b</sub>/N<sub>0</sub> = −114 dBm + NF + E<sub>b</sub>/N<sub>0</sub>. **NF = 6 dB is an assumption**: the AD9361's noise figure, the board's losses before it, and a margin for what the channel model leaves out. A packet counts as received at a PER of 10 %, as in `RX_GATEWAY_COMPARISON.md` (the BLE specification's sensitivity is at a BER of 0.1 %, a different point).
+
+| PER 10 %, 0 / 20 / −30 / 50 ppm | SNR measured (dB) | E<sub>b</sub>/N<sub>0</sub> (dB) | Sensitivity, NF = 6 dB (dBm) |
+|---|---|---|---|
+| **this gateway** (`ble-rx-gateway-8`'s receiver, 3 phases, BCH t = 8) | −0.66 / −0.54 / −0.34 / 2.26 | 8.4 / 8.5 / 8.7 / 11.3 | **−99.6 / −99.5 / −99.3 / −96.7** |
+| `ble-rx-2p1c` (CRC + 1 bit, no BCH), the same packets | 8.26 / 10.22 / 12.16 / 22.38 | 17.3 / 19.3 / 21.2 / 31.4 | −90.7 / −88.7 / −86.8 / −76.6 |
+
+**From a sensitivity to a distance.** Antennas of 0 dBi, channel 37 (2.402 GHz), a margin of 10 dB for fading, and a log-distance path loss, PL(d) = 40.06 dB + 10 n log<sub>10</sub>(d / 1 m): n = 2 is free space, n = 3 a room, n = 3.5 a building with walls. At 0 ppm:
+
+| The tag's power | Free space (n = 2) | Indoor (n = 3) | Indoor, obstacles (n = 3.5) |
+|---|---:|---:|---:|
+| +5 dBm (the PoC's tag board, an AD9361) | ~535 m | ~66 m | ~36 m |
+| 0 dBm | ~300 m | ~45 m | ~26 m |
+| −10 dBm (a low-power ASIC tag) | ~95 m | ~21 m | ~14 m |
+| *`ble-rx-2p1c`, no BCH, 0 dBm (for comparison)* | *~110 m* | *~23 m* | *~15 m* |
+
+At 50 ppm the gateway loses 2.9 dB: the distances become about 29 % shorter in free space and about 20 % shorter at n = 3. **The 9 dB that the BCH and the three phases give almost double the range indoors** (×1.98 at n = 3, ×2.8 in free space) at the same power.
+
+**What the estimate leaves out:**
+
+- **multipath, interference** (Wi-Fi on the same band), **a real oscillator's phase noise and the AD9361's real AGC**; § 2 of `RX_GATEWAY_COMPARISON.md` asks the AGC to keep the signal within 1/8 of the scale;
+- **the final tag's power supply.** The final tags are powered by the gateway's field through the air-core transformer (§ 8). That is likely to limit the distance long before the radio does, to centimetres or about a metre, depending on the coils. The PoC's tags are boards with their own supply, so the PoC does not show this limit.
+
+**How it will be checked:** the plan's phase 6, the PER with and without the BCH in test mode (the counter: every loss counted), through an SMA cable and attenuators. The attenuation at which the PER crosses 10 % gives the sensitivity in dBm and so the real NF of this chain; the distance follows from it.
 
 ## 8. What the branch does not do
 
