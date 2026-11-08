@@ -57,6 +57,7 @@ own packets of each t: the two rows of the existing receivers show the range acr
 The percentages are against `ble-rx-2p1c`. A negative SNR is not a mistake: it is upstream's definition (`btlelib.add_noise`), the
 signal's peak power against all the noise of the samples, at 8 samples per symbol, wider than the signal, as in every
 earlier campaign of this project. It is not a link budget; differences between rows are what this document uses.
+§ 11.1 turns it into a sensitivity in dBm and a distance, as an estimate under stated assumptions, not a measurement.
 
 ## 2. What the branches contain
 
@@ -470,6 +471,54 @@ Nothing here has run on a board. What remains:
 3. **The AGC**: § 2's condition on the input level, to be checked with the AD9361's real AGC.
 4. **The link**: a tag branch and a gateway branch, through a cable and attenuators. Every SNR of this document is upstream's
    channel model plus Gaussian noise: no multipath, no interference, no phase noise of a real oscillator.
+
+### 11.1 The range: an estimate, not a measurement
+
+**Nothing in this subsection was measured.** No range has been measured on any branch. It turns § 5's SNR into a
+sensitivity and a distance, under the assumptions below, so that the link of point 4 has a number to be compared with.
+`ble-rx-poc` uses `ble-rx-gateway-8`'s receiver unchanged and the same packet, so its § 7.1 (`RX_POC.md`) gives the
+same numbers for `ble-tx-poc-tmp100` and `ble-tx-poc-gen`.
+
+**From the SNR to a sensitivity.** Upstream's SNR is the signal's power (a constant envelope of peak 127, so its mean
+power too) against the noise in the whole band sampled, 8 MS/s for 1 Mbit/s. So E<sub>b</sub>/N<sub>0</sub> = SNR +
+10 log<sub>10</sub>(8) = SNR + 9.03 dB, and S = −174 dBm/Hz + 10 log<sub>10</sub>(1 MHz) + NF + E<sub>b</sub>/N<sub>0</sub>
+= −114 dBm + NF + E<sub>b</sub>/N<sub>0</sub>. **NF = 6 dB is an assumption**: the AD9361's noise figure, the board's
+losses before it, and a margin for what the channel model leaves out. The point is a PER of 10 %, as in § 5 (the BLE
+specification's sensitivity is at a BER of 0.1 %, another point).
+
+| PER 10 %, 0 / 20 / −30 / 50 ppm, NF = 6 dB | E<sub>b</sub>/N<sub>0</sub> (dB) | Sensitivity (dBm) |
+|---|---|---|
+| `ble-rx-micro`, t = 8 packet | 19.3 / 22.2 / 24.3 / 35.6 | −88.7 / −85.8 / −83.7 / −72.4 |
+| `ble-rx-2p1c`, t = 8 packet | 17.3 / 19.3 / 21.2 / 31.4 | −90.7 / −88.7 / −86.8 / −76.6 |
+| **`ble-rx-gateway-8`**, 3 phases | 8.4 / 8.5 / 8.7 / 11.3 | **−99.6 / −99.5 / −99.3 / −96.7** |
+| **`ble-rx-gateway-12`**, 3 phases | 8.1 / 8.3 / 8.3 / 11.5 | **−99.9 / −99.7 / −99.7 / −96.5** |
+| **`ble-rx-gateway-18`**, 3 phases | 7.6 / 8.0 / 8.1 / 11.5 | **−100.4 / −100.0 / −99.9 / −96.5** |
+
+On the t = 12 and t = 18 packets, `ble-rx-micro` and `ble-rx-2p1c` are within 0.6 dB of their t = 8 rows (§ 1).
+
+**From a sensitivity to a distance.** Antennas of 0 dBi, channel 37 (2.402 GHz), a margin of 10 dB for fading, and a
+log-distance path loss, PL(d) = 40.06 dB + 10 n log<sub>10</sub>(d / 1 m): n = 2 is free space, n = 3 a room,
+n = 3.5 a building with walls. At 0 ppm (free space / n = 3 / n = 3.5):
+
+| The tag's power | `ble-rx-2p1c` | **`ble-rx-gateway-8`** | **`ble-rx-gateway-12`** | **`ble-rx-gateway-18`** |
+|---|---|---|---|---|
+| +5 dBm (a board with an AD9361) | 192 / 33 / 20 m | 535 / 66 / 36 m | 555 / 68 / 37 m | 585 / 70 / 38 m |
+| 0 dBm | 108 / 23 / 15 m | 300 / 45 / 26 m | 312 / 46 / 27 m | 329 / 48 / 27 m |
+| −10 dBm (a low-power ASIC tag) | 34 / 11 / 8 m | 95 / 21 / 14 m | 99 / 21 / 14 m | 104 / 22 / 14 m |
+
+1. **The gateway almost doubles the range indoors at the same power**: ×1.98 at n = 3 and ×2.8 in free space against
+   `ble-rx-2p1c` (t = 8, 0 ppm, 8.9 dB).
+2. **The code's t barely moves it**: from t = 8 to t = 18, +0.8 dB, +6 % of distance at n = 3, for +27 % of the tag's
+   time on the air (§ 12).
+3. From 0 to 50 ppm the gateways lose 2.9 dB (t = 8) to 3.9 dB (t = 18): the distances become 29–36 % shorter in free
+   space and 20–26 % at n = 3, so at 50 ppm the three are within 0.2 dB of each other.
+
+**What it leaves out:** multipath, interference (Wi-Fi on the same band), a real oscillator's phase noise and the
+AD9361's real AGC (§ 2: the signal within 1/8 of the scale). And **the tag's power supply**: a tag powered by the
+gateway's field through an air-core transformer is likely to be limited by it long before the radio, to centimetres or
+about a metre depending on the coils. **How it will be checked:** point 4's link, the PER against attenuation through
+an SMA cable; the attenuation at which the PER crosses 10 % gives the sensitivity in dBm, so the real NF, and the
+distance follows from it.
 
 ## 12. The choice
 
