@@ -135,9 +135,11 @@ or faster. Pairs to any other address are dropped.
 | ![upstream TX signals](../../open_btle_baseband_chip/py-fig3.png) | ![ble-tx-iot TX signals](../../results/figures/tx-iot/tx_iot_py_fig3.png) | ![ble-iot-1byte TX signals](../../results/figures/iot-1byte/iot_1byte_py_fig3.png) |
 
 Upstream's figure is a 2-byte data PDU, which these transmitters cannot send, so the columns show the form of the
-signal and not the same packet. The two others are each tag's whole packet on channel 37, with the RTL's actual
-output against the Python model on every sample: **0 samples differ** in both (1 424 samples, 176 PHY bits; 1 360
-samples, 168 PHY bits; `tx_iot_figures_tx.json`, `iot_1byte_figures_tx.json`).
+signal and not the same packet. The two others draw the first 648 samples of each tag's packet on channel 37, the
+interval of upstream's figure (the preamble, the access address, the PDU header and the start of AdvA). Only the
+drawing is cut: the RTL's actual output is compared with the Python model on every sample of the whole packet, and
+**0 samples differ** in both (1 424 samples, 176 PHY bits; 1 360 samples, 168 PHY bits; `tx_iot_figures_tx.json`,
+`iot_1byte_figures_tx.json`).
 
 ### 3.2 The receiver's decision (upstream's `py-fig4.png`)
 
@@ -146,7 +148,7 @@ samples, 168 PHY bits; `tx_iot_figures_tx.json`, `iot_1byte_figures_tx.json`).
 | ![upstream RX decision](../../open_btle_baseband_chip/py-fig4.png) | ![ble-tx-iot RX decision](../../results/figures/tx-iot/tx_iot_py_fig4.png) | ![ble-iot-1byte RX decision](../../results/figures/iot-1byte/iot_1byte_py_fig4.png) |
 
 After 20 dB SNR and 20 ppm, demodulated by upstream's receiver model: CRC OK and the PDU received equal to the one
-sent, on both.
+sent, on both. The figures draw the same first 648 samples; the receiver decided on the whole packet.
 
 ### 3.3 Bit error rate (upstream's `open_btle_baseband_chip_21_1.png`, `_23_1.png`)
 
