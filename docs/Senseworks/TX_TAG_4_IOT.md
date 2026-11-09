@@ -9,9 +9,10 @@
 **Status:** every number below is measured and its evidence is committed (§ 12). Cell area in 45 nm
 (Nangate45, pre-layout), a routed FPGA implementation, and signoff-clean layouts in the open 180 nm PDK; **the
 synthesis (Vivado, Yosys) and the layout (LibreLane) of both branches end with no warning that is not a reviewed
-exception** (§ 8.1). The same RTL is also laid out in the open 55 nm PDK, ICsprout55 (§ 8.2): routed with no DRC
-on the tech LEF's rules, timing met at three corners, and its netlist equal to `ble-tx-min` clock by clock with the
-layout's delays; the PDK's foundry DRC and LVS are Calibre decks and were not run. Not a tape-out
+exception** (§ 8.1). In the open 55 nm PDK, ICsprout55, which has no OTP, the transmitter is laid out with AdvA in 48
+flip-flops instead (branch `ble-tx-iot-reg`, § 8.2), so that each chip still sends its own address: routed with no DRC on
+the tech LEF's rules, timing met at three corners, and its netlist equal to `ble-tx-min` clock by clock with the layout's
+delays; the PDK's foundry DRC and LVS are Calibre decks and were not run. Not a tape-out
 (`docs/Validation/ASIC_READINESS.md`: NOT READY, as on every branch).
 
 ---
@@ -32,6 +33,7 @@ This document measures them on everything `TX_FINAL_DECISIONS.md` measures for `
 | `ble-tx-tag-8` | the senseworks tag with 8 bytes of BCH parity | `TX_TAG_COMPARISON.md` |
 | **`ble-tx-iot`** | this document: AdvA, Company ID, **two** sensor bytes; no receiver | branch `ble-tx-iot` |
 | **`ble-iot-1byte`** | this document: AdvA, Company ID, **one** sensor byte; no receiver | branch `ble-iot-1byte` |
+| **`ble-tx-iot-reg`** | `ble-tx-iot` with AdvA in six registers (48 flip-flops) written like the sensor's bytes, for a process without an OTP: the ICsprout55 layout (§ 8.2) | branch `ble-tx-iot-reg` |
 
 ## 1. Summary
 
@@ -50,17 +52,17 @@ This document measures them on everything `TX_FINAL_DECISIONS.md` measures for `
 | **GF180MCU layout, placed cells + macros** (µm²) | not closed | 160 784.9 (flip-flops) | 129 286.0 | **100 307.1** | **98 445.6** | § 8 |
 | **GF180MCU die** (µm²) | — | 577 600 | 577 600 | **174 800 (760 × 230)** | **171 000 (760 × 225)** | § 8 |
 | Signoff: DRC, LVS, antenna, slew, capacitance, setup, hold | — | clean | clean | **clean** | **clean** | § 8 |
-| **ICsprout55 (55 nm) layout, placed cells** (µm²; AdvA in the ROM) | — | — | — | **4 969.4** | **4 776.0** | § 8.2 |
-| **ICsprout55 die** (µm²) | — | — | — | **6 724 (82 × 82)** | **6 724 (82 × 82)** | § 8.2 |
-| ICsprout55: routing DRC, slew, capacitance, setup, hold; netlist against `ble-tx-min` with the layout's delays | — | — | — | **clean; 54/54 runs, 12/12 faults** | **clean; 54/54 runs, 12/12 faults** | § 8.2 |
+| **ICsprout55 (55 nm) layout, placed cells** (µm²), `ble-tx-iot-reg`: AdvA in 48 flip-flops | — | — | — | **5 612.0** | not laid out | § 8.2 |
+| **ICsprout55 die** (µm²), `ble-tx-iot-reg` | — | — | — | **7 396 (86 × 86)** | — | § 8.2 |
+| ICsprout55: routing DRC, slew, capacitance, setup, hold; netlist against `ble-tx-min` with the layout's delays | — | — | — | **clean; 108/108 runs, 12/12 faults** | — | § 8.2 |
 | Warnings of synthesis and layout | 207 unreviewed (Vivado synthesis) | 0 unreviewed | 0 unreviewed | **0 unreviewed** | **0 unreviewed** | § 8.1 |
 
 **In one sentence:** both branches send a standard advertising packet exactly as upstream's transmitter sends the
 same PDU, sample for sample, in 1.4 % of upstream's transmitter cell area (45 nm) and less than half of
 `ble-tx-min`'s, on a GF180MCU die 70 % smaller; their price is one fixed packet, no receiver and no error
-correction, and the second branch's single byte saves only 2.3 % more. **In 55 nm (ICsprout55) the same transmitter
-is an 82 × 82 µm block, a die 26 times smaller than in GF180MCU**; without the eFuse blocks, which 55 nm has no
-open equivalent of, its placed cells take 10.4 times less area, near the node's (180 / 55)² = 10.7 (§ 8.2).
+correction, and the second branch's single byte saves only 2.3 % more. **In 55 nm (ICsprout55), with AdvA in 48
+flip-flops since the PDK has no OTP, the transmitter is an 86 × 86 µm block, a die 23.6 times smaller than in GF180MCU**;
+its logic is 1.45 times Nangate45's for the same RTL, the node's (55 / 45)² = 1.49 (§ 8.2).
 
 **Against each other:** one byte fewer of sensor removes 8 flip-flops: −55.6 µm² in 45 nm (−2.3 %), −1 861.5 µm²
 placed in GF180MCU (−1.9 %) and 8 µs per packet (−4.5 %), for half the bits of reading. § 10 keeps two bytes unless
@@ -303,8 +305,8 @@ noise, about 50 times faster than the 16 MHz clock needs.
 ### 5.2 In the FPGA and in GF180MCU
 
 Every clock and every corner meets timing with room: on the xc7z020 +53.6 ns or more at 62.5 ns (§ 6), in GF180MCU +10.7 ns or
-more of setup slack in the worst of 9 corners (§ 8), in ICsprout55 +13.9 ns or more in the worst of 3 (§ 8.2; on `clkb`'s 20 ns,
-+43.8 ns on `clk`'s 62.5 ns).
+more of setup slack in the worst of 9 corners (§ 8), in ICsprout55 (`ble-tx-iot-reg`) +13.6 ns or more in the worst of 3 (§ 8.2;
+on `clkb`'s 20 ns, +44.5 ns on `clk`'s 62.5 ns).
 
 ## 6. FPGA: the xc7z020 of upstream's report
 
@@ -387,10 +389,10 @@ of every cell, 1.10 V typical; `results/power/tx-iot/leakage.md`):
 **7.4 In GF180MCU** (§ 8), OpenSTA's vectorless estimate at 5 V, the default activity of every net: 23.73 mW for
 `ble-tx-iot` and 22.84 mW for `ble-iot-1byte` (leakage 0.53 and 0.50 µW), against 43.28 mW for `ble-tx-min` with flip-flops
 and 27.78 mW for `ble-tx-tag-8`. An estimate of the order of magnitude, not of the difference. The compact die costs nothing
-here: the same `ble-tx-iot` on the 760 × 760 µm die gives 26.70 mW and 1.16 µW. **In ICsprout55** (§ 8.2), the same estimate at
-1.2 V (tt, 25 °C) gives 0.303 mW for `ble-tx-iot` and 0.246 mW for `ble-iot-1byte`, 78 and 93 times less than at 5 V in GF180MCU,
-mostly the supply (dynamic power goes with V², (5 / 1.2)² = 17) and the capacitance. Its leakage is higher, not lower: 1.66 and
-1.47 µW at 25 °C, 6.46 and 6.22 µW at 125 °C (ss), against 0.53 and 0.50 µW in GF180MCU, the thin oxide and short channels of 55 nm.
+here: the same `ble-tx-iot` on the 760 × 760 µm die gives 26.70 mW and 1.16 µW. **In ICsprout55** (§ 8.2, `ble-tx-iot-reg`, 48
+flip-flops more), the same estimate at 1.2 V (tt, 25 °C) gives 0.351 mW, 68 times less than `ble-tx-iot` at 5 V in GF180MCU,
+mostly the supply (dynamic power goes with V², (5 / 1.2)² = 17) and the capacitance. Its leakage is higher, not lower: 1.74 µW at
+25 °C and 7.26 µW at 125 °C (ss), against 0.53 µW in GF180MCU, the thin oxide and short channels of 55 nm.
 
 ## 8. Layout in open PDKs (GF180MCU-D; ICsprout55 in § 8.2)
 
@@ -521,7 +523,7 @@ The layout adds to `ble-tx-min`'s settings the three of `ble-tx-tag-8` (`RUN_POS
 `IO_EXCLUDE_PIN_REGION bottom:*`) and those of § 8.0.1. `ble-iot-1byte`'s one fanout violation is a clock-tree buffer, the reviewed
 case: every data net meets the limit.
 
-### 8.2 The same transmitter in 55 nm: ICsprout55
+### 8.2 The same transmitter in 55 nm: ICsprout55, with AdvA in registers (`ble-tx-iot-reg`)
 
 **The process.** ICsprout55 (ICS55) is the open 55 nm PDK of ICsprout, a foundry, and of the ECOS team (ICT, Chinese Academy of
 Sciences), github.com/openecos-projects/icsprout55-pdk, Apache 2.0. ECOS reported chips of its first ICS55 shuttle brought up on
@@ -536,111 +538,143 @@ could therefore do:
 | Three 7-track libraries (`ics55_LLSC_H7CR/L/H`, RVT/LVT/HVT): LEF, GDS, Verilog, liberty at 7 corners | **RVT** (`H7CR`): ss 1.08 V 125 °C rcworst, tt 1.2 V 25 °C, ff 1.32 V −40 °C rcbest |
 | DRC, antenna and LVS decks | **no: Calibre's only**; none for KLayout, Magic or Netgen |
 | SPICE models, RC extraction rules | not published (README, "Todo") |
-| OTP / eFuse block | none public: **AdvA in the ROM** (`ADV_ADDRESS_OTP = 0`) |
+| OTP / eFuse block | **none public** |
 | SRAM and ROM | online compilers (not needed: this transmitter has no memory) |
 
-**The flow.** LibreLane has no ICS55 PDK, and ECOS's own flow (ECC) runs through an installer that was not run here, so the steps of
-LibreLane Classic are scripted directly (`scripts/layout/tx_iot_ics55/`) on the same binaries as the GF180MCU runs (the eFuse compiler's
-Nix environment: Yosys 0.54, OpenROAD `4534556`, KLayout 0.30.4), with the PDK settings of ECC (`chipcompiler/data/pdk.py`: site `core7`,
-`FILLTAPH7R` taps every 58 µm, MET1 rails and MET4/MET5 straps, its excluded cells). Same RTL as § 8 (`GAUSS_TABLE = 1`), same clocks
-(`clk` 16 MHz, `clkb` 50 MHz), same SDC, output load and slew/capacitance margins. What differs, and why:
+**AdvA without an OTP: the branch `ble-tx-iot-reg`.** In GF180MCU, AdvA is in six eFuse blocks (§ 9): each chip is programmed once
+with its own address. ICS55 has no such block, and a ROM would give every chip the same address, which a product cannot have. So
+`ble-tx-iot-reg` (from `ble-tx-iot`) keeps AdvA in **six registers on `clkb`, 48 flip-flops**, written by the same (address, data) pair
+as the sensor's bytes, at PDU addresses 2..7 (byte 2 = AdvA[7:0], the first sent): `ADV_ADDRESS_REG = 1`, the branch's default
+(`verilog/btle_tx.v`, `tag_pdu_buffer`). They are not reset, so a reset keeps the address. The contract: the six bytes written before
+the first `tx_start` after power-up and not while a packet is sent. **The price is that the address is volatile**: whatever writes the
+registers (the firmware, `firmware/btle_ll.c -A <12 hex digits>`, now required in the tag mode) must hold it in a non-volatile memory off
+this block and write it after every power-up. The ROM and OTP options stay in the RTL, selected by `ADV_ADDRESS_REG = 0`.
 
-| | GF180MCU (§ 8) | ICsprout55 | Why |
+Its validation repeats § 3.5 (`results/validation/tx-iot-reg-validation/`), with a third DUT build per AdvA, the registers
+(`ADV_ADDRESS` set to 0, so the address can only come from them): its six bytes written through the pair in a random order, sometimes
+after a random value (the last write must win), all before the first packet and then each only sometimes, so the registers must keep
+the address through the packets and the resets that abort them; the DUT's other random pairs avoid 2..7.
+
+| Check | `ble-tx-iot-reg` |
+|---|---:|
+| `tests/test_tx_tag.py` against `ble-tx-min`, every output on every clock: ROM, OTP and registers × 2 AdvA × 3 seeds × 6 `clkb` | **108/108 runs** |
+| Faults, the 13 of § 3.5 and 4 on the registers (a byte written by the wrong address, the bytes in the wrong order, one never written, all cleared by a write to the sensor) | **17/17 caught** |
+| `tests/test_tx_tag_packet.py`: upstream's testbench writing the whole PDU, an AdvA that is not the ROM's | **50/50** |
+| `check_tag_scapy.py` on those packets | **50/50** |
+| `tests/test_tag_controller.py`: AdvA written through reg 8 as the firmware does (not the ROM's), then the sensor and channels 37, 38, 39 | **18/18 packets** |
+| `run_lint.py` | **PASS 2/2**, the 13 exceptions |
+| Cell area, 45 nm (Nangate45, § 4's flow; `results/area/tx-iot/ble-tx-iot-reg/`) | **2 774.4 µm²**, 278 flip-flops: **+371.9 µm² (+15.5 %)** against `ble-tx-iot`'s 2 402.5 |
+
+**The flow.** LibreLane has no ICS55 PDK, and ECOS's own flow (ECC) runs through an installer that was not run here, so the steps of
+LibreLane Classic are scripted directly (`scripts/layout/tx_iot_ics55/`, in `ble-tx-iot-reg`) on the same binaries as the GF180MCU runs
+(the eFuse compiler's Nix environment: Yosys 0.54, OpenROAD `4534556`, KLayout 0.30.4), with the PDK settings of ECC
+(`chipcompiler/data/pdk.py`: site `core7`, `FILLTAPH7R` taps every 58 µm, MET1 rails and MET4/MET5 straps, its excluded cells). Same
+clocks (`clk` 16 MHz, `clkb` 50 MHz), same SDC, output load and slew/capacitance margins as § 8. What differs, and why:
+
+| | GF180MCU (§ 8, `ble-tx-iot`) | ICsprout55 (`ble-tx-iot-reg`) | Why |
 |---|---|---|---|
-| AdvA | six eFuse blocks | ROM | no open OTP in 55 nm |
+| AdvA | six eFuse blocks | 48 flip-flops | no open OTP in 55 nm; a ROM is one address for every chip |
 | Hold: clock uncertainty / repair margin | 0.25 / 0.1 then 0.05 ns | 0.10 / 0.04 ns (ECC's) | with 0.25 ns, about every flip-flop pair failed hold at ff by 0.2 ns (a clock-to-Q of tens of ps) and the repair hit OpenROAD's buffer cap: GF180's margin, not this process's need |
-| Delay cells | excluded | allowed in the hold repair only | the hold repair needs them (261 and 256 `DLY4X2` placed) |
+| Delay cells | excluded | allowed in the hold repair only | the hold repair needs them (298 `DLY4X2` placed) |
 | After the global route | repair, then a new route | repair, then the route again where it changed (incremental) | the new route moved nets over the limits the repair had met |
 | Signoff parasitics | OpenRCX on the PDK's rules | the global route's, from the tech LEF's RC | no extraction rules |
-| Die | 760 × 230 / 225 µm, set by the eFuse row | **82 × 82 µm**, square, the smallest that passes (§ 8.2.1) | |
+| Die | 760 × 230 µm, set by the eFuse row | **86 × 86 µm**, square, the smallest that passes (§ 8.2.1) | |
 
-![ble-tx-iot in GF180MCU and in ICsprout55, same scale](../../results/figures/tx-iot/tx_iot_gf180_vs_ics55.png)
+![The IoT tag in GF180MCU and in ICsprout55, same scale](../../results/figures/tx-iot/tx_iot_reg_gf180_vs_ics55.png)
 
-| `ble-tx-iot`, ICsprout55, 82 × 82 µm | `ble-iot-1byte`, ICsprout55, 82 × 82 µm |
+![ble-tx-iot-reg, ICsprout55, 86 × 86 µm](../../results/figures/tx-iot/tx_iot_reg_ics55_gds.png)
+
+`ble-tx-iot-reg` in ICsprout55, 86 × 86 µm: MET1 blue, MET2 red, MET3 green, MET4 yellow, MET5 violet; pins on the top and bottom edges.
+
+| Checks | **`ble-tx-iot-reg`** (`tx-iot-reg-ics55`) |
 |---|---|
-| ![ble-tx-iot ICS55 GDS](../../results/figures/tx-iot/tx_iot_ics55_gds.png) | ![ble-iot-1byte ICS55 GDS](../../results/figures/tx-iot/iot_1byte_ics55_gds.png) |
-| MET1 blue, MET2 red, MET3 green, MET4 yellow, MET5 violet; pins on the top and bottom edges | the same |
+| Routing DRC (OpenROAD, the tech LEF's rules) | **0** |
+| The rule the router skips (`DRT-0349`: VIA4's enclosure by MET4), checked on the GDS (`via4_enclosure.py`) | **2 156 / 2 156 cuts** |
+| GDS: every placed cell the library's own layout (`gds.py`) | 98 cells, none missing |
+| Placement check, unplaced or overlapping cells | 0 |
+| Worst setup slack: ss / tt / ff | +13.612 / +14.690 / +15.097 ns |
+| Worst hold slack: ff / tt / ss | +0.049 / +0.131 / +0.343 ns |
+| Max slew / max capacitance violations | 0 / 0 |
+| Max fanout (10, as GF180) | every data net within it; **4 buffers of `clkb`'s clock tree above it** (11, 12, 13, 14), their slew and capacitance within limits (below) |
+| Clock skew, `clk` / `clkb` | 0.33 / 0.29 ns |
+| **Gate level against `ble-tx-min`, every output on every clock, with the layout's delays** (`gls.py`; SDF of ss, tt, ff; AdvA written to the registers, both of § 3.5's) | **108/108 runs (36 per corner)** |
+| The same with faults in the netlist (an XOR made XNOR, a NAND made AND, a NOR made OR, an inverter made a buffer) | **12/12 caught** |
+| Flow warnings / unreviewed | Yosys 0; OpenROAD 7 / **0** |
+| Foundry DRC, antenna, LVS (Calibre decks) | **not run** |
 
-| Checks | **`ble-tx-iot`** (`tx-iot-ics55`) | **`ble-iot-1byte`** (`iot-1byte-ics55`) |
-|---|---|---|
-| Routing DRC (OpenROAD, the tech LEF's rules) | **0** | **0** |
-| The rule the router skips (`DRT-0349`: VIA4's enclosure by MET4), checked on the GDS (`via4_enclosure.py`) | **1 666 / 1 666 cuts** | **1 591 / 1 591 cuts** |
-| GDS: every placed cell the library's own layout (`gds.py`) | 90 cells, none missing | 85 cells, none missing |
-| Placement check, unplaced or overlapping cells | 0 | 0 |
-| Worst setup slack: ss / tt / ff | +13.887 / +14.839 / +15.199 ns | +14.021 / +14.916 / +15.256 ns |
-| Worst hold slack: ff / tt / ss | +0.056 / +0.145 / +0.361 ns | +0.058 / +0.147 / +0.357 ns |
-| Max slew / max capacitance violations | 0 / 0 | 0 / 0 |
-| Max fanout (10, as GF180) | **0** | every data net within it; 1 clock-tree buffer above it (`clkb`, 12), the reviewed case of § 8.1 |
-| Clock skew, `clk` / `clkb` | 0.34 / 0.27 ns | 0.32 / 0.27 ns |
-| **Gate level against `ble-tx-min`, every output on every clock, with the layout's delays** (`gls.py`; SDF of ss, tt, ff) | **54/54 runs (18 per corner)** | **54/54 runs** |
-| The same with faults in the netlist (an XOR made XNOR, a NAND made AND, a NOR made OR, an inverter made a buffer) | **12/12 caught** | **12/12 caught** |
-| Flow warnings / unreviewed | Yosys 0; OpenROAD 6 / **0** | Yosys 0; OpenROAD 6 / **0** |
-| Foundry DRC, antenna, LVS (Calibre decks) | **not run** | **not run** |
-
-The six OpenROAD warnings: the core's corner snapped to the 1.4 µm row grid (`IFP-0028`), and `DRT-0349` on CT, VIA4, T4V2 and RV.
-CT is inside the library's cells, T4V2 and RV are above MET5 and not routed; VIA4's rule is checked on the GDS (above).
+The seven OpenROAD warnings: the core's corner snapped to the 1.4 µm row grid (`IFP-0028`); `DRT-0349` on CT, VIA4, T4V2 and RV (CT is
+inside the library's cells, T4V2 and RV are above MET5 and not routed, VIA4's rule is checked on the GDS, above); and `GRT-0273`, the global
+router dropping the clock tree's non-default rule (wider spacing) on `clk` to ease congestion, so `clk` is routed with the default rules, its
+timing and slew met. **`clkb`'s four buffers above the fanout of 10**: with AdvA in registers, `clkb`'s tree has 77 sinks (32 in
+`ble-tx-iot`); this CTS clusters no clock net below about 200 sinks (`clk`, 209, is clustered) and builds an H-tree whose leaves drive up to
+15, and it has no fanout limit (`clock_tree_synthesis`, `set_cts_config`). Clustering sizes 5 to 10 and diameters 30 to 150 µm leave 4 to 7
+clock-tree buffers above it (§ 8.2.1). The limit stands for slew and capacitance, which these nets meet; it is the case § 8.1 reviewed for
+`ble-iot-1byte`'s one buffer in GF180MCU, four times.
 
 **The gate-level check stands for LVS here.** `gls.py` runs `tests/test_tx_tag.py`'s own testbench, stimulus, reference and verdicts
-(imported, not copied) on the routed netlist, the PDK's cell models and the layout's SDF (OpenSTA's, in the subset Icarus reads: the
-conditional arcs that have an unconditional twin and the timing checks left out, the late delay as the typical one). The netlist's
-AdvA and Company ID are fixed by synthesis, so one AdvA and the ROM run, against the RTL's 72 runs of two AdvA and two stores (§ 3.5);
-every `clkb` frequency runs. Two adaptations: the inputs reach the netlist 2 ns after the clock edge (the testbench changes them on the
-edge, which a netlist behind its clock tree would take a clock early; the SDC's input delay is 12.5 ns), and the length check does not
-read the DUT's state register (a netlist does not keep its name; the PHY bits counted on the outputs stay). It shows that the netlist the
-layout was routed from sends what the RTL sends, sample for sample, with real delays; it does not show that the GDS is that netlist,
-which only an extraction and LVS would.
+(imported, not copied), its register build, on the routed netlist, the PDK's cell models and the layout's SDF (OpenSTA's, in the subset
+Icarus reads: the conditional arcs that have an unconditional twin and the timing checks left out, the late delay as the typical one). AdvA
+goes into the netlist's registers through the pair, so both of § 3.5's addresses run; the netlist's Company ID is synthesis's, 0xFFFF, for
+both. Two adaptations: the inputs reach the netlist 2 ns after the clock edge (the testbench changes them on the edge, which a netlist behind
+its clock tree would take a clock early; the SDC's input delay is 12.5 ns), and the length check does not read the DUT's state register (a
+netlist does not keep its name; the PHY bits counted on the outputs stay). The Icarus warning that timing checks are not supported, one per
+cell model's `specify` block, is left out of the logs. It shows that the netlist the layout was routed from sends what the RTL sends, sample
+for sample, with real delays; it does not show that the GDS is that netlist, which only an extraction and LVS would.
 
 **The area, the three that § 8.0 separates** (the categories of the GF180 table; port and hold buffers are timing repair there too):
 
-| µm² | `ble-tx-iot`, GF180MCU | **`ble-tx-iot`, ICS55** | GF180 / ICS55 | `ble-iot-1byte`, GF180MCU | **`ble-iot-1byte`, ICS55** | GF180 / ICS55 |
-|---|---:|---:|---:|---:|---:|---:|
-| **1. Cells after synthesis** (pre-layout; Nangate45 in § 4: 2 402.5 and 2 346.9) | — | **3 506.2** (1 450 cells) | | — | **3 377.4** (1 395 cells) | |
-| Logic: combinational, flip-flops, inverters, buffers | 39 856.1 | **3 515.7** | **11.3 ×** | 38 402.8 | **3 384.6** | **11.3 ×** |
-| of which flip-flops | 238 | 238 (1 466.1 µm²) | | 230 | 230 (1 416.8 µm²) | |
-| Timing-repair buffers + clock trees | 8 517.4 | **1 376.5** | 6.2 × | 8 205.7 | **1 314.0** | 6.2 × |
-| of which hold buffers | | 730.8 (261) | | | 716.8 (256) | |
-| Taps, end caps, antenna diodes | 3 481.6 | **77.3** | 45 × | 3 385.0 | **77.3** | 44 × |
-| eFuse blocks (AdvA, OTP) | 48 452.1 | — (ROM) | | 48 452.1 | — (ROM) | |
-| **2. Placed cells (the routed block)** | 100 307.1 | **4 969.4** | 20.2 × | 98 445.6 | **4 776.0** | 20.6 × |
-| The same without the eFuse blocks | 51 855.0 | **4 969.4** | **10.4 ×** | 49 993.5 | **4 776.0** | **10.5 ×** |
-| **3. Die** (the transmitter as a macro: no pads, no seal ring) | 174 800 | **6 724** | **26.0 ×** | 171 000 | **6 724** | **25.4 ×** |
-| Utilization of the core | 68.6 % | 82.7 % (of 6 006) | | 68.7 % | 79.5 % | |
+| µm² | `ble-tx-iot`, GF180MCU (eFuse) | **`ble-tx-iot-reg`, ICS55** (registers) | GF180 / ICS55 |
+|---|---:|---:|---:|
+| **1. Cells after synthesis** (pre-layout; Nangate45 of the same RTL: 2 774.4) | — | **4 015.8** (1 596 cells) | |
+| Logic: combinational, flip-flops, inverters, buffers | 39 856.1 | **4 035.9** | 9.9 × |
+| of which flip-flops | 238 | 286 (1 761.8 µm²; AdvA's 48 included) | |
+| Timing-repair buffers + clock trees | 8 517.4 | **1 494.4** | 5.7 × |
+| of which hold buffers | | 834.4 (298) | |
+| Taps, end caps, antenna diodes | 3 481.6 | **81.8** | 43 × |
+| AdvA's storage | 48 452.1 (six eFuse blocks) | in the logic above (48 flip-flops, about 296 µm² of `DFFQX1`) | |
+| **2. Placed cells (the routed block)** | 100 307.1 | **5 612.0** | **17.9 ×** |
+| **3. Die** (the transmitter as a macro: no pads, no seal ring) | 174 800 | **7 396** | **23.6 ×** |
+| Utilization of the core | 68.6 % | 84.3 % (of 6 658.4) | |
 
-1. **The logic is at the node's ratio in both directions.** (180 / 55)² = 10.7 and the logic is 11.3 times smaller; (55 / 45)² = 1.49 and
-   it is 1.46 and 1.44 times Nangate45's (synthesis and layout agree). Cell for cell, ICS55's are 1.36 (flip-flop, 6.16 against 4.522 µm²)
-   to 1.75 times (XOR2) Nangate45's: an industrial library, not a predictive one, at about the scaling.
-2. **The repair is the share that does not scale**: 28 % of the placed cells in 55 nm against 16 % in 180 nm (of the placed cells
-   without the eFuse blocks), half of it hold buffers. Fast cells need delay to meet hold (the flow's table above), where GF180's slow
+1. **The logic is at the node's ratio**: 1.45 times Nangate45's for the same RTL (4 035.9 against 2 774.4; synthesis alone 1.45), against
+   (55 / 45)² = 1.49. Cell for cell, ICS55's are 1.36 (flip-flop, 6.16 against 4.522 µm²) to 1.75 times (XOR2) Nangate45's: an industrial
+   library, not a predictive one, at about the scaling. Against GF180MCU the logic is 9.9 times smaller, below the node's (180 / 55)² = 10.7,
+   because this RTL has 48 flip-flops more.
+2. **AdvA costs little here and is volatile.** The six eFuse blocks are 48 452.1 µm² in GF180MCU, half of its placed area; the 48 flip-flops
+   and their writes are 371.9 µm² in 45 nm (+15.5 %), about 540 µm² in 55 nm at the logic's ratio of 1.45. An eFuse block in 55 nm would be smaller
+   than in 180 nm, so the comparison is not of like with like: what the registers buy is a die without OTP, what they cost is that the
+   address must come from outside after every power-up.
+3. **The repair is the share that does not scale**: 27 % of the placed cells in 55 nm against 16 % in 180 nm (of the placed cells without
+   the eFuse blocks), more than half of it hold buffers. Fast cells need delay to meet hold (the flow's table above), where GF180's slow
    ones needed little; with GF180's 0.25 ns of uncertainty on hold the share would be larger still.
-3. **The die is smaller than the node predicts** (26 against 10.7) **only because 55 nm has no eFuse row**: half of GF180's placed area
-   is the six blocks (§ 9), which here are a ROM, and the eFuse row also fixed GF180's aspect ratio. Without them, the placed area is at the
-   node's ratio (10.4, 10.5). A product in 55 nm would still need a non-volatile AdvA per chip (ICsprout runs a 55 nm embedded-Flash
-   process, its README says; nothing of it is in this PDK), so **26 × is the ROM's figure, 10.4 × the logic's**.
-4. **This is the transmitter's digital block, not the chip.** Pads, ESD, the clock source and the radio are outside it; they do not
-   shrink with the node as logic does, and on a chip of this size they would dominate. The 6 724 µm² is the area of the block, not of a
-   transmitter chip.
-5. **The two branches differ by 193.5 µm² placed (−3.9 %)**, 131.0 µm² of logic (−3.7 %: 8 flip-flops and their multiplexers),
-   more in share than in 45 nm (−2.3 %) and GF180 (−1.9 %), and on the same die: the sweep's limit is the same for both. A byte is
-   still a small part of a transmitter whose size is the modulator's; § 10.3's recommendation stands.
+4. **This is the transmitter's digital block, not the chip.** Pads, ESD, the clock source, the radio and the memory that holds AdvA are
+   outside it; they do not shrink with the node as logic does, and on a chip of this size they would dominate. The 7 396 µm² is the area
+   of the block, not of a transmitter chip.
+5. **`ble-iot-1byte` is not laid out in 55 nm.** In GF180MCU it saves 1.9 % of placed area for half of the reading's bits (§ 10.3); a
+   55 nm layout of it with registers would answer the same question at the same scale.
 
 #### 8.2.1 The die sweep
 
-Square dies, the placement's target density raised as the die shrinks, the clock tree's clustering as GF180's (7 flip-flops over
-150 µm) unless stated (`results/layout/die-sweep-ics55/<branch>.tsv`). "Clean": the gate of `run.sh` (no routing DRC, no slew or
-capacitance violation, no data net over the max fanout, every slack positive).
+Square dies, the placement's target density raised as the die shrinks, the clock tree's clustering as GF180's (7 flip-flops over 150 µm)
+unless stated (`results/layout/die-sweep-ics55/ble-tx-iot-reg.tsv`). "Clean": the gate of `run.sh` (no routing DRC, no slew or capacitance
+violation, no data net over the max fanout, every slack positive, no `GPL-0302`, the placer's warning that the target density is below the
+cells' own, which GF180's gate fails too); every run has three to seven clock-tree buffers above the fanout of 10, `clkb`'s and
+some of `clk`'s.
 
-| Die (µm) | Density | `ble-tx-iot` | `ble-iot-1byte` |
-|---|---:|---|---|
-| 100, 90, 85 | 0.55, 0.65, 0.70 | clean; 5 025, 4 967, 4 995 µm² placed | clean, the `clkb` buffer at 12 |
-| 83 | 0.72 | clean (5 000 µm²) | clean, the `clkb` buffer at 12 (clustering 30 µm) |
-| **82** | **0.74** | **clean: chosen** (4 969 µm²) | **clean, the `clkb` buffer at 12: chosen** (4 776 µm²) |
-| 81 | 0.76 | 6 slew, 4 capacitance violations at ss | — |
-| 80 | 0.75, 0.78 | 2 slew, 4 capacitance | 3 slew, 1 capacitance; at 0.78 (clustering 5), routing fails |
-| 76, 74, 72, 70 | 0.80–0.88 | the cells do not fit (detailed placement) | the same, or routing congestion |
+| Die (µm) | Density | Result | Placed (µm²) |
+|---|---:|---|---:|
+| 92 | 0.66 | clean | 5 683 |
+| 90, 88 | 0.68, 0.70 | `GPL-0302` | 5 655, 5 659 |
+| 88 | 0.74; 0.76 | 2 capacitance violations; clean | 5 650; 5 643 |
+| 87 | 0.71 | `GPL-0302` (also with clustering 5 to 10 over 30 to 150 µm, some with slew or capacitance violations) | 5 624–5 719 |
+| 87 | 0.74; 0.76, 0.78 | clean; 3 to 18 slew and capacitance violations at ss | 5 668; 5 673, 5 666 |
+| **86** | **0.78** | **clean: chosen** | **5 612** |
+| 86 | 0.72, 0.76, 0.80 | routing congestion (`GRT-0116`) | — |
+| 85 | 0.73; 0.78 | `GPL-0302` and 13 violations; 21 slew and capacitance violations | 5 640; 5 661 |
+| 85, 84, 83, 82 | 0.74–0.84 | routing congestion (`GRT-0116`, `GRT-0232`) | — |
 
-The clock tree's clustering does not remove `ble-iot-1byte`'s `clkb` buffer: 5, 6, 8 or 10 flip-flops, or 20, 30 or 50 µm, leave it at
-12 and add `clk` buffers above 10 (`ble-tx-iot` gets them too). This CTS has no fanout limit. At 82 µm the core is 80–83 % full;
-what is left is fillers and the room the repair needs.
+**The layouts with AdvA in the ROM** (`ble-tx-iot`, `ble-iot-1byte`, 82 × 82 µm, 4 969.4 and 4 776.0 µm² placed), made first, were removed:
+every chip would send one address.
 
 ## 9. The AdvA OTP (GF180MCU eFuse)
 
@@ -668,7 +702,7 @@ blocks are 8 bits wide. The programming port must reach a production test interf
 | 10.4 | Access address, preamble, CRC init | written by software | **kept as they are**, as the tag | constants for advertising (0x8E89BED6, 0xAA, 0x555555): 40 + 24-bit load logic less; **not built** | open |
 | 10.5 | AdvA | written with the packet | **OTP**, as `ble-tx-min` | ROM: no area, one address for all | decided (supervisor) |
 | 10.6 | GF180MCU die | — | **760 × 230, 760 × 225 µm** | § 8.0.1 | decided |
-| 10.7 | ICsprout55 die (AdvA in the ROM) | — | **82 × 82 µm, both** | § 8.2.1 | decided for this study; a product needs a non-volatile AdvA, which the PDK does not have |
+| 10.7 | AdvA without an OTP (ICsprout55) | — | **48 flip-flops written through the pair** (`ble-tx-iot-reg`), 86 × 86 µm | ROM: one address for every chip (82 × 82 µm, removed) | decided for this study; the address is volatile, held off the block |
 
 **10.3, the choice between the two.** Both are equally exact, built and validated.
 
@@ -699,12 +733,13 @@ And what `ble-tx-min` gives up already (a changeable AdvA, the runtime Gaussian 
 
 **Does not claim:**
 - The 45 nm figures are pre-layout (no wires, no clock tree), in an academic library; they are not comparable as such with a layout (§ 8.0).
-- The signoff layouts are in 180 nm, the node of the open PDK that has an OTP and is fabricable. The 55 nm layouts (§ 8.2) are in a PDK
-  that has been fabricated but is a preview release, and they are **not signed off**: its DRC, antenna and LVS decks are Calibre's and
-  were not run (the routing DRC is the tech LEF's, the gate-level check stands for LVS without being one); its timing uses the global
-  route's parasitics from the tech LEF's RC, as it has no extraction rules; there is no IR-drop analysis; AdvA is in the ROM, as the PDK
-  has no OTP. Its area is the transmitter's digital block, not a chip's: no pads, ESD, clock source or radio, which would not shrink
-  with the node. Fabricating in it would need ECOS's accepted PDK version, its checks and its terms of access, which were not asked.
+- The signoff layouts are in 180 nm, the node of the open PDK that has an OTP and is fabricable. The 55 nm layout (§ 8.2) is of
+  `ble-tx-iot-reg`, AdvA in registers, in a PDK that has been fabricated but is a preview release, and it is **not signed off**: its DRC,
+  antenna and LVS decks are Calibre's and were not run (the routing DRC is the tech LEF's, the gate-level check stands for LVS without being
+  one); its timing uses the global route's parasitics from the tech LEF's RC, as it has no extraction rules; there is no IR-drop analysis.
+  Its area is the transmitter's digital block, not a chip's: no pads, ESD, clock source, radio or the non-volatile memory the registers'
+  address comes from. Fabricating in it would need ECOS's accepted PDK version, its checks and its terms of access, which were not asked.
+  The firmware's `-A` was not run on a board.
 - The BER's comparison with `ble-tx-min` is of different packets; the differences are within the draws' spread (§ 3.3). The SNR at PER 10 % is a
   model's, and does not cover the one-byte packet.
 - The GF180MCU layouts are the transmitter as a macro (no pads, no seal ring, no chip-level integration, no parasitic-annotated simulation);
@@ -731,11 +766,12 @@ branch's clone under WSL (a Windows worktree's git does not run there), and `<la
 | FPGA Device view | `results/fpga/xc7z020-iot/<iot, iot1b>/device.png`, `device.txt` | `device_view.ps1 <dir>`, then `device_crop.py` |
 | Layout and warnings | `results/layout/tx-iot-gf180/`, `iot-1byte-gf180/`, `tx-iot-gf180-die760/`, and each `warning_gate.txt` | `scripts/layout/tx_min_gf180/run.sh <label>-gf180 HEAD`; the old die: `CONFIG_OVERRIDES` as in § 8.0.1 |
 | Die sweep | `results/layout/die-sweep/<branch>.tsv` | `CONFIG_OVERRIDES='{"DIE_AREA":[0,0,760,<h>],"PL_TARGET_DENSITY_PCT":<d>}' scripts/layout/tx_min_gf180/run.sh <name> HEAD` |
-| Layout in ICsprout55 (§ 8.2) | `results/layout/tx-iot-ics55/`, `iot-1byte-ics55/` (`gate.txt`, `summary.txt`, `area.*.txt`, `sta.*.txt.gz`, `power.*.txt`, the GDS, netlist and SDFs) | `scripts/layout/tx_iot_ics55/run.sh <label>-ics55 <branch>` (PDK: `icsprout55-pdk` `e0b1122` after its `make unzip`, in `ICS55_DIR`) |
-| ICsprout55 gate level | `results/layout/<label>-ics55/gls.{ss,tt,ff}.log` | `python3 scripts/layout/tx_iot_ics55/gls.py <netlist> <sdf> <PDK>/IP/STD_cell/ics55_LLSC_H7C_V1p10C100/ics55_LLSC_H7CR/verilog/ics55_LLSC_H7CR.v` |
-| ICsprout55 VIA4 enclosure | `results/layout/<label>-ics55/via4_enclosure.txt` | `python3 scripts/layout/tx_iot_ics55/via4_enclosure.py <gds>` (KLayout) |
-| ICsprout55 die sweep | `results/layout/die-sweep-ics55/<branch>.tsv` | `DIE_W=<w> DIE_H=<w> DENSITY=<d> [CTS_SIZE=<n> CTS_DIAM=<um>] KEEP=0 scripts/layout/tx_iot_ics55/run.sh <name> <branch>` |
-| Same-scale figure | `results/figures/tx-iot/tx_iot_gf180_vs_ics55.png` | both GDS rendered at 2 px/µm (`scripts/layout/tx_iot_ics55/scale_render.py`, KLayout), then composed (`scale_figure.py`) |
+| `ble-tx-iot-reg`, validation (§ 8.2) | `results/validation/tx-iot-reg-validation/`, `results/area/tx-iot/ble-tx-iot-reg/` | in `ble-tx-iot-reg`: `scripts/senseworks/run_tag_validation.sh tx-iot-reg-validation`; `AREA_PARAMS=GAUSS_TABLE=1 RTL_REV=HEAD scripts/area/run_area.sh tx-iot/ble-tx-iot-reg crc24 scramble gfsk_modulation btle_tx` |
+| Layout in ICsprout55 (§ 8.2) | in `ble-tx-iot-reg`: `results/layout/tx-iot-reg-ics55/` (`gate.txt`, `summary.txt`, `area.*.txt`, `sta.*.txt.gz`, `power.*.txt`, the GDS, netlist and SDFs) | `scripts/layout/tx_iot_ics55/run.sh tx-iot-reg-ics55 HEAD` (PDK: `icsprout55-pdk` `e0b1122` after its `make unzip`, in `ICS55_DIR`) |
+| ICsprout55 gate level | `results/layout/tx-iot-reg-ics55/gls.{ss,tt,ff}.log` | `python3 scripts/layout/tx_iot_ics55/gls.py <netlist> <sdf> <PDK>/IP/STD_cell/ics55_LLSC_H7C_V1p10C100/ics55_LLSC_H7CR/verilog/ics55_LLSC_H7CR.v` |
+| ICsprout55 VIA4 enclosure | `results/layout/tx-iot-reg-ics55/via4_enclosure.txt` | `python3 scripts/layout/tx_iot_ics55/via4_enclosure.py <gds>` (KLayout) |
+| ICsprout55 die sweep | `results/layout/die-sweep-ics55/ble-tx-iot-reg.tsv` | `DIE_W=<w> DIE_H=<w> DENSITY=<d> [CTS_SIZE=<n> CTS_DIAM=<um>] KEEP=0 scripts/layout/tx_iot_ics55/run.sh <name> HEAD` |
+| Same-scale figure | `results/figures/tx-iot/tx_iot_reg_gf180_vs_ics55.png` | both GDS rendered at 2 px/µm (`scripts/layout/tx_iot_ics55/scale_render.py`, KLayout), then composed (`scale_figure.py`) |
 | OTP | `results/otp/gf180-efuse/` | `TX_MIN_VALIDATION.md` § 10 |
 | Figures of §§ 3–8 | `results/figures/tx-iot/`, `results/figures/iot-1byte/` (`tx-iot/data.json` names the source of every number) | `python3 scripts/figures/tx_min_figures.py tx\|ber <dir>`; `python3 scripts/figures/tx_iot_figures.py results/figures/tx-iot/data.json results/figures/tx-iot` |
 
