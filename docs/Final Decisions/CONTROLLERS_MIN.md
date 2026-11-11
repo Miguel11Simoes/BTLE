@@ -7,14 +7,16 @@ Advertising transmitter `ble-tx-min` and the final receiver `ble-rx-2p1c`), each
 **Reference documents:** [`TX_FINAL_DECISIONS.md`](TX_FINAL_DECISIONS.md), [`RX_FINAL_DECISIONS.md`](RX_FINAL_DECISIONS.md),
 [`TX_TAG_4_IOT.md`](../Senseworks/TX_TAG_4_IOT.md), [`RX_4_IOT.md`](../Senseworks/RX_4_IOT.md): the halves' own measurements, which
 this document does not repeat  
-**Date:** 2026-11-10  
+**Date:** 2026-11-11  
 **Author:** Miguel Simões  
-**Status:** every number below is measured and its evidence is committed in the branch it belongs to (§ 9). Validation of
-both controllers, cell area in 45 nm (Nangate45, pre-layout), and the PHY of each laid out as one macro in two open PDKs:
-**GF180MCU-D** (180 nm; DRC with the foundry's KLayout deck, LVS, antenna, timing at 9 corners: clean) and **ICsprout55**
+**Status:** every number below is measured and its evidence is committed in the branch it belongs to (§ 10). Validation of
+both controllers, cell area in 45 nm (Nangate45, pre-layout), and the PHY of each laid out as one macro in three open PDKs:
+**GF180MCU-D** (180 nm; DRC with the foundry's KLayout deck, LVS, antenna, timing at 9 corners: clean), **ICsprout55**
 (55 nm; routing DRC on the tech LEF's rules, timing at 3 corners: clean; the netlist equal to the RTL clock by clock; the PDK's
-foundry DRC and LVS are Calibre decks and were not run). Not a tape-out (`docs/Validation/ASIC_READINESS.md`: NOT READY, as on
-every branch).
+foundry DRC and LVS are Calibre decks, which cannot be run with open tools, § 9.1) and **SKY130A** (130 nm, upstream's process;
+KLayout and Magic DRC, LVS, antenna, timing at 9 corners: clean), where **upstream's own `btle_phy` was laid out with the same
+flow** for a comparison in one process (§ 8). Blocks, not chips (§ 9.2). Not a tape-out (`docs/Validation/ASIC_READINESS.md`:
+NOT READY, as on every branch).
 
 ---
 
@@ -56,11 +58,16 @@ against the same halves laid out apart.
 | **ICsprout55 die** (µm²) | **24 025 (155 × 155)** | **48 400 (220 × 220)** | § 6 |
 | ICsprout55: routing DRC, VIA4 enclosure, slew, capacitance, setup, hold; the netlist against the RTL, every output on every clock | **clean; 18/18 runs, 4/4 faults** | **clean; 18/18 runs, 4/4 faults** | § 6 |
 | One macro against the two halves' macros, GF180MCU: placed / die | +0.8 % / **+6.9 %** | −2.6 % / **−49.1 %** | § 7 |
-| Unreviewed warnings of the layouts | **0** | **0** | § 5.2, § 6 |
+| **SKY130A: placed cells / die** (µm², AdvA in 48 flip-flops) | **73 045.1 / 144 400 (380 × 380)** | **137 627 / 313 600 (560 × 560)** | § 8 |
+| SKY130A signoff: DRC (KLayout, Magic), LVS, antenna, slew, capacitance, setup, hold | **clean** | **clean** | § 8 |
+| **Against upstream's `btle_phy` in SKY130A, same flow** (5 500 000 µm² die, 581 967 µm² cells + 11 SRAM macros): die / cells | **−97.4 % / −87.4 %** | **−94.3 % / −76.4 %** | § 8 |
+| Unreviewed warnings of the layouts | **0** | **0** | § 5.2, § 6, § 8 |
 
 **In one sentence:** the IoT controller is a 155 × 155 µm block in 55 nm and the Legacy Advertising one a 220 × 220 µm block, twice
 its area, each with its transmitter and receiver unchanged and checked together; in GF180MCU one macro costs what the two halves
 cost apart in cells (−2.6 to +0.8 %), and saves half the die for `ble-adv`, whose two separate dies were set wide for other reasons.
+In upstream's own process, SKY130A, with one flow and one set of constraints for the three, upstream's PHY needs a die 38 times
+`ble-iot`'s and 17.5 times `ble-adv`'s, and does not close timing at the slow corner.
 
 ## 2. What was composed
 
@@ -325,20 +332,194 @@ The logic scales with the node. The die scales by more because GF180MCU's holds 
 `ble-iot`'s placed area) and its width is set by them; ICsprout55's has none, and its address must come from outside after every power-up
 (`TX_TAG_4_IOT.md` § 8.2).
 
-## 8. What this does not claim
+## 8. Upstream and the two controllers in SKY130A, one flow
 
-1. **Not a chip.** The layouts are the PHY as a macro: no pads, ESD, clock source or radio, and not the RISC-V core or its memories
-   (`btle_controller`, § 4, has 4 SRAM macros).
-2. **55 nm signoff is partial.** ICsprout55's DRC, antenna and LVS decks are Calibre's and were not run; the routing DRC is the tech LEF's,
-   the parasitics the global route's (no extraction rules), and the netlist is checked against the RTL in zero delay with the timing from
-   OpenSTA (§ 6). Its PDK is a preview release that forbids mass production.
+**Why.** Upstream laid its design out in SKY130 (its notebook, `open_btle_baseband_chip/open_btle_baseband_chip.ipynb` at tag
+`upstream-baseline`, OpenLane): `btle_controller_wrapper` on a die of 2070.4 × 2081.2 µm (4 308 896 µm²), a run that failed in global
+routing, and `btle_rx_core` alone on 303.1 × 313.8 µm (95 122 µm²), whose GDS was written and whose STA after routing failed. Neither
+closed, neither is the block laid out here, and both are in another node than §§ 5–6. So the comparison is made by laying out
+**upstream's `btle_phy`** (its transmitter and receiver, the block §§ 5–6 lay out for ours) and ours in SKY130A, with one script, one SDC
+and one set of settings.
+
+**The flow** (`scripts/layout/phy_sky130/run.sh <label> <rev> <iot|adv|upstream>`): LibreLane Classic, sky130A (open_pdks `8afc8346`, from
+Ciel), `sky130_fd_sc_hd`, in the Nix environment of § 5; the SDC of § 5 (`clk` 16 MHz, `clkb` 50 MHz, input and output delays 20 % of the
+period); 9 corners (ss 100 °C 1.60 V, tt 25 °C 1.80 V, ff −40 °C 1.95 V, each with minimum, nominal and maximum parasitics); § 5's settings
+(timing-driven placement, the resizers' setup margins 1.0 / 0.5 ns, the repair after global routing, slew / capacitance margins 60 / 30 %,
+clock-tree clustering 7 sinks over 150 µm, fanout 10); the GDS written by KLayout. `ble-iot` and `ble-adv` as in ICsprout55: AdvA in 48
+flip-flops (this flow has no OTP), `ble-adv`'s AdvData in flip-flops.
+
+**Upstream's PHY**: its RTL at `upstream-baseline` with its default parameters, unchanged except its two memory models. Those
+(`sdpram_one_clk.v`, `sdpram_two_clk.v`) are inferred RAMs for a Xilinx BRAM: 9 of 512 × 8 (the transmitter's PDU, each of the receiver's 8
+phases' packet) and 2 of 2048 × 8 (the VCO's cos and sin tables), 69 632 bits, which as flip-flops alone would be larger than the
+whole of `ble-adv`. They are put on the PDK's OpenRAM macros by `sdpram_sky130.v` (the same module names and ports): the nine on
+`sky130_sram_1kbyte_1rw1r_8x1024_8` (half of each used), the two on `sky130_sram_2kbyte_1rw1r_32x512_8`. `sdpram_check.py` runs each wrapper
+beside upstream's model on random traffic on both clocks: **9/9 runs equal, 4/4 faults caught** (`sdpram_check.txt`). What the macros need,
+and the logic of the other two does not, is upstream's only:
+
+| Upstream only | Why |
+|---|---|
+| The 11 macros in three rows at the bottom, 60 µm apart and 60 µm from the left edge | channels for the routing and the power straps; at 30 µm from the edge the row pieces left of the macros keep one tap cell of two, and LVS finds ~260 floating n-wells |
+| The receiver's read port (`rx_pdu_octet_mem_*`) on the west side, beside the macros that drive it; every other pin on the other three | the read data runs from the macros to the pins |
+| The macros' liberty (only typical, 1.8 V 25 °C, used at every corner): the input slew limit of three buses, 0.04 ns, raised to 0.5 ns | 0.04 ns is the characterisation's input slew, not a limit a cell can drive across a macro: the resizer stops (`RSZ-2008`) |
+| The hold repair's margin after global routing 0.2 ns | the macros' pins timed with the typical liberty |
+| Magic's DRC and the hold check reported, not fatal | below |
+
+| The same scale: upstream's `btle_phy`, `ble-adv`, `ble-iot`, SKY130A |
+|---|
+| ![The three PHYs in SKY130A, same scale](../../results/figures/controllers/controllers_sky130.png) |
+
+| upstream, 2500 × 2200 µm | `ble-adv`, 560 × 560 µm | `ble-iot`, 380 × 380 µm |
+|---|---|---|
+| ![upstream's btle_phy GDS, SKY130A](../../results/figures/controllers/phy_upstream_sky130_gds.png) | ![ble-adv GDS, SKY130A](../../results/figures/controllers/phy_adv_sky130_gds.png) | ![ble-iot GDS, SKY130A](../../results/figures/controllers/phy_iot_sky130_gds.png) |
+| the 11 SRAM macros at the bottom, the logic above and right | logic only | logic only |
+
+| Signoff | **upstream** (`phy-upstream-sky130`) | **`ble-adv`** (`phy-adv-sky130`) | **`ble-iot`** (`phy-iot-sky130`) |
+|---|---|---|---|
+| DRC: KLayout (whole GDS) / Magic / routing | **0** / 36 301 756, **every one inside the 11 OpenRAM macros, 0 outside** / 0 | **0** / 0 / 0 | **0** / 0 / 0 |
+| LVS (Netgen) / antenna | clean / 0 | clean / 0 | clean / 0 |
+| Worst setup slack: ss / tt / ff | **−1.191** / +1.429 / +2.581 ns | +7.314 / +11.314 / +12.928 ns | +8.616 / +12.615 / +13.896 ns |
+| Worst hold slack: ff / tt / ss | **−0.044** / +0.109 / +0.320 ns | +0.100 / +0.299 / +0.819 ns | +0.088 / +0.288 / +0.828 ns |
+| Endpoints failing setup at ss / hold at ff | 8 (`rx_pdu_octet_mem_data[7:0]`) / 5 (the TX PDU macro's read address) | 0 / 0 | 0 / 0 |
+| Max slew / max capacitance violations (worst corner, ss) | **491 / 19** | 0 / 0 | 0 / 0 |
+| Max fanout (10) | 75 nets: 20 clock-tree buffers, 47 long-wire buffers, 7 other buffers, 1 macro output | 17 clock-tree buffers | 8 clock-tree buffers |
+| IR drop (worst) / clock skew | 8.51 mV / 0.76 ns | 0.30 mV / 0.35 ns | 0.34 mV / 0.33 ns |
+| Standard cells / macros | 96 331 / 11 | 15 674 / 0 | 8 294 / 0 |
+
+**`ble-iot` and `ble-adv` are clean**, as in GF180MCU. Their warnings are of the kinds § 5.2 reviewed (`STA-1140` × 30, `DRT-0349` × 10,
+`VSRC_LOC_FILES`, the PHY's pins without antenna information, the long-wire checker not set), and `ble-adv`'s three `GRT-0243` (antenna
+repair during global routing on nets that already have diodes; the antenna check after detailed routing: 0).
+
+**Upstream's PHY is DRC and LVS clean, and its timing fails only at the macros' boundaries:**
+
+1. **Magic's 36 M DRC markers are the OpenRAM bit cells.** `magic_drc_in_macros.txt` places each marker against the macros' boxes: all
+   inside, none outside; the rules are those of the SRAM core (`poly.8`, `diff/tap.2`, `licon.11` "SRAM gate", `li.c2` "core local
+   interconnect", ...): the bit cells are drawn to the foundry's SRAM-core rules, tighter than the logic's, and Magic's full deck flags
+   them as logic. KLayout's deck checks the same GDS: 0.
+2. **Setup at ss, −1.19 ns on 8 paths**: the macros' read data to the port `rx_pdu_octet_mem_data`. Upstream's model registers the read
+   data on the rising edge; the macro's read starts at the falling edge, 10 ns into the `clkb` period, and its data must reach the
+   port 4 ns before the next rising edge (the SDC's output delay): 6 ns for the macro's access and a wire across the die, against a full
+   period from a flip-flop in upstream's model. Every internal path closes; at tt and ff these 8 paths pass (+1.43 ns, +2.58 ns).
+   Closing it needs a register after the macro (a change of upstream's RTL) or a looser constraint on that port; neither is made here.
+3. **Hold at ff, −0.04 ns on 5 paths** into the TX PDU macro's read address: the macro is timed with its typical liberty at the fast
+   corner, the only one the PDK gives.
+4. **Slew and capacitance at ss**: the macros' clock, address and data pins and long wires across a 2.5 mm die (491 pins at ss, 62 at
+   ff); the 19 capacitance violations are macro outputs (`dout`), whose liberty limit is 0.0276 pF.
+5. Its warnings, besides those of `ble-adv`: `PDN-0110` × 12 (met4–met5 vias not placed at the macros' edges; LVS clean, IR drop 8.5
+   mV), `RSZ-0062` × 2 (the setup above, not repaired), the macros' pins without antenna information.
+
+| SKY130A (µm²) | **upstream** | **`ble-adv`** | **`ble-iot`** |
+|---|---:|---:|---:|
+| Combinational | 343 363 | 59 117.9 | 33 589.7 |
+| Flip-flops and latches | 52 895.7 | 39 780.7 | 19 568.8 |
+| Inverters, buffers | 2 128.3 | 498.0 | 344.1 |
+| Timing-repair buffers | 122 719 | 28 323.4 | 14 824.2 |
+| Clock trees | 8 293.0 | 4 558.1 | 2 338.5 |
+| Taps, antenna diodes | 52 568.0 | 5 348.9 | 2 379.8 |
+| **Placed cells** | **581 967** | **137 627** | **73 045.1** |
+| SRAM macros (11) | 2 398 540 | — | — |
+| **Placed cells + macros** | **2 980 507** | **137 627** | **73 045.1** |
+| **Die** | **5 500 000 (2500 × 2200)** | **313 600 (560 × 560)** | **144 400 (380 × 380)** |
+| Utilization of the core | 55.0 % | 46.8 % | 55.6 % |
+
+**Against upstream, both in SKY130A, the same flow** (measured; no node to normalise):
+
+| My layout | Die (µm²) | % of upstream's die | Difference | Placed cells (µm²) | % of upstream's cells | Difference | % of upstream's cells + macros |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| `ble-iot` (380 × 380) | 144 400 | 2.63 % | **−97.4 %** | 73 045.1 | 12.6 % | **−87.4 %** | 2.45 % |
+| `ble-adv` (560 × 560) | 313 600 | 5.70 % | **−94.3 %** | 137 627 | 23.6 % | **−76.4 %** | 4.62 % |
+
+**Against upstream's own runs** (its notebook, SKY130, OpenLane; neither closed; the same node, so no normalisation):
+
+| Layout | Die (µm²) | Against `btle_controller_wrapper` (4 308 896) | Against `btle_rx_core` (95 122, one of the receiver's 8 phases) |
+|---|---:|---:|---:|
+| `ble-iot` | 144 400 | 3.35 % (**−96.6 %**) | **+51.8 %** |
+| `ble-adv` | 313 600 | 7.28 % (**−92.7 %**) | **+229.7 %** |
+| upstream's `btle_phy`, here | 5 500 000 | +27.6 % | 57.8 × |
+
+**The estimate from the other nodes, checked.** Before these runs, the GF180MCU and ICsprout55 dies were scaled to 130 nm by the square of
+the nodes' ratio (× 0.522 and × 5.587):
+
+| Layout | Die in its node (µm²) | Scaled to 130 nm | Measured in SKY130A | The estimate's error |
+|---|---:|---:|---:|---:|
+| `ble-iot`, GF180MCU (760 × 460) | 349 600 | 182 351 | 144 400 | +26.3 % |
+| `ble-adv`, GF180MCU (760 × 930) | 706 800 | 368 667 | 313 600 | +17.6 % |
+| `ble-iot`, ICsprout55 (155 × 155) | 24 025 | 134 223 | 144 400 | −7.0 % |
+| `ble-adv`, ICsprout55 (220 × 220) | 48 400 | 270 401 | 313 600 | −13.8 % |
+
+1. **Upstream's PHY is 38 times `ble-iot`'s die and 17.5 times `ble-adv`'s; in cells alone, 8.0 and 4.2 times.** 80 % of its placed
+   area is memory: the 11 macros hold its receiver's 8 packet buffers and the VCO's tables, where `ble-adv` keeps two packets of 42 octets
+   in flip-flops and `ble-iot` stores no packet constants at all (§ 4).
+2. **Upstream's die is not its minimum**: 2500 × 2200 µm is the smallest die its final settings routed; 2300 × 2000 routed once with
+   other settings (wires buffered every 400 µm, the macros 30 µm from the edge). Smaller by up to 16 %, it would still be 32 and 15
+   times ours. `ble-iot`'s 380 µm is the smallest die tried (§ 8.1).
+3. **The scaled estimate was within 26 %** of the measured die: above it from GF180MCU, whose die is set by the eFuse row (§ 7.1),
+   below it from ICsprout55. `sky130_fd_sc_hd` is denser than the node ratio predicts: the logic (combinational, flip-flops, inverters,
+   buffers) is 6.0 times (`ble-iot`) and 5.8 times (`ble-adv`) Nangate45's, against (130 / 45)² = 8.3.
+4. **Timing**: ours close at every corner with 7.3 ns of setup slack or more at ss; upstream's closes at tt and ff and fails at ss on its
+   read port only (above).
+
+### 8.1 The die sweep
+
+Square dies for ours, the density raised as the die shrinks; upstream's die the smallest its macros' rows and the routing allowed.
+"Clean": no DRC, LVS or antenna error, no slew or capacitance violation, every slack positive. `results/layout/die-sweep-sky130/sweep.tsv`
+(every run, its settings and result; `sweep_raw.tsv`, the log).
+
+| Branch | Die (µm) | Density | Slew / cap margin | Result | Placed cells (µm²) |
+|---|---:|---:|---|---|---:|
+| `ble-iot` | 460 | 55 | 30 / 30 % | 7 slew violations | 71 269.6 |
+| `ble-iot` | 430, 400 | 60, 64 | 60 / 30 % | clean | 74 007.2, 73 724.5 |
+| `ble-iot` | **380** | **68** | **60 / 30 %** | **clean: chosen** | **73 045.1** |
+| `ble-adv` | 640 | 50 | 30 / 30 % | 20 slew violations | 133 732 |
+| `ble-adv` | 600 | 55 | 60 / 30 % | clean | 138 365 |
+| `ble-adv` | **560** | **60** | **60 / 30 %** | **clean: chosen** | **137 627** |
+| `ble-adv` | 530 | 64 | 60 / 30 % | 13 slew violations | 136 521 |
+| upstream | 2010 × 1700 to 2200 × 1800 | 45–50 | 60 / 30 % | `RSZ-2008` (the macros' input slew limit, before the liberty copy); then routing congestion | — |
+| upstream | 2200 × 1900, 2300 × 2000 | 40–42 | 60 / 30 % | 20 µm macro halos: detailed placement fails (`DPL-0036`); without: routing congestion, or routed with wires buffered at 400 µm and stopped by the setup check | — |
+| upstream | 2300 × 2000, 2400 × 2100 | 36–40 | 60 / 30 % | the macros 60 µm from the edge, the read port on the north or west side: routing congestion | — |
+| upstream | 2500 × 2200 | 33 | 60 / 30 % | the same, wires buffered at 400 µm: routing congestion | — |
+| upstream | **2500 × 2200** | **33** | **60 / 30 %** | **the final settings (read port west, no wire buffering): DRC (KLayout), LVS, antenna clean; the timing above: chosen** | **581 967** |
+
+## 9. What this does not claim
+
+1. **Not a chip.** The layouts are the PHY as a macro (§ 9.2): no pads, ESD, clock source or radio, and not the RISC-V core or its
+   memories (`btle_controller`, § 4, has 4 SRAM macros).
+2. **55 nm signoff is partial, and cannot be completed with this PDK** (§ 9.1). The routing DRC is the tech LEF's, the parasitics the
+   global route's, and the netlist is checked against the RTL in zero delay with the timing from OpenSTA (§ 6).
 3. **The functions are the halves'.** BER, sensitivity, PER and activity were measured on each half (the reference documents) and not
    again here; § 3 shows the halves unchanged and working together, not new performance.
 4. **No board, no FPGA run of the composed controllers**, no power with a packet's activity: the leakage of § 6 is activity-free, and the
    tools' total power at their default activity is not reported.
-5. **AdvA in registers is volatile** (ICsprout55): whatever writes it must keep the address in a non-volatile memory off this block.
+5. **AdvA in registers is volatile** (ICsprout55, SKY130A): whatever writes it must keep the address in a non-volatile memory off this
+   block.
 
-## 9. Evidence and reproduction
+### 9.1 Which layouts could be fabricated, as blocks
+
+"As a block": the layout passes the signoff a foundry would ask of a macro, and a chip around it (§ 9.2) is still to be made.
+
+| Process | Layouts | Signoff run | Fabricable as a block | Why |
+|---|---|---|---|---|
+| **GF180MCU-D** (180 nm) | `ble-iot`, `ble-adv` (§ 5); the halves in their documents | DRC with the foundry's KLayout deck and Magic, LVS, antenna, STA at 9 corners: **clean** | **Yes** | an open PDK fabricated on shuttles; the eFuse blocks are the open compiler's, their programming not characterised here |
+| **SKY130A** (130 nm) | `ble-iot`, `ble-adv` (§ 8) | DRC with KLayout and Magic, LVS, antenna, STA at 9 corners: **clean** | **Yes** | the same |
+| **SKY130A** | upstream's `btle_phy` (§ 8) | the same: DRC (KLayout), LVS, antenna clean; Magic's markers all in the OpenRAM bit cells; **setup at ss, hold at ff, slew and capacitance at the macros' pins fail** | **Not as it is** | the geometry is clean, the timing at the slow and fast corners is not: its read port needs a register after the SRAM or a looser constraint (§ 8) |
+| **ICsprout55** (55 nm) | `ble-iot`, `ble-adv` (§ 6); `ble-tx-iot-reg` (`TX_TAG_4_IOT.md` § 8.2) | routing DRC on the tech LEF's rules, VIA4's enclosure on the GDS, STA at 3 corners on the global route's parasitics, the netlist against the RTL: **clean** | **No** | the foundry's checks **cannot be run, not skipped**: the DRC and LVS decks are Calibre's only (SVRF / TVF), and the PDK has no KLayout or Magic deck; no antenna rules; no extraction rules (RC), listed as to do in the PDK's README; and the PDK is a preview release that forbids mass production |
+
+### 9.2 What a block holds, and what a chip adds
+
+The same for every layout of this document and for upstream's (§ 8):
+
+| Part of a chip | In these layouts |
+|---|---|
+| Clock tree (CTS) for `clk` and `clkb` | **yes**, in all |
+| Power grid (PDN), its straps on the macros | **yes**, in all |
+| The memories the PHY needs | **yes**: flip-flops (ours), eFuse blocks for AdvA (GF180MCU), OpenRAM macros (upstream's, SKY130A) |
+| **Clock source** (oscillator, PLL, crystal driver) | **no, in none**: `clk` and `clkb` are input pins. Upstream's too: its `btle_controller` takes `rf_clk`, `bb_clk`, `bram_clk_a` and `s00_axi_aclk` as inputs, and its `rx_clk_gen` / `tx_clk_gen` are the UART's baud-rate counters, not oscillators. This project's clock-source study is the ring oscillator of branch `ble-tx-o-ring` (`TX_O_RING.md`) |
+| Pads, ESD protection, seal ring | no |
+| Power-on reset | no: the reset is an input pin |
+| The RISC-V core and its memories (`btle_controller`, § 4) | no |
+| The radio (RF front end, ADC, DAC) | no: the I/Q samples are digital ports |
+| AdvA kept across power-ups | GF180MCU: the eFuse blocks, in the block; ICsprout55, SKY130A: registers written after every power-up, the address kept off the block |
+
+## 10. Evidence and reproduction
 
 | What | Where (in the branch named) | Script |
 |---|---|---|
@@ -347,8 +528,13 @@ The logic scales with the node. The die scales by more because GF180MCU's holds 
 | Area, 45 nm | `results/area/controllers/<branch>/` | `AREA_PARAMS=... scripts/area/run_area.sh controllers/<branch> btle_tx btle_rx btle_phy btle_controller` |
 | GF180MCU layouts | `results/layout/phy-iot-gf180/`, `phy-adv-gf180/` (metrics, STA of 9 corners, DRC, LVS, IR drop, warnings, the GDS and netlist) | `DIE_H=460 DENSITY=64 scripts/layout/phy_gf180/run.sh phy-iot-gf180 HEAD iot`; `DIE_H=930 DENSITY=52 SLEW_PCT=60 scripts/layout/phy_gf180/run.sh phy-adv-gf180 HEAD adv` |
 | ICsprout55 layouts | `results/layout/phy-iot-ics55/`, `phy-adv-ics55/` (`gate.txt`, `summary.txt`, `area.*.txt`, `sta.*.txt.gz`, `power.*.txt`, `skew.txt`, `via4_enclosure.txt`, `gls.txt`, the GDS, netlist and SDFs) | `DIE_W=155 DIE_H=155 DENSITY=0.72 scripts/layout/phy_ics55/run.sh phy-iot-ics55 HEAD iot`; `DIE_W=220 DIE_H=220 DENSITY=0.64 ... phy-adv-ics55 HEAD adv`; `via4_enclosure.py`; `phy_gls.py NETLIST CELLS_V` |
-| Die sweeps | `results/layout/die-sweep-controllers/<branch>.tsv` | the same scripts, `KEEP=0` |
-| Figures | `results/figures/controllers/` | `run.sh` (each GDS); the same-scale figure from the four GDS at 1.2 px/µm |
+| SKY130A layouts | `results/layout/phy-iot-sky130/` (`ble-iot`), `phy-adv-sky130/` (`ble-adv`), `phy-upstream-sky130/` (both; with `sdpram_check.txt`, `magic_drc_in_macros.txt`, the liberty copies and `pin_order.cfg`) | `DIE_W=380 DIE_H=380 DENSITY=68 SLEW_PCT=60 CAP_PCT=30 scripts/layout/phy_sky130/run.sh phy-iot-sky130 HEAD iot`; `DIE_W=560 DIE_H=560 DENSITY=60 ... phy-adv-sky130 HEAD adv`; `DIE_W=2500 DIE_H=2200 DENSITY=33 ... phy-upstream-sky130 upstream-baseline upstream`; `python3 scripts/layout/phy_sky130/sdpram_check.py SKY130_SRAM_VERILOG_DIR` |
+| Die sweeps | `results/layout/die-sweep-controllers/<branch>.tsv`; `results/layout/die-sweep-sky130/` | the same scripts, `KEEP=0` |
+| Figures | `results/figures/controllers/` | `run.sh` (each GDS); the same-scale figures from the GDS at 1.2 px/µm (GF180MCU, ICsprout55) and 0.5 px/µm (SKY130A, the metals) |
 
 The GF180MCU runs are at `ble-iot` `8433b030` and `ble-adv` `6f89c0a2` (`provenance.txt`: no file under `scripts/layout` changed); the
 ICsprout55 runs at the same commits, their `gls.txt` from `phy_gls.py` as committed after them (the RTL's unknown bits not compared, § 6).
+The SKY130A runs: `ble-iot` and `ble-adv` at the same commits, upstream's RTL at `upstream-baseline` (`8540186`) with `ble-iot`'s
+`8433b030` scripts; `provenance.txt` counts the files under `scripts/layout` not yet committed then (`scripts/layout/phy_sky130/`, committed
+after the runs: since `ble-iot`'s and `ble-adv`'s runs, only upstream's defaults, which they do not read, its non-fatal checks, comments,
+and what `KEEP=1` copies have changed; since upstream's run, comments and the count by rule in `magic_drc_in_macros.txt`).

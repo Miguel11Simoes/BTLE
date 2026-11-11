@@ -11,7 +11,7 @@ against `ble-tx-min` and upstream's Python model, area and timing in 45 nm, sign
 GF180MCU, the controller placed and routed on the Zynq's FPGA (out of context, § 9). **Not done:** the
 board's bitstream (the block design with the AD9361's IP) and any test on a board; the firmware's tag mode
 is written and compiled, not run (§ 11). Not a tape-out (`docs/Validation/ASIC_READINESS.md`: NOT READY, as
-on every branch).
+on every branch). The layouts are blocks, not chips: no pads, ESD, seal ring, clock source (`clk` and `clkb` are input pins), power-on reset or radio (`docs/Final Decisions/CONTROLLERS_MIN.md` § 9.2; its § 9.1: which layouts could be fabricated, by process).
 
 ---
 

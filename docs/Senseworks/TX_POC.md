@@ -8,7 +8,7 @@
 **Status:** run `tx-poc`. Phases 1, 2 and 3 of the plan are done, and every number below is measured, with its evidence committed
 (§ 12). Phase 4 is prepared: the RTL in the controller, the board's files, the firmware and the controller placed and routed on the
 Zynq's FPGA out of context. **Not done:** the board's bitstream (it needs Vivado 2022.2 and ADI's IP, which this machine does
-not have) and any test on a board (§ 9). Not a tape-out.
+not have) and any test on a board (§ 9). Not a tape-out. The layouts are blocks, not chips: no pads, ESD, seal ring, clock source (`clk` and `clkb` are input pins), power-on reset or radio (`docs/Final Decisions/CONTROLLERS_MIN.md` § 9.2; its § 9.1: which layouts could be fabricated, by process).
 
 ---
 

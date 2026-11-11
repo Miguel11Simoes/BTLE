@@ -11,7 +11,7 @@ committed (§ 13): the RTL in simulation against an integer model and against th
 in 45 nm, layouts in GF180MCU, the controller placed and routed on the Zynq's FPGA (out of context, § 10).
 **Not done:** the board's bitstream and any test on a board; the firmware's gateway mode is tested on a host and
 in simulation through the registers, not on a board (§ 11). Not a tape-out (`docs/Validation/ASIC_READINESS.md`:
-NOT READY, as on every branch).
+NOT READY, as on every branch). The layouts are blocks, not chips: no pads, ESD, seal ring, clock source (`clk` and `clkb` are input pins), power-on reset or radio (`docs/Final Decisions/CONTROLLERS_MIN.md` § 9.2; its § 9.1: which layouts could be fabricated, by process).
 
 ---
 

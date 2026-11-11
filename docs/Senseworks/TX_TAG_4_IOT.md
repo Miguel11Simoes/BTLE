@@ -12,7 +12,8 @@ synthesis (Vivado, Yosys) and the layout (LibreLane) of both branches end with n
 exception** (§ 8.1). In the open 55 nm PDK, ICsprout55, which has no OTP, the transmitter is laid out with AdvA in 48
 flip-flops instead (branch `ble-tx-iot-reg`, § 8.2), so that each chip still sends its own address: routed with no DRC on
 the tech LEF's rules, timing met at three corners, and its netlist equal to `ble-tx-min` clock by clock with the layout's
-delays; the PDK's foundry DRC and LVS are Calibre decks and were not run. Not a tape-out
+delays; the PDK's foundry DRC and LVS are Calibre decks only and it has no antenna or extraction rules, so its signoff cannot be
+run with open tools (§ 8.2). The layouts are blocks, not chips: no pads, clock source or radio. Not a tape-out
 (`docs/Validation/ASIC_READINESS.md`: NOT READY, as on every branch).
 
 ---
@@ -602,7 +603,22 @@ clocks (`clk` 16 MHz, `clkb` 50 MHz), same SDC, output load and slew/capacitance
 | **Gate level against `ble-tx-min`, every output on every clock, with the layout's delays** (`gls.py`; SDF of ss, tt, ff; AdvA written to the registers, both of § 3.5's) | **108/108 runs (36 per corner)** |
 | The same with faults in the netlist (an XOR made XNOR, a NAND made AND, a NOR made OR, an inverter made a buffer) | **12/12 caught** |
 | Flow warnings / unreviewed | Yosys 0; OpenROAD 7 / **0** |
-| Foundry DRC, antenna, LVS (Calibre decks) | **not run** |
+| Foundry DRC, antenna, LVS (Calibre decks) | **not run: they cannot be, with this PDK** (below) |
+
+**Why the foundry's checks are missing, and that they cannot be run, not that they were skipped.** Each check a foundry asks of a block
+needs a rule file in the PDK for the tool that runs it, and ICS55 publishes none an open tool can read:
+
+| Check | What the PDK has | Can it be run here? |
+|---|---|---|
+| DRC | a Calibre deck only (SVRF / TVF, Siemens' formats); no KLayout or Magic deck | **no**: Calibre is a commercial tool, and its decks are not readable by KLayout or Magic |
+| LVS | a Calibre deck only; no Netgen setup, and no device extraction for KLayout or Magic | **no**, for the same reason; the gate-level check below stands for it without being one |
+| Antenna | no antenna deck or rules | **no**: no rule to check against |
+| RC extraction | no extraction rules (README: "Todo") | **no**: the timing uses the global route's parasitics from the tech LEF's per-layer RC |
+| Production | a preview release that forbids mass production | — |
+
+So the 55 nm layouts are routed and timed, and their netlists checked against the RTL, but **not signed off; they could not be with this
+release of the PDK**. The GF180MCU layouts (§ 8) and the SKY130A ones (`CONTROLLERS_MIN.md` § 8), whose PDKs ship KLayout and Magic
+decks and extraction rules, are signed off in full; `CONTROLLERS_MIN.md` § 9.1 compares the three processes.
 
 The seven OpenROAD warnings: the core's corner snapped to the 1.4 µm row grid (`IFP-0028`); `DRT-0349` on CT, VIA4, T4V2 and RV (CT is
 inside the library's cells, T4V2 and RV are above MET5 and not routed, VIA4's rule is checked on the GDS, above); and `GRT-0273`, the global
@@ -736,8 +752,8 @@ And what `ble-tx-min` gives up already (a changeable AdvA, the runtime Gaussian 
 **Does not claim:**
 - The 45 nm figures are pre-layout (no wires, no clock tree), in an academic library; they are not comparable as such with a layout (§ 8.0).
 - The signoff layouts are in 180 nm, the node of the open PDK that has an OTP and is fabricable. The 55 nm layout (§ 8.2) is of
-  `ble-tx-iot-reg`, AdvA in registers, in a PDK that has been fabricated but is a preview release, and it is **not signed off**: its DRC,
-  antenna and LVS decks are Calibre's and were not run (the routing DRC is the tech LEF's, the gate-level check stands for LVS without being
+  `ble-tx-iot-reg`, AdvA in registers, in a PDK that has been fabricated but is a preview release, and it is **not signed off**: its DRC
+  and LVS decks are Calibre's only and it has no antenna rules, so they cannot be run with open tools (§ 8.2) (the routing DRC is the tech LEF's, the gate-level check stands for LVS without being
   one); its timing uses the global route's parasitics from the tech LEF's RC, as it has no extraction rules; there is no IR-drop analysis.
   Its area is the transmitter's digital block, not a chip's: no pads, ESD, clock source, radio or the non-volatile memory the registers'
   address comes from. Fabricating in it would need ECOS's accepted PDK version, its checks and its terms of access, which were not asked.

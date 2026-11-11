@@ -11,7 +11,7 @@
 (§ 11). Pre-layout results in 45 nm, a routed FPGA implementation, and signoff-clean layouts of the three
 receivers in an open 180 nm PDK; **the synthesis (Vivado, Yosys) and the layout (LibreLane) of the three
 receivers end with no warning that is not a reviewed exception** (§ 8.1); not a tape-out
-(`docs/Validation/ASIC_READINESS.md`: NOT READY, as on every branch). **The decision (§ 9.5): `ble-rx-2p1c`
+(`docs/Validation/ASIC_READINESS.md`: NOT READY, as on every branch). The layouts are blocks, not chips: no pads, ESD, seal ring, clock source (`clk` and `clkb` are input pins), power-on reset or radio (`docs/Final Decisions/CONTROLLERS_MIN.md` § 9.2; its § 9.1: which layouts could be fabricated, by process). **The decision (§ 9.5): `ble-rx-2p1c`
 is the receiver of the final architecture.**
 
 ---
