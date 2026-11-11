@@ -10,7 +10,7 @@
 results in 45 nm, a routed FPGA implementation, and a signoff-clean layout of the transmitter in an open
 180 nm PDK; **the synthesis (Vivado, Yosys) and the layout (LibreLane) of both AdvData stores end with no
 warning that is not a reviewed exception** (§ 8.1); not a tape-out (`docs/Validation/ASIC_READINESS.md`:
-NOT READY, as on every branch).
+NOT READY, as on every branch). The layouts are blocks, not chips: no pads, ESD, seal ring, clock source (`clk` and `clkb` are input pins), power-on reset or radio (`docs/Final Decisions/CONTROLLERS_MIN.md` § 9.2; its § 9.1: which layouts could be fabricated, by process).
 
 ---
 

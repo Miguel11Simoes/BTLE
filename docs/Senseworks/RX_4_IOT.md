@@ -11,7 +11,7 @@ Cell area in 45 nm (Nangate45, pre-layout), an out-of-context FPGA implementatio
 of that mode), and GF180MCU macros with DRC, LVS and timing clean; **the
 synthesis (Vivado, Yosys) and the layout (LibreLane) of both branches end with no warning that is not a reviewed exception**,
 one of them new (§ 8.1). **Not done:** a test on a board, Vivado's Device view (§ 6), a formal proof or a gate-level check of the
-new logic (§ 11). Not a tape-out (`docs/Validation/ASIC_READINESS.md`: NOT READY, as on every branch).
+new logic (§ 11). Not a tape-out (`docs/Validation/ASIC_READINESS.md`: NOT READY, as on every branch). The layouts are blocks, not chips: no pads, ESD, seal ring, clock source (`clk` and `clkb` are input pins), power-on reset or radio (`docs/Final Decisions/CONTROLLERS_MIN.md` § 9.2; its § 9.1: which layouts could be fabricated, by process).
 
 ---
 
