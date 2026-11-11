@@ -19,6 +19,23 @@ The requirements, from the plan's revision: the least area; the transmitter of `
 
 `verilog/tag_fsm.v`. **All the state is one counter of ticks**, `t`: 15 flip-flops at 32.768 kHz, with the last 2^12 ticks of a period divided into 32 windows of 32 slots, one bit of I2C per slot of 4 ticks, so SCL is 8.2 kHz.
 
+```mermaid
+flowchart LR
+  subgraph P["ble-tx-poc tag_core"]
+    direction LR
+    PE["EEPROM<br/>profile, EUI-48"] --> PK["16-state FSM<br/>+ sequencer"]
+    PT["interval and<br/>advDelay timers"] --> PK
+    PK <--> PB["tag_bus<br/>I2C / SPI / ADC"] --> PC["tag_capture"] --> PX["btle_tx"]
+  end
+  subgraph F["ble-tx-poc-tmp100 tag_fsm"]
+    direction LR
+    FT["one counter t<br/>15 bits at 32.768 kHz"] --> FW["windows 8, 30, 31<br/>1 I2C bit per 4 ticks"] <--> FS["TMP100<br/>SCL, SDA"]
+    FW --> FR["16-bit register"] --> FX["btle_tx<br/>direct ports"]
+    FT --> FL["advDelay<br/>8-bit LFSR"] --> FX
+    FT -->|"the wrap: tx_start"| FX
+  end
+```
+
 | `t` | The bus | |
 |---|---|---|
 | window 8 | START `0x90` ACK `0x01` ACK `0x81` ACK STOP | the configuration: SD = 1, OS = 1, 9 bits: one conversion |

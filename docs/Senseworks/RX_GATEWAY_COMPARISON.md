@@ -61,6 +61,22 @@ earlier campaign of this project. It is not a link budget; differences between r
 
 ## 2. What the branches contain
 
+```mermaid
+flowchart LR
+  subgraph M["ble-rx-micro btle_rx"]
+    direction LR
+    MI["I/Q, 8 bits"] --> MD["1 demodulator<br/>8 bits, 8 phases"] --> MA["1 AA automaton<br/>exact AA"] --> MP["1 phase chosen<br/>at the AA"] --> MC["1 decoder<br/>CRC exact"] --> MR["42 octets<br/>in flip-flops"]
+  end
+  subgraph K["ble-rx-2p1c btle_rx"]
+    direction LR
+    KI["I/Q, 8 bits"] --> KD["1 demodulator<br/>8 bits, 8 phases"] --> KA["1 AA automaton<br/>exact AA"] --> KP["2 phases chosen<br/>at the AA"] --> KC["1 decoder<br/>2 phases"] --> KR["2 × 42 octets<br/>in flip-flops"] --> KS["CRC, or 1 bit<br/>corrected"]
+  end
+  subgraph G["ble-rx-gateway-8 / 12 / 18 (no transmitter)"]
+    direction LR
+    GI["I/Q, 8 bits"] --> GF["channel filter<br/>moving sum of 4"] --> GD["demodulator<br/>CFO corrected"] --> GA["AA automaton<br/>≤ 3 wrong bits"] --> GP["3 phases chosen<br/>at the AA"] --> GC["1 decoder<br/>length known"] --> GR["3 copies<br/>readable"] --> GB["ARM: BCH t = 8 / 12 / 18<br/>+ CRC within 4 / 5 / 6 bits"]
+  end
+```
+
 | Part | File | |
 |---|---|---|
 | The channel filter: the moving sum of the last 4 samples of I and Q | `verilog/rx_channel_filter.v` (`RX_FILTER = 1`) | new |
