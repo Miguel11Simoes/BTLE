@@ -5,7 +5,7 @@
 **Base:** `ble-tx-tag-8` (`86a194a6`); the plan is [`docs/PLANO_PoC.md`](../PLANO_PoC.md), revised on 2026-11-06 (its first section)  
 **Date:** 2026-11-06  
 **Author:** Miguel Simões  
-**Status:** run `tx-poc-tmp100`. The RTL, its simulation, the area and leakage at 45 nm, the GF180 layouts and the controller on the Zynq's FPGA out of context are done, every number below measured, with its evidence committed (§ 9). **Not done:** the board's bitstream (it needs Vivado 2022.2 and ADI's IP, which this machine does not have) and any test on a board or with a real TMP100 (§ 7). Not a tape-out.
+**Status:** run `tx-poc-tmp100`. The RTL, its simulation, the area and leakage at 45 nm, the GF180 layouts and the controller on the Zynq's FPGA out of context are done, every number below measured, with its evidence committed (§ 9). **Not done:** the board's bitstream (it needs Vivado 2022.2 and ADI's IP, which this machine does not have) and any test on a board or with a real TMP100 (§ 7). Not a tape-out. The layouts are blocks, not chips: no pads, ESD, seal ring, clock source (`clk` and `clkb` are input pins), power-on reset or radio (`docs/Final Decisions/CONTROLLERS_MIN.md` § 9.2; its § 9.1: which layouts could be fabricated, by process).
 
 ---
 

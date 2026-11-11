@@ -13,7 +13,7 @@ AdvData stores of this branch, one run; the activity with the harness fix `46571
 transmitter's layout with the OTP, signoff clean, `7f2306c`) and `tx-min-gf180-sram64` (the same with
 AdvData in the PDK's SRAM: header in registers, AdvA in OTP, AdvData in SRAM, § 7.1); figures in `results/figures/tx-min/`.
 Pre-layout digital campaigns and measurements, plus one open-PDK layout of the transmitter (§ 7):
-ASIC readiness is NOT READY, as on every branch (`ASIC_READINESS.md`).
+ASIC readiness is NOT READY, as on every branch (`ASIC_READINESS.md`). The layouts are blocks, not chips: no pads, ESD, seal ring, clock source (`clk` and `clkb` are input pins), power-on reset or radio (`docs/Final Decisions/CONTROLLERS_MIN.md` § 9.2; its § 9.1: which layouts could be fabricated, by process).
 
 ---
 
