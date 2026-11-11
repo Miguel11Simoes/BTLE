@@ -142,6 +142,32 @@ device decodes into some codeword with that probability, before the CRC is check
 
 ## 4. What the branches contain
 
+```mermaid
+flowchart LR
+  subgraph M["ble-tx-min btle_tx (+ btle_rx in the controller)"]
+    direction LR
+    MH["header<br/>2 registers"] --> MC
+    MA["AdvA, 6 B<br/>ROM / OTP"] --> MC
+    MD["AdvData ≤ 31 B<br/>SRAM 32 × 8"] --> MC["CRC-24 +<br/>whitening"] --> MG["× 8 upsample,<br/>Gaussian, VCO ROM"]
+  end
+  subgraph T["ble-tx-tag-8 / 12 / 18 btle_tx (no receiver)"]
+    direction LR
+    TK["constants<br/>header, AD structure, Company ID"] --> TC
+    TA["AdvA, 6 B<br/>ROM / OTP"] --> TC
+    TS["sensor<br/>2 registers on clkb"] --> TC
+    TA --> TL["BCH LFSR<br/>64 / 92 / 124 flip-flops"]
+    TS --> TL --> TC["CRC-24 +<br/>whitening"] --> TG["× 8 upsample,<br/>Gaussian, VCO ROM"]
+  end
+  subgraph O["ble-tx-tag-1byte btle_tx (no receiver)"]
+    direction LR
+    OK["constants<br/>AD length 12"] --> OC
+    OA["AdvA, 6 B<br/>ROM / OTP"] --> OL
+    OS["sensor<br/>1 register"] --> OL["BCH LFSR<br/>64 flip-flops, n = 120"] --> OC["CRC-24 +<br/>whitening"] --> OG["× 8 upsample,<br/>Gaussian, VCO ROM"]
+    OA --> OC
+    OS --> OC
+  end
+```
+
 | Part | Files | |
 |---|---|---|
 | The tag's packet buffer `tag_pdu_buffer`: header, AD structure and Company ID constants, AdvA ROM or OTP, the two sensor registers on `clkb` (pairs to every other address dropped); `ble-tx-min`'s read protocol (request toggle, two synchronizers) unchanged | `verilog/btle_tx.v` | replaces `adv_pdu_buffer`: no AdvData memory, no header registers |

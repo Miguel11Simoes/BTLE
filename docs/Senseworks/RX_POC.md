@@ -21,6 +21,18 @@ It is `ble-rx-gateway-8`'s receiver, unchanged (the BCH t = 8 decoded on the ARM
 | Firmware | `btle_ll -G 8 -U host:port` drains the queue at each interrupt and sends each packet accepted by **UDP**, one JSON datagram | the PC needs no raw Ethernet, no `ble_fpga_ctl`, no Wireshark |
 | PC | `host/senseworks_gateway`, the **application** | a network of tags, not one packet at a time |
 
+```mermaid
+flowchart LR
+  subgraph G["ble-rx-gateway-8"]
+    direction LR
+    GT["tags on<br/>channel 37"] --> GX["btle_rx: filter, CFO,<br/>AA ≤ 3 bits, 3 phases"] --> GR["rx_ram<br/>1 packet; a 2nd overwrites"] --> GA["ARM, btle_ll -G 8<br/>BCH + CRC"] --> GO["printed<br/>one packet at a time"]
+  end
+  subgraph P["ble-rx-poc"]
+    direction LR
+    PT["many tags on<br/>channel 37"] --> PX["btle_rx<br/>unchanged"] --> PR["rx_ram: queue of 4<br/>drops counted (reg 42)"] --> PA["ARM, btle_ll -G 8 -U<br/>drains the queue"] --> PU["UDP<br/>one JSON per packet"] --> PC["PC: senseworks_gateway<br/>page, CSV, API"]
+  end
+```
+
 **The tags and the gateway need no change for more tags.** A packet carries its tag's AdvA, so the gateway tells them apart; the sensor a tag has is not in the packet, and the application maps each AdvA to its sensor (§ 4).
 
 ## 1. Many tags on one channel

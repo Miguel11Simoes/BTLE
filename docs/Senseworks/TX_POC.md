@@ -30,6 +30,22 @@ sensor over I2C and sends its value in a standard Bluetooth LE advertising packe
 
 ## 1. What the branch contains
 
+```mermaid
+flowchart LR
+  subgraph T["ble-tx-tag-8"]
+    direction LR
+    TF["ARM firmware<br/>btle_ll -T: interval, advDelay"] --> TW["(address, data) pair<br/>on clkb"] --> TS["2 sensor registers"] --> TX["btle_tx<br/>constants, AdvA, BCH t = 8"] --> TR["I, Q"]
+  end
+  subgraph P["ble-tx-poc (no processor)"]
+    direction LR
+    PE["24AA02E48 EEPROM<br/>profile + EUI-48"] --> PL["loader program<br/>CFG_SRC 0 / 1 / 2"] --> PK["tag_core<br/>16-state FSM, sequencer"]
+    PM["timers: interval<br/>+ advDelay LFSR"] --> PK
+    PK <--> PB["tag_bus<br/>I2C / SPI / ADC"] <--> PN["sensor"]
+    PB --> PC["tag_capture<br/>window, sign, offset"] --> PX["btle_tx<br/>direct ports, SENSOR_BYTES 1 / 2"]
+    PK --> PX --> PR["I, Q"]
+  end
+```
+
 | Part | Files | |
 |---|---|---|
 | `btle_tx` with `SENSOR_BYTES` (1 or 2) and direct ports for AdvA, TxAdd and the sensor, on the `clk` domain. No `clkb`, no read request, no read register | `verilog/btle_tx.v` | every output on every clock equal to `ble-tx-tag-8`'s (2 bytes) and `ble-tx-tag-1byte`'s (1 byte) |
